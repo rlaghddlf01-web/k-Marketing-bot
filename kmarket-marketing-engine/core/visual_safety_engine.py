@@ -8,9 +8,9 @@ VisualSafetyEngine - AI 기괴함/환각 차단 & 17개국 인종/국적 일치 
 import logging
 import math
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from config import BASE_DIR, ASSETS_DIR, DATA_DIR, LANGUAGES
+from core.pexels_client import PexelsClient
 
 logger = logging.getLogger("VisualSafetyEngine")
 
@@ -174,6 +174,7 @@ class VisualSafetyEngine:
         # 17개국 에셋 디렉토리 격리 구조 보장
         self.assets_dir = ASSETS_DIR
         self._ensure_asset_folders()
+        self.pexels_client = PexelsClient()
 
     def _ensure_asset_folders(self):
         """17개국별 격리된 에셋 폴더 자동 생성"""
@@ -201,8 +202,18 @@ class VisualSafetyEngine:
         - 실시간 환급액 카운팅 박스 & 공인 세무대리 인증 뱃지 탑재
         """
         W, H = 1080, 1920
-        # 모던 다크 네이비 프리미엄 배경
-        img = Image.new("RGB", (W, H), color=(10, 15, 30))
+        # 1. Pexels에서 대상 언어/국적에 맞는 100% 실사 고화질 배경 가져오기
+        real_bg = self.pexels_client.fetch_photo_for_lang(lang=lang, service_id="easytax")
+        if real_bg:
+            # 고화질 실사 사진을 1080x1920으로 리사이즈 및 다크 오버레이 (가독성 확보)
+            img = real_bg.resize((W, H), Image.Resampling.LANCZOS)
+            # 어둡게 조정하여 텍스트/UI 강조 (밝기 35%)
+            enhancer = ImageEnhance.Brightness(img)
+            img = enhancer.enhance(0.35)
+        else:
+            # 모던 다크 네이비 프리미엄 배경 (폴백)
+            img = Image.new("RGB", (W, H), color=(10, 15, 30))
+
         draw = ImageDraw.Draw(img)
 
         # 폰트 세팅
