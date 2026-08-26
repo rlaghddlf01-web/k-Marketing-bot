@@ -76,26 +76,26 @@
             <!-- 상단 헤더 & 원클릭 브랜드 스위처 -->
             <header class="top-header">
                 <div class="header-left">
-                    <div class="brand-switcher-group" style="display:flex;gap:8px;margin-bottom:8px;">
-                        <button class="brand-tab-btn active" id="brand-tab-km" onclick="switchBrand('kmarket')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;border:2px solid #10b981;background:rgba(16,185,129,0.15);color:#34d399;font-weight:700;font-size:14px;cursor:pointer;">
-                            🛒 K-Market 로컬 라이프 관제 센터
+                    <div class="brand-switcher-group" style="display:flex;gap:8px;margin-bottom:10px;">
+                        <button class="brand-tab-btn active" id="brand-tab-km" onclick="switchBrand('kmarket')" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:none;background:#7C3AED;color:#FFFFFF;font-weight:800;font-size:13.5px;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,0.4);">
+                            🛒 K-Market 라이프 관제
                         </button>
-                        <button class="brand-tab-btn" id="brand-tab-tax" onclick="switchBrand('easytax')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;border:2px solid rgba(245,158,11,0.3);background:rgba(255,255,255,0.03);color:#94a3b8;font-weight:700;font-size:14px;cursor:pointer;">
-                            💰 EasyTax 국세청 환급 관제 센터
+                        <button class="brand-tab-btn" id="brand-tab-tax" onclick="switchBrand('easytax')" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:1px solid #22294E;background:#13172E;color:#94A3B8;font-weight:700;font-size:13.5px;cursor:pointer;">
+                            💰 EasyTax 국세청 환급 관제
                         </button>
                     </div>
                     <h2 class="page-title" id="page-title">📊 K-Market 마케팅 통합 제어 센터</h2>
                     <p class="page-desc" id="page-desc">270개 실물 매물 0원 나눔, 무빙세일, 17개국 양방향 번역 채팅을 실시간 제어합니다.</p>
                 </div>
-                <div class="header-right" style="display:flex;gap:12px;">
-                    <div class="badge" id="header-health-badge" style="background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);cursor:pointer;" onclick="switchTabDirect('health')" title="클릭 시 실시간 헬스케어 관제 센터로 이동">
-                        🩺 건강도: <strong id="header-health-score">100% 정상 🟢</strong>
+                <div class="header-right" style="display:flex;gap:8px;align-items:center;">
+                    <div class="badge" id="header-health-badge" style="background:#13172E;border:1px solid #22294E;color:#34D399;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;" onclick="switchTabDirect('health')" title="클릭 시 실시간 헬스케어 관제 센터로 이동">
+                        🩺 헬스케어: <strong id="header-health-score">100% 정상 🟢</strong>
                     </div>
                     <div class="badge badge-google" onclick="triggerGoogleIndex()" style="cursor:pointer;" title="클릭 시 구글 봇에게 즉시 색인 핑 전송">
-                        🌐 구글 색인: <strong id="google-index-count">6,630개 URL 가동</strong>
+                        🌐 구글 색인: <strong id="google-index-count">6,630개 URL</strong>
                     </div>
                     <div class="badge badge-season" id="today-season-badge">
-                        🎯 활성 관제: <strong id="season-name" style="color:#10b981;">K-MARKET</strong>
+                        🎯 활성 모드: <strong id="season-name" style="color:#FACC15;">K-MARKET</strong>
                     </div>
                 </div>
             </header>

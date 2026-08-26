@@ -59,35 +59,39 @@ function switchBrand(brand) {
     const seasonName = document.getElementById("season-name");
 
     if (brand === "kmarket") {
-        btnKM.style.background = "rgba(16,185,129,0.15)";
-        btnKM.style.borderColor = "#10b981";
-        btnKM.style.color = "#34d399";
+        btnKM.style.background = "#7C3AED";
+        btnKM.style.borderColor = "transparent";
+        btnKM.style.color = "#FFFFFF";
+        btnKM.style.boxShadow = "0 4px 14px rgba(124, 58, 237, 0.4)";
 
-        btnTax.style.background = "rgba(255,255,255,0.03)";
-        btnTax.style.borderColor = "rgba(245,158,11,0.3)";
-        btnTax.style.color = "#94a3b8";
+        btnTax.style.background = "#13172E";
+        btnTax.style.borderColor = "#22294E";
+        btnTax.style.color = "#94A3B8";
+        btnTax.style.boxShadow = "none";
 
         pageTitle.innerHTML = "📊 K-Market 100% 라이프 & 0원 나눔 제어 센터";
         pageDesc.innerText = "270개 실물 매물 0원 나눔, 무빙세일, 17개국 양방향 번역 채팅을 100% 전담 제어합니다.";
         seasonName.innerText = "K-MARKET (100% 전력질주)";
-        seasonName.style.color = "#10b981";
+        seasonName.style.color = "#FACC15";
         document.getElementById("google-index-count").innerText = "1,105개 K-Market 대학/공단 URL 가동";
         document.getElementById("stat-seo-count").innerText = "1,105 개 (K-Market)";
     } else {
-        btnTax.style.background = "rgba(245,158,11,0.15)";
-        btnTax.style.borderColor = "#f59e0b";
-        btnTax.style.color = "#fbbf24";
+        btnTax.style.background = "#7C3AED";
+        btnTax.style.borderColor = "transparent";
+        btnTax.style.color = "#FFFFFF";
+        btnTax.style.boxShadow = "0 4px 14px rgba(124, 58, 237, 0.4)";
 
-        btnKM.style.background = "rgba(255,255,255,0.03)";
-        btnKM.style.borderColor = "rgba(16,185,129,0.3)";
-        btnKM.style.color = "#94a3b8";
+        btnKM.style.background = "#13172E";
+        btnKM.style.borderColor = "#22294E";
+        btnKM.style.color = "#94A3B8";
+        btnKM.style.boxShadow = "none";
 
-        pageTitle.innerHTML = "📊 EasyTax (KTRS) 100% 국세청 세금환급 제어 센터";
-        pageDesc.innerText = "조세특례제한법 E-9 90% 감면, D-2 3.3% 환급, 5개년 소급 신청 및 Anti-Ban 세무 대리를 100% 전담 관제합니다.";
+        pageTitle.innerHTML = "💰 EasyTax (KTRS) 100% 세무 환급 제어 센터";
+        pageDesc.innerText = "조특법 90% 소득세 감면, D-2 알바 3.3% 환급, 5개년 경정청구를 100% 전담 제어합니다.";
         seasonName.innerText = "EASYTAX (100% 전력질주)";
-        seasonName.style.color = "#fbbf24";
-        document.getElementById("google-index-count").innerText = "1,105개 EasyTax 공단/대학 URL 가동";
-        document.getElementById("stat-seo-count").innerText = "1,105 개 (EasyTax)";
+        seasonName.style.color = "#FACC15";
+        document.getElementById("google-index-count").innerText = "5,525개 EasyTax 세무 URL 가동";
+        document.getElementById("stat-seo-count").innerText = "5,525 개 (EasyTax)";
     }
 
     renderActionGrid();
