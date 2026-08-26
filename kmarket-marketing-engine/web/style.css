@@ -422,7 +422,7 @@ body {
 }
 
 /* ======================================================================
-   🔥 High-Visibility Vivid Buttons (스크린샷 스타일의 핫 오렌지 & 퍼플)
+   🔥 High-Visibility Vivid Buttons (브랜드별 차별화: EasyTax 황금 골드 vs K-Market 핫오렌지/에메랄드)
    ====================================================================== */
 .btn {
     display: inline-flex;
@@ -439,17 +439,32 @@ body {
     text-decoration: none;
 }
 
-/* 🌟 스크린샷의 대표적인 [핫 오렌지 메인 CTA 버튼] */
-.btn-primary, .btn-action {
+/* 🌟 K-Market 메인 CTA 버튼: 핫 오렌지 그라데이션 */
+.btn-primary, .btn-action, .btn-kmarket {
     background: linear-gradient(135deg, #FF6B35, #FF3D00) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 4px 14px var(--accent-orange-glow);
+    box-shadow: 0 4px 14px rgba(255, 61, 0, 0.35);
 }
 
-.btn-primary:hover, .btn-action:hover {
+.btn-primary:hover, .btn-action:hover, .btn-kmarket:hover {
     background: linear-gradient(135deg, #FF5722, #E63900) !important;
     transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(255, 61, 0, 0.5);
+}
+
+/* 👑 EasyTax 전용: 프리미엄 럭셔리 황금(Gold) 버튼 */
+.btn-gold, .btn-easytax {
+    background: linear-gradient(135deg, #FBBF24, #F59E0B, #D97706) !important;
+    color: #FFFFFF !important;
+    border: 1px solid #FDE68A !important;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.45) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-gold:hover, .btn-easytax:hover {
+    background: linear-gradient(135deg, #F59E0B, #D97706, #B45309) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6) !important;
 }
 
 .btn-secondary {

@@ -62,7 +62,7 @@ function switchBrand(brand) {
         btnKM.style.background = "#7C3AED";
         btnKM.style.borderColor = "transparent";
         btnKM.style.color = "#FFFFFF";
-        btnKM.style.boxShadow = "0 4px 14px rgba(124, 58, 237, 0.4)";
+        btnKM.style.boxShadow = "0 4px 14px rgba(124, 58, 237, 0.45)";
 
         btnTax.style.background = "#13172E";
         btnTax.style.borderColor = "#22294E";
@@ -72,14 +72,14 @@ function switchBrand(brand) {
         pageTitle.innerHTML = "📊 K-Market 100% 라이프 & 0원 나눔 제어 센터";
         pageDesc.innerText = "270개 실물 매물 0원 나눔, 무빙세일, 17개국 양방향 번역 채팅을 100% 전담 제어합니다.";
         seasonName.innerText = "K-MARKET (100% 전력질주)";
-        seasonName.style.color = "#FACC15";
+        seasonName.style.color = "#FF6B35";
         document.getElementById("google-index-count").innerText = "1,105개 K-Market 대학/공단 URL 가동";
         document.getElementById("stat-seo-count").innerText = "1,105 개 (K-Market)";
     } else {
-        btnTax.style.background = "#7C3AED";
-        btnTax.style.borderColor = "transparent";
+        btnTax.style.background = "linear-gradient(135deg, #FBBF24, #F59E0B, #D97706)";
+        btnTax.style.borderColor = "#FDE68A";
         btnTax.style.color = "#FFFFFF";
-        btnTax.style.boxShadow = "0 4px 14px rgba(124, 58, 237, 0.4)";
+        btnTax.style.boxShadow = "0 4px 18px rgba(245, 158, 11, 0.5)";
 
         btnKM.style.background = "#13172E";
         btnKM.style.borderColor = "#22294E";
@@ -115,7 +115,7 @@ function renderActionGrid() {
         panelDesc.innerText = "270개 실물 매물 기반 0원 나눔 숏폼, 실물 카드뉴스, 중고 가구 레딧 헌터를 즉시 실행합니다.";
 
         container.innerHTML = `
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">🎬</span>
                     <div>
@@ -123,10 +123,10 @@ function renderActionGrid() {
                         <p>270개 실매물 사진 + 17개국 음성 TTS 렌더링</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="runModule('kmarket_shorts')">🛒 숏폼 일괄 렌더링</button>
+                <button class="btn btn-action" onclick="runModule('kmarket_shorts')">🛒 숏폼 일괄 렌더링</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">📸</span>
                     <div>
@@ -134,10 +134,10 @@ function renderActionGrid() {
                         <p>0원 나눔 & 무빙세일 꿀매물 캐러셀 생성</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="runModule('kmarket_cardnews')">🛒 카드뉴스 생성</button>
+                <button class="btn btn-action" onclick="runModule('kmarket_cardnews')">🛒 카드뉴스 생성</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">🤖</span>
                     <div>
@@ -145,10 +145,10 @@ function renderActionGrid() {
                         <p>r/korea 중고 질문 감지 & 0원 나눔 안내</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="runModule('kmarket_reddit')">🛒 레딧 스캔 & 답변</button>
+                <button class="btn btn-action" onclick="runModule('kmarket_reddit')">🛒 레딧 스캔 & 답변</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">🎁</span>
                     <div>
@@ -156,10 +156,10 @@ function renderActionGrid() {
                         <p>매일 아침 17개국 0원 매물 텔레그램 발송</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="runModule('kmarket_briefing')">🛒 브리핑 발송</button>
+                <button class="btn btn-action" onclick="runModule('kmarket_briefing')">🛒 브리핑 발송</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">👥</span>
                     <div>
@@ -167,10 +167,10 @@ function renderActionGrid() {
                         <p>재한 외국인 대형 그룹 첫 댓글 링크 스텔스</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="runModule('kmarket_fb_groups')">🛒 페북 그룹 배포</button>
+                <button class="btn btn-action" onclick="runModule('kmarket_fb_groups')">🛒 페북 그룹 배포</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">🌐</span>
                     <div>
@@ -178,10 +178,10 @@ function renderActionGrid() {
                         <p>17개국어 0원 나눔 1,500자 장문 SEO 칼럼 자동 발행</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="runModule('kmarket_blog')">🛒 WordPress / Medium 칼럼 발행</button>
+                <button class="btn btn-action" onclick="runModule('kmarket_blog')">🛒 WordPress / Medium 칼럼 발행</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">🌐</span>
                     <div>
@@ -189,10 +189,10 @@ function renderActionGrid() {
                         <p>전국 65개 거점 × 17개 언어 1,105개 캠퍼스 색인</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="triggerGoogleIndex()">🛒 구글봇 색인 핑 전송</button>
+                <button class="btn btn-action" onclick="triggerGoogleIndex()">🛒 구글봇 색인 핑 전송</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #10b981;">
+            <div class="action-card" style="border-top:3px solid #FF6B35;">
                 <div class="action-header">
                     <span class="action-emoji">📄</span>
                     <div>
@@ -200,7 +200,7 @@ function renderActionGrid() {
                         <p>중고/0원나눔/원룸 이사 가이드북 렌더링</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" onclick="runModule('kmarket_pdf')">🛒 PDF 가이드 렌더링</button>
+                <button class="btn btn-action" onclick="runModule('kmarket_pdf')">🛒 PDF 가이드 렌더링</button>
             </div>
         `;
     } else {
@@ -208,7 +208,7 @@ function renderActionGrid() {
         panelDesc.innerText = "조특법 90% 소득세 감면, D-2 알바 3.3% 환급, 글로벌 세무 블로그 발행을 즉시 실행합니다.";
 
         container.innerHTML = `
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">🎬</span>
                     <div>
@@ -216,10 +216,10 @@ function renderActionGrid() {
                         <p>합법 세무 권리 & Anti-Ban 공인 뱃지 비디오</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="runModule('easytax_shorts')">💰 세무 숏폼 렌더링</button>
+                <button class="btn btn-gold btn-block" onclick="runModule('easytax_shorts')">💰 세무 숏폼 렌더링</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">📸</span>
                     <div>
@@ -227,10 +227,10 @@ function renderActionGrid() {
                         <p>선입금 0원 & 국세청 공인 대리 4장 카드뉴스</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="runModule('easytax_cardnews')">💰 세무 카드뉴스 생성</button>
+                <button class="btn btn-gold btn-block" onclick="runModule('easytax_cardnews')">💰 세무 카드뉴스 생성</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">🤖</span>
                     <div>
@@ -238,10 +238,10 @@ function renderActionGrid() {
                         <p>r/korea 세금 질문 감지 & 조특법 팩트 법률 답변</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="runModule('easytax_reddit')">💰 세무 레딧 답변</button>
+                <button class="btn btn-gold btn-block" onclick="runModule('easytax_reddit')">💰 세무 레딧 답변</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">📜</span>
                     <div>
@@ -249,43 +249,43 @@ function renderActionGrid() {
                         <p>매일 아침 비자별 절세 팁 텔레그램 발송</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="runModule('easytax_briefing')">💰 세무 브리핑 발송</button>
+                <button class="btn btn-gold btn-block" onclick="runModule('easytax_briefing')">💰 세무 브리핑 발송</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">👥</span>
                     <div>
-                        <h4>페이스북 50만 그룹 침투기</h4>
-                        <p>재한 E-9/D-2 50만 그룹 첫 댓글 링크 스텔스</p>
+                        <h4>외국인 세무 페이스북 그룹 배포</h4>
+                        <p>공인 세무 환급 팩트 가이드 스텔스 발행</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="runModule('easytax_fb_groups')">💰 페북 세무 배포</button>
+                <button class="btn btn-gold btn-block" onclick="runModule('easytax_fb_groups')">💰 페북 세무 배포</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">🌐</span>
                     <div>
-                        <h4>WordPress & Medium 글로벌 SEO 세무 블로그</h4>
-                        <p>17개국어 E-9/D-2 환급 1,500자 장문 세무 칼럼 발행</p>
+                        <h4>WordPress & Medium 글로벌 세무 블로그</h4>
+                        <p>17개국어 5개년 경정청구 전문 칼럼 자동 발행</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="runModule('easytax_blog')">💰 WordPress / Medium 칼럼 발행</button>
+                <button class="btn btn-gold btn-block" onclick="runModule('easytax_blog')">💰 세무 블로그 발행</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">🌐</span>
                     <div>
-                        <h4>공단/대학 EasyTax SEO</h4>
-                        <p>전국 65개 거점 × 17개 언어 1,105개 세무 색인</p>
+                        <h4>산업단지/대학 EasyTax SEO</h4>
+                        <p>전국 325개 거점 × 17개 언어 5,525개 세무 URL 색인</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="triggerGoogleIndex()">💰 구글봇 세무 핑 전송</button>
+                <button class="btn btn-gold btn-block" onclick="triggerGoogleIndex()">💰 구글봇 세무 핑 전송</button>
             </div>
 
-            <div class="action-card" style="border-top:3px solid #f59e0b;">
+            <div class="action-card" style="border-top:3px solid #F59E0B;">
                 <div class="action-header">
                     <span class="action-emoji">📄</span>
                     <div>
@@ -293,7 +293,8 @@ function renderActionGrid() {
                         <p>5개년 소급 신청 및 비자별 세무 가이드북</p>
                     </div>
                 </div>
-                <button class="btn btn-secondary btn-action" style="background:#2563eb;border-color:#2563eb;" onclick="runModule('easytax_pdf')">💰 PDF 가이드 렌더링</button>
+                <button class="btn btn-gold btn-block" onclick="runModule('easytax_pdf')">💰 세무 가이드북 렌더링</button>
+            </div>
             </div>
         `;
     }
@@ -341,19 +342,21 @@ async function fetchStatus() {
         if (isKMarketRunning) {
             kmIndicator.classList.add("active");
             kmStatusText.innerText = "K-Market 가동 중 🟢";
-            kmStatusText.style.color = "#10b981";
+            kmStatusText.style.color = "#FF6B35";
             kmSub.innerText = `사이클 #${data.kmarket_stats.cycle || 1} • ${data.kmarket_stats.last_run || '실행 중'}`;
             kmToggleBtn.innerText = "⏹️ K-Market 봇 정지";
-            kmToggleBtn.style.background = "#334155";
-            kmToggleBtn.style.borderColor = "#475569";
+            kmToggleBtn.className = "btn btn-secondary btn-block";
+            kmToggleBtn.style.background = "#1A1F3D";
+            kmToggleBtn.style.borderColor = "#2B3466";
         } else {
             kmIndicator.classList.remove("active");
             kmStatusText.innerText = "K-Market 대기 중 ⚪";
-            kmStatusText.style.color = "#94a3b8";
+            kmStatusText.style.color = "#94A3B8";
             kmSub.innerText = "실물 숏폼/0원나눔/레딧";
             kmToggleBtn.innerText = "🚀 K-Market 봇 가동";
-            kmToggleBtn.style.background = "#10b981";
-            kmToggleBtn.style.borderColor = "#10b981";
+            kmToggleBtn.className = "btn btn-primary btn-block";
+            kmToggleBtn.style.background = "";
+            kmToggleBtn.style.borderColor = "";
         }
 
         // 2. EasyTax 봇 상태
@@ -366,19 +369,21 @@ async function fetchStatus() {
         if (isEasyTaxRunning) {
             taxIndicator.classList.add("active");
             taxStatusText.innerText = "EasyTax 가동 중 🟢";
-            taxStatusText.style.color = "#f59e0b";
+            taxStatusText.style.color = "#FACC15";
             taxSub.innerText = `사이클 #${data.easytax_stats.cycle || 1} • ${data.easytax_stats.last_run || '실행 중'}`;
             taxToggleBtn.innerText = "⏹️ EasyTax 봇 정지";
-            taxToggleBtn.style.background = "#334155";
-            taxToggleBtn.style.borderColor = "#475569";
+            taxToggleBtn.className = "btn btn-secondary btn-block";
+            taxToggleBtn.style.background = "#1A1F3D";
+            taxToggleBtn.style.borderColor = "#2B3466";
         } else {
             taxIndicator.classList.remove("active");
             taxStatusText.innerText = "EasyTax 대기 중 ⚪";
-            taxStatusText.style.color = "#94a3b8";
+            taxStatusText.style.color = "#94A3B8";
             taxSub.innerText = "E-9 90%감면/환급/Anti-Ban";
-            taxToggleBtn.innerText = "🚀 EasyTax 봇 가동";
-            taxToggleBtn.style.background = "#f59e0b";
-            taxToggleBtn.style.borderColor = "#f59e0b";
+            taxToggleBtn.innerText = "💰 EasyTax 봇 가동";
+            taxToggleBtn.className = "btn btn-gold btn-block";
+            taxToggleBtn.style.background = "";
+            taxToggleBtn.style.borderColor = "";
         }
 
         // 지표 업데이트
