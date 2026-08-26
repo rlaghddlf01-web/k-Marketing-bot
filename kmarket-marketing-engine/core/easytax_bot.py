@@ -80,13 +80,9 @@ class EasyTaxRefundBot:
         except Exception as e:
             logger.error(f"EasyTax 숏폼 생성 에러: {e}")
 
-        # 2. Anti-Ban 공인 세무 카드뉴스 4장 세트 생성 (가중치 기반 언어 1개)
-        try:
-            chosen_lang = get_weighted_language("easytax")
-            cards = self.cardnews_gen.generate_carousel(service_id="easytax", lang=chosen_lang)
-            results["cardnews_count"] = len(cards)
-        except Exception as e:
-            logger.error(f"EasyTax 카드뉴스 생성 에러: {e}")
+        # 2. 카드뉴스 생성 (사용자 요청에 따라 정지)
+        results["cardnews_count"] = 0
+        logger.info("ℹ️ [EasyTax 봇] 카드뉴스 자동 생성은 일시 정지(비활성화) 상태입니다.")
 
         # 3. 비자/세금 질문 실시간 스캔 & 팩트 법률 답변
         try:
@@ -115,5 +111,15 @@ class EasyTaxRefundBot:
             results["blog_count"] = blog_res.get("count", 0)
         except Exception as e:
             logger.error(f"EasyTax 블로그 발행 에러: {e}")
+
+        # 7. 이탈 고객 15분 자동 복구 SMS & 메신저 케어 실시간 트리거
+        try:
+            import urllib.request
+            cron_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/api/cron/follow-up"
+            req = urllib.request.Request(cron_url, headers={"User-Agent": "KTRS-Marketing-Daemon/1.0"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                logger.info(f"📲 [EasyTax] 15분 이탈 고객 자동 복구 SMS/메신저 트리거 성공 (HTTP {resp.status})")
+        except Exception as e:
+            logger.warning(f"EasyTax 이탈 고객 SMS 트리거 알림: {e}")
 
         return results

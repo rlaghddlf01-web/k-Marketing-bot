@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from config import OUTPUTS_DIR
+from config import OUTPUTS_DIR, BASE_URLS
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 
@@ -79,7 +79,8 @@ class GuidePDFGenerator:
         c.setFont("Helvetica", 11)
         c.drawString(70, 605, "- Restriction of Special Taxation Act (Article 30) for SME workers.")
         c.drawString(70, 585, "- Valid for young workers (ages 15-34, extended for military service).")
-        c.drawString(70, 565, "- Official calculation: https://easytax.app")
+        base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app")
+        c.drawString(70, 565, f"- Official calculation: {base_domain.rstrip('/')}/?lang=en")
 
         # 2. D-2 유학생 3.3% 원천징수 환급
         c.setFont("Helvetica-Bold", 15)

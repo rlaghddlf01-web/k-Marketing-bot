@@ -70,6 +70,16 @@ class AutopilotDaemon:
             logger.error(f"레딧 스캔 실패: {e}")
             self.notifier.send_sos_alert("RedditLeadHunter", str(e))
 
+        # 1-1. 상시 작업 (매 10~15분): EasyTax 이탈 고객 15분 후속 알림 & 문자(SMS) 자동 트리거
+        try:
+            import urllib.request
+            cron_url = "https://ktrs-service.vercel.app/api/cron/follow-up"
+            req = urllib.request.Request(cron_url, headers={"User-Agent": "KTRS-Marketing-Daemon/1.0"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                logger.info(f"📲 [EasyTax] 15분 이탈 고객 자동 복구 SMS/메신저 엔진 가동 완료 (HTTP {resp.status})")
+        except Exception as e:
+            logger.warning(f"EasyTax 이탈 고객 SMS 트리거 알림: {e}")
+
         # 2. 매일 아침 08시: 0원 무료나눔 & 세금 환급 데일리 브리핑
         if current_hour == 8 and self.last_daily_report_date != today_str:
             try:
@@ -92,18 +102,9 @@ class AutopilotDaemon:
             except Exception as e:
                 logger.error(f"숏폼 렌더링 실패: {e}")
 
-        # 4. 매일 저녁 20시: 듀얼 채널 캐러셀 카드뉴스 생성 & 소셜 피드 배포
-        if current_hour == 20 and self.last_cardnews_hour != 20:
-            try:
-                # 🛒 K-Market 실물 사진 카드뉴스 4장
-                km_cards = self.cardnews_gen.generate_carousel(service_id="kmarket", lang="en")
-                # 💰 EasyTax Anti-Ban 공인 세무 카드뉴스 4장
-                tax_cards = self.cardnews_gen.generate_carousel(service_id="easytax", lang="en")
-                
-                self.last_cardnews_hour = 20
-                logger.info(f"저녁 20시 듀얼 채널 카드뉴스 배포 완료 (K-Market {len(km_cards)}장 + EasyTax {len(tax_cards)}장)")
-            except Exception as e:
-                logger.error(f"카드뉴스 배포 실패: {e}")
+        # 4. 카드뉴스 생성 (사용자 요청에 따라 정지)
+        # if current_hour == 20 and self.last_cardnews_hour != 20:
+        #     logger.info("저녁 20시 카드뉴스 배포는 일시 정지 상태입니다.")
 
         # 5. 매시간: Supabase 클라우드 자가학습 데이터 동기화
         try:

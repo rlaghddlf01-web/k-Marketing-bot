@@ -47,5 +47,18 @@ class ServiceRouter:
     def get_service(self, service_id: str) -> Dict[str, Any]:
         """특정 서비스 정보 조회"""
         service_data = self.services.get(service_id, {})
-        service_data["landing_url"] = BASE_URLS.get(service_id, service_data.get("landing_url", "https://k-market.app"))
+        service_data["landing_url"] = BASE_URLS.get(service_id, service_data.get("landing_url", "https://ktrs-market.vercel.app"))
         return service_data
+
+    def get_service_landing_url(self, service_id: str, lang: str = "ko", path: str = "") -> str:
+        """
+        1:1 매칭 서비스 및 언어별 실시간 접속 주소 생성:
+        - kmarket: https://ktrs-market.vercel.app/{lang}
+        - easytax: https://ktrs-service.vercel.app/?lang={lang}
+        """
+        base_domain = BASE_URLS.get(service_id, "https://ktrs-market.vercel.app")
+        if service_id == "kmarket" or "ktrs-market" in base_domain:
+            return f"{base_domain.rstrip('/')}/{lang}/{path.strip('/')}" if path else f"{base_domain.rstrip('/')}/{lang}"
+        else:
+            sub = f"/{path.strip('/')}" if path else ""
+            return f"{base_domain.rstrip('/')}{sub}?lang={lang}"

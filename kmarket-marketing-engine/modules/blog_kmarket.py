@@ -3,7 +3,7 @@ import json
 import logging
 from pathlib import Path
 from typing import List, Dict, Any
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.gemini_kmarket import KMarketGeminiEngine
@@ -28,16 +28,18 @@ class KMarketBlogPublisher:
     def publish_daily_articles(self, target_langs: List[str] = ["en", "vi", "ko"]) -> Dict[str, Any]:
         """K-Market 17개국어 전문 블로그 칼럼 자동 작성 및 발행"""
         published_articles = []
+        base_domain = BASE_URLS.get("kmarket", "https://k-market.app")
 
         for lang in target_langs:
             lang_name = LANGUAGES.get(lang, {}).get("native_name", lang.upper())
             campaign = UTMTracker.generate_campaign_tag("kmarket", f"blog_{lang}", lang)
-            landing_url = UTMTracker.build_url(
-                base_url="https://k-market.app",
+            landing_url = UTMTracker.build_landing_url(
+                base_domain=base_domain,
+                lang=lang,
+                path="welcome",
                 source="wordpress_medium",
                 medium="organic_seo_blog",
-                campaign=campaign,
-                lang=lang
+                campaign=campaign
             )
 
             # 1. 1,500자 장문 블로그 칼럼 내용 생성

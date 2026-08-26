@@ -4,7 +4,7 @@ import logging
 import random
 from pathlib import Path
 from typing import List, Dict, Any
-from config import DATA_DIR, OUTPUTS_DIR
+from config import DATA_DIR, OUTPUTS_DIR, BASE_URLS
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.gemini_kmarket import KMarketGeminiEngine
@@ -46,12 +46,14 @@ class KMarketFacebookHunter:
             approval_type = group.get("approval_type", "instant")
 
             campaign = UTMTracker.generate_campaign_tag("kmarket", f"fb_{group_id}", lang)
-            landing_url = UTMTracker.build_url(
-                base_url="https://k-market.app",
+            base_domain = BASE_URLS.get("kmarket", "https://k-market.app")
+            landing_url = UTMTracker.build_landing_url(
+                base_domain=base_domain,
+                lang=lang,
+                path="welcome",
                 source="facebook_group",
                 medium="stealth_first_comment",
-                campaign=campaign,
-                lang=lang
+                campaign=campaign
             )
 
             # 1. 관리자 100% 승인용 순수 정보성 본문 생성 (링크 미포함)

@@ -26,8 +26,11 @@ class KMarketIFrameEngine:
         self.base_url = "https://ktrs-market.vercel.app"
 
     def get_mobile_iframe_url(self, lang: str = "vi", category: str = "all") -> str:
-        """17개국 언어 및 카테고리가 적용된 케이마켓 실제 모바일 웹 URL 생성"""
-        return f"{self.base_url}/?lang={lang}&cat={category}&view=mobile"
+        """17개국 언어 및 카테고리가 적용된 케이마켓 실제 모바일 웹 URL 생성 (서브패스 라우팅)"""
+        lang_code = lang.lower().strip()
+        if lang_code in ["ko", "kr", ""]:
+            return f"{self.base_url}/?cat={category}&view=mobile"
+        return f"{self.base_url}/{lang_code}?cat={category}&view=mobile"
 
     def render_iframe_cardnews_set(self, lang: str = "vi") -> List[Path]:
         """

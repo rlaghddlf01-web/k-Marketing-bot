@@ -87,14 +87,17 @@ class RedditLeadHunter:
         service_id, service_data = self.router.route_query(full_text)
 
         # 4. 동적 UTM 랜딩 링크 생성
-        campaign = UTMTracker.generate_campaign_tag(service_id, "reddit", "en")
-        landing_url = UTMTracker.build_url(
-            base_url=service_data.get("landing_url", "https://k-market.app"),
+        target_lang = "en"
+        campaign = UTMTracker.generate_campaign_tag(service_id, "reddit", target_lang)
+        base_domain = service_data.get("landing_url", "https://k-market.app")
+        landing_url = UTMTracker.build_landing_url(
+            base_domain=base_domain,
+            lang=target_lang,
+            path="welcome",
             source="reddit",
             medium="lead_comment",
             campaign=campaign,
-            content=subreddit,
-            lang="en"
+            content=subreddit
         )
 
         # 5. Few-Shot 자가학습 프롬프트 기반 80:20 댓글 생성

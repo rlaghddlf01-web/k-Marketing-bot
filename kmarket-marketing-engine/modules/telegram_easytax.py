@@ -4,7 +4,7 @@ import json
 import time
 from pathlib import Path
 from typing import List, Dict, Any
-from config import BASE_DIR, LANGUAGES, OUTPUTS_DIR, DATA_DIR
+from config import BASE_DIR, LANGUAGES, OUTPUTS_DIR, DATA_DIR, BASE_URLS
 from core.db_manager import DBManager
 
 logger = logging.getLogger("EasyTaxTelegram")
@@ -33,14 +33,16 @@ class EasyTaxTelegramPusher:
     def broadcast_daily_tax_tips(self, target_langs: List[str] = ["en", "vi", "ko"]) -> Dict[str, Any]:
         """외국인 세무 꿀팁 17개국어 텔레그램 브로드캐스트 발행"""
         messages_sent = 0
+        base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app")
         for lang in target_langs:
             lang_name = LANGUAGES.get(lang, {}).get("native_name", lang.upper())
+            easytax_url = f"{base_domain.rstrip('/')}/?lang={lang}&utm_source=telegram&utm_medium=daily_tips"
             text = f"🏛️ [EasyTax Korea Expat Tax Relief Daily ({lang_name})]\n\n"
             text += f"• E-9/H-2 Workers: Up to 90% Income Tax Reduction (Article 30)\n"
             text += f"• D-2 Students: 100% Refund on 3.3% Part-Time Withholding Tax\n"
             text += f"• Retroactive 5-Year Overpaid Tax Claims (2020~2025)\n"
             text += f"🛡️ 100% Free AI Simulation • Zero Upfront Fees\n\n"
-            text += f"👉 Estimate your refund for free: https://easytax.app?lang={lang}\n"
+            text += f"👉 Estimate your refund for free: {easytax_url}\n"
             text += f"* Processed via certified tax agents under Korean National Tax regulations."
 
             # 텔레그램 실발송 시도

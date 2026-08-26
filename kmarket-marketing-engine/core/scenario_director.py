@@ -133,9 +133,82 @@ DEMOGRAPHIC_KEYWORDS = {
 }
 
 
+# 🎯 케이마켓(K-Market) 전용 4대 숏폼 테마 (50:50 믹스 전략)
+KMARKET_LIFESTYLE_THEMES = [
+    {
+        "id": "feed_scroll_giveaway",
+        "type": "A_feed_scroll",
+        "name": "당근 피드 스크롤 & 0원 나눔 득템형 (실물 위주 50%)",
+        "action_prompt": "scrolling smartphone showing second hand marketplace app with 0 KRW free items and electronics, clean mobile UI screen, 4k vertical",
+        "negative_prompt": "creepy smile, floating phone, distorted hands, extra fingers, cartoon",
+        "hook_template": "free_giveaway",
+        "video_query": "person browsing smartphone scrolling screen modern room"
+    },
+    {
+        "id": "moving_sale_urgent",
+        "type": "B_storytelling",
+        "name": "귀국 D-3 원룸 방빼기 무빙세일 (80% 급처분 상황극 50%)",
+        "action_prompt": "young expat packing moving boxes in clean studio apartment with luggage, checking smartphone moving sale app, natural smiling",
+        "negative_prompt": "sad crying, messy garbage, dark lighting, deformed limbs, floating boxes",
+        "hook_template": "moving_sale",
+        "video_query": "young person packing suitcase moving apartment"
+    },
+    {
+        "id": "chat_direct_safe",
+        "type": "B_storytelling",
+        "name": "공단/대학 기숙사 앞 1:1 번역 안심 직거래 (여성/청년 상황극)",
+        "action_prompt": "young foreign female holding smartphone outside modern residential dormitory, smiling warmly meeting a friendly seller for safe item trade",
+        "negative_prompt": "dangerous dark street, scary expression, bad hands, deformed face",
+        "hook_template": "safe_chat",
+        "video_query": "young woman waiting outside holding phone smiling warm sunlight"
+    },
+    {
+        "id": "room_cleanup_student",
+        "type": "B_storytelling",
+        "name": "유학생 졸업 & 원룸 0원 가구 득템 꿀팁 (일상 공감형)",
+        "action_prompt": "young international student sitting in cozy dorm room with desk and books, happily discovering free furniture on mobile phone",
+        "negative_prompt": "creepy smile, extra fingers, distorted room, floating furniture",
+        "hook_template": "student_tip",
+        "video_query": "student in study room checking smartphone happily"
+    }
+]
+
+# 🎯 케이마켓 타깃 페르소나 (외국인 근로자, 유학생, 다문화 청년)
+KMARKET_PERSONAS = [
+    {
+        "age_group": "20대 초반 (만 20~24세)",
+        "gender": "female",
+        "persona_role": "D-2 유학생 (원룸 자취방 가구/가전 득템)",
+        "target_category": "desk, chair, rice cooker",
+        "persona_desc": "21-year-old female university international student living in a studio apartment in Korea"
+    },
+    {
+        "age_group": "20대 후반 (만 25~29세)",
+        "gender": "female",
+        "persona_role": "E-9/H-2 근로자 (기숙사 앞 1:1 번역 직거래)",
+        "target_category": "washing machine, refrigerator, bicycle",
+        "persona_desc": "26-year-old female diligent factory worker in Korean industrial town"
+    },
+    {
+        "age_group": "20대 후반 (만 25~29세)",
+        "gender": "male",
+        "persona_role": "E-9 근로자 (귀국 D-3 가전/오토바이 무빙세일)",
+        "target_category": "moving_sale, electric bicycle, smartphone",
+        "persona_desc": "28-year-old male skilled workforce packing up for returning home with moving sale items"
+    },
+    {
+        "age_group": "30대 초반 (만 30~34세)",
+        "gender": "male",
+        "persona_role": "E-7 전문직/가족 (유아용품/생활가전 나눔)",
+        "target_category": "sofa, bed, dining table, electronics",
+        "persona_desc": "31-year-old male foreign expat professional living with family in South Korea"
+    }
+]
+
+
 class ScenarioDirector:
     """
-    🎬 17개국 × 성별 × 만15~34세 나이 × 6대 감정 테마 시나리오 전담 디렉터
+    🎬 [K-Market & EasyTax 통합] 17개국 × 성별 × 나이 × 테마 시나리오 전담 디렉터
     """
     def __init__(self):
         pass
@@ -144,16 +217,42 @@ class ScenarioDirector:
         """
         매일 완전히 새로운 고전환 숏폼 기획안(페르소나 + 감정테마 + Pexels 비디오 검색 쿼리 + 안전 가드레일) 1개 생성
         """
-        # 1. 감정/상황 테마 선택 (6개 중 1개)
-        theme = random.choice(LIFESTYLE_THEMES)
-
-        # 2. 만 15~34세 청년 페르소나 선택 (6개 중 1개)
-        persona = random.choice(AGE_GENDER_PERSONAS)
-
-        # 3. 국적/인종 키워드
         demo_str = DEMOGRAPHIC_KEYWORDS.get(lang, "International Expat")
 
-        # 4. 스마트폰 왜곡 및 이상한 모델 차단 정밀 Pexels 비디오 검색 쿼리 조립
+        # 🛒 케이마켓(K-Market) 전용 시나리오 플래닝 (50:50 믹스)
+        if service_id == "kmarket":
+            theme = random.choice(KMARKET_LIFESTYLE_THEMES)
+            persona = random.choice(KMARKET_PERSONAS)
+            video_query = f"{demo_str} {theme['video_query']}"
+
+            scenario_plan = {
+                "lang": lang,
+                "service_id": "kmarket",
+                "content_mix_type": theme["type"],  # 'A_feed_scroll' or 'B_storytelling'
+                "theme_id": theme["id"],
+                "theme_name": theme["name"],
+                "age_group": persona["age_group"],
+                "gender": persona["gender"],
+                "persona_role": persona["persona_role"],
+                "target_category": persona["target_category"],
+                "persona_desc": f"{demo_str} {persona['persona_desc']}",
+                "video_search_query": video_query,
+                "action_prompt": theme["action_prompt"],
+                "negative_guardrail": theme["negative_prompt"] + ", caucasian for asian, deformed limbs, floating phone, six fingers",
+                "safety_rules": [
+                    "100% 9:16 vertical video only",
+                    "Real verified listings (0 KRW giveaway / moving sale)",
+                    "1:1 multi-language translation chat push alert overlay",
+                    "Carrot market style smooth scroll & 0% Korean audio"
+                ]
+            }
+            logger.info(f"[{lang.upper()}] 🛒 [K-Market] 시나리오 기획 완료: {theme['name']} ({theme['type']}) × {persona['persona_role']}")
+            return scenario_plan
+
+        # 💰 이지텍스(EasyTax) 시나리오 플래닝 (기존 유지)
+        theme = random.choice(LIFESTYLE_THEMES)
+        persona = random.choice(AGE_GENDER_PERSONAS)
+
         if theme["id"] == "travel_healing":
             video_query = f"{demo_str} happy traveler vertical"
         elif theme["id"] == "walking_home_happy":
@@ -189,5 +288,5 @@ class ScenarioDirector:
             ]
         }
 
-        logger.info(f"[{lang.upper()}] 🎬 시나리오 기획 완료: {theme['name']} × {persona['age_group']} {persona['gender'].upper()} ({persona['visa']})")
+        logger.info(f"[{lang.upper()}] 🎬 [EasyTax] 시나리오 기획 완료: {theme['name']} × {persona['age_group']} {persona['gender'].upper()} ({persona['visa']})")
         return scenario_plan

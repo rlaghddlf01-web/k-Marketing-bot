@@ -225,10 +225,10 @@ class ProgrammaticSEO:
 
     def _generate_sitemap(self, urls: List[str]):
         sitemap_path = self.output_dir / "sitemap.xml"
-        items = "".join(f"<url><loc>{u}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n" for u in urls[:10000])
+        # 🛡️ 구글 서치 콘솔 XML 파싱 오류 방지: URL 내 '&' 문자를 '&amp;'로 100% 이스케이프
+        items = "".join(f"  <url>\n    <loc>{u.replace('&', '&amp;')}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n" for u in urls[:10000])
         xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{items}
-</urlset>"""
+{items}</urlset>"""
         with open(sitemap_path, "w", encoding="utf-8") as f:
             f.write(xml_content)

@@ -7,7 +7,8 @@ from config import (
     REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET,
     REDDIT_USER_AGENT, REDDIT_USERNAME, REDDIT_PASSWORD,
     REPLY_DELAY_MIN_SEC, REPLY_DELAY_MAX_SEC,
-    HOURLY_REDDIT_LIMIT, DAILY_REDDIT_LIMIT
+    HOURLY_REDDIT_LIMIT, DAILY_REDDIT_LIMIT,
+    BASE_URLS
 )
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
@@ -84,19 +85,22 @@ class KMarketRedditHunter:
         if not self.db_mgr.can_post_to_channel(channel_key, HOURLY_REDDIT_LIMIT, DAILY_REDDIT_LIMIT):
             return False
 
-        campaign = UTMTracker.generate_campaign_tag("kmarket", f"reddit_{subreddit}", "en")
-        landing_url = UTMTracker.build_url(
-            base_url="https://k-market.app",
+        target_lang = "en"
+        campaign = UTMTracker.generate_campaign_tag("kmarket", f"reddit_{subreddit}", target_lang)
+        base_domain = BASE_URLS.get("kmarket", "https://k-market.app")
+        landing_url = UTMTracker.build_landing_url(
+            base_domain=base_domain,
+            lang=target_lang,
+            path="welcome",
             source="reddit",
             medium="community_comment",
-            campaign=campaign,
-            lang="en"
+            campaign=campaign
         )
 
         reply_content = self.gemini.generate_reddit_response(
             post_title=title,
             post_body=body,
-            target_lang="en",
+            target_lang=target_lang,
             landing_url=landing_url
         )
 

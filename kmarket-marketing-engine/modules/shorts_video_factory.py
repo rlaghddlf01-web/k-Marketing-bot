@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 import time
@@ -165,20 +166,73 @@ class ShortsVideoFactory:
                     except Exception as e:
                         logger.warning(f"Supabase 미디어 자산 기록 실패: {e}")
                 else:
-                    # 🛒 K-Market: 실제 케이마켓 웹사이트 9:16 스크린샷 기반 숏폼 합성!
-                    from core.kmarket_real_browser_capturer import KMarketRealBrowserCapturer
-                    capturer = KMarketRealBrowserCapturer(self.output_dir)
-                    real_slides = capturer.capture_real_kmarket_slides(lang=lang)
-                    kmarket_bg = real_slides[0] if real_slides else frame_path
+                    # 🛒 K-Market: [50:50 믹스] 당근 피드 스크롤 & 리얼 일상 상황극 9:16 모션 숏폼 합성!
+                    from core.kmarket_motion_composer import KMarketMotionComposer
+                    kmarket_composer = KMarketMotionComposer()
                     
-                    mp4_path = self.motion_composer.compose_motion_shorts(
-                        bg_video_path=kmarket_bg,
-                        audio_path=audio_path,
-                        service_id=service_id,
+                    # 1. 일일 케이마켓 4대 테마 & 50:50 시나리오 기획
+                    scenario = self.scenario_director.plan_daily_scenario(lang=lang, service_id="kmarket")
+                    logger.info(f"[{lang.upper()}] 🛒 케이마켓 숏폼 테마: {scenario['theme_name']} ({scenario['content_mix_type']})")
+
+                    # 2. 실시간 270개 매물 데이터 수급
+                    real_items = []
+                    try:
+                        from core.supabase_manager import SupabaseManager
+                        sup_mgr = SupabaseManager()
+                        real_items = sup_mgr.fetch_live_kmarket_items(limit=6)
+                    except Exception:
+                        pass
+
+                    # 3. 당근 피드 스크롤 (A타입) or 1:1 번역 직거래 상황극 (B타입) 9:16 MP4 모션 비디오 합성
+                    mp4_path = kmarket_composer.compose_kmarket_shorts(
+                        service_id="kmarket",
                         lang=lang,
                         title=hook_title,
-                        captions=captions
+                        captions=captions,
+                        audio_path=audio_path,
+                        scenario_plan=scenario,
+                        real_items=real_items
                     )
+
+                    # 4. 사전 품질 검증 게이트 (Quality Gate >= 80점)
+                    passed, q_score, reason = self.quality_verifier.verify_media_quality(
+                        frame_path, lang, scenario["theme_name"]
+                    )
+
+                    # 5. Supabase marketing_media_assets & kmarket_golden_copies 자가학습 기록
+                    try:
+                        from core.supabase_manager import SupabaseManager
+                        sup_mgr = SupabaseManager()
+                        
+                        # 미디어 자산 등록
+                        sup_mgr.record_marketing_media_asset({
+                            "service_id": "kmarket",
+                            "target_lang": lang,
+                            "media_type": "short_video",
+                            "theme_id": scenario["theme_id"],
+                            "age_group": scenario["age_group"],
+                            "gender": scenario["gender"],
+                            "prompt_used": scenario.get("action_prompt", ""),
+                            "file_path": str(mp4_path) if mp4_path else "",
+                            "quality_score": q_score,
+                            "verification_passed": passed
+                        })
+
+                        # 골든 카피 등록 (자가진화용)
+                        if sup_mgr.client and mp4_path:
+                            sup_mgr.client.table("kmarket_golden_copies").upsert({
+                                "content_type": "shorts",
+                                "service_id": "kmarket",
+                                "target_lang": lang,
+                                "title": hook_title,
+                                "content_text": voice_text,
+                                "target_url": f"https://ktrs-market.vercel.app/{lang if lang != 'ko' else ''}",
+                                "external_id": f"shorts_km_{lang}_{int(os.times().system * 100)}",
+                                "score": q_score
+                            }).execute()
+                            logger.info(f"💎 [Supabase] 케이마켓 골든 카피({q_score}점) 자가학습 DB 자동 저장 완료")
+                    except Exception as e:
+                        logger.warning(f"K-Market Supabase 자가학습 기록 경고: {e}")
 
                 # 7. DB 기록 (유니크 ID 생성)
                 unique_ext_id = "shorts_{}_{}_{}".format(service_id, lang, int(time.time() * 1000))

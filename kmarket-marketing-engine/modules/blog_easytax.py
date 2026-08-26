@@ -3,7 +3,7 @@ import json
 import logging
 from pathlib import Path
 from typing import List, Dict, Any
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.gemini_easytax import EasyTaxGeminiEngine
@@ -29,16 +29,19 @@ class EasyTaxBlogPublisher:
     def publish_daily_articles(self, target_langs: List[str] = ["en", "vi", "ko"]) -> Dict[str, Any]:
         """EasyTax 17개국어 전문 세무 블로그 칼럼 자동 작성 및 발행"""
         published_articles = []
+        base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app")
 
         for lang in target_langs:
             lang_name = LANGUAGES.get(lang, {}).get("native_name", lang.upper())
             campaign = UTMTracker.generate_campaign_tag("easytax", f"blog_{lang}", lang)
-            landing_url = UTMTracker.build_url(
-                base_url="https://easytax.app",
+            landing_url = UTMTracker.build_service_landing_url(
+                service_id="easytax",
+                base_domain=base_domain,
+                lang=lang,
+                path="",
                 source="wordpress_medium",
                 medium="organic_seo_tax_blog",
-                campaign=campaign,
-                lang=lang
+                campaign=campaign
             )
 
             # 1. 1,500자 장문 세무 칼럼 내용 생성

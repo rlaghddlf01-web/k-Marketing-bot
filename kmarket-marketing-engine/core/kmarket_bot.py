@@ -82,13 +82,9 @@ class KMarketGrowthBot:
         except Exception as e:
             logger.error(f"K-Market 숏폼 생성 에러: {e}")
 
-        # 2. 실물 사진 4장 캐러셀 카드뉴스 생성 (가중치 기반 언어 1개)
-        try:
-            chosen_lang = get_weighted_language("kmarket")
-            cards = self.cardnews_gen.generate_carousel(service_id="kmarket", lang=chosen_lang)
-            results["cardnews_count"] = len(cards)
-        except Exception as e:
-            logger.error(f"K-Market 카드뉴스 생성 에러: {e}")
+        # 2. 카드뉴스 생성 (사용자 요청에 따라 정지)
+        results["cardnews_count"] = 0
+        logger.info("ℹ️ [K-Market 봇] 카드뉴스 자동 생성은 일시 정지(비활성화) 상태입니다.")
 
         # 3. 레딧 중고/가구 질문 실시간 스캔 & 안내
         try:

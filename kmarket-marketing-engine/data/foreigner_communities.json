@@ -1,0 +1,112 @@
+[
+  {
+    "id": "comm_vietnam_association",
+    "name_ko": "재한 베트남인 공동체 / 총유학생회",
+    "name_en": "Vietnamese Community in Korea (Hội Người Việt Nam tại Hàn Quốc)",
+    "country": "Vietnam",
+    "lang": "vi",
+    "main_hubs": ["서울 영등포", "안산 원곡동", "김해 동상동", "수원", "천안", "부산"],
+    "key_interests": ["귀국 무빙세일 중고거래", "E-9/E-7 90% 소득세 감면", "D-2 3.3% 아르바이트 환급", "한국 생활 필수 가이드"],
+    "keywords": ["Hội người Việt tại Hàn Quốc", "K-Market mua bán đồ cũ", "Hoàn thuế thu nhập Hàn Quốc 90%", "Cộng đồng du học sinh VSAK"]
+  },
+  {
+    "id": "comm_mongolia_association",
+    "name_ko": "재한 몽골인 협회 / 몽골타운 커뮤니티",
+    "name_en": "Mongolian Association in Korea (Солонгос дахь Монголчуудын холбоо)",
+    "country": "Mongolia",
+    "lang": "mn",
+    "main_hubs": ["서울 동대문 몽골타운", "인천 부평", "경기 안산", "충남 천안"],
+    "key_interests": ["0원 무료 나눔 가구/가전", "E-9 근로자 세금 환급", "중고 스마트폰/전자기기", "외국인 안심 직거래"],
+    "keywords": ["Солонгос дахь Монголчууд", "K-Market үнэгүй бараа", "Татварын буцаан олголт Солонгос", "Монгол оюутны холбоо"]
+  },
+  {
+    "id": "comm_uzbekistan_association",
+    "name_ko": "주한 우즈베키스탄 교민회 / 실크로드 커뮤니티",
+    "name_en": "Uzbek Community in Korea (Koreyadagi O'zbekistonliklar)",
+    "country": "Uzbekistan",
+    "lang": "uz",
+    "main_hubs": ["서울 동대문 중앙아시아거리", "안산 원곡동", "화성 발안", "광주 고려인마을", "김해"],
+    "key_interests": ["E-9 제조업 근로자 세금 90% 감면", "원룸 가전/가구 직거래", "귀국 이삿짐 정리", "무료 통번역"],
+    "keywords": ["Koreyadagi O'zbeklar", "K-Market ishlatilgan buyumlar", "Soliqni qaytarib olish 90%", "O'zbek talabalari"]
+  },
+  {
+    "id": "comm_russia_cis_association",
+    "name_ko": "재한 러시아/CIS 고려인 동포 연합",
+    "name_en": "Russian & CIS Expat Community in Korea (Русскоязычная Корея)",
+    "country": "Russia/CIS",
+    "lang": "ru",
+    "main_hubs": ["서울 동대문", "인천 연수구 함박마을", "안산 땟골마을", "광주 월곡동 고려인마을"],
+    "key_interests": ["H-2/F-4 동포 세무 환급", "귀국 정리 무빙세일", "생활 가구/생필품 0원 나눔"],
+    "keywords": ["Русскоязычная Корея", "K-Market бесплатные вещи", "Возврат налогов в Корее", "Русский Ансан"]
+  },
+  {
+    "id": "comm_china_association",
+    "name_ko": "재한 중국 유학생 연합 / 동포 협회",
+    "name_en": "Chinese Expat & Student Association (在韩中国留学生联合会)",
+    "country": "China",
+    "lang": "zh",
+    "main_hubs": ["서울 대림동", "건대입구 양꼬치거리", "구로 디지털단지", "안산 원곡동", "수원"],
+    "key_interests": ["D-2 유학생 3.3% 환급", "중고 가전/스마트폰 안전거래", "졸업 귀국 무빙세일", "원룸 양도"],
+    "keywords": ["在韩华人论坛", "K-Market 二手交易", "韩国退税 90%", "中国留学生租房二手"]
+  },
+  {
+    "id": "comm_philippines_association",
+    "name_ko": "재한 필리핀 공동체 (카티푸난 / KASAMMA-KO)",
+    "name_en": "Federation of Filipino Communities in Korea (Katipunan / Kasamma-ko)",
+    "country": "Philippines",
+    "lang": "tl",
+    "main_hubs": ["서울 혜화동 필리핀 마켓", "안산 원곡동", "인천 남동", "경기 포천"],
+    "key_interests": ["EPS E-9 Tax Refund", "Free Giveaway Electronics", "Moving Sale Safe Direct Trade", "Sunday Market Items"],
+    "keywords": ["Filipinos in Korea", "K-Market Free Stuff", "Korea Tax Refund EPS E-9", "Hyehwa Filipino Community"]
+  },
+  {
+    "id": "comm_indonesia_association",
+    "name_ko": "주한 인도네시아 유학생·근로자 연합 (PERPIKA / FOKI)",
+    "name_en": "Indonesian Community in Korea (PERPIKA / FOKI)",
+    "country": "Indonesia",
+    "lang": "id",
+    "main_hubs": ["안산 원곡동", "경남 김해", "대구 성서", "부산 사상", "충북 음성"],
+    "key_interests": ["E-9/E-7 Tax Refund Reduction 90%", "Used Goods P2P Safe Trading", "Moving Sale Appliance Bundles"],
+    "keywords": ["WNI di Korea", "K-Market Jual Beli Bekas", "Pengembalian Pajak Korea 90%", "Komunitas Pekerja Indonesia"]
+  },
+  {
+    "id": "comm_thailand_association",
+    "name_ko": "재한 태국인 노동자·유학생 커뮤니티",
+    "name_en": "Thai Community in Korea (คนไทยในเกาหลีใต้)",
+    "country": "Thailand",
+    "lang": "th",
+    "main_hubs": ["경기 안산", "화성 향남", "평택 포승", "충남 아산", "전북 정읍"],
+    "key_interests": ["E-9 Tax Refund 90%", "0 Won Giveaway Used Goods", "Factory Dormitory Moving Sales"],
+    "keywords": ["คนไทยในเกาหลี", "K-Market ของมือสองฟรี", "ขอคืนภาษีเกาหลี 90%", "แรงงานไทย E-9"]
+  },
+  {
+    "id": "comm_cambodia_association",
+    "name_ko": "재한 캄보디아 근로자·학생 연합",
+    "name_en": "Cambodian Community in Korea (សហគមន៍ខ្មែរនៅកូរ៉េ)",
+    "country": "Cambodia",
+    "lang": "km",
+    "main_hubs": ["경기 의정부", "안산 원곡동", "충남 천안", "경남 김해"],
+    "key_interests": ["E-9 Tax Refund Claim 5 Years", "Direct Secondhand Appliances", "Moving Sales"],
+    "keywords": ["ពលករខ្មែរនៅកូរ៉េ", "K-Market ទំនិញជជុះ", "ទាមទារប្រាក់ពន្ធកូរ៉េត្រឡប់មកវិញ 90%"]
+  },
+  {
+    "id": "comm_myanmar_association",
+    "name_ko": "재한 미얀마인 공동체 / 민주주의 연대",
+    "name_en": "Myanmar Community in Korea (မြန်မာအသိုက်အဝန်း)",
+    "country": "Myanmar",
+    "lang": "my",
+    "main_hubs": ["인천 부평", "경기 부천", "안산", "대구 성서공단"],
+    "key_interests": ["E-9/E-7 90% Income Tax Exemption", "Free Furniture Giveaways", "17 Languages Translation Chat"],
+    "keywords": ["ကိုရီးယားရောက်မြန်မာများ", "K-Market အခမဲ့ပစ္စည်းများ", "ကိုရီးယားအခွန်ပြန်အမ်းငွေ 90%"]
+  },
+  {
+    "id": "comm_nepal_association",
+    "name_ko": "재한 네팔인 협회 (NRNA Korea)",
+    "name_en": "Non-Resident Nepali Association Korea (NRNA Korea)",
+    "country": "Nepal",
+    "lang": "ne",
+    "main_hubs": ["서울 동대문 네팔거리", "안산 원곡동", "김해", "수원", "포천"],
+    "key_interests": ["EPS 5-Year Income Tax Refund", "Moving Sale Bed & Desk", "Zero Upfront Fee Tax Claim"],
+    "keywords": ["NRNA Korea", "K-Market Free Share", "Korea Tax Return Nepal EPS 90%", "Nepali in Korea"]
+  }
+]

@@ -36,6 +36,59 @@ class UTMTracker:
         return urllib.parse.urlunparse(new_url_parts)
 
     @classmethod
+    def build_service_landing_url(cls, service_id: str, base_domain: str, lang: str = "en",
+                                  path: str = "", source: str = "direct", 
+                                  medium: str = "marketing", campaign: str = "", 
+                                  content: Optional[str] = None) -> str:
+        """
+        서비스별 실제 라우팅 방식에 100% 맞춘 최종 랜딩 URL 생성:
+        - K-Market: Path 기반 (예: https://ktrs-market.vercel.app/vi)
+        - EasyTax: Query 기반 (예: https://ktrs-service.vercel.app/?lang=vi 또는 https://ktrs-service.vercel.app/welcome?lang=vi)
+        """
+        base = base_domain.rstrip("/")
+        subpath = path.strip("/")
+        
+        if service_id == "kmarket" or "ktrs-market" in base:
+            # K-Market: Path 기반 /{lang}
+            full_base = f"{base}/{lang}/{subpath}" if subpath else f"{base}/{lang}"
+            return cls.build_url(
+                base_url=full_base,
+                source=source,
+                medium=medium,
+                campaign=campaign,
+                content=content,
+                lang=None
+            )
+        else:
+            # EasyTax (KTRS Service): Query 기반 ?lang={lang}
+            full_base = f"{base}/{subpath}" if subpath else base
+            return cls.build_url(
+                base_url=full_base,
+                source=source,
+                medium=medium,
+                campaign=campaign,
+                content=content,
+                lang=lang
+            )
+
+    @classmethod
+    def build_landing_url(cls, base_domain: str, lang: str = "en", path: str = "",
+                          source: str = "direct", medium: str = "marketing", 
+                          campaign: str = "", content: Optional[str] = None,
+                          service_id: str = "kmarket") -> str:
+        """하위 호환용 래퍼 함수"""
+        return cls.build_service_landing_url(
+            service_id=service_id,
+            base_domain=base_domain,
+            lang=lang,
+            path=path,
+            source=source,
+            medium=medium,
+            campaign=campaign,
+            content=content
+        )
+
+    @classmethod
     def generate_campaign_tag(cls, service_id: str, channel: str, lang: str) -> str:
         """표준 캠페인 태그 생성 (예: easytax_reddit_vi_202608)"""
         now_str = datetime.datetime.now().strftime("%Y%m")

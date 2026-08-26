@@ -2,7 +2,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Dict, Any, List
-from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES
+from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_URLS
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.notifier import Notifier
@@ -34,16 +34,18 @@ class FreeStuffNotifier:
 
         free_items = [item for item in self.items if item.get("is_free", False)]
         saved_files = []
+        base_domain = BASE_URLS.get("kmarket", "https://k-market.app")
 
         for lang in target_langs:
             lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
             campaign = UTMTracker.generate_campaign_tag("kmarket", "daily_briefing", lang)
-            landing_url = UTMTracker.build_url(
-                base_url="https://k-market.app/giveaways",
+            landing_url = UTMTracker.build_landing_url(
+                base_domain=base_domain,
+                lang=lang,
+                path="welcome",
                 source="daily_briefing",
                 medium="push_feed",
-                campaign=campaign,
-                lang=lang
+                campaign=campaign
             )
 
             lines = [

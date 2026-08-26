@@ -206,8 +206,8 @@ REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD", "")
 
 # Target Services Base URLs
 BASE_URLS = {
-    "kmarket": os.getenv("KMARKET_BASE_URL", "https://k-market.app"),
-    "easytax": os.getenv("EASYTAX_BASE_URL", "https://easy-tax.app"),
+    "kmarket": os.getenv("KMARKET_BASE_URL", "https://ktrs-market.vercel.app"),
+    "easytax": os.getenv("EASYTAX_BASE_URL", "https://ktrs-service.vercel.app"),
     "ktelecom": os.getenv("KTELECOM_BASE_URL", "https://k-telecom.app"),
     "loan": os.getenv("LOAN_BASE_URL", "https://expat-loan.app"),
     "housing": os.getenv("HOUSING_BASE_URL", "https://expat-housing.app"),
