@@ -133,7 +133,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
             rel_path = path[len("/outputs/"):]
             file_path = OUTPUTS_DIR / rel_path
             mime_type, _ = mimetypes.guess_type(str(file_path))
-            self._serve_file(file_path, mime_type or "application/octet-stream")
+            if not mime_type:
+                ext = file_path.suffix.lower()
+                mime_type = "text/plain" if ext in [".txt", ".md", ".log"] else "application/octet-stream"
+            if mime_type.startswith("text/") or mime_type in ["application/json", "application/javascript"]:
+                mime_type = f"{mime_type.split(';')[0]}; charset=utf-8"
+            self._serve_file(file_path, mime_type)
             return
 
         # 3. API 엔드포인트
