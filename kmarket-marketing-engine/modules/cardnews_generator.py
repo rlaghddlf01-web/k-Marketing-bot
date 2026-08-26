@@ -134,11 +134,14 @@ class CardnewsGenerator:
                 {"badge": "외국인등록증 100% 안심인증", "title": "사기 없는 대학가 도보 5분 안심 거래", "desc": "본인인증 셀러 + AI 사기방지 엔진 탑재 완료", "cta": "대한민국 No.1 외국인 직거래 케이마켓 가기!"},
             ]
         else:
+            # 100% 현지어 지원 카드뉴스 슬라이드 데이터
+            from core.motion_video_composer import SCENE_I18N
+            i18n = SCENE_I18N.get(lang, SCENE_I18N["en"])
             slides_data = [
-                {"badge": "국세청 조특법 제30조 공식 적용", "title": "외국인 근로자 소득세 90% 감면 합법 혜택", "desc": "E-9, E-7, H-2 외국인 5년치 미환급 세금 합법 신청", "cta": "지금 3분 무료 세금 환급 모의계산하기!"},
-                {"badge": "100% 무료 선입금 0원 보장", "title": "조회 비용 완전 무료! 환급 성공 시에만 정산", "desc": "어떠한 선입금도 요구하지 않는 안심 국세청 환급", "cta": "선입금 없이 숨은 내 환급액 1초 조회!"},
-                {"badge": "공인 세무법인 1:1 전담 검토", "title": "국세청 홈택스 전자신고 100% 법적 보호", "desc": "전문 세무사 정밀 검토로 안전한 통장 입금", "cta": "공인 세무사와 1:1 안전 환급 신청하기!"},
-                {"badge": "ARC 신분증 1장으로 3분 환급 신청", "title": "17개국 모국어로 5개년 환급금 원스톱 수령", "desc": "평균 150만~400만원 과오납 세금 즉시 수령", "cta": "프로필 링크에서 3분 무료 환급 시작!"},
+                {"badge": i18n["header_tag"], "title": i18n["scene1_hook_main"], "desc": i18n["scene1_hook_sub"], "cta": i18n["scene4_cta_btn"]},
+                {"badge": i18n["push_bank"], "title": i18n["push_title"], "desc": i18n["scene2_caption_1"], "cta": i18n["scene4_cta_btn"]},
+                {"badge": i18n["scene3_trust_badge"], "title": i18n["scene3_trust_main"], "desc": i18n["scene3_trust_sub"], "cta": i18n["scene4_cta_btn"]},
+                {"badge": "EasyTax", "title": i18n["scene4_cta_sub"], "desc": i18n["disclaimer"], "cta": i18n["scene4_cta_btn"]},
             ]
 
         campaign = UTMTracker.generate_campaign_tag(service_id, "cardnews", lang)
@@ -225,30 +228,35 @@ class CardnewsGenerator:
                 draw.rectangle([(photo_x + 650, photo_y + 15), (photo_x + 965, photo_y + 80)], fill=(30, 41, 59, 200))
                 draw.text((photo_x + 665, photo_y + 25), region[:12], fill=(255, 255, 255), font=font_badge)
 
-            # ── EasyTax: Gemini Imagen 3 실사 사진 직접 생성 및 합성 ──
+            # ── EasyTax: Gemini 2.5 Flash Image 실사 사진 직접 생성 및 풀스크린 합성 ──
             scenario = self.scenario_director.plan_daily_scenario(lang=lang, service_id="easytax")
             gen_img_path = self.gemini_media_gen.generate_theme_image(
                 lang=lang,
                 theme_id=scenario["theme_id"],
                 scenario_plan=scenario,
-                aspect_ratio="4:3"
+                aspect_ratio="1:1"
             )
             if gen_img_path and gen_img_path.exists():
                 try:
-                    # 사전 품질 검증
-                    passed, score, reason = self.quality_verifier.verify_media_quality(
-                        gen_img_path, lang, scenario["theme_name"]
-                    )
                     easytax_img = Image.open(gen_img_path).convert("RGB")
-                    easytax_resized = easytax_img.resize((photo_w, photo_h), Image.Resampling.LANCZOS)
-                    img.paste(easytax_resized, (photo_x, photo_y))
-                    photo_loaded = True
+                    # 카드 전체에 풀스크린 실사 사진 배치
+                    easytax_resized = easytax_img.resize((W, H), Image.Resampling.LANCZOS)
+                    img.paste(easytax_resized, (0, 0))
                     
-                    # 사진 위 환급액 하이라이트 뱃지 오버레이
-                    draw.rectangle([(photo_x + 15, photo_y + 15), (photo_x + 480, photo_y + 80)], fill=(245, 158, 11))
-                    draw.text((photo_x + 30, photo_y + 25), f"💰 ₩{scenario['refund_amount_krw']:,} KRW", fill=(15, 23, 42), font=font_price)
+                    # 어두운 그라디언트 오버레이 (자막 가독성 확보)
+                    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+                    d_over = ImageDraw.Draw(overlay)
+                    # 상단/하단 다크 비네팅
+                    d_over.rectangle([(0, 0), (W, 160)], fill=(0, 0, 0, 180))
+                    d_over.rectangle([(0, 680), (W, H)], fill=(0, 0, 0, 220))
+                    img.paste(Image.alpha_composite(Image.new("RGBA", (W, H), (0,0,0,0)), overlay), (0, 0), overlay)
+                    
+                    # 사진 위 환급액 하이라이트 골드 뱃지 오버레이
+                    draw.rectangle([(50, 180), (580, 260)], fill=(245, 158, 11))
+                    draw.text((70, 195), f"💰 ₩{scenario['refund_amount_krw']:,} KRW", fill=(15, 23, 42), font=font_price)
+                    photo_loaded = True
                 except Exception as e:
-                    logger.warning(f"EasyTax 카드뉴스 이미지 합성 에러: {e}")
+                    logger.warning(f"EasyTax 카드뉴스 실사 합성 에러: {e}")
 
         if not photo_loaded:
             # 사진 로드 실패 시 폴백 그라디언트 카드

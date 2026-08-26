@@ -256,7 +256,11 @@ class MotionVideoComposer:
 
         # 3. FFmpeg 복합 필터
         if bg_video_path and bg_video_path.exists():
-            video_input = ["-stream_loop", "-1", "-i", str(bg_video_path)]
+            # 이미지 파일인 경우 loop 1과 framerate 지정
+            if str(bg_video_path).lower().endswith(('.png', '.jpg', '.jpeg')):
+                video_input = ["-loop", "1", "-framerate", "30", "-i", str(bg_video_path)]
+            else:
+                video_input = ["-stream_loop", "-1", "-i", str(bg_video_path)]
         else:
             video_input = ["-f", "lavfi", "-i", f"color=c=0x0f172a:s=1080x1920:d={audio_duration}"]
 

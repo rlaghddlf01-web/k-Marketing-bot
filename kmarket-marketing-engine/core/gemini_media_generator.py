@@ -74,23 +74,23 @@ class GeminiMediaGenerator:
 
         if self.client:
             try:
-                # 최신 Gemini 3.1 Flash Image 모델 호출
+                # 구글 공식 Gemini 2.5 Flash Image 모델 호출
                 result = self.client.models.generate_content(
-                    model='gemini-3.1-flash-image',
+                    model='gemini-2.5-flash-image',
                     contents=prompt
                 )
-                # 이미지 파트 추출
+                # 실제 이미지 바이너리 추출 및 저장
                 for part in result.candidates[0].content.parts:
-                    if hasattr(part, 'inline_data') and part.inline_data:
-                        image = Image.open(io.BytesIO(part.inline_data.data))
-                        image.save(output_path)
-                        logger.info(f"✅ Gemini 3.1 Flash Image 생성 성공: {output_path.name}")
+                    if hasattr(part, 'inline_data') and part.inline_data and part.inline_data.data:
+                        image = Image.open(io.BytesIO(part.inline_data.data)).convert("RGB")
+                        image.save(output_path, "JPEG", quality=95)
+                        logger.info(f"🎉 [봇 자동화 - Gemini Flash Image] 100% 실사 사진 생성 성공: {output_path.name}")
                         return output_path
             except Exception as e:
-                logger.warning(f"Gemini Image 생성 실패 (Fallback 모드): {e}")
+                logger.warning(f"Gemini Image 생성 실패: {e}")
 
-        # Fallback: 로컬 Pillow 기반 고화질 그라디언트 + 스마트폰 UI 템플릿 생성
+        # Fallback: 고화질 그라디언트 템플릿
         W, H = (1080, 1920) if aspect_ratio == "9:16" else (1080, 1080)
         fallback_img = Image.new("RGB", (W, H), color=(15, 23, 42))
-        fallback_img.save(output_path)
+        fallback_img.save(output_path, "JPEG", quality=95)
         return output_path

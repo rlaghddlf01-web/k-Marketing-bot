@@ -7,6 +7,7 @@ from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.gemini_easytax import EasyTaxGeminiEngine
+from core.gemini_media_generator import GeminiMediaGenerator
 from core.supabase_manager import SupabaseManager
 
 logger = logging.getLogger("EasyTaxBlog")
