@@ -15,8 +15,10 @@ from core.utm_tracker import UTMTracker
 from core.trend_scraper import ViralTrendScraper
 from core.video_composer import VideoComposer
 from core.visual_safety_engine import VisualSafetyEngine
-from core.pexels_video_client import PexelsVideoClient
 from core.motion_video_composer import MotionVideoComposer
+from core.scenario_director import ScenarioDirector
+from core.gemini_media_generator import GeminiMediaGenerator
+from core.media_quality_verifier import MediaQualityVerifier
 
 logger = logging.getLogger("ShortsFactory")
 
@@ -37,8 +39,10 @@ class ShortsVideoFactory:
         self.kmarket_items = self._load_items_from_supabase()
         self.video_composer = VideoComposer()
         self.safety_engine = VisualSafetyEngine()
-        self.pexels_video_client = PexelsVideoClient()
         self.motion_composer = MotionVideoComposer(self.output_dir)
+        self.scenario_director = ScenarioDirector()
+        self.gemini_media_gen = GeminiMediaGenerator()
+        self.quality_verifier = MediaQualityVerifier()
 
     def _load_items_from_supabase(self) -> List[Dict[str, Any]]:
         """Supabase kmarket_items 테이블에서 실제 270개 매물 사진 직접 조회"""
@@ -113,18 +117,53 @@ class ShortsVideoFactory:
                 # 5. 케이마켓 / 이지텍스 대표 비주얼 프레임 생성 (썸네일/포스터용)
                 frame_path = self._render_vertical_frame(service_id, service_data, lang, hook_title, captions)
 
-                # 6. ★ [핵심 혁신] 씬 전환 기반의 '진짜 움직이는 숏폼 비디오(MP4)' 렌더링
+                # 6. ★ [핵심 혁신] Gemini AI 직접 비주얼 생성 + 사전 품질 검증 게이트 + 숏폼 합성
                 if service_id == "easytax":
-                    # EasyTax: Pexels에서 실제 움직이는 고화질 세로형 비디오 배경 획득
-                    bg_video = self.pexels_video_client.fetch_video_for_lang(lang=lang, service_id="easytax")
+                    # 6-1. 매일 새로운 라이프스타일 감정 테마 & 15~34세 청년 페르소나 기획안 생성
+                    scenario = self.scenario_director.plan_daily_scenario(lang=lang, service_id="easytax")
+                    logger.info(f"[{lang.upper()}] 🎬 일일 숏폼 테마: {scenario['theme_name']} ({scenario['age_group']} {scenario['visa']})")
+                    
+                    # 6-2. Gemini Imagen으로 9:16 고화질 실사 비주얼 직접 생성
+                    gen_img_path = self.gemini_media_gen.generate_theme_image(
+                        lang=lang,
+                        theme_id=scenario["theme_id"],
+                        scenario_plan=scenario,
+                        aspect_ratio="9:16"
+                    )
+                    
+                    # 6-3. 사전 AI 품질 검증 게이트 (Quality Gate >= 80점)
+                    passed, q_score, reason = self.quality_verifier.verify_media_quality(
+                        gen_img_path, lang, scenario["theme_name"]
+                    )
+                    
+                    # 6-4. 100% 현지어 자막 + 상단 입금 푸시 알림 결합 숏폼 비디오 합성
                     mp4_path = self.motion_composer.compose_motion_shorts(
-                        bg_video_path=bg_video,
+                        bg_video_path=gen_img_path,
                         audio_path=audio_path,
                         service_id=service_id,
                         lang=lang,
                         title=hook_title,
                         captions=captions
                     )
+
+                    # 6-5. Supabase marketing_media_assets 테이블에 자산 & 품질 점수 기록
+                    try:
+                        from core.supabase_manager import SupabaseManager
+                        sup_mgr = SupabaseManager()
+                        sup_mgr.record_marketing_media_asset({
+                            "service_id": service_id,
+                            "target_lang": lang,
+                            "media_type": "short_video",
+                            "theme_id": scenario["theme_id"],
+                            "age_group": scenario["age_group"],
+                            "gender": scenario["gender"],
+                            "prompt_used": scenario.get("action_prompt", ""),
+                            "file_path": str(mp4_path) if mp4_path else "",
+                            "quality_score": q_score,
+                            "verification_passed": passed
+                        })
+                    except Exception as e:
+                        logger.warning(f"Supabase 미디어 자산 기록 실패: {e}")
                 else:
                     # K-Market: 실물 매물 사진 + 오디오 합성
                     mp4_path = self.video_composer.compose(

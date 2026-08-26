@@ -11,6 +11,9 @@ from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, SUPABASE_URL, SUPABASE_KEY
 from core.service_router import ServiceRouter
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
+from core.gemini_media_generator import GeminiMediaGenerator
+from core.media_quality_verifier import MediaQualityVerifier
+from core.scenario_director import ScenarioDirector
 
 logger = logging.getLogger("CardnewsGenerator")
 
@@ -29,8 +32,8 @@ def get_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont:
 class CardnewsGenerator:
     """
     [무인 자동화 4] 17개국 캐러셀 카드뉴스 (1080x1080)
-    ★ Supabase kmarket_items 테이블에서 270개 실제 매물 사진을 직접 조회하여 합성
-    ★ 로컬 JSON 파일은 Supabase 연결 실패 시 폴백으로만 사용
+    ★ K-Market: Supabase 270개 실제 매물 사진 직접 합성
+    ★ EasyTax: Gemini Imagen 3 직접 실사 사진 생성 + 사전 품질 검증
     """
 
     def __init__(self, db_mgr: DBManager, router: ServiceRouter):
@@ -41,6 +44,9 @@ class CardnewsGenerator:
         self._image_cache: Dict[str, Image.Image] = {}
         # Supabase에서 실제 매물 사진 로드 (핵심)
         self.kmarket_items = self._load_items_from_supabase()
+        self.gemini_media_gen = GeminiMediaGenerator()
+        self.quality_verifier = MediaQualityVerifier()
+        self.scenario_director = ScenarioDirector()
 
     # ──────────────────────────────────────────────
     # 1단계: Supabase에서 실제 270개 매물 사진 직접 조회
@@ -219,15 +225,39 @@ class CardnewsGenerator:
                 draw.rectangle([(photo_x + 650, photo_y + 15), (photo_x + 965, photo_y + 80)], fill=(30, 41, 59, 200))
                 draw.text((photo_x + 665, photo_y + 25), region[:12], fill=(255, 255, 255), font=font_badge)
 
+            # ── EasyTax: Gemini Imagen 3 실사 사진 직접 생성 및 합성 ──
+            scenario = self.scenario_director.plan_daily_scenario(lang=lang, service_id="easytax")
+            gen_img_path = self.gemini_media_gen.generate_theme_image(
+                lang=lang,
+                theme_id=scenario["theme_id"],
+                scenario_plan=scenario,
+                aspect_ratio="4:3"
+            )
+            if gen_img_path and gen_img_path.exists():
+                try:
+                    # 사전 품질 검증
+                    passed, score, reason = self.quality_verifier.verify_media_quality(
+                        gen_img_path, lang, scenario["theme_name"]
+                    )
+                    easytax_img = Image.open(gen_img_path).convert("RGB")
+                    easytax_resized = easytax_img.resize((photo_w, photo_h), Image.Resampling.LANCZOS)
+                    img.paste(easytax_resized, (photo_x, photo_y))
+                    photo_loaded = True
+                    
+                    # 사진 위 환급액 하이라이트 뱃지 오버레이
+                    draw.rectangle([(photo_x + 15, photo_y + 15), (photo_x + 480, photo_y + 80)], fill=(245, 158, 11))
+                    draw.text((photo_x + 30, photo_y + 25), f"💰 ₩{scenario['refund_amount_krw']:,} KRW", fill=(15, 23, 42), font=font_price)
+                except Exception as e:
+                    logger.warning(f"EasyTax 카드뉴스 이미지 합성 에러: {e}")
+
         if not photo_loaded:
-            # 사진 로드 실패 or EasyTax → 텍스트 기반 비주얼 카드
+            # 사진 로드 실패 시 폴백 그라디언트 카드
             draw.rectangle([(photo_x, photo_y), (photo_x + photo_w, photo_y + photo_h)],
                            fill=(20, 28, 58), outline=(59, 130, 246), width=3)
             if service_id == "easytax":
                 draw.text((photo_x + 60, photo_y + 100), "국세청 외국인 소득세 환급", fill=(255, 255, 255), font=font_title)
                 draw.text((photo_x + 60, photo_y + 200), "조특법 제30조 90% 소득세 감면 적용", fill=(250, 204, 21), font=font_price)
                 draw.text((photo_x + 60, photo_y + 290), "1인 평균 150만 ~ 400만원 과오납 세금 환급", fill=(52, 211, 153), font=font_desc)
-                draw.text((photo_x + 60, photo_y + 370), "공인 세무법인 전자신고 • 선입금 0원 100% 안전", fill=(148, 163, 184), font=font_desc)
             else:
                 draw.text((photo_x + 250, photo_y + 240), "케이마켓 인증 매물", fill=(148, 163, 184), font=font_title)
 

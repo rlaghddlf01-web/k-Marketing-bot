@@ -247,3 +247,63 @@ class SupabaseManager:
             except Exception as e:
                 logger.warning(f"골든 카피 전환 승격 실패: {e}")
 
+    def record_marketing_media_asset(self, payload: Dict[str, Any]) -> Optional[int]:
+        """[AI 미디어 자산 등록 & 품질 검증 기록] Supabase marketing_media_assets 테이블에 저장"""
+        if self.client:
+            try:
+                res = self.client.table("marketing_media_assets").insert(payload).execute()
+                if res.data:
+                    logger.info(f"✅ Supabase 미디어 자산 기록 성공: {payload.get('theme_id')} ({payload.get('quality_score')}점)")
+                    return res.data[0].get("id")
+            except Exception as e:
+                logger.warning(f"Supabase marketing_media_assets 기록 실패: {e}")
+        return None
+
+    def fetch_best_learning_theme(self, service_id: str, lang: str) -> Optional[str]:
+        """[자가학습 강화 루프] Supabase theme_learning_weights에서 승률 가장 높은 테마 조회"""
+        if self.client:
+            try:
+                res = self.client.table("theme_learning_weights") \
+                    .select("theme_id, current_weight, win_rate") \
+                    .eq("service_id", service_id) \
+                    .eq("target_lang", lang) \
+                    .order("current_weight", desc=True) \
+                    .limit(1) \
+                    .execute()
+                if res.data and len(res.data) > 0:
+                    best_theme = res.data[0].get("theme_id")
+                    logger.info(f"🧠 [자가학습 가중치 적용] {lang.upper()} 최고 성과 테마: {best_theme}")
+                    return best_theme
+            except Exception as e:
+                logger.warning(f"Supabase theme_learning_weights 조회 실패: {e}")
+        return None
+
+    def update_theme_conversion_win(self, service_id: str, lang: str, theme_id: str):
+        """[성과 기반 가중치 승격] 특정 테마에서 전환 발생 시 해당 테마 가중치 +0.5 자동 상승"""
+        if self.client:
+            try:
+                # 기존 가중치 확인
+                res = self.client.table("theme_learning_weights") \
+                    .select("current_weight, total_conversions") \
+                    .eq("service_id", service_id) \
+                    .eq("target_lang", lang) \
+                    .eq("theme_id", theme_id) \
+                    .execute()
+                
+                cur_weight = 1.0
+                conversions = 1
+                if res.data and len(res.data) > 0:
+                    cur_weight = float(res.data[0].get("current_weight", 1.0)) + 0.5
+                    conversions = int(res.data[0].get("total_conversions", 0)) + 1
+                
+                self.client.table("theme_learning_weights").upsert({
+                    "service_id": service_id,
+                    "target_lang": lang,
+                    "theme_id": theme_id,
+                    "current_weight": cur_weight,
+                    "total_conversions": conversions
+                }).execute()
+                logger.info(f"🏆 [테마 가중치 자가학습 승격] {lang}/{theme_id} -> 가중치 {cur_weight}")
+            except Exception as e:
+                logger.warning(f"테마 가중치 승격 실패: {e}")
+
