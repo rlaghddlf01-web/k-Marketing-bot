@@ -1,0 +1,53 @@
+{
+  "kmarket": {
+    "name": "K-Market (외국인 No.1 로컬 중고마켓 & 0원 나눔)",
+    "category": "e-commerce",
+    "description": "외국인 간 안전한 중고 직거래, 0원 무료나눔, 무빙 아웃(Moving Sale) 살림 일괄 처분, 17개국 실시간 양방향 번역 채팅 플랫폼",
+    "keywords": [
+      "0원나눔", "무료나눔", "무빙세일", "가구나눔", "전자레인지", "침대", "책상", "중고아이폰", "이사정리", "원룸살림처분",
+      "used", "secondhand", "free giveaway", "moving out sale", "furniture", "appliances", "foreigner market"
+    ],
+    "usp": [
+      "🎁 0원 무료 나눔 (Free Giveaways): 졸업/귀국 유학생과 근로자가 침대, 책상, 가전제품을 이웃에게 0원 무료 나눔",
+      "📦 원클릭 무빙 아웃 세일 (Moving Sale): 방 전체 가구·가전 5~10종 일괄 처분 패키지",
+      "🗣️ 17개국 실시간 양방향 자동 번역 채팅: 모국어로 입력하면 상대방 언어(한국어/영어 등)로 실시간 즉시 번역",
+      "🛡️ AI 안티스캠(Anti-Scam) 실시간 사기 방지: 선입금 유도, 카카오톡 외부 거래, 상품권 사기 키워드 감지 시 즉시 경고",
+      "📍 하버사인 반경 로컬 매칭: 안산 원곡동, 동대문, 이태원, 수원, 평택 등 내 주변 3km~10km 안전 직거래",
+      "🆔 외국인등록증(ARC) Gemini AI OCR 실명 인증으로 100% 신뢰도 보장"
+    ],
+    "landing_url": "https://k-market.app",
+    "active": true
+  },
+  "easytax": {
+    "name": "EasyTax / KTRS (외국인 세금환급 & 중소기업 90% 감면)",
+    "category": "fintech_tax",
+    "description": "국세청(홈택스) 공식 연동 5개년도 소득세/원천징수세 환급, E-9/E-7/D-2/H-2 비자별 중소기업 세금 감면 및 출국만기보험 환급 대행",
+    "keywords": [
+      "외국인세금환급", "중소기업소득세감면", "90%감면", "E-9세금환급", "D-2알바환급", "3.3%환급", "연말정산경정청구", "출국만기보험",
+      "korean tax refund", "expat tax refund", "withholding tax 3.3%", "E-9 tax reduction 90%", "hometax refund"
+    ],
+    "usp": [
+      "⚡ 3분 무료 AI 환급액 조회: 외국인등록증 사진 1장 업로드 시 3초 만에 OCR 자동인식 및 국세청 실시간 연동",
+      "🔥 E-9 외국인 근로자 중소기업 취업 소득세 최대 90% 감면 혜택 (조세특례제한법 제30조)",
+      "🎓 D-2 유학생 아르바이트/인턴십 떼인 세금(3.3%) 100% 전액 환급",
+      "📅 최근 5개년(2020~2025년) 누락된 연말정산·월세 세액공제 전액 소급 환급",
+      "📲 카카오톡, PASS, 하나인증서, 홈택스 ID 간편인증 100% 지원",
+      "🏛️ 국세청 공식 세무대리 전자서명 위임으로 본인 은행 계좌로 환급금 직접 입금"
+    ],
+    "landing_url": "https://easy-tax.app",
+    "active": true
+  },
+  "ktelecom": {
+    "name": "K-Telecom (외국인 알뜰폰/USIM)",
+    "category": "telecom",
+    "description": "여권 및 외국인등록증으로 입국 당일 무약정 개통 가능한 외국인 전용 선불/알뜰폰 eSIM/USIM",
+    "keywords": ["알뜰폰", "유심", "eSIM", "선불폰", "데이터 무제한", "외국인 개통", "sim card", "prepaid sim"],
+    "usp": [
+      "외국인등록증 발급 전 여권만으로도 당일 즉시 eSIM/USIM 개통",
+      "한국 번호 개통으로 본인인증(PASS, 통신사 인증) 100% 지원",
+      "약정 없음, 위약금 없음, 가성비 무제한 요금제"
+    ],
+    "landing_url": "https://k-telecom.app",
+    "active": false
+  }
+}

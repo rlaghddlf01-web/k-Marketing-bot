@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛸 Universal Expat Growth Engine | 로컬 컨트롤 센터</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">🛸</div>
+                <div>
+                    <h1 class="logo-title">Expat Growth</h1>
+                    <span class="logo-sub">무인 자가학습 공장 v1.0</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="overview">
+                    <span class="icon">📊</span> 대시보드 & 제어
+                </button>
+                <button class="nav-item" data-tab="ir-analytics">
+                    <span class="icon">💎</span> 실시간 유입 & IR 관제
+                </button>
+                <button class="nav-item" data-tab="platforms">
+                    <span class="icon">🚀</span> 플랫폼 직접 발행 & 구글 색인
+                </button>
+                <button class="nav-item" data-tab="hashtags">
+                    <span class="icon">📈</span> 17개국 바이럴 해시태그
+                </button>
+                <button class="nav-item" data-tab="gallery">
+                    <span class="icon">🎬</span> 미디어 갤러리
+                </button>
+                <button class="nav-item" data-tab="self-learning">
+                    <span class="icon">🧠</span> 자가학습 랭킹
+                </button>
+                <button class="nav-item" data-tab="health">
+                    <span class="icon">🩺</span> 실시간 헬스케어 & 맥박
+                </button>
+                <button class="nav-item" data-tab="settings">
+                    <span class="icon">⚙️</span> API 및 계정 설정
+                </button>
+            </nav>
+
+            <div class="sidebar-status-card" style="border-left: 4px solid #10b981; margin-bottom: 12px;">
+                <div class="status-header">
+                    <span class="status-dot pulse" id="km-daemon-indicator"></span>
+                    <span class="status-text" id="km-daemon-status-text" style="font-weight:600;font-size:12px;">🛒 K-Market 봇 대기</span>
+                </div>
+                <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;" id="km-daemon-sub">실물 숏폼/0원나눔/레딧</div>
+                <button class="btn btn-primary btn-block" style="background:#10b981;border-color:#10b981;font-size:12px;padding:8px;" id="btn-toggle-km-daemon" onclick="toggleKMarketDaemon()">
+                    🚀 K-Market 봇 가동
+                </button>
+            </div>
+
+            <div class="sidebar-status-card" style="border-left: 4px solid #f59e0b;">
+                <div class="status-header">
+                    <span class="status-dot pulse" id="tax-daemon-indicator"></span>
+                    <span class="status-text" id="tax-daemon-status-text" style="font-weight:600;font-size:12px;">💰 EasyTax 봇 대기</span>
+                </div>
+                <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;" id="tax-daemon-sub">E-9 90%감면/환급/Anti-Ban</div>
+                <button class="btn btn-primary btn-block" style="background:#f59e0b;border-color:#f59e0b;font-size:12px;padding:8px;" id="btn-toggle-tax-daemon" onclick="toggleEasyTaxDaemon()">
+                    🚀 EasyTax 봇 가동
+                </button>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <main class="main-content">
+            <!-- 상단 헤더 & 원클릭 브랜드 스위처 -->
+            <header class="top-header">
+                <div class="header-left">
+                    <div class="brand-switcher-group" style="display:flex;gap:8px;margin-bottom:8px;">
+                        <button class="brand-tab-btn active" id="brand-tab-km" onclick="switchBrand('kmarket')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;border:2px solid #10b981;background:rgba(16,185,129,0.15);color:#34d399;font-weight:700;font-size:14px;cursor:pointer;">
+                            🛒 K-Market 로컬 라이프 관제 센터
+                        </button>
+                        <button class="brand-tab-btn" id="brand-tab-tax" onclick="switchBrand('easytax')" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;border:2px solid rgba(245,158,11,0.3);background:rgba(255,255,255,0.03);color:#94a3b8;font-weight:700;font-size:14px;cursor:pointer;">
+                            💰 EasyTax 국세청 환급 관제 센터
+                        </button>
+                    </div>
+                    <h2 class="page-title" id="page-title">📊 K-Market 마케팅 통합 제어 센터</h2>
+                    <p class="page-desc" id="page-desc">270개 실물 매물 0원 나눔, 무빙세일, 17개국 양방향 번역 채팅을 실시간 제어합니다.</p>
+                </div>
+                <div class="header-right" style="display:flex;gap:12px;">
+                    <div class="badge" id="header-health-badge" style="background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);cursor:pointer;" onclick="switchTabDirect('health')" title="클릭 시 실시간 헬스케어 관제 센터로 이동">
+                        🩺 건강도: <strong id="header-health-score">100% 정상 🟢</strong>
+                    </div>
+                    <div class="badge badge-google" onclick="triggerGoogleIndex()" style="cursor:pointer;" title="클릭 시 구글 봇에게 즉시 색인 핑 전송">
+                        🌐 구글 색인: <strong id="google-index-count">6,630개 URL 가동</strong>
+                    </div>
+                    <div class="badge badge-season" id="today-season-badge">
+                        🎯 활성 관제: <strong id="season-name" style="color:#10b981;">K-MARKET</strong>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 탭 1: 대시보드 & 제어 -->
+            <section class="tab-content active" id="tab-overview">
+                <!-- 통계 카드 그리드 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon purple">🤖</div>
+                        <div class="stat-info">
+                            <span class="stat-label">총 배포 및 응답</span>
+                            <h3 class="stat-value" id="stat-total-count">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">⭐</div>
+                        <div class="stat-info">
+                            <span class="stat-label">최고 성과 골든 점수</span>
+                            <h3 class="stat-value" id="stat-top-score">0.0 점</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue">🌐</div>
+                        <div class="stat-info">
+                            <span class="stat-label">구글 SEO 색인 URL</span>
+                            <h3 class="stat-value" id="stat-seo-count">6,630 개</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">🛡️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Anti-Ban 상태</span>
+                            <h3 class="stat-value" style="color:#10b981;">안전 보호 중</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 원클릭 모듈 실행 패널 (브랜드별 100% 동적 분리) -->
+                <div class="section-card">
+                    <h3 class="section-title" id="action-panel-title">⚡ K-Market 전담 모듈 원클릭 즉시 실행</h3>
+                    <p class="section-subtitle" id="action-panel-desc">270개 실물 매물 기반 0원 나눔 숏폼, 실물 카드뉴스, 중고 가구 레딧 헌터를 원클릭으로 즉시 실행합니다.</p>
+                    
+                    <div class="action-grid" id="action-grid-container">
+                        <!-- renderActionGrid()로 100% 동적 렌더링 -->
+                    </div>
+                </div>
+
+                <!-- 실시간 활동 로그 콘솔 -->
+                <div class="section-card">
+                    <div class="log-header">
+                        <h3 class="section-title">📜 실시간 엔진 활동 로그</h3>
+                        <button class="btn btn-sm btn-ghost" onclick="clearLogs()">로그 지우기</button>
+                    </div>
+                    <div class="terminal-box" id="terminal-log">
+                        <div class="log-line info">[System] 로컬 마케팅 컨트롤 센터가 준비되었습니다.</div>
+                        <div class="log-line success">[Ready] 17개 언어 및 6대 서비스 플러그인이 로드되었습니다.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 탭 2: 실시간 유입 정밀 분석 & 연도별(YoY) 비교 대시보드 (KTRS IR 관제 센터) -->
+            <section class="tab-content" id="tab-ir-analytics">
+                <!-- 상단 필터 및 헤더 카드 -->
+                <div class="section-card ir-header-card">
+                    <div class="ir-header-top">
+                        <div class="ir-header-title-area">
+                            <h3 class="ir-main-title">📈 실시간 유입 정밀 분석 & 연도별(YoY) 비교 대시보드</h3>
+                            <div class="ir-title-badges">
+                                <span class="badge-select">기준 연도: <strong>2026년</strong></span>
+                                <span class="badge-live-pulse"><span class="pulse-dot"></span> 오늘 24시간 실시간</span>
+                            </div>
+                            <p class="ir-subtitle">2026년~2027년 이후까지 연도별 실적 및 24시간 시간대별 트래픽을 정밀 비교할 수 있습니다.</p>
+                        </div>
+
+                        <!-- 기간 선택 탭 버튼 그룹 -->
+                        <div class="period-button-group">
+                            <button class="period-btn active" onclick="switchPeriod('today', this)">📅 오늘 (24시간)</button>
+                            <button class="period-btn" onclick="switchPeriod('weekly', this)">📊 주간</button>
+                            <button class="period-btn" onclick="switchPeriod('monthly', this)">📈 월간</button>
+                            <button class="period-btn" onclick="switchPeriod('yearly', this)">🏆 연간 (Yearly/IR)</button>
+                        </div>
+                    </div>
+
+                    <!-- 4대 상단 주요 지표 카드 -->
+                    <div class="stats-grid" style="margin-top: 24px; margin-bottom: 0;">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">👁️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">오늘 페이지뷰 (PV)</span>
+                                <h3 class="stat-value" id="kpi-today-pv">310 회</h3>
+                                <span class="stat-sub">실시간 실제 누적 페이지뷰</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">📦</div>
+                            <div class="stat-info">
+                                <span class="stat-label">기간 누적 PV</span>
+                                <h3 class="stat-value" id="kpi-cumulative-pv">660 회</h3>
+                                <span class="stat-sub">유입 경로를 통한 총 방문 합계</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue">📈</div>
+                            <div class="stat-info">
+                                <span class="stat-label">연간 성장 지표 (YoY)</span>
+                                <h3 class="stat-value" style="color:#10b981;" id="kpi-yoy">↗ 기준년도 (런칭)</h3>
+                                <span class="stat-sub">2025년 대비 성장 실적</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">👥</div>
+                            <div class="stat-info">
+                                <span class="stat-label">월간 방문자 수 (MAU)</span>
+                                <h3 class="stat-value" id="kpi-monthly-visitors">660 명</h3>
+                                <span class="stat-sub">실시간 고유 방문자 측정</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 24시간 시간대별 추이 막대 그래프 & 16대 채널별 실제 유입 현황 그리드 -->
+                <div class="ir-dual-grid">
+                    <!-- 좌측: 24시간 시간대별 막대 그래프 -->
+                    <div class="section-card ir-chart-card">
+                        <div class="chart-header">
+                            <h4 class="chart-title">📊 오늘 24시간 시간대별 추이 (00시~23시)</h4>
+                            <span class="chart-badge">기준: 오늘 24H 실시간</span>
+                        </div>
+                        <p class="chart-hint">마우스 휠이나 터치로 좌우 스크롤하며 00시부터 23시까지 전체 시간대를 정밀 확인할 수 있습니다.</p>
+                        
+                        <!-- 막대 그래프 컨테이너 -->
+                        <div class="bar-chart-scroll-wrapper">
+                            <div class="bar-chart-container" id="hourly-bar-chart">
+                                <!-- JS로 24개 막대 바 동적 생성 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 우측: 글로벌 16대 채널별 실제 유입 현황 -->
+                    <div class="section-card ir-channels-card">
+                        <div class="chart-header">
+                            <h4 class="chart-title">🔗 글로벌 16대 채널별 실제 유입 현황</h4>
+                            <div class="channel-filter-tabs">
+                                <button class="filter-tab active">전체</button>
+                                <button class="filter-tab">글로벌 SNS</button>
+                                <button class="filter-tab">국가별 메신저</button>
+                                <button class="filter-tab">기타/QR</button>
+                            </div>
+                        </div>
+
+                        <!-- 채널별 프로그레스 바 목록 -->
+                        <div class="channel-bars-list" id="channel-bars-list">
+                            <!-- JS로 동적 렌더링 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 각 서비스 앱별 최종 산출물 & 결과물 성과 카드 -->
+                <div class="section-card">
+                    <div class="gallery-header">
+                        <div>
+                            <h3 class="section-title">💎 각 앱별 최종 유입 & 비즈니스 결과물 산출 내역</h3>
+                            <p class="section-subtitle">마케팅 봇이 배포한 다국어 콘텐츠를 통해 각 서비스 앱으로 유입되어 발생한 실제 환급 신청액 및 거래 매칭 실적입니다.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadIRAnalytics()">🔄 새로고침</button>
+                    </div>
+                    <div class="platforms-grid" id="ir-app-metrics-grid">
+                        <!-- 동적으로 로드되는 앱별 성과 카드들 -->
+                    </div>
+                </div>
+
+                <!-- 하단 관리자 관제 요약 바 -->
+                <div class="footer-summary-grid">
+                    <div class="summary-item">
+                        <span class="sum-icon">📦</span>
+                        <div>
+                            <span class="sum-label">총 등록 매물</span>
+                            <h4 class="sum-val">270 건</h4>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="sum-icon">🛡️</span>
+                        <div>
+                            <span class="sum-label">사기 신고/의심</span>
+                            <h4 class="sum-val" style="color:#10b981;">0 건 (100% 안전)</h4>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="sum-icon">💵</span>
+                        <div>
+                            <span class="sum-label">KTRS 세금 환급 연계</span>
+                            <h4 class="sum-val" style="color:#38bdf8;" id="sum-tax-volume">2억 4,800 만원</h4>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="sum-icon">👥</span>
+                        <div>
+                            <span class="sum-label">외국인 이용 회원</span>
+                            <h4 class="sum-val" style="color:#a855f7;" id="sum-members">644 명</h4>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 탭 3: 플랫폼 직접 자동 발행 & 구글 색인 센터 -->
+            <section class="tab-content" id="tab-platforms">
+                <!-- 구글 색인 안내 배너 -->
+                <div class="google-info-card">
+                    <div class="google-info-left">
+                        <span style="font-size:32px;">🌐</span>
+                        <div>
+                            <h3 style="font-size:16px;font-weight:700;">구글 검색 자동 등록(Google Search Console & Indexing API) 가동 원리</h3>
+                            <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;">
+                                전국 30개 대학 + 15개 국가산업단지 × 17개 언어 <strong>4,590개 랜딩 URL</strong> 및 <code>sitemap.xml</code>을 빌드하여, Googlebot(구글 검색 로봇)에게 실시간 색인 핑(Ping)을 전송하여 검색 결과에 자동 노출시킵니다.
+                            </p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="triggerGoogleIndex()">🌐 구글 실시간 색인 핑 전송</button>
+                </div>
+
+                <!-- 7대 플랫폼 상태 카드 그리드 -->
+                <div class="platforms-grid" id="platforms-container">
+                    <!-- 동적으로 렌더링되는 플랫폼 카드들 -->
+                </div>
+            </section>
+
+            <!-- 탭 4: 17개국 실시간 바이럴 해시태그 트렌드 -->
+            <section class="tab-content" id="tab-hashtags">
+                <!-- 대한민국(KR) 실시간 급상승 트렌드 배너 -->
+                <div class="google-info-card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%); border-color: rgba(239, 68, 68, 0.3);">
+                    <div class="google-info-left">
+                        <span style="font-size:32px;">🇰🇷</span>
+                        <div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <h3 style="font-size:16px;font-weight:700;margin:0;">대한민국(Geo: KR) 실시간 급상승 바이럴 트렌드</h3>
+                                <span class="badge-live-pulse" style="font-size:11px;"><span class="pulse-dot"></span> 실시간 동기화</span>
+                            </div>
+                            <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;">
+                                전 세계가 아닌 <strong>'대한민국 영토 내에서 지금 이 순간 가장 뜨거운 급상승 키워드'</strong>를 수집하여 17개국 외국인 타깃 태그와 결합합니다.
+                            </p>
+                            <div id="kr-live-trends-bar" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">
+                                <!-- 대한민국 실시간 트렌드 태그들 -->
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="refreshHashtags()">🔄 실시간 트렌드 새로고침</button>
+                </div>
+
+                <!-- 17개국 타깃 매트릭스 그리드 -->
+                <div class="section-card" style="margin-top:16px;">
+                    <div class="gallery-header">
+                        <div>
+                            <h3 class="section-title">🎯 17개국 전 국가 '국내 체류 외국인(In-Korea)' 정밀 타깃 매트릭스</h3>
+                            <p class="section-subtitle">각국 모국어의 한국 체류 고유 키워드(#cuocsonghanquoc, #在韩留学生, #koreyadahayot 등)와 서비스 태그가 100% 결합됩니다.</p>
+                        </div>
+                        <div style="font-size:13px;color:var(--text-secondary);">
+                            총 <strong style="color:#60a5fa;" id="hashtags-country-count">17</strong>개국 활성
+                        </div>
+                    </div>
+                    <div class="platforms-grid" id="hashtags-container">
+                        <!-- 동적으로 로드되는 17개국 해시태그 카드들 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 탭 5: 미디어 갤러리 -->
+            <section class="tab-content" id="tab-gallery">
+                <div class="section-card">
+                    <div class="gallery-header">
+                        <h3 class="section-title">📁 생성된 미디어 아티팩트 갤러리</h3>
+                        <button class="btn btn-secondary" onclick="loadGallery()">🔄 새로고침</button>
+                    </div>
+                    <div class="gallery-grid" id="gallery-grid">
+                        <!-- 동적으로 로드되는 미디어 카드들 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 탭 6: 자가학습 랭킹 -->
+            <section class="tab-content" id="tab-self-learning">
+                <div class="section-card">
+                    <h3 class="section-title">🧠 Supabase 자가학습 골든 카피 랭킹 (Top-Performing Copies)</h3>
+                    <p class="section-subtitle">성과 점수(반응+유입+전환) 85점 이상을 기록하여 AI 카피라이팅 Few-Shot으로 자동 주입되는 모범 카피들입니다.</p>
+                    <div class="table-container">
+                        <table class="custom-table" id="golden-copies-table">
+                            <thead>
+                                <tr>
+                                    <th>등급 / 점수</th>
+                                    <th>서비스</th>
+                                    <th>언어</th>
+                                    <th>카피 원문 미리보기</th>
+                                    <th>기여 지표 (클릭/전환)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="golden-copies-body">
+                                <!-- 동적 랭킹 목록 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 탭 7: 환경 설정 -->
+            <section class="tab-content" id="tab-settings">
+                <div class="section-card">
+                    <h3 class="section-title">⚙️ 소셜 플랫폼 계정 API 키 & 오토파일럿 설정</h3>
+                    <p class="section-subtitle">계정 키를 입력해 두시면, 사람이 올릴 필요 없이 프로그램이 각 플랫폼 계정으로 직접 자동 업로드 및 발행합니다.</p>
+                    <form id="settings-form" onsubmit="saveSettings(event)">
+                        
+                        <h4 style="font-size:14px;color:#60a5fa;margin-bottom:12px;">🤖 AI 및 클라우드 DB</h4>
+                        <div class="form-group">
+                            <label>Gemini API Key</label>
+                            <input type="password" id="cfg-gemini-key" class="form-control" placeholder="AI Studio Gemini API 키">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Supabase URL</label>
+                                <input type="text" id="cfg-supabase-url" class="form-control" placeholder="https://your-project.supabase.co">
+                            </div>
+                            <div class="form-group">
+                                <label>Supabase Anon Key</label>
+                                <input type="password" id="cfg-supabase-key" class="form-control" placeholder="Supabase Anon/Service Key">
+                            </div>
+                        </div>
+
+                        <h4 style="font-size:14px;color:#10b981;margin:18px 0 12px 0;">🛒 1. K-Market 공식 계정 (70% 라이프/나눔 채널)</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>K-Market YouTube Data API Key</label>
+                                <input type="password" id="cfg-km-youtube" class="form-control" placeholder="K-Market 전용 YouTube API 키">
+                            </div>
+                            <div class="form-group">
+                                <label>K-Market Instagram/Meta Token</label>
+                                <input type="password" id="cfg-km-meta" class="form-control" placeholder="K-Market 전용 Meta Graph Token">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>K-Market TikTok Creator Token</label>
+                                <input type="password" id="cfg-km-tiktok" class="form-control" placeholder="K-Market 전용 TikTok Posting Token">
+                            </div>
+                        </div>
+
+                        <h4 style="font-size:14px;color:#f59e0b;margin:18px 0 12px 0;">💰 2. EasyTax 공식 계정 (30% 세무/환급 채널)</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>EasyTax YouTube Data API Key</label>
+                                <input type="password" id="cfg-tax-youtube" class="form-control" placeholder="EasyTax 전용 YouTube API 키">
+                            </div>
+                            <div class="form-group">
+                                <label>EasyTax Instagram/Meta Token</label>
+                                <input type="password" id="cfg-tax-meta" class="form-control" placeholder="EasyTax 전용 Meta Graph Token">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>EasyTax TikTok Creator Token</label>
+                                <input type="password" id="cfg-tax-tiktok" class="form-control" placeholder="EasyTax 전용 TikTok Posting Token">
+                            </div>
+                            <div class="form-group">
+                                <label>17개국 텔레그램 봇 토큰</label>
+                                <input type="password" id="cfg-tg-token" class="form-control" placeholder="공통 텔레그램 봇 토큰">
+                            </div>
+                        </div>
+
+                        <h4 style="font-size:14px;color:#60a5fa;margin:18px 0 12px 0;">🛡️ 3. Anti-Ban & 듀얼 오토파일럿 가동 설정</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Anti-Ban 지터 최소 대기 (초)</label>
+                                <input type="number" id="cfg-delay-min" class="form-control" value="180">
+                            </div>
+                            <div class="form-group">
+                                <label>Anti-Ban 지터 최대 대기 (초)</label>
+                                <input type="number" id="cfg-delay-max" class="form-control" value="420">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="margin-top: 15px;">💾 모든 계정 및 설정 저장하기</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 탭 8: 실시간 헬스케어 & 맥박 관제 (100% 브랜드별 완전 분리) -->
+            <section class="tab-content" id="tab-health">
+                <div class="section-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <div>
+                            <h3 class="section-title" id="health-panel-title">🩺 실시간 시스템 헬스케어 & 맥박 관제 센터</h3>
+                            <p class="section-subtitle" id="health-panel-desc">현재 선택된 브랜드의 AI 두뇌, 파이썬 전담 봇, DB 및 7대 전용 소셜 채널의 건강 상태와 막힘 여부를 실시간 감시합니다.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="runFullHealthDiagnostic()" style="background:#2563eb;border-color:#2563eb;display:flex;align-items:center;gap:6px;">
+                            🔍 1초 즉시 정밀 자가진단 실행
+                        </button>
+                    </div>
+
+                    <!-- 1. 🧠 현재 브랜드 전용 핵심 3대 두뇌 상태 -->
+                    <h4 style="font-size:14px;color:#a855f7;margin:20px 0 12px 0;" id="health-brain-title">🧠 핵심 3대 AI 및 시스템 두뇌 맥박</h4>
+                    <div class="stats-grid" id="health-brain-grid">
+                        <!-- loadHealthStatus()로 동적 렌더링 -->
+                    </div>
+
+                    <!-- 2. 📡 현재 브랜드 전용 7대 채널 실시간 맥박 (100% 분리) -->
+                    <h4 style="font-size:14px;margin:28px 0 12px 0;" id="health-channels-title">📡 7대 소셜 & 커뮤니티 채널 맥박</h4>
+                    <div class="action-grid" id="health-channels-grid">
+                        <!-- loadHealthStatus()로 동적 렌더링 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 토스트 알림 컨테이너 -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

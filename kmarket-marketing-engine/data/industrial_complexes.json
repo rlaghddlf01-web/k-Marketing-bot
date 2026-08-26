@@ -1,0 +1,17 @@
+[
+  {"name_ko": "반월·시화 국가산업단지", "name_en": "Banwol-Sihwa Industrial Complex", "region": "경기 안산시/시흥시", "expat_count": 42000, "main_visas": ["E-9", "H-2", "F-4"], "hotspots": ["원곡동 다문화거리", "정왕역", "안산역", "시화공단"]},
+  {"name_ko": "화성 향남·발안 일반산업단지", "name_en": "Hwaseong Hyangnam-Balan Industrial Complex", "region": "경기 화성시", "expat_count": 28000, "main_visas": ["E-9", "F-4"], "hotspots": ["발안만세시장", "향남읍", "남양읍"]},
+  {"name_ko": "평택 포승·고덕 국가산업단지", "name_en": "Pyeongtaek Poseung-Godeok Industrial Complex", "region": "경기 평택시", "expat_count": 22000, "main_visas": ["E-9", "E-7", "F-4"], "hotspots": ["포승원룸단지", "서정리역", "평택항", "고덕신도시"]},
+  {"name_ko": "구미 국가산업단지", "name_en": "Gumi National Industrial Complex", "region": "경북 구미시", "expat_count": 14000, "main_visas": ["E-9", "E-7"], "hotspots": ["구미역", "원평동", "인동 로데오", "4공단"]},
+  {"name_ko": "영암 대불 국가산업단지 (조선업)", "name_en": "Yeongam Daebul Shipbuilding Complex", "region": "전남 영암군/목포시", "expat_count": 16000, "main_visas": ["E-9", "E-7-3", "E-7-4"], "hotspots": ["삼호읍", "대불산단 원룸촌", "목포 하당"]},
+  {"name_ko": "울산 온산·미포 국가산업단지", "name_en": "Ulsan Onsan-Mipo Industrial Complex", "region": "울산 울주군/동구", "expat_count": 18000, "main_visas": ["E-9", "E-7"], "hotspots": ["방어동", "전하동", "덕신리 원룸촌", "남창역"]},
+  {"name_ko": "창원 국가산업단지", "name_en": "Changwon National Industrial Complex", "region": "경남 창원시", "expat_count": 15000, "main_visas": ["E-9", "E-7", "F-4"], "hotspots": ["명서동", "팔용동", "마산합포구", "진해 용원"]},
+  {"name_ko": "김해 골든루트·주촌 산업단지", "name_en": "Gimhae Golden Root Industrial Complex", "region": "경남 김해시", "expat_count": 21000, "main_visas": ["E-9", "H-2", "F-4"], "hotspots": ["김해 동상동 외국인거리", "주촌면", "진영읍", "수로왕릉역"]},
+  {"name_ko": "음성·진천 충북혁신산업단지", "name_en": "Eumseong-Jincheon Industrial Complex", "region": "충북 음성군/진천군", "expat_count": 17000, "main_visas": ["E-9", "F-4"], "hotspots": ["대소면", "금왕읍", "덕산읍", "광혜원면"]},
+  {"name_ko": "천안·아산 디스플레이/자동차산단", "name_en": "Cheonan-Asan Industrial Complex", "region": "충남 천안시/아산시", "expat_count": 19000, "main_visas": ["E-9", "E-7", "F-4"], "hotspots": ["둔포면 아산테크노밸리", "성환읍", "천안 직산", "온양온천역"]},
+  {"name_ko": "포항 철강산업단지", "name_en": "Pohang Steel Industrial Complex", "region": "경북 포항시", "expat_count": 9000, "main_visas": ["E-9", "E-7"], "hotspots": ["오천읍", "청림동", "효자동"]},
+  {"name_ko": "군산·익산 국가산업단지", "name_en": "Gunsan-Iksan Industrial Complex", "region": "전북 군산시/익산시", "expat_count": 11000, "main_visas": ["E-9", "F-4"], "hotspots": ["오식도동", "소룡동", "익산 국가산단"]},
+  {"name_ko": "인천 남동 국가산업단지", "name_en": "Incheon Namdong Industrial Complex", "region": "인천 남동구", "expat_count": 16000, "main_visas": ["E-9", "H-2", "F-4"], "hotspots": ["남동공단역", "호구포역", "논현동", "함박마을(고려인)"]},
+  {"name_ko": "대구 성서 산업단지", "name_en": "Daegu Seongseo Industrial Complex", "region": "대구 달서구", "expat_count": 13000, "main_visas": ["E-9", "F-4"], "hotspots": ["성서산업단지역", "계명대역", "이곡동"]},
+  {"name_ko": "광주 하남·첨단 국가산업단지", "name_en": "Gwangju Hanam-Cheomdan Industrial Complex", "region": "광주 광산구", "expat_count": 14000, "main_visas": ["E-9", "H-2", "F-4"], "hotspots": ["월곡동 고려인마을", "하남동", "첨단지구"]}
+]

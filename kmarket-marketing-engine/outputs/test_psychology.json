@@ -1,0 +1,41 @@
+{
+  "r1": {
+    "psychology": "free_giveaway_emotional",
+    "ab_group": "A",
+    "hook_title": "BÍ MẬT SẮM ĐỒ 0 WON TẠI HÀN QUỐC!",
+    "voiceover_text": "Mới sang Hàn tốn hàng triệu won sắm đồ? Dừng lại ngay! Cộng đồng người ngoại quốc đi trước đang TẶNG MIỄN PHÍ tủ, giường, tủ lạnh 0 WON cực tốt! Nhìn này, chiếc kệ sách gỗ này giá đúng 0 WON tại khu Ansan, Pyeongtaek luôn nhé. Nhắn tin lấy đồ siêu dễ vì K-Market có chat dịch tự động 17 ngôn ngữ, không giỏi tiếng Hàn vẫn nhận đồ thoải mái. Ấm áp tình đồng hương! Bấm ngay vào link ở bio để tải K-Market và săn đồ free hôm nay!",
+    "captions": [
+      "Sắm trọn đồ dùng 0 WON từ anh chị đi trước!",
+      "Kệ sách gỗ FREE tại Ansan / Pyeongtaek!",
+      "Chat tự động dịch 17 ngôn ngữ - Không lo tiếng Hàn",
+      "Bấm link ở bio để nhận đồ miễn phí trên K-Market!"
+    ],
+    "cta_text": "Tải K-Market và nhận đồ 0 Won ngay tại link Bio!"
+  },
+  "r2": {
+    "psychology": "urgent_moving_discount",
+    "ab_group": "B",
+    "hook_title": "Leaving Korea Soon? Score Up To 90% Off!",
+    "voiceover_text": "Hey guys! Moving out of Korea soon and feeling overwhelmed? You're not alone! I just snagged this amazing Cuckoo Master Chef Rice Cooker for only 45,000 Won from an expat flying home in 7 days! On K-Market, people leaving Korea offer up to 90% off full room setups. You can chat seamlessly with 17-language translation and even grab 0 Won free giveaways! Tap the link in my profile to download K-Market now!",
+    "captions": [
+      "Moving out soon? Get up to 90% OFF deals! ✈️",
+      "Cuckoo Rice Cooker for only 45,000 KRW! 🍚",
+      "17-language chat & 0 KRW giveaways! 💬",
+      "Tap the profile link to join K-Market today!📲"
+    ],
+    "cta_text": "Tap the link in my profile to download K-Market now!"
+  },
+  "r3": {
+    "psychology": "multi_lang_comfort",
+    "ab_group": "A",
+    "hook_title": "한국어 몰라도 중고거래 사기 0%!",
+    "voiceover_text": "한국에서 중고거래 할 때 사기당할까 봐 불안하셨죠? 이제 언어 장벽도, 사기 걱정도 완전히 끝입니다! 외국인 등록증 ARC 인증을 완료한 신뢰할 수 있는 판매자만 모인 K-Market! 17개 국어 실시간 자동 번역 채팅으로 한국어를 전혀 못 해도 모국어로 편하게 거래하세요. 지금 안산, 시흥, 평택 공단 기숙사 근처에서 쿠쿠 6인용 IH 압력밥솥 DHB0660FDM이 단돈 3만 원! 0원 무료 나눔 혜택까지! 지금 당장 프로필 링크 타고 K-Market을 확인하세요!",
+    "captions": [
+      "한국어 몰라도 중고거래 사기 0%!",
+      "ARC 신원 인증 & 17개 국어 실시간 번역 채팅",
+      "쿠쿠 6인용 IH 압력밥솥이 단돈 30,000원!",
+      "0원 무료 나눔 혜택! 프로필 링크 클릭!"
+    ],
+    "cta_text": "지금 프로필 링크 누르고 K-Market 다운로드하세요!"
+  }
+}

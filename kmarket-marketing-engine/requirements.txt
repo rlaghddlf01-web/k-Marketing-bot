@@ -1,0 +1,11 @@
+google-genai>=0.1.1
+edge-tts>=6.1.12
+asyncio
+aiohttp
+python-dotenv>=1.0.0
+praw>=7.7.1
+pillow>=10.0.0
+reportlab>=4.0.0
+supabase>=2.0.0
+rich>=13.0.0
+requests>=2.31.0

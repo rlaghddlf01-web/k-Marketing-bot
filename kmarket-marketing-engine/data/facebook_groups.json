@@ -1,0 +1,65 @@
+[
+  {
+    "group_id": "fb_vietnam_01",
+    "name": "Người Việt tại Hàn Quốc (재한 베트남인 모임)",
+    "members": "520,000",
+    "country": "Vietnam",
+    "lang": "vi",
+    "target": "kmarket_and_easytax",
+    "approval_type": "post_approval"
+  },
+  {
+    "group_id": "fb_vietnam_02",
+    "name": "Hội Du học sinh Việt Nam tại Hàn Quốc (VSAK - 유학생회)",
+    "members": "180,000",
+    "country": "Vietnam",
+    "lang": "vi",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
+    "group_id": "fb_russia_01",
+    "name": "Русские в Корее / Работа в Корее (러시아/고려인 커뮤니티)",
+    "members": "240,000",
+    "country": "Russia",
+    "lang": "ru",
+    "target": "kmarket_and_easytax",
+    "approval_type": "post_approval"
+  },
+  {
+    "group_id": "fb_uzbek_01",
+    "name": "Koreyadagi O'zbeklar (재한 우즈베키스탄 근로자)",
+    "members": "160,000",
+    "country": "Uzbekistan",
+    "lang": "uz",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
+    "group_id": "fb_philippines_01",
+    "name": "Filipinos in South Korea / Pinoy EPS (필리핀 근로자)",
+    "members": "190,000",
+    "country": "Philippines",
+    "lang": "tl",
+    "target": "kmarket_and_easytax",
+    "approval_type": "post_approval"
+  },
+  {
+    "group_id": "fb_global_01",
+    "name": "Expats in Seoul & Korea (글로벌 외국인 커뮤니티)",
+    "members": "310,000",
+    "country": "Global",
+    "lang": "en",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
+    "group_id": "fb_mongolia_01",
+    "name": "Солонгос дахь Монголчууд (재한 몽골인 협회)",
+    "members": "140,000",
+    "country": "Mongolia",
+    "lang": "mn",
+    "target": "kmarket_and_easytax",
+    "approval_type": "post_approval"
+  }
+]

@@ -1,0 +1,27 @@
+# 🔐 보안: API 키 및 환경 변수 파일 절대 유출 방지
+.env
+.env.local
+.env.*.local
+*.env
+
+# 🐍 파이썬 캐시 및 가상환경
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# 📦 생성된 대용량 미디어 파일
+outputs/shorts/*.mp4
+outputs/shorts/*.mp3
+outputs/cardnews/*.png
+outputs/pdf_guides/*.pdf
+outputs/logs/*.log
+
+# 🗄️ 로컬 임시 DB 및 IDE 설정
+data/history.db
+.agents/
+.vscode/
+.idea/
+*.log
