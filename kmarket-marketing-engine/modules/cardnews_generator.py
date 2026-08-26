@@ -127,19 +127,15 @@ class CardnewsGenerator:
 
         cards = []
         if service_id == "kmarket":
-            # 📱 케이마켓: 9:16 세로형 풀스크린 모바일 웹뷰 4장 생성!
-            from core.kmarket_webview_composer import KMarketWebviewComposer
-            webview_comp = KMarketWebviewComposer(self.output_dir)
-            for idx in range(1, 5):
-                img_path = webview_comp.render_slide(slide_idx=idx, lang=lang)
-                cards.append(img_path)
+            # 🌐 실제 케이마켓 웹사이트(https://ktrs-market.vercel.app/) 9:16 브라우저 캡처!
+            from core.kmarket_real_browser_capturer import KMarketRealBrowserCapturer
+            capturer = KMarketRealBrowserCapturer(self.output_dir)
+            cards = capturer.capture_real_kmarket_slides(lang=lang)
         else:
-            # 💰 EasyTax: 9:16 세로형 풀스크린 카드뉴스 렌더링
-            from core.kmarket_webview_composer import KMarketWebviewComposer
-            webview_comp = KMarketWebviewComposer(self.output_dir)
-            for idx in range(1, 5):
-                img_path = webview_comp.render_slide(slide_idx=idx, lang=lang)
-                cards.append(img_path)
+            # 💰 EasyTax: 9:16 실사 카드뉴스 렌더링
+            from core.kmarket_real_browser_capturer import KMarketRealBrowserCapturer
+            capturer = KMarketRealBrowserCapturer(self.output_dir)
+            cards = capturer.capture_real_kmarket_slides(lang=lang)
 
         campaign = UTMTracker.generate_campaign_tag(service_id, "cardnews", lang)
         landing_url = UTMTracker.build_url(

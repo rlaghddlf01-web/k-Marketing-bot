@@ -165,13 +165,14 @@ class ShortsVideoFactory:
                     except Exception as e:
                         logger.warning(f"Supabase 미디어 자산 기록 실패: {e}")
                 else:
-                    # 🛒 K-Market: 9:16 세로형 모바일 웹뷰 기반 스무스 모션 숏폼 합성!
-                    from core.kmarket_webview_composer import KMarketWebviewComposer
-                    webview_comp = KMarketWebviewComposer(self.output_dir)
-                    kmarket_frame_1 = webview_comp.render_slide(slide_idx=1, lang=lang)
+                    # 🛒 K-Market: 실제 케이마켓 웹사이트 9:16 스크린샷 기반 숏폼 합성!
+                    from core.kmarket_real_browser_capturer import KMarketRealBrowserCapturer
+                    capturer = KMarketRealBrowserCapturer(self.output_dir)
+                    real_slides = capturer.capture_real_kmarket_slides(lang=lang)
+                    kmarket_bg = real_slides[0] if real_slides else frame_path
                     
                     mp4_path = self.motion_composer.compose_motion_shorts(
-                        bg_video_path=kmarket_frame_1,
+                        bg_video_path=kmarket_bg,
                         audio_path=audio_path,
                         service_id=service_id,
                         lang=lang,
