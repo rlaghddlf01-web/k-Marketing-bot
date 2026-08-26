@@ -527,6 +527,7 @@ async function loadPlatforms(btn) {
     try {
         const res = await fetch("/api/platforms");
         const data = await res.json();
+        const tabs = ['overview', 'history', 'ranking', 'media-gallery', 'ir-analytics', 'iframe_viewer', 'platforms', 'seo', 'telegram', 'analytics', 'settings', 'logs'];
         let platforms = data.platforms || {};
 
         let entries = Object.entries(platforms);

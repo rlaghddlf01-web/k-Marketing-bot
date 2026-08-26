@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K-Market 9:16 Mobile iFrame View</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+    /* 9:16 세로형 스마트폰 프레임 (1080x1920 비율) */
+    .phone-container {
+      position: relative;
+      width: 450px;
+      height: 800px;
+      background: #000;
+      border-radius: 48px;
+      padding: 12px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 2px #334155;
+    }
+    /* 상단 다이내믹 아일랜드 노치 */
+    .notch {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 24px;
+      background: #000;
+      border-radius: 16px;
+      z-index: 10;
+    }
+    /* 실제 케이마켓 웹사이트가 로딩되는 아이프레임 */
+    .kmarket-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 36px;
+      background: #fff;
+    }
+    /* 하단 언어 전환 툴바 */
+    .lang-toolbar {
+      position: absolute;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.9);
+      padding: 8px 16px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .lang-btn {
+      background: #334155;
+      color: #f8fafc;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn.active, .lang-btn:hover {
+      background: #ff6b35;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-container">
+    <div class="notch"></div>
+    <iframe id="kmarketFrame" class="kmarket-iframe" src="https://ktrs-market.vercel.app/?lang=vi"></iframe>
+    
+    <div class="lang-toolbar">
+      <button class="lang-btn active" onclick="switchLang('vi')">🇻🇳 베트남 (VI)</button>
+      <button class="lang-btn" onclick="switchLang('mn')">🇲🇳 몽골 (MN)</button>
+      <button class="lang-btn" onclick="switchLang('uz')">🇺🇿 우즈벡 (UZ)</button>
+      <button class="lang-btn" onclick="switchLang('zh')">🇨🇳 중국 (ZH)</button>
+      <button class="lang-btn" onclick="switchLang('en')">🇺🇸 영어 (EN)</button>
+    </div>
+  </div>
+
+  <script>
+    function switchLang(lang) {
+      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('kmarketFrame').src = `https://ktrs-market.vercel.app/?lang=${lang}`;
+    }
+  </script>
+
+</body>
+</html>

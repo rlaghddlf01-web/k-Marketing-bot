@@ -28,6 +28,9 @@
                 <button class="nav-item" data-tab="ir-analytics">
                     <span class="icon">💎</span> 실시간 유입 & IR 관제
                 </button>
+                <button class="nav-item" data-tab="iframe_viewer">
+                    <span class="icon">📱</span> 9:16 모바일 뷰어
+                </button>
                 <button class="nav-item" data-tab="platforms">
                     <span class="icon">🚀</span> 플랫폼 직접 발행 & 구글 색인
                 </button>
@@ -102,7 +105,27 @@
 
             <!-- 탭 1: 대시보드 & 제어 -->
             <section class="tab-content active" id="tab-overview">
-                <!-- 통계 카드 그리드 -->
+                <!-- 📱 9:16 모바일 iFrame 실시간 뷰어 탭 -->
+            <section id="tab-iframe_viewer" class="tab-content" style="display:none;">
+                <div class="panel-header">
+                    <h2>📱 케이마켓 9:16 세로형 모바일 iFrame 실시간 뷰어</h2>
+                    <p style="color:var(--text-secondary);">실제 케이마켓 웹사이트의 17개국 모바일 인터페이스를 실시간으로 확인합니다.</p>
+                </div>
+                <div style="display:flex; justify-content:center; padding: 20px 0;">
+                    <div style="width:420px; height:780px; background:#000; border-radius:44px; padding:10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position:relative;">
+                        <iframe id="liveKMarketFrame" src="https://ktrs-market.vercel.app/?lang=vi" style="width:100%; height:100%; border:none; border-radius:34px; background:#fff;"></iframe>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
+                    <button class="btn btn-outline" onclick="document.getElementById('liveKMarketFrame').src='https://ktrs-market.vercel.app/?lang=vi'">🇻🇳 베트남어 (VI)</button>
+                    <button class="btn btn-outline" onclick="document.getElementById('liveKMarketFrame').src='https://ktrs-market.vercel.app/?lang=mn'">🇲🇳 몽골어 (MN)</button>
+                    <button class="btn btn-outline" onclick="document.getElementById('liveKMarketFrame').src='https://ktrs-market.vercel.app/?lang=uz'">🇺🇿 우즈벡어 (UZ)</button>
+                    <button class="btn btn-outline" onclick="document.getElementById('liveKMarketFrame').src='https://ktrs-market.vercel.app/?lang=zh'">🇨🇳 중국어 (ZH)</button>
+                    <button class="btn btn-outline" onclick="document.getElementById('liveKMarketFrame').src='https://ktrs-market.vercel.app/?lang=en'">🇺🇸 영어 (EN)</button>
+                </div>
+            </section>
+            
+            <!-- 📜 시스템 로그 탭 -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon purple">🤖</div>

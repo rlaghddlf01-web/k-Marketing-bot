@@ -165,13 +165,18 @@ class ShortsVideoFactory:
                     except Exception as e:
                         logger.warning(f"Supabase 미디어 자산 기록 실패: {e}")
                 else:
-                    # K-Market: 실물 매물 사진 + 오디오 합성
-                    mp4_path = self.video_composer.compose(
-                        frame_path=frame_path,
+                    # 🛒 K-Market: 9:16 세로형 모바일 웹뷰 기반 스무스 모션 숏폼 합성!
+                    from core.kmarket_webview_composer import KMarketWebviewComposer
+                    webview_comp = KMarketWebviewComposer(self.output_dir)
+                    kmarket_frame_1 = webview_comp.render_slide(slide_idx=1, lang=lang)
+                    
+                    mp4_path = self.motion_composer.compose_motion_shorts(
+                        bg_video_path=kmarket_frame_1,
                         audio_path=audio_path,
                         service_id=service_id,
                         lang=lang,
-                        bgm_volume=0.08,
+                        title=hook_title,
+                        captions=captions
                     )
 
                 # 7. DB 기록 (유니크 ID 생성)

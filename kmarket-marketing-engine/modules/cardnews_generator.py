@@ -127,22 +127,19 @@ class CardnewsGenerator:
 
         cards = []
         if service_id == "kmarket":
-            slides_data = [
-                {"badge": "0원 무료 나눔 FREE", "title": "졸업·귀국 외국인 가구 0원 무료 나눔!", "desc": "침대, 책상, 전자레인지, 냉장고 선착순 0원 나눔", "cta": "프로필 링크에서 0원 나눔 예약하기!"},
-                {"badge": "원클릭 무빙세일 MOVING SALE", "title": "원룸 풀패키지 가전·가구 최대 80% 할인", "desc": "침대+책상+밥솥+행거 세트 도보 5분 직거래", "cta": "대학가/공단 근처 실물 매물 확인하기!"},
-                {"badge": "17개국어 실시간 자동번역 채팅", "title": "한국어 못해도 내 모국어로 1초 채팅!", "desc": "한국인 판매자와 17개 언어 실시간 번역 대화", "cta": "언어 장벽 없는 안심 직거래 시작하기!"},
-                {"badge": "외국인등록증 100% 안심인증", "title": "사기 없는 대학가 도보 5분 안심 거래", "desc": "본인인증 셀러 + AI 사기방지 엔진 탑재 완료", "cta": "대한민국 No.1 외국인 직거래 케이마켓 가기!"},
-            ]
+            # 📱 케이마켓: 9:16 세로형 풀스크린 모바일 웹뷰 4장 생성!
+            from core.kmarket_webview_composer import KMarketWebviewComposer
+            webview_comp = KMarketWebviewComposer(self.output_dir)
+            for idx in range(1, 5):
+                img_path = webview_comp.render_slide(slide_idx=idx, lang=lang)
+                cards.append(img_path)
         else:
-            # 100% 현지어 지원 카드뉴스 슬라이드 데이터
-            from core.motion_video_composer import SCENE_I18N
-            i18n = SCENE_I18N.get(lang, SCENE_I18N["en"])
-            slides_data = [
-                {"badge": i18n["header_tag"], "title": i18n["scene1_hook_main"], "desc": i18n["scene1_hook_sub"], "cta": i18n["scene4_cta_btn"]},
-                {"badge": i18n["push_bank"], "title": i18n["push_title"], "desc": i18n["scene2_caption_1"], "cta": i18n["scene4_cta_btn"]},
-                {"badge": i18n["scene3_trust_badge"], "title": i18n["scene3_trust_main"], "desc": i18n["scene3_trust_sub"], "cta": i18n["scene4_cta_btn"]},
-                {"badge": "EasyTax", "title": i18n["scene4_cta_sub"], "desc": i18n["disclaimer"], "cta": i18n["scene4_cta_btn"]},
-            ]
+            # 💰 EasyTax: 9:16 세로형 풀스크린 카드뉴스 렌더링
+            from core.kmarket_webview_composer import KMarketWebviewComposer
+            webview_comp = KMarketWebviewComposer(self.output_dir)
+            for idx in range(1, 5):
+                img_path = webview_comp.render_slide(slide_idx=idx, lang=lang)
+                cards.append(img_path)
 
         campaign = UTMTracker.generate_campaign_tag(service_id, "cardnews", lang)
         landing_url = UTMTracker.build_url(
@@ -150,18 +147,14 @@ class CardnewsGenerator:
             source="social_cardnews", medium="carousel", campaign=campaign, lang=lang
         )
 
-        for idx, slide in enumerate(slides_data, 1):
-            img_path = self._render_single_card(service_id, lang, idx, slide, landing_url)
-            cards.append(img_path)
-
         self.db_mgr.record_history(
             content_type="cardnews", service_id=service_id, target_lang=lang,
-            title=slides_data[0]["title"],
-            content_text=f"Supabase real-photo carousel 4 slides for {service_id} in {lang}",
+            title=f"K-Market 9:16 Mobile Webview Carousel for {lang.upper()}",
+            content_text=f"K-Market 9:16 authentic mobile webview 4 slides in {lang}",
             target_url=landing_url,
             external_id=f"card_{service_id}_{lang}_{int(time.time() * 1000)}"
         )
-        logger.info(f"[{lang.upper()}] Supabase 실사 카드뉴스 4장 생성 완료 ({service_id})")
+        logger.info(f"[{lang.upper()}] 📱 케이마켓 9:16 세로형 모바일 카드뉴스 4장 생성 완료 ({service_id})")
         return cards
 
     # ──────────────────────────────────────────────
