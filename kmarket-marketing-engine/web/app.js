@@ -751,7 +751,7 @@ async function runModule(moduleName) {
     }
 }
 
-// 14. 갤러리 로드 & 카테고리 필터링 (브랜드별 100% 엄격 분리 & 사진 최우선)
+// 14. 갤러리 로드 & 카테고리 필터링 (사진 최우선 & 전체 노출)
 let cachedGalleryItems = [];
 let currentGalleryFilter = "all";
 
@@ -759,16 +759,10 @@ async function loadGallery(btn) {
     if (btn) animateRefreshBtn(btn, "미디어 갤러리가 새로고침되었습니다! 🎬");
     const grid = document.getElementById("gallery-grid");
     try {
-        const res = await fetch("/api/outputs");
+        const res = await fetch("/api/outputs?t=" + Date.now());
         const data = await res.json();
 
         let items = data.items || [];
-        if (currentBrand === "kmarket") {
-            items = items.filter(i => i.brand === "kmarket" || i.name.includes("kmarket"));
-        } else if (currentBrand === "easytax") {
-            items = items.filter(i => i.brand === "easytax" || i.name.includes("easytax"));
-        }
-
         cachedGalleryItems = items;
 
         // 카테고리별 개수 업데이트
@@ -797,65 +791,71 @@ function renderGalleryItems() {
     const grid = document.getElementById("gallery-grid");
     if (!grid) return;
 
-    let items = cachedGalleryItems;
+    let items = [...cachedGalleryItems];
+
+    // 브랜드 필터링 (선택 시 해당 브랜드 우선, 없으면 전체)
+    if (currentBrand === "kmarket") {
+        const filtered = items.filter(i => i.brand === "kmarket" || i.name.includes("kmarket"));
+        if (filtered.length > 0) items = filtered;
+    } else if (currentBrand === "easytax") {
+        const filtered = items.filter(i => i.brand === "easytax" || i.name.includes("easytax"));
+        if (filtered.length > 0) items = filtered;
+    }
+
     if (currentGalleryFilter !== "all") {
         items = items.filter(i => i.type === currentGalleryFilter);
     }
 
     if (items.length === 0) {
-        const brandLabel = currentBrand === "kmarket" ? "K-Market" : "EasyTax";
         grid.innerHTML = `<div style="color: var(--text-secondary); grid-column: 1/-1; text-align:center; padding: 40px; background:#13172E; border-radius:12px; border:1px solid #22294E;">
             <span style="font-size:32px; display:block; margin-bottom:8px;">🖼️</span>
-            ${brandLabel} 전용 생성된 ${currentGalleryFilter === 'image' ? '카드뉴스 사진' : '미디어'}가 없습니다.
+            생성된 ${currentGalleryFilter === 'image' ? '카드뉴스 사진' : '미디어'}가 없습니다.
         </div>`;
         return;
     }
 
     grid.innerHTML = items.map(item => {
-        const brandBadge = item.brand === "kmarket" 
+        const isKM = item.brand === "kmarket" || item.name.includes("kmarket");
+        const brandBadge = isKM
             ? `<span style="background:rgba(16,185,129,0.2);color:#34d399;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">🛒 K-Market</span>` 
             : `<span style="background:rgba(245,158,11,0.2);color:#fbbf24;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">💰 EasyTax</span>`;
 
         let thumbHtml = "";
         if (item.type === "image") {
             thumbHtml = `
-                <div class="gallery-thumb-wrapper">
-                    <img src="${item.url}" class="gallery-thumb" alt="${item.name}" loading="lazy" onclick="window.open('${item.url}', '_blank')" style="cursor:pointer;" title="클릭하여 원본 사진 크게 보기">
+                <div class="gallery-thumb-wrapper" style="background:#080A14;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:10px 10px 0 0;">
+                    <img src="${item.url}" class="gallery-thumb" alt="${item.name}" loading="lazy" onclick="window.open('${item.url}', '_blank')" style="width:100%;height:100%;object-fit:cover;cursor:pointer;" title="클릭하여 원본 사진 크게 보기">
                 </div>
             `;
         } else if (item.type === "audio") {
             thumbHtml = `
-                <div class="gallery-thumb-wrapper">
-                    <div class="gallery-audio-box">
-                        <span style="font-size:32px;margin-bottom:8px;">🎵</span>
-                        <audio controls src="${item.url}" style="width:95%;height:32px;"></audio>
-                    </div>
+                <div class="gallery-thumb-wrapper" style="background:linear-gradient(135deg,#1E1B4B,#0F172A);height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;">
+                    <span style="font-size:36px;margin-bottom:8px;">🎵</span>
+                    <audio controls src="${item.url}" style="width:95%;height:32px;"></audio>
                 </div>
             `;
         } else {
             thumbHtml = `
-                <div class="gallery-thumb-wrapper">
-                    <div class="gallery-doc-box">
-                        <span style="font-size:36px;margin-bottom:6px;">📄</span>
-                        <span style="font-size:11px;color:#94A3B8;">텍스트 브리핑</span>
-                    </div>
+                <div class="gallery-thumb-wrapper" style="background:#0D1126;height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94A3B8;">
+                    <span style="font-size:38px;margin-bottom:6px;">📄</span>
+                    <span style="font-size:11px;color:#94A3B8;">텍스트 브리핑</span>
                 </div>
             `;
         }
 
         return `
-            <div class="gallery-card">
+            <div class="gallery-card" style="background:#13172E;border:1px solid #22294E;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 14px rgba(0,0,0,0.3);">
                 ${thumbHtml}
-                <div class="gallery-info">
+                <div class="gallery-info" style="padding:14px 16px;display:flex;flex-direction:column;flex:1;justify-content:space-between;">
                     <div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
                             ${brandBadge}
                             <span style="font-size:11px;color:var(--text-secondary);font-weight:600;">${item.size}</span>
                         </div>
-                        <div class="gallery-title" title="${item.name}">${item.name}</div>
-                        <div class="gallery-meta">${item.category}</div>
+                        <div class="gallery-title" title="${item.name}" style="font-size:13px;font-weight:700;color:#FFFFFF;margin-bottom:4px;word-break:break-all;">${item.name}</div>
+                        <div class="gallery-meta" style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">${item.category}</div>
                     </div>
-                    <a href="${item.url}" target="_blank" class="btn btn-secondary btn-block" style="font-size:12px;padding:8px 12px;margin-top:6px;">
+                    <a href="${item.url}" target="_blank" class="btn btn-secondary btn-block" style="font-size:12px;padding:8px 12px;text-align:center;text-decoration:none;">
                         ${item.type === 'image' ? '🔍 사진 크게 보기' : '📥 열기 / 다운로드'}
                     </a>
                 </div>
