@@ -15,6 +15,8 @@ from core.utm_tracker import UTMTracker
 from core.trend_scraper import ViralTrendScraper
 from core.video_composer import VideoComposer
 from core.visual_safety_engine import VisualSafetyEngine
+from core.pexels_video_client import PexelsVideoClient
+from core.motion_video_composer import MotionVideoComposer
 
 logger = logging.getLogger("ShortsFactory")
 
@@ -35,6 +37,8 @@ class ShortsVideoFactory:
         self.kmarket_items = self._load_items_from_supabase()
         self.video_composer = VideoComposer()
         self.safety_engine = VisualSafetyEngine()
+        self.pexels_video_client = PexelsVideoClient()
+        self.motion_composer = MotionVideoComposer(self.output_dir)
 
     def _load_items_from_supabase(self) -> List[Dict[str, Any]]:
         """Supabase kmarket_items 테이블에서 실제 270개 매물 사진 직접 조회"""
@@ -106,17 +110,30 @@ class ShortsVideoFactory:
                 audio_filename = "shorts_{}_{}.mp3".format(service_id, lang)
                 audio_path = self.tts.generate_speech(voice_text, lang=lang, filename=audio_filename)
 
-                # 5. 케이마켓 Supabase 실물 사진 연동 9:16 비주얼 프레임 렌더링 (1080x1920)
+                # 5. 케이마켓 / 이지텍스 대표 비주얼 프레임 생성 (썸네일/포스터용)
                 frame_path = self._render_vertical_frame(service_id, service_data, lang, hook_title, captions)
 
-                # 6. ★ 이미지 + 음성 + BGM → 최종 .mp4 숏폼 영상 합성
-                mp4_path = self.video_composer.compose(
-                    frame_path=frame_path,
-                    audio_path=audio_path,
-                    service_id=service_id,
-                    lang=lang,
-                    bgm_volume=0.07,
-                )
+                # 6. ★ [핵심 혁신] 씬 전환 기반의 '진짜 움직이는 숏폼 비디오(MP4)' 렌더링
+                if service_id == "easytax":
+                    # EasyTax: Pexels에서 실제 움직이는 고화질 세로형 비디오 배경 획득
+                    bg_video = self.pexels_video_client.fetch_video_for_lang(lang=lang, service_id="easytax")
+                    mp4_path = self.motion_composer.compose_motion_shorts(
+                        bg_video_path=bg_video,
+                        audio_path=audio_path,
+                        service_id=service_id,
+                        lang=lang,
+                        title=hook_title,
+                        captions=captions
+                    )
+                else:
+                    # K-Market: 실물 매물 사진 + 오디오 합성
+                    mp4_path = self.video_composer.compose(
+                        frame_path=frame_path,
+                        audio_path=audio_path,
+                        service_id=service_id,
+                        lang=lang,
+                        bgm_volume=0.08,
+                    )
 
                 # 7. DB 기록 (유니크 ID 생성)
                 unique_ext_id = "shorts_{}_{}_{}".format(service_id, lang, int(time.time() * 1000))
