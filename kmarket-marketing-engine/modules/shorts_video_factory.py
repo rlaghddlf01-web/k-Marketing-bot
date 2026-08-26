@@ -14,6 +14,7 @@ from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.trend_scraper import ViralTrendScraper
 from core.video_composer import VideoComposer
+from core.visual_safety_engine import VisualSafetyEngine
 
 logger = logging.getLogger("ShortsFactory")
 
@@ -33,6 +34,7 @@ class ShortsVideoFactory:
         self.cache_img_dir.mkdir(parents=True, exist_ok=True)
         self.kmarket_items = self._load_items_from_supabase()
         self.video_composer = VideoComposer()
+        self.safety_engine = VisualSafetyEngine()
 
     def _load_items_from_supabase(self) -> List[Dict[str, Any]]:
         """Supabase kmarket_items 테이블에서 실제 270개 매물 사진 직접 조회"""
@@ -215,21 +217,17 @@ class ShortsVideoFactory:
                 draw.rectangle([(card_x + 20, card_y + card_h - 100), (card_x + card_w - 20, card_y + card_h - 20)], fill=(0, 0, 0, 200))
                 draw.text((card_x + 40, card_y + card_h - 75), f"📍 {region_name} • 100% 외국인등록증 인증 실매물", fill=(255, 255, 255))
         else:
-            # EasyTax의 경우 5개년 환급 리포트 실물 대시보드 카드 렌더링
-            draw.rectangle([(120, 400), (960, 1240)], fill=(24, 34, 53), outline=(16, 185, 129), width=3)
-            draw.rectangle([(160, 440), (920, 540)], fill=(16, 185, 129))
-            draw.text((200, 475), "🏛️ 국세청(홈택스) 공인 5개년 세금 환급 리포트", fill=(255, 255, 255))
-            
-            draw.text((180, 580), "• E-9 근로자: 중소기업 소득세 최대 90% 감면 (조특법 30조)", fill=(226, 232, 240))
-            draw.text((180, 660), "• D-2 유학생: 아르바이트 3.3% 원천징수세 전액 환급", fill=(226, 232, 240))
-            draw.text((180, 740), "• 5개년(2020~2025) 누락 연말정산·월세 세액공제 소급", fill=(226, 232, 240))
-            draw.text((180, 820), "• 외국인등록증 사진 1장으로 3분 무료 AI 조회", fill=(251, 191, 36))
-            
-            draw.rectangle([(180, 920), (900, 1180)], fill=(15, 23, 42), outline=(59, 130, 246), width=2)
-            draw.text((220, 980), "평균 예상 환급금 산출 내역:", fill=(148, 163, 184))
-            draw.text((220, 1050), "₩ 1,850,000 ~ 4,500,000 원", fill=(52, 211, 153))
+            # 💰 EasyTax: VisualSafetyEngine을 통한 1인칭 POV 스마트폰 입금 알림 & 인포그래픽 프레임 렌더링
+            output_path = self.output_dir / "frame_easytax_{}.png".format(lang)
+            return self.safety_engine.render_safe_easytax_pov_frame(
+                lang=lang,
+                title=title,
+                captions=captions,
+                estimated_krw=3840000,
+                output_path=output_path
+            )
 
-        # 4. 하단 캡션 안내
+        # 4. 하단 캡션 안내 (K-Market 공통)
         y_pos = 1300
         for cap in captions[:2]:
             draw.rectangle([(80, y_pos), (1000, y_pos + 100)], fill=(30, 41, 59), outline=(59, 130, 246), width=1)
