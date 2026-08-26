@@ -68,18 +68,14 @@ class EasyTaxRefundBot:
             "blog_count": 0
         }
 
-        # 가중치 기반 세무 타깃 언어 동적 추출 (베트남 25%, 우즈벡 14%, 중국 12%, 영어/태국 8% 등)
-        import random
-        from config import EASYTAX_LANGUAGE_WEIGHTS, get_weighted_language
-        langs_pool = list(EASYTAX_LANGUAGE_WEIGHTS.keys())
-        weights_pool = list(EASYTAX_LANGUAGE_WEIGHTS.values())
-        sampled_langs = list(set(random.choices(langs_pool, weights=weights_pool, k=4)))
-        if "vi" not in sampled_langs: sampled_langs.append("vi")
-        if "uz" not in sampled_langs: sampled_langs.append("uz")
+        # 가중치 기반 오늘 최적의 타깃 1개 언어 추출 (베트남 25%, 우즈벡 14%, 중국 12% 등)
+        from config import get_weighted_language
+        chosen_lang = get_weighted_language("easytax")
+        logger.info(f"🎯 [EasyTax 봇 타깃 언어] {chosen_lang.upper()} 선정 (인구통계 가중치 1위)")
 
-        # 1. 5개년 세무 환급 & E-9 90% 감면 가이드 숏폼 생성
+        # 1. 5개년 세무 환급 숏폼 영상 1개 정밀 생성
         try:
-            shorts = self.shorts_factory.produce_shorts(service_id="easytax", target_langs=sampled_langs)
+            shorts = self.shorts_factory.produce_shorts(service_id="easytax", target_langs=[chosen_lang])
             results["shorts_count"] = len(shorts)
         except Exception as e:
             logger.error(f"EasyTax 숏폼 생성 에러: {e}")
@@ -99,9 +95,9 @@ class EasyTaxRefundBot:
         except Exception as e:
             logger.error(f"EasyTax 레딧 스캔 에러: {e}")
 
-        # 4. 17개국 텔레그램 세무 팁 브리핑 발송 (가중치 언어들)
+        # 4. 17개국 텔레그램 세무 팁 브리핑 발송 (선정된 타깃 언어)
         try:
-            tg_res = self.telegram_pusher.broadcast_daily_tax_tips(target_langs=sampled_langs[:3])
+            tg_res = self.telegram_pusher.broadcast_daily_tax_tips(target_langs=[chosen_lang])
             results["telegram_count"] = tg_res.get("sent_count", 0)
         except Exception as e:
             logger.error(f"EasyTax 텔레그램 발송 에러: {e}")
@@ -113,9 +109,9 @@ class EasyTaxRefundBot:
         except Exception as e:
             logger.error(f"EasyTax 페이스북 배포 에러: {e}")
 
-        # 6. 17개국어 글로벌 SEO 세무 블로그 칼럼 발행 (가중치 언어들)
+        # 6. 17개국어 글로벌 SEO 세무 블로그 칼럼 발행 (선정된 타깃 언어)
         try:
-            blog_res = self.blog_publisher.publish_daily_articles(target_langs=sampled_langs[:3])
+            blog_res = self.blog_publisher.publish_daily_articles(target_langs=[chosen_lang])
             results["blog_count"] = blog_res.get("count", 0)
         except Exception as e:
             logger.error(f"EasyTax 블로그 발행 에러: {e}")
