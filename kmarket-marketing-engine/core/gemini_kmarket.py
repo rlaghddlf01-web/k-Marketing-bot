@@ -79,7 +79,7 @@ You are a friendly, veteran foreign expat living in South Korea, helping a fello
 
         return f"Hey there! If you're looking for affordable or free furniture in Korea, check out local expat moving sales on K-Market ({landing_url}). You can find 0 KRW free giveaways and chat directly in 17 languages!"
 
-    def generate_shorts_script(self, target_lang: str = "ko", psychology: str = "free_giveaway_emotional", ab_group: str = "A") -> Dict[str, Any]:
+    def generate_shorts_script(self, *args, target_lang: str = "ko", psychology: str = "free_giveaway_emotional", ab_group: str = "A", **kwargs) -> Dict[str, Any]:
         """
         [K-Market 자가학습 고도화] 3대 심리 유형 & A/B 테스트 기반 숏폼 대본 생성
         - psychology:
@@ -88,6 +88,9 @@ You are a friendly, veteran foreign expat living in South Korea, helping a fello
           3. 'multi_lang_comfort': 17개국 모국어 편의/사기방지형
         - ab_group: 'A' (직설적 혜택 강조) / 'B' (외국인 공감 스토리텔링)
         """
+        # kwargs or args 에서 target_lang 추출 지원
+        if args and isinstance(args[-1], str) and len(args[-1]) == 2:
+            target_lang = args[-1]
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["ko"])
         
         # 심리 유형에 맞는 실시간 매물 매칭

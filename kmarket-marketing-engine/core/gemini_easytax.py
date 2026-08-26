@@ -83,8 +83,10 @@ You are a knowledgeable and trusted tax advisory assistant in South Korea, answe
 
         return f"Under Korean Tax Law (Article 30), foreign workers in SMEs can receive up to 90% income tax reduction. D-2 students can claim back 100% of 3.3% withholding tax. You can simulate your 5-year refund 100% free with no upfront fees at EasyTax ({landing_url})."
 
-    def generate_shorts_script(self, target_lang: str = "ko", psychology: str = "relief_rights") -> Dict[str, Any]:
+    def generate_shorts_script(self, *args, target_lang: str = "ko", psychology: str = "relief_rights", **kwargs) -> Dict[str, Any]:
         """EasyTax 합법 세무 환급 30초 숏폼 대본 생성 (refund_scripts 고도화 & Anti-Ban 가드레일)"""
+        if args and isinstance(args[-1], str) and len(args[-1]) == 2:
+            target_lang = args[-1]
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["ko"])
         proven_scripts = self.supabase_mgr.fetch_easytax_proven_scripts(limit=2)
         proven_guide = ""

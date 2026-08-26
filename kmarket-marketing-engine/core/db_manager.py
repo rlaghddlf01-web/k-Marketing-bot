@@ -121,6 +121,17 @@ class DBManager:
             cursor.execute("INSERT INTO rate_limits (channel, action_type) VALUES (?, ?)", (channel, action_type))
             conn.commit()
 
+    def can_post_to_channel(self, channel: str, max_per_day: int = 10) -> bool:
+        """일일 채널별 발행 한도(Rate Limit) 초과 여부 안전 검사"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT COUNT(*) FROM rate_limits 
+                WHERE channel = ? AND created_at >= datetime('now', '-1 day')
+            """, (channel,))
+            count = cursor.fetchone()[0]
+            return count < max_per_day
+
     def update_metrics(self, history_id: int, views: int = 0, clicks: int = 0, conversions: int = 0, score: float = 0.0):
         """성과 메트릭 및 스코어 업데이트"""
         with self._get_connection() as conn:

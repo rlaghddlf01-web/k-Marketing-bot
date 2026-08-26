@@ -3,6 +3,12 @@ import sys
 import time
 from pathlib import Path
 
+# UTF-8 출력 보장 (Windows 콘솔 이모지 지원)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
 # Add project root
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR))
