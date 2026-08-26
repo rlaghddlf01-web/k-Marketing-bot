@@ -6,13 +6,14 @@ import io
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from PIL import Image, ImageDraw, ImageFont
-from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_DIR
+from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_DIR, SUPABASE_URL, SUPABASE_KEY
 from core.service_router import ServiceRouter
 from core.gemini_engine import GeminiEngine
 from core.tts_engine import TTSEngine
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.trend_scraper import ViralTrendScraper
+from core.video_composer import VideoComposer
 
 logger = logging.getLogger("ShortsFactory")
 
@@ -30,16 +31,40 @@ class ShortsVideoFactory:
         self.cache_img_dir = DATA_DIR / "image_cache"
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.cache_img_dir.mkdir(parents=True, exist_ok=True)
-        self.kmarket_items = self._load_kmarket_items()
+        self.kmarket_items = self._load_items_from_supabase()
+        self.video_composer = VideoComposer()
 
-    def _load_kmarket_items(self) -> List[Dict[str, Any]]:
+    def _load_items_from_supabase(self) -> List[Dict[str, Any]]:
+        """Supabase kmarket_items 테이블에서 실제 270개 매물 사진 직접 조회"""
+        if SUPABASE_URL and SUPABASE_KEY and SUPABASE_URL.startswith("http"):
+            try:
+                from supabase import create_client
+                client = create_client(SUPABASE_URL, SUPABASE_KEY)
+                response = client.table("kmarket_items") \
+                    .select("id,title,price,images,region,category") \
+                    .order("created_at", desc=True) \
+                    .limit(300) \
+                    .execute()
+                if response.data:
+                    items_with_photos = [
+                        item for item in response.data
+                        if item.get("images") and len(item["images"]) > 0
+                    ]
+                    logger.info("Supabase에서 매물 사진 {}개 로드 완료".format(len(items_with_photos)))
+                    if items_with_photos:
+                        return items_with_photos
+            except Exception as e:
+                logger.warning("Supabase 조회 실패, 로컬 폴백: {}".format(e))
+
+        # 폴백: 로컬 JSON
         items_path = DATA_DIR / "kmarket_items.json"
         if items_path.exists():
             try:
                 with open(items_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
+                    items = json.load(f)
+                    return [i for i in items if i.get("images") and len(i["images"]) > 0] or items
             except Exception as e:
-                logger.warning(f"K-Market 매물 데이터 로드 실패: {e}")
+                logger.warning("로컬 kmarket_items.json 로드 실패: {}".format(e))
         return []
 
     def produce_shorts(self, service_id: str = "kmarket", target_langs: Optional[List[str]] = None) -> List[Dict[str, Any]]:
@@ -76,14 +101,23 @@ class ShortsVideoFactory:
                 )
 
                 # 4. TTS 음성 파일 생성 (.mp3)
-                audio_filename = f"shorts_{service_id}_{lang}.mp3"
+                audio_filename = "shorts_{}_{}.mp3".format(service_id, lang)
                 audio_path = self.tts.generate_speech(voice_text, lang=lang, filename=audio_filename)
 
-                # 5. 케이마켓 실제 실물 매물 사진 연동 9:16 비주얼 프레임 렌더링 (1080x1920)
+                # 5. 케이마켓 Supabase 실물 사진 연동 9:16 비주얼 프레임 렌더링 (1080x1920)
                 frame_path = self._render_vertical_frame(service_id, service_data, lang, hook_title, captions)
 
-                # 6. DB 기록 (유니크 ID 생성)
-                unique_ext_id = f"shorts_{service_id}_{lang}_{int(time.time() * 1000)}"
+                # 6. ★ 이미지 + 음성 + BGM → 최종 .mp4 숏폼 영상 합성
+                mp4_path = self.video_composer.compose(
+                    frame_path=frame_path,
+                    audio_path=audio_path,
+                    service_id=service_id,
+                    lang=lang,
+                    bgm_volume=0.07,
+                )
+
+                # 7. DB 기록 (유니크 ID 생성)
+                unique_ext_id = "shorts_{}_{}_{}".format(service_id, lang, int(time.time() * 1000))
                 hist_id = self.db_mgr.record_history(
                     content_type="shorts",
                     service_id=service_id,
@@ -101,6 +135,7 @@ class ShortsVideoFactory:
                     "title": hook_title,
                     "audio_path": str(audio_path) if audio_path else "",
                     "frame_path": str(frame_path),
+                    "mp4_path": str(mp4_path) if mp4_path else "",
                     "landing_url": landing_url,
                     "hashtags": hashtags
                 })
