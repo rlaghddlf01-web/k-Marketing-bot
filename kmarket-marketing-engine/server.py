@@ -449,7 +449,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
     def _handle_get_outputs(self):
         items = []
-        categories = ["shorts", "cardnews", "pdf_guides", "briefings"]
+        categories = ["cardnews", "shorts", "pdf_guides", "briefings"]
         for cat in categories:
             cat_dir = OUTPUTS_DIR / cat
             if cat_dir.exists():
@@ -458,6 +458,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                         ext = p.suffix.lower()
                         media_type = "image" if ext in [".png", ".jpg", ".jpeg"] else "audio" if ext in [".mp3", ".wav"] else "doc"
                         size_kb = round(p.stat().st_size / 1024, 1)
+                        mtime = p.stat().st_mtime
                         brand = "kmarket" if "kmarket" in p.name else "easytax" if "easytax" in p.name else "all"
                         items.append({
                             "name": p.name,
@@ -465,10 +466,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
                             "category": cat.replace("_", " ").title(),
                             "type": media_type,
                             "size": f"{size_kb} KB",
-                            "url": f"/outputs/{cat}/{p.name}"
+                            "url": f"/outputs/{cat}/{p.name}",
+                            "mtime": mtime
                         })
 
-        items.reverse()
+        # 1순위: 사진(image) 우선, 2순위: 최신 생성순
+        items.sort(key=lambda x: (0 if x["type"] == "image" else 1 if x["type"] == "audio" else 2, -x["mtime"]))
         self._set_headers("application/json")
         self.wfile.write(json.dumps({"items": items}).encode("utf-8"))
 

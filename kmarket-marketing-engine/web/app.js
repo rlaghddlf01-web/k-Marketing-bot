@@ -751,7 +751,10 @@ async function runModule(moduleName) {
     }
 }
 
-// 14. 갤러리 로드 (브랜드별 100% 엄격 분리)
+// 14. 갤러리 로드 & 카테고리 필터링 (브랜드별 100% 엄격 분리 & 사진 최우선)
+let cachedGalleryItems = [];
+let currentGalleryFilter = "all";
+
 async function loadGallery(btn) {
     if (btn) animateRefreshBtn(btn, "미디어 갤러리가 새로고침되었습니다! 🎬");
     const grid = document.getElementById("gallery-grid");
@@ -766,40 +769,99 @@ async function loadGallery(btn) {
             items = items.filter(i => i.brand === "easytax" || i.name.includes("easytax"));
         }
 
-        if (items.length === 0) {
-            const brandLabel = currentBrand === "kmarket" ? "K-Market" : "EasyTax";
-            grid.innerHTML = `<p style="color: var(--text-secondary); grid-column: 1/-1;">${brandLabel} 전용 생성된 미디어가 아직 없습니다. [원클릭 즉시 실행]을 눌러보세요!</p>`;
-            return;
-        }
+        cachedGalleryItems = items;
 
-        grid.innerHTML = items.map(item => {
-            const brandBadge = item.brand === "kmarket" 
-                ? `<span style="background:rgba(16,185,129,0.2);color:#34d399;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;">🛒 K-Market</span>` 
-                : `<span style="background:rgba(245,158,11,0.2);color:#fbbf24;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;">💰 EasyTax</span>`;
+        // 카테고리별 개수 업데이트
+        const imgCount = items.filter(i => i.type === "image").length;
+        const audioCount = items.filter(i => i.type === "audio").length;
+        const docCount = items.filter(i => i.type === "doc").length;
 
-            return `
-                <div class="gallery-card">
-                    ${item.type === 'image' 
-                        ? `<img src="${item.url}" class="gallery-thumb" alt="${item.name}" loading="lazy">` 
-                        : item.type === 'audio'
-                        ? `<div class="gallery-thumb" style="display:flex;align-items:center;justify-content:center;font-size:36px;flex-direction:column;">🎵<audio controls src="${item.url}" style="width:90%;margin-top:10px;"></audio></div>`
-                        : `<div class="gallery-thumb" style="display:flex;align-items:center;justify-content:center;font-size:36px;">📄</div>`
-                    }
-                    <div class="gallery-info">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                            ${brandBadge}
-                            <span style="font-size:11px;color:var(--text-secondary);">${item.size}</span>
-                        </div>
-                        <div class="gallery-title">${item.name}</div>
-                        <div class="gallery-meta">${item.category}</div>
-                        <a href="${item.url}" target="_blank" class="btn btn-sm btn-secondary" style="margin-top:8px;width:100%;">열기 / 다운로드</a>
-                    </div>
-                </div>
-            `;
-        }).join("");
+        if (document.getElementById("gallery-count-img")) document.getElementById("gallery-count-img").innerText = imgCount;
+        if (document.getElementById("gallery-count-audio")) document.getElementById("gallery-count-audio").innerText = audioCount;
+        if (document.getElementById("gallery-count-doc")) document.getElementById("gallery-count-doc").innerText = docCount;
+
+        renderGalleryItems();
     } catch (e) {
         console.error("Gallery load error:", e);
     }
+}
+
+function filterGallery(filterType, btn) {
+    currentGalleryFilter = filterType;
+    document.querySelectorAll(".gallery-filter-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderGalleryItems();
+}
+
+function renderGalleryItems() {
+    const grid = document.getElementById("gallery-grid");
+    if (!grid) return;
+
+    let items = cachedGalleryItems;
+    if (currentGalleryFilter !== "all") {
+        items = items.filter(i => i.type === currentGalleryFilter);
+    }
+
+    if (items.length === 0) {
+        const brandLabel = currentBrand === "kmarket" ? "K-Market" : "EasyTax";
+        grid.innerHTML = `<div style="color: var(--text-secondary); grid-column: 1/-1; text-align:center; padding: 40px; background:#13172E; border-radius:12px; border:1px solid #22294E;">
+            <span style="font-size:32px; display:block; margin-bottom:8px;">🖼️</span>
+            ${brandLabel} 전용 생성된 ${currentGalleryFilter === 'image' ? '카드뉴스 사진' : '미디어'}가 없습니다.
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = items.map(item => {
+        const brandBadge = item.brand === "kmarket" 
+            ? `<span style="background:rgba(16,185,129,0.2);color:#34d399;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">🛒 K-Market</span>` 
+            : `<span style="background:rgba(245,158,11,0.2);color:#fbbf24;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">💰 EasyTax</span>`;
+
+        let thumbHtml = "";
+        if (item.type === "image") {
+            thumbHtml = `
+                <div class="gallery-thumb-wrapper">
+                    <img src="${item.url}" class="gallery-thumb" alt="${item.name}" loading="lazy" onclick="window.open('${item.url}', '_blank')" style="cursor:pointer;" title="클릭하여 원본 사진 크게 보기">
+                </div>
+            `;
+        } else if (item.type === "audio") {
+            thumbHtml = `
+                <div class="gallery-thumb-wrapper">
+                    <div class="gallery-audio-box">
+                        <span style="font-size:32px;margin-bottom:8px;">🎵</span>
+                        <audio controls src="${item.url}" style="width:95%;height:32px;"></audio>
+                    </div>
+                </div>
+            `;
+        } else {
+            thumbHtml = `
+                <div class="gallery-thumb-wrapper">
+                    <div class="gallery-doc-box">
+                        <span style="font-size:36px;margin-bottom:6px;">📄</span>
+                        <span style="font-size:11px;color:#94A3B8;">텍스트 브리핑</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="gallery-card">
+                ${thumbHtml}
+                <div class="gallery-info">
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            ${brandBadge}
+                            <span style="font-size:11px;color:var(--text-secondary);font-weight:600;">${item.size}</span>
+                        </div>
+                        <div class="gallery-title" title="${item.name}">${item.name}</div>
+                        <div class="gallery-meta">${item.category}</div>
+                    </div>
+                    <a href="${item.url}" target="_blank" class="btn btn-secondary btn-block" style="font-size:12px;padding:8px 12px;margin-top:6px;">
+                        ${item.type === 'image' ? '🔍 사진 크게 보기' : '📥 열기 / 다운로드'}
+                    </a>
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
 // 15. 자가학습 랭킹 로드 (브랜드별 100% 분리)
