@@ -66,16 +66,26 @@ class KMarketGrowthBot:
             "blog_count": 0
         }
 
+        # 가중치 기반 타깃 언어 동적 추출 (상위 가중치 3~5개국 우선 + 확률적 롱테일 추출)
+        import random
+        from config import KMARKET_LANGUAGE_WEIGHTS, get_weighted_language
+        langs_pool = list(KMARKET_LANGUAGE_WEIGHTS.keys())
+        weights_pool = list(KMARKET_LANGUAGE_WEIGHTS.values())
+        sampled_langs = list(set(random.choices(langs_pool, weights=weights_pool, k=4)))
+        if "vi" not in sampled_langs: sampled_langs.append("vi")
+        if "zh" not in sampled_langs: sampled_langs.append("zh")
+
         # 1. 270개 실물 매물 사진 기반 0원 나눔 숏폼 생성
         try:
-            shorts = self.shorts_factory.produce_shorts(service_id="kmarket", target_langs=["vi", "en", "zh", "ko", "uz"])
+            shorts = self.shorts_factory.produce_shorts(service_id="kmarket", target_langs=sampled_langs)
             results["shorts_count"] = len(shorts)
         except Exception as e:
             logger.error(f"K-Market 숏폼 생성 에러: {e}")
 
-        # 2. 실물 사진 4장 캐러셀 카드뉴스 생성
+        # 2. 실물 사진 4장 캐러셀 카드뉴스 생성 (가중치 기반 언어 1개)
         try:
-            cards = self.cardnews_gen.generate_carousel(service_id="kmarket", lang="en")
+            chosen_lang = get_weighted_language("kmarket")
+            cards = self.cardnews_gen.generate_carousel(service_id="kmarket", lang=chosen_lang)
             results["cardnews_count"] = len(cards)
         except Exception as e:
             logger.error(f"K-Market 카드뉴스 생성 에러: {e}")
@@ -87,9 +97,9 @@ class KMarketGrowthBot:
         except Exception as e:
             logger.error(f"K-Market 레딧 스캔 에러: {e}")
 
-        # 4. 17개국 텔레그램 0원 나눔 브리핑 발송
+        # 4. 17개국 텔레그램 0원 나눔 브리핑 발송 (가중치 언어들)
         try:
-            tg_res = self.telegram_pusher.broadcast_daily_deals(target_langs=["en", "vi", "ko"])
+            tg_res = self.telegram_pusher.broadcast_daily_deals(target_langs=sampled_langs[:3])
             results["telegram_count"] = tg_res.get("sent_count", 0)
         except Exception as e:
             logger.error(f"K-Market 텔레그램 발송 에러: {e}")
@@ -101,9 +111,9 @@ class KMarketGrowthBot:
         except Exception as e:
             logger.error(f"K-Market 페이스북 배포 에러: {e}")
 
-        # 6. 17개국어 글로벌 SEO 블로그 칼럼 발행
+        # 6. 17개국어 글로벌 SEO 블로그 칼럼 발행 (가중치 언어들)
         try:
-            blog_res = self.blog_publisher.publish_daily_articles(target_langs=["en", "vi", "ko"])
+            blog_res = self.blog_publisher.publish_daily_articles(target_langs=sampled_langs[:3])
             results["blog_count"] = blog_res.get("count", 0)
         except Exception as e:
             logger.error(f"K-Market 블로그 발행 에러: {e}")
