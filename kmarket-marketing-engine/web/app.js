@@ -4,6 +4,26 @@ let isKMarketRunning = false;
 let isEasyTaxRunning = false;
 let logHistory = [];
 
+// 🔄 모든 새로고침 버튼 공통 회전 애니메이션 & 토스트 헬퍼
+function animateRefreshBtn(btn, successMsg = "최신 데이터로 새로고침되었습니다! 🔄") {
+    if (!btn) return;
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = `<span class="spin-icon" style="display:inline-block;animation:rotateSpin 0.6s linear infinite;">🔄</span> 갱신 중...`;
+    btn.classList.add("btn-spinning");
+    setTimeout(() => {
+        btn.innerHTML = origHtml;
+        btn.classList.remove("btn-spinning");
+        if (successMsg) showToast(successMsg);
+    }, 600);
+}
+
+// 1. 대시보드 오버뷰 새로고침
+function refreshOverview(btn) {
+    animateRefreshBtn(btn, "대시보드 활동 로그와 상태가 새로고침되었습니다! 📊");
+    fetchStatus();
+    renderActionGrid();
+}
+
 // DOM 요소 로드
 document.addEventListener("DOMContentLoaded", () => {
     initTabs();
@@ -410,7 +430,10 @@ function switchPeriod(period, btnElement) {
 }
 
 // 6. 실시간 유입 정밀 분석 & KTRS IR 관제 데이터 로드 (브랜드별 분리)
-async function loadIRAnalytics(period = currentPeriod) {
+async function loadIRAnalytics(periodOrBtn = currentPeriod, maybeBtn = null) {
+    const period = typeof periodOrBtn === 'string' ? periodOrBtn : currentPeriod;
+    const btn = typeof periodOrBtn === 'object' && periodOrBtn && periodOrBtn.nodeType ? periodOrBtn : maybeBtn;
+    if (btn) animateRefreshBtn(btn, "실시간 유입 및 IR 관제 지표가 새로고침되었습니다! 💎");
     try {
         const res = await fetch(`/api/ir-analytics?period=${period}`);
         const data = await res.json();
@@ -498,7 +521,8 @@ async function loadIRAnalytics(period = currentPeriod) {
 }
 
 // 7. 플랫폼 상태 목록 로드 (브랜드별 100% 분리)
-async function loadPlatforms() {
+async function loadPlatforms(btn) {
+    if (btn) animateRefreshBtn(btn, "플랫폼 연동 상태가 새로고침되었습니다! 🚀");
     const container = document.getElementById("platforms-container");
     try {
         const res = await fetch("/api/platforms");
@@ -554,7 +578,8 @@ async function loadPlatforms() {
 }
 
 // 8. 17개국 바이럴 해시태그 로드 (브랜드별 100% 분리)
-async function loadHashtags() {
+async function loadHashtags(btn) {
+    if (btn) animateRefreshBtn(btn, "17개국 타깃 해시태그가 새로고침되었습니다! 📈");
     const container = document.getElementById("hashtags-container");
     const countBadge = document.getElementById("supported-countries-count");
     try {
@@ -650,7 +675,8 @@ function copyTags(escapedTags) {
 }
 
 // 10. 바이럴 해시태그 새로고침
-async function refreshHashtags() {
+async function refreshHashtags(btn) {
+    if (btn) animateRefreshBtn(btn, "17개국 실시간 바이럴 트렌드가 갱신되었습니다! 📈");
     appendLog("[Hashtags] 17개국 실시간 바이럴 해시태그 트렌드 갱신 중...", "info");
     showToast("실시간 바이럴 해시태그를 갱신합니다...");
     try {
@@ -726,7 +752,8 @@ async function runModule(moduleName) {
 }
 
 // 14. 갤러리 로드 (브랜드별 100% 엄격 분리)
-async function loadGallery() {
+async function loadGallery(btn) {
+    if (btn) animateRefreshBtn(btn, "미디어 갤러리가 새로고침되었습니다! 🎬");
     const grid = document.getElementById("gallery-grid");
     try {
         const res = await fetch("/api/outputs");
@@ -776,7 +803,8 @@ async function loadGallery() {
 }
 
 // 15. 자가학습 랭킹 로드 (브랜드별 100% 분리)
-async function loadGoldenCopies() {
+async function loadGoldenCopies(btn) {
+    if (btn) animateRefreshBtn(btn, "골든 카피 랭킹이 새로고침되었습니다! 🧠");
     const tbody = document.getElementById("golden-copies-body");
     try {
         const res = await fetch(`/api/golden-copies?brand=${currentBrand}`);
@@ -809,7 +837,8 @@ async function loadGoldenCopies() {
 }
 
 // 16. 환경 설정 로드 및 저장
-async function loadSettings() {
+async function loadSettings(btn) {
+    if (btn) animateRefreshBtn(btn, "환경 설정값이 성공적으로 다시 로드되었습니다! ⚙️");
     try {
         const res = await fetch("/api/settings");
         const data = await res.json();
@@ -897,7 +926,8 @@ function showToast(message, type = "info") {
 }
 
 // 18. 실시간 시스템 헬스케어 & 맥박 관제 (100% 브랜드별 완전 분리)
-async function loadHealthStatus() {
+async function loadHealthStatus(btn) {
+    if (btn) animateRefreshBtn(btn, "시스템 맥박 및 헬스케어 상태가 새로고침되었습니다! 🩺");
     try {
         const res = await fetch("/api/health");
         const data = await res.json();

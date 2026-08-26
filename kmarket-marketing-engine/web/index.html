@@ -146,9 +146,9 @@
 
                 <!-- 실시간 활동 로그 콘솔 -->
                 <div class="section-card">
-                    <div class="log-header">
-                        <h3 class="section-title">📜 실시간 엔진 활동 로그</h3>
-                        <button class="btn btn-sm btn-ghost" onclick="clearLogs()">로그 지우기</button>
+                    <div class="log-header" style="display:flex;justify-content:space-between;align-items:center;">
+                        <h3 class="section-title" style="margin:0;">📜 실시간 엔진 활동 로그</h3>
+                        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="refreshOverview(this)">🔄 새로고침</button>
                     </div>
                     <div class="terminal-box" id="terminal-log">
                         <div class="log-line info">[System] 로컬 마케팅 컨트롤 센터가 준비되었습니다.</div>
@@ -318,8 +318,17 @@
                 </div>
 
                 <!-- 7대 플랫폼 상태 카드 그리드 -->
-                <div class="platforms-grid" id="platforms-container">
-                    <!-- 동적으로 렌더링되는 플랫폼 카드들 -->
+                <div class="section-card" style="margin-top:16px;">
+                    <div class="gallery-header">
+                        <div>
+                            <h3 class="section-title">🚀 7대 플랫폼 직접 연동 & 발행 헬스케어</h3>
+                            <p class="section-subtitle">유튜브, 인스타그램, 틱톡, 레딧, 페이스북, 텔레그램, 구글 SEO 발행 상태를 실시간 관제합니다.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadPlatforms(this)">🔄 새로고침</button>
+                    </div>
+                    <div class="platforms-grid" id="platforms-container">
+                        <!-- 동적으로 렌더링되는 플랫폼 카드들 -->
+                    </div>
                 </div>
             </section>
 
@@ -342,7 +351,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-primary" onclick="refreshHashtags()">🔄 실시간 트렌드 새로고침</button>
+                    <button class="btn btn-primary" onclick="refreshHashtags(this)">🔄 실시간 트렌드 새로고침</button>
                 </div>
 
                 <!-- 17개국 타깃 매트릭스 그리드 -->
@@ -352,8 +361,11 @@
                             <h3 class="section-title">🎯 17개국 전 국가 '국내 체류 외국인(In-Korea)' 정밀 타깃 매트릭스</h3>
                             <p class="section-subtitle">각국 모국어의 한국 체류 고유 키워드(#cuocsonghanquoc, #在韩留学生, #koreyadahayot 등)와 서비스 태그가 100% 결합됩니다.</p>
                         </div>
-                        <div style="font-size:13px;color:var(--text-secondary);">
-                            총 <strong style="color:#60a5fa;" id="hashtags-country-count">17</strong>개국 활성
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="font-size:13px;color:var(--text-secondary);">
+                                총 <strong style="color:#60a5fa;" id="hashtags-country-count">17</strong>개국 활성
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadHashtags(this)">🔄 새로고침</button>
                         </div>
                     </div>
                     <div class="platforms-grid" id="hashtags-container">
@@ -366,8 +378,11 @@
             <section class="tab-content" id="tab-gallery">
                 <div class="section-card">
                     <div class="gallery-header">
-                        <h3 class="section-title">📁 생성된 미디어 아티팩트 갤러리</h3>
-                        <button class="btn btn-secondary" onclick="loadGallery()">🔄 새로고침</button>
+                        <div>
+                            <h3 class="section-title">📁 생성된 미디어 아티팩트 갤러리</h3>
+                            <p class="section-subtitle">실시간 렌더링된 숏폼 오디오, 4장 카드뉴스, 가이드북 PDF를 열람합니다.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadGallery(this)">🔄 새로고침</button>
                     </div>
                     <div class="gallery-grid" id="gallery-grid">
                         <!-- 동적으로 로드되는 미디어 카드들 -->
@@ -378,8 +393,13 @@
             <!-- 탭 6: 자가학습 랭킹 -->
             <section class="tab-content" id="tab-self-learning">
                 <div class="section-card">
-                    <h3 class="section-title">🧠 Supabase 자가학습 골든 카피 랭킹 (Top-Performing Copies)</h3>
-                    <p class="section-subtitle">성과 점수(반응+유입+전환) 85점 이상을 기록하여 AI 카피라이팅 Few-Shot으로 자동 주입되는 모범 카피들입니다.</p>
+                    <div class="gallery-header">
+                        <div>
+                            <h3 class="section-title">🧠 Supabase 자가학습 골든 카피 랭킹 (Top-Performing Copies)</h3>
+                            <p class="section-subtitle">성과 점수(반응+유입+전환) 85점 이상을 기록하여 AI 카피라이팅 Few-Shot으로 자동 주입되는 모범 카피들입니다.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadGoldenCopies(this)">🔄 새로고침</button>
+                    </div>
                     <div class="table-container">
                         <table class="custom-table" id="golden-copies-table">
                             <thead>
@@ -402,8 +422,13 @@
             <!-- 탭 7: 환경 설정 -->
             <section class="tab-content" id="tab-settings">
                 <div class="section-card">
-                    <h3 class="section-title">⚙️ 소셜 플랫폼 계정 API 키 & 오토파일럿 설정</h3>
-                    <p class="section-subtitle">계정 키를 입력해 두시면, 사람이 올릴 필요 없이 프로그램이 각 플랫폼 계정으로 직접 자동 업로드 및 발행합니다.</p>
+                    <div class="gallery-header">
+                        <div>
+                            <h3 class="section-title">⚙️ 소셜 플랫폼 계정 API 키 & 오토파일럿 설정</h3>
+                            <p class="section-subtitle">계정 키를 입력해 두시면, 사람이 올릴 필요 없이 프로그램이 각 플랫폼 계정으로 직접 자동 업로드 및 발행합니다.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadSettings(this)">🔄 설정값 다시 불러오기</button>
+                    </div>
                     <form id="settings-form" onsubmit="saveSettings(event)">
                         
                         <h4 style="font-size:14px;color:#60a5fa;margin-bottom:12px;">🤖 AI 및 클라우드 DB</h4>
@@ -488,9 +513,12 @@
                             <h3 class="section-title" id="health-panel-title">🩺 실시간 시스템 헬스케어 & 맥박 관제 센터</h3>
                             <p class="section-subtitle" id="health-panel-desc">현재 선택된 브랜드의 AI 두뇌, 파이썬 전담 봇, DB 및 7대 전용 소셜 채널의 건강 상태와 막힘 여부를 실시간 감시합니다.</p>
                         </div>
-                        <button class="btn btn-primary" onclick="runFullHealthDiagnostic()" style="background:#2563eb;border-color:#2563eb;display:flex;align-items:center;gap:6px;">
-                            🔍 1초 즉시 정밀 자가진단 실행
-                        </button>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <button class="btn btn-secondary" onclick="loadHealthStatus(this)">🔄 새로고침</button>
+                            <button class="btn btn-primary" onclick="runFullHealthDiagnostic(this)" style="background:#2563eb;border-color:#2563eb;display:flex;align-items:center;gap:6px;">
+                                🔍 1초 정밀 자가진단
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 1. 🧠 현재 브랜드 전용 핵심 3대 두뇌 상태 -->
