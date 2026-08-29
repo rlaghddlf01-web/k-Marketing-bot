@@ -49,13 +49,18 @@ class EasyTaxSEOPusher:
             sitemap_urls.append(f"{base_domain}/?lang={lang_code}")
             sitemap_urls.append(f"{base_domain}/welcome?lang={lang_code}")
 
+        import re
+        def clean_slug(text: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9_\-]+', '-', text.lower()).strip('-')
+
         # 1. 전국 15개 국가산업단지 근로자 90% 소득세 감면 SEO (15 × 17 = 255개)
         for ind in self.industrials:
             i_name = ind["name_en"]
             region = ind["region"]
+            c_slug = clean_slug(i_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"easytax-industrial-{i_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/tax-reduction/{i_name.lower().replace(' ', '-')}?lang={lang_code}"
+                slug = f"easytax-industrial-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/tax-reduction/{c_slug}?lang={lang_code}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{i_name}] E-9/H-2 Expat Worker 90% Income Tax Reduction Guide in {region}", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -63,9 +68,10 @@ class EasyTaxSEOPusher:
         for univ in self.universities:
             u_name = univ["name_en"]
             region = univ["region"]
+            c_slug = clean_slug(u_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"easytax-campus-{u_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/student-refund/{u_name.lower().replace(' ', '-')}?lang={lang_code}"
+                slug = f"easytax-campus-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/student-refund/{c_slug}?lang={lang_code}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{u_name}] D-2 International Student Part-Time 3.3% Tax Refund in {region}", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -73,9 +79,10 @@ class EasyTaxSEOPusher:
         for town in self.expat_towns:
             t_name = town["name_en"]
             dist = town["district"]
+            c_slug = clean_slug(t_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"easytax-town-{t_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/area-refund/{t_name.lower().replace(' ', '-')}?lang={lang_code}"
+                slug = f"easytax-town-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/area-refund/{c_slug}?lang={lang_code}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{t_name}, {dist}] Claim 5-Year Overpaid Taxes (2020-2025) via Hometax", dist, lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -83,18 +90,20 @@ class EasyTaxSEOPusher:
         for sc in self.support_centers:
             sc_name = sc["name_en"]
             region = f"{sc['region']} {sc['district']}"
+            c_slug = clean_slug(sc_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"easytax-center-{sc_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/center-guide/{sc_name.lower().replace(' ', '-')}?lang={lang_code}"
+                slug = f"easytax-center-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/center-guide/{c_slug}?lang={lang_code}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{sc_name}] Official Korean Tax Law & Income Tax Exemption Assistance", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
         # 5. 국가별 재한 교민회/협회 공식 세무 가이드 (11 × 17 = 187개)
         for comm in self.communities:
             c_name = comm["name_en"]
+            c_id = clean_slug(comm['id'])
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"easytax-community-{comm['id']}-{lang_code}"
-                target_url = f"{base_domain}/community-tax/{comm['id']}?lang={lang_code}"
+                slug = f"easytax-community-{c_id}-{lang_code}"
+                target_url = f"{base_domain}/community-tax/{c_id}?lang={lang_code}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{c_name}] Certified Tax Refund & Income Protection Portal", comm['country'], lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -102,17 +111,26 @@ class EasyTaxSEOPusher:
         sitemap_path = self.sitemap_dir / "sitemap_easytax.xml"
         self._write_sitemap(sitemap_path, sitemap_urls)
 
-        # 5. Googlebot 실시간 Ping 전송
+        # 7. Google Indexing API v3 공식 실시간 핑 전송 (EasyTax 전용 서비스 계정)
+        from core.google_indexing_client import GoogleIndexingClient
+        indexing_client = GoogleIndexingClient(brand="easytax")
+        api_res = indexing_client.batch_publish_urls(sitemap_urls, max_limit=15)
+
+        # 8. 공개 사이트맵 엔드포인트 핑 병행
         ping_status = self._ping_googlebot(sitemap_path)
 
-        logger.info(f"💰 [EasyTax Google SEO] {len(sitemap_urls)}개 세무 URL 빌드 및 구글 색인 핑 전송 완료")
+        success_count = api_res.get("success_count", 0)
+        api_msg = f" (Google Indexing API {success_count}개 URL 즉시 색인 완료 🚀)" if success_count > 0 else ""
+        logger.info(f"💰 [EasyTax Google SEO] {len(sitemap_urls)}개 세무 URL 빌드 및 구글 색인 핑 전송 완료{api_msg}")
+
         return {
             "success": True,
             "brand": "easytax",
             "indexed_count": len(sitemap_urls),
             "sitemap_file": str(sitemap_path),
             "ping_status": ping_status,
-            "message": f"💰 [EasyTax 전용] {len(sitemap_urls)}개 공단/대학 세무 URL 및 sitemap_easytax.xml이 구글 검색엔진에 실시간 색인 요청되었습니다!"
+            "indexing_api": api_res,
+            "message": f"💰 [EasyTax 전용] {len(sitemap_urls)}개 공단/대학 세무 URL 및 sitemap_easytax.xml 색인 요청 완료!{api_msg}"
         }
 
     def _render_page(self, slug: str, title: str, location: str, lang_code: str, lang_info: Dict[str, str], url: str, base_domain: str = "https://ktrs-service.vercel.app"):
@@ -163,8 +181,7 @@ class EasyTaxSEOPusher:
             f.write(xml)
 
     def _ping_googlebot(self, sitemap_path: Path) -> str:
-        base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app")
-        sitemap_url = f"{base_domain}/sitemaps/{sitemap_path.name}"
+        sitemap_url = f"https://ktrs-service.vercel.app/sitemaps/{sitemap_path.name}"
         ping_endpoint = f"https://www.google.com/ping?sitemap={urllib.parse.quote(sitemap_url)}"
         try:
             req = urllib.request.Request(ping_endpoint, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
@@ -172,3 +189,9 @@ class EasyTaxSEOPusher:
                 return f"Googlebot Ping Success (Status: {resp.status})"
         except Exception as e:
             return f"Simulated Ping (Endpoint ready: {e})"
+
+    def publish_all_industrial_pages(self):
+        return self.build_and_push_index()
+
+# 호환용 별칭
+EasyTaxCampusSEO = EasyTaxSEOPusher

@@ -37,13 +37,76 @@
     --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 
+/* 🟢 안정적이고 깔끔한 상태 표시기 */
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #64748b;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+.status-dot.active {
+    background: #10B981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.sidebar-status-card {
+    background: #13172E;
+    border: 1px solid #22294E;
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+.sidebar-status-card.running {
+    background: rgba(16, 185, 129, 0.08) !important;
+    border-color: #10B981 !important;
+}
+
+.mod-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.2s ease;
+}
+
+.mod-badge.running {
+    background: rgba(16, 185, 129, 0.18) !important;
+    color: #10B981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.45) !important;
+    font-weight: 700 !important;
+}
+
+.mod-badge.done {
+    background: rgba(16, 185, 129, 0.18) !important;
+    color: #34D399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    font-weight: 700 !important;
+}
+
+.mod-badge.stopped {
+    background: rgba(239, 68, 68, 0.16) !important;
+    color: #F87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    font-weight: 700 !important;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
+html, body {
+    width: 100%;
+    height: 100%;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--bg-main);
     color: var(--text-primary);
@@ -55,8 +118,9 @@ body {
 
 .app-container {
     display: flex;
-    width: 100vw;
+    width: 100%;
     min-height: 100vh;
+    overflow: hidden;
 }
 
 /* ======================================================================
@@ -64,6 +128,9 @@ body {
    ====================================================================== */
 .sidebar {
     width: 270px;
+    min-width: 270px;
+    max-width: 270px;
+    flex-shrink: 0;
     background-color: var(--bg-sidebar);
     border-right: 1px solid var(--border-color);
     padding: 24px 18px;
@@ -168,30 +235,23 @@ body {
     height: 8px;
     border-radius: 50%;
     background-color: #64748B;
+    display: inline-block;
 }
 
 .status-dot.active {
     background-color: var(--accent-green);
-    box-shadow: 0 0 10px var(--accent-green);
-}
-
-.status-dot.pulse {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.95); opacity: 0.8; }
-    50% { transform: scale(1.15); opacity: 1; }
-    100% { transform: scale(0.95); opacity: 0.8; }
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
 /* ======================================================================
    Main Content Layout
    ====================================================================== */
 .main-content {
-    flex-grow: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     padding: 28px 36px;
     overflow-y: auto;
+    overflow-x: hidden;
     background: var(--bg-main);
 }
 
@@ -359,6 +419,46 @@ body {
     margin-bottom: 12px;
 }
 
+.mod-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.05);
+    color: #94A3B8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.mod-badge.running {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34D399;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.mod-badge.stopped {
+    background: rgba(239, 68, 68, 0.15);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.mod-badge.done {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60A5FA;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.action-btn-group {
+    display: grid;
+    grid-template-columns: 1fr 70px;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+
 .action-emoji, .platform-icon {
     font-size: 22px;
     background: rgba(255, 255, 255, 0.04);
@@ -478,10 +578,52 @@ body {
     border-color: #3B478C;
 }
 
+/* 🛑 정지/중지 버튼: 붉은색 계열 경고 톤 */
+.btn-stop {
+    background: #1E1B2E !important;
+    border: 1px solid #EF4444 !important;
+    color: #FCA5A5 !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.btn-stop:hover {
+    background: #DC2626 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
+    transform: translateY(-1px);
+}
+
+/* ⚡ 전체 마스터 가동/정지 */
+.btn-master-start {
+    background: linear-gradient(135deg, #10B981, #059669) !important;
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+.btn-master-start:hover {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.5);
+    transform: translateY(-1px);
+}
+
+.btn-master-stop {
+    background: #1A1F3D !important;
+    border: 1px solid #64748B !important;
+    color: #CBD5E1 !important;
+}
+
+.btn-master-stop:hover {
+    background: #991B1B !important;
+    border-color: #EF4444 !important;
+    color: #FFFFFF !important;
+}
+
 .btn-block {
     width: 100%;
     margin-top: 10px;
 }
+
 
 .form-group {
     margin-bottom: 16px;
@@ -673,27 +815,40 @@ body {
 .log-line.warning { color: #FCD34D; }
 
 /* ======================================================================
-   Toast Notification
+   Toast Notification (Bottom Center Fixed, Screen Squeeze Protection)
    ====================================================================== */
-.toast-container {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: #13172E;
-    color: #FFFFFF;
-    padding: 12px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    font-size: 13.5px;
-    font-weight: 600;
-    display: none;
-    z-index: 1000;
-    border: 1px solid #2B3466;
-    animation: slideUp 0.3s ease;
+#toast-container, .toast-container {
+    position: fixed !important;
+    bottom: 24px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: center !important;
+    z-index: 99999 !important;
+    pointer-events: none !important;
+    width: auto !important;
+    max-width: 90vw !important;
+    right: auto !important;
 }
 
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
+.toast {
+    background: #1e293b !important;
+    color: #ffffff !important;
+    padding: 10px 20px !important;
+    border-radius: 10px !important;
+    border: 1px solid #3b82f6 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    pointer-events: auto !important;
+    white-space: nowrap !important;
+    animation: fadeInToast 0.25s ease !important;
+}
+
+@keyframes fadeInToast {
+    from { transform: translateY(12px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
 
@@ -885,3 +1040,193 @@ body {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+/* ======================================================================
+   📊 IR 24H Bar Chart & Progress Bars
+   ====================================================================== */
+.ir-dual-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+    margin-top: 24px;
+}
+
+@media (max-width: 1024px) {
+    .ir-dual-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.chart-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #F8FAFC;
+    margin: 0;
+}
+
+.chart-badge {
+    font-size: 11.5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(124, 58, 237, 0.15);
+    color: #A78BFA;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    font-weight: 600;
+}
+
+.chart-hint {
+    font-size: 12px;
+    color: #64748B;
+    margin: 0 0 14px 0;
+}
+
+.bar-chart-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding: 16px 0 10px 0;
+}
+
+.bar-chart-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 180px;
+    min-width: 750px;
+    padding: 10px 10px 0 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bar-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    min-width: 24px;
+}
+
+.bar-badge {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.bar-fill {
+    width: 100%;
+    max-width: 28px;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.4s ease;
+}
+
+.bar-label {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 8px;
+    white-space: nowrap;
+}
+
+.channel-bars-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.channel-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.channel-info-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.progress-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* ======================================================================
+   📟 Terminal Box (고정 높이 320px & 내부 오토 스크롤 전담)
+   ====================================================================== */
+.terminal-box {
+    background: #080B18 !important;
+    border: 1px solid #1E2548 !important;
+    border-radius: 10px !important;
+    padding: 14px 16px !important;
+    height: 320px !important;
+    max-height: 320px !important;
+    min-height: 320px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    font-family: 'Consolas', 'Courier New', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    box-sizing: border-box !important;
+}
+
+.terminal-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.terminal-box::-webkit-scrollbar-track {
+    background: #080B18;
+}
+
+.terminal-box::-webkit-scrollbar-thumb {
+    background: #2B3566;
+    border-radius: 3px;
+}
+
+.terminal-box::-webkit-scrollbar-thumb:hover {
+    background: #3B4888;
+}
+
+.log-line {
+    margin: 2px 0;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.log-line.info {
+    color: #94A3B8;
+}
+
+.log-line.success {
+    color: #34D399;
+}
+
+.log-line.warning {
+    color: #F59E0B;
+}
+
+.log-line.error {
+    color: #EF4444;
+}
+

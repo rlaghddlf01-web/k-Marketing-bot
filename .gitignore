@@ -21,7 +21,22 @@ outputs/logs/*.log
 
 # 🗄️ 로컬 임시 DB 및 IDE 설정
 data/history.db
+data/reddit_profiles/
+**/reddit_profiles/
+*.db
 .agents/
 .vscode/
 .idea/
 *.log
+
+# 📦 대용량 산출물 및 임시 파일
+**/outputs/
+**/scratch/
+outputs/
+*.mp4
+*.mp3
+*.png
+
+# 🔐 구글 서비스 계정 키 보안
+*service_account*.json
+*.json.json

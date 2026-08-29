@@ -15,6 +15,7 @@ from modules.cardnews_generator import CardnewsGenerator
 from modules.telegram_kmarket import KMarketTelegramPusher
 from modules.facebook_kmarket import KMarketFacebookHunter
 from modules.blog_kmarket import KMarketBlogPublisher
+from modules.threads_kmarket import KMarketThreadsPublisher
 
 logger = logging.getLogger("KMarketBot")
 
@@ -27,6 +28,7 @@ class KMarketGrowthBot:
     - 17개국 텔레그램 0원 나눔 브리핑 발송
     - 100만 명 규모 페이스북 외국인 그룹 첫 댓글 스텔스 침투
     - 17개국어 WordPress/Medium 글로벌 SEO 블로그 칼럼 대량 발행
+    - 17개국어 Meta Threads 바이럴 스토리텔링 타래 스레드 배포
     """
     def __init__(self, db_mgr: DBManager, supabase_mgr: SupabaseManager):
         self.db_mgr = db_mgr
@@ -43,6 +45,7 @@ class KMarketGrowthBot:
         self.reddit_hunter = KMarketRedditHunter(self.db_mgr, self.supabase_mgr)
         self.fb_hunter = KMarketFacebookHunter(self.db_mgr, self.supabase_mgr)
         self.blog_publisher = KMarketBlogPublisher(self.db_mgr, self.supabase_mgr)
+        self.threads_publisher = KMarketThreadsPublisher(self.db_mgr, self.supabase_mgr)
 
         self.running = False
         self.last_run_time = None
@@ -82,9 +85,13 @@ class KMarketGrowthBot:
         except Exception as e:
             logger.error(f"K-Market 숏폼 생성 에러: {e}")
 
-        # 2. 카드뉴스 생성 (사용자 요청에 따라 정지)
-        results["cardnews_count"] = 0
-        logger.info("ℹ️ [K-Market 봇] 카드뉴스 자동 생성은 일시 정지(비활성화) 상태입니다.")
+        # 2. 4장 캐러셀 실물 카드뉴스 생성
+        try:
+            cards = self.cardnews_gen.generate_carousel(service_id="kmarket", lang=sampled_langs[0])
+            results["cardnews_count"] = len(cards)
+            logger.info(f"✅ [K-Market 봇] 카드뉴스 {len(cards)}장 렌더링 완료")
+        except Exception as e:
+            logger.error(f"K-Market 카드뉴스 생성 에러: {e}")
 
         # 3. 레딧 중고/가구 질문 실시간 스캔 & 안내
         try:
@@ -113,5 +120,12 @@ class KMarketGrowthBot:
             results["blog_count"] = blog_res.get("count", 0)
         except Exception as e:
             logger.error(f"K-Market 블로그 발행 에러: {e}")
+
+        # 7. 17개국어 Meta Threads 바이럴 스레드 배포
+        try:
+            th_res = self.threads_publisher.publish_daily_threads(target_langs=sampled_langs[:3])
+            results["threads_count"] = th_res.get("count", 0)
+        except Exception as e:
+            logger.error(f"K-Market Threads 배포 에러: {e}")
 
         return results

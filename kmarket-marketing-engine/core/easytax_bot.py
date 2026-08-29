@@ -2,6 +2,7 @@ import time
 import logging
 import datetime
 from typing import Dict, Any, List
+from config import BASE_URLS
 from core.db_manager import DBManager
 from core.supabase_manager import SupabaseManager
 from core.service_router import ServiceRouter
@@ -16,6 +17,7 @@ from modules.guide_pdf_generator import GuidePDFGenerator
 from modules.telegram_easytax import EasyTaxTelegramPusher
 from modules.facebook_easytax import EasyTaxFacebookHunter
 from modules.blog_easytax import EasyTaxBlogPublisher
+from modules.threads_easytax import EasyTaxThreadsPublisher
 
 logger = logging.getLogger("EasyTaxBot")
 
@@ -28,6 +30,7 @@ class EasyTaxRefundBot:
     - 17개국 텔레그램 세무 팁 브리핑 발송
     - 100만 명 규모 페이스북 외국인 그룹 첫 댓글 스텔스 침투
     - 17개국어 WordPress/Medium 공인 세무 SEO 블로그 칼럼 대량 발행
+    - 17개국어 Meta Threads 합법 세무 권리 타래 스레드 배포
     """
     def __init__(self, db_mgr: DBManager, supabase_mgr: SupabaseManager):
         self.db_mgr = db_mgr
@@ -45,6 +48,7 @@ class EasyTaxRefundBot:
         self.reddit_hunter = EasyTaxRedditHunter(self.db_mgr, self.supabase_mgr)
         self.fb_hunter = EasyTaxFacebookHunter(self.db_mgr, self.supabase_mgr)
         self.blog_publisher = EasyTaxBlogPublisher(self.db_mgr, self.supabase_mgr)
+        self.threads_publisher = EasyTaxThreadsPublisher(self.db_mgr, self.supabase_mgr)
 
         self.running = False
         self.last_run_time = None
@@ -80,9 +84,13 @@ class EasyTaxRefundBot:
         except Exception as e:
             logger.error(f"EasyTax 숏폼 생성 에러: {e}")
 
-        # 2. 카드뉴스 생성 (사용자 요청에 따라 정지)
-        results["cardnews_count"] = 0
-        logger.info("ℹ️ [EasyTax 봇] 카드뉴스 자동 생성은 일시 정지(비활성화) 상태입니다.")
+        # 2. 4장 캐러셀 세무 카드뉴스 생성
+        try:
+            cards = self.cardnews_gen.generate_carousel(service_id="easytax", lang=chosen_lang)
+            results["cardnews_count"] = len(cards)
+            logger.info(f"✅ [EasyTax 봇] 세무 카드뉴스 {len(cards)}장 렌더링 완료")
+        except Exception as e:
+            logger.error(f"EasyTax 카드뉴스 생성 에러: {e}")
 
         # 3. 비자/세금 질문 실시간 스캔 & 팩트 법률 답변
         try:
@@ -112,7 +120,14 @@ class EasyTaxRefundBot:
         except Exception as e:
             logger.error(f"EasyTax 블로그 발행 에러: {e}")
 
-        # 7. 이탈 고객 15분 자동 복구 SMS & 메신저 케어 실시간 트리거
+        # 7. 17개국어 Meta Threads 합법 세무 권리 스레드 배포
+        try:
+            th_res = self.threads_publisher.publish_daily_threads(target_langs=[chosen_lang])
+            results["threads_count"] = th_res.get("count", 0)
+        except Exception as e:
+            logger.error(f"EasyTax Threads 배포 에러: {e}")
+
+        # 8. 이탈 고객 15분 자동 복구 SMS & 메신저 케어 실시간 트리거
         try:
             import urllib.request
             cron_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/api/cron/follow-up"

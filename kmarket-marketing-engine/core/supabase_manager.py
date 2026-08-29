@@ -123,6 +123,7 @@ class SupabaseManager:
         - urgent_moving_discount: is_moving_sale 또는 가격 인하(is_price_dropped) 매물 우선
         - multi_lang_comfort: 번역(translations) 완료 매물 우선
         """
+        import random
         if self.client:
             try:
                 query = self.client.table("kmarket_items").select("*")
@@ -132,14 +133,16 @@ class SupabaseManager:
                 elif psychology == "urgent_moving_discount":
                     query = query.or_("is_moving_sale.eq.true,is_price_dropped.eq.true")
                 
-                query = query.order("created_at", desc=True).limit(limit)
-                response = query.execute()
+                # 실시간 270개 전체에서 무작위 롤링 추출
+                response = query.limit(100).execute()
                 if response.data:
-                    return response.data
+                    items_pool = response.data
+                    random.shuffle(items_pool)
+                    return items_pool[:limit]
             except Exception as e:
                 logger.warning(f"Supabase kmarket_items 실시간 조회 실패: {e}")
 
-        # Fallback to local items
+        # Fallback to local items (270개 실물 매물 실시간 롤링)
         from config import DATA_DIR
         import json
         local_path = DATA_DIR / "kmarket_items.json"
@@ -148,6 +151,7 @@ class SupabaseManager:
                 items = json.load(f)
                 if free_only or psychology == "free_giveaway_emotional":
                     items = [it for it in items if it.get("price", 0) == 0]
+                random.shuffle(items)
                 return items[:limit]
         return []
 

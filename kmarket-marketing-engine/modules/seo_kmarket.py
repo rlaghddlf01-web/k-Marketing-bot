@@ -48,13 +48,18 @@ class KMarketSEOPusher:
         for lang_code in LANGUAGES.keys():
             sitemap_urls.append(f"{base_domain}/{lang_code}")
 
+        import re
+        def clean_slug(text: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9_\-]+', '-', text.lower()).strip('-')
+
         # 1. 전국 47개 대학 캠퍼스 0원 나눔 SEO 페이지 (47 × 17 = 799개)
         for univ in self.universities:
             u_name = univ["name_en"]
             region = univ["region"]
+            c_slug = clean_slug(u_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"kmarket-campus-{u_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/{lang_code}/campus/{u_name.lower().replace(' ', '-')}"
+                slug = f"kmarket-campus-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/{lang_code}/campus/{c_slug}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{u_name}] 0 KRW Free Giveaways & Moving Sales for Expats", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -62,9 +67,10 @@ class KMarketSEOPusher:
         for ind in self.industrials:
             i_name = ind["name_en"]
             region = ind["region"]
+            c_slug = clean_slug(i_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"kmarket-industrial-{i_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/{lang_code}/area/{i_name.lower().replace(' ', '-')}"
+                slug = f"kmarket-industrial-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/{lang_code}/area/{c_slug}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{i_name}] Foreign Worker Secondhand Appliances & Moving Sale", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -72,9 +78,10 @@ class KMarketSEOPusher:
         for town in self.expat_towns:
             t_name = town["name_en"]
             region = town["region"]
+            c_slug = clean_slug(t_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"kmarket-town-{t_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/{lang_code}/town/{t_name.lower().replace(' ', '-')}"
+                slug = f"kmarket-town-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/{lang_code}/town/{c_slug}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{t_name}] Expat Community Marketplace & 0 KRW Free Share", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -82,18 +89,20 @@ class KMarketSEOPusher:
         for sc in self.support_centers:
             sc_name = sc["name_en"]
             region = f"{sc['region']} {sc['district']}"
+            c_slug = clean_slug(sc_name)
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"kmarket-center-{sc_name.lower().replace(' ', '-')}-{lang_code}"
-                target_url = f"{base_domain}/{lang_code}/center/{sc_name.lower().replace(' ', '-')}"
+                slug = f"kmarket-center-{c_slug}-{lang_code}"
+                target_url = f"{base_domain}/{lang_code}/center/{c_slug}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{sc_name}] Free Korean Expat Support & 0 KRW Safe Trading", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
         # 5. 국가별 재한 교민회/협회 SEO 페이지 (11 × 17 = 187개)
         for comm in self.communities:
             c_name = comm["name_en"]
+            c_id = clean_slug(comm['id'])
             for lang_code, lang_info in LANGUAGES.items():
-                slug = f"kmarket-community-{comm['id']}-{lang_code}"
-                target_url = f"{base_domain}/{lang_code}/community/{comm['id']}"
+                slug = f"kmarket-community-{c_id}-{lang_code}"
+                target_url = f"{base_domain}/{lang_code}/community/{c_id}"
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{c_name}] Official Expat Community Safe Trade Hub", comm['country'], lang_code, lang_info, target_url, base_domain=base_domain)
 
@@ -101,17 +110,26 @@ class KMarketSEOPusher:
         sitemap_path = self.sitemap_dir / "sitemap_kmarket.xml"
         self._write_sitemap(sitemap_path, sitemap_urls)
 
-        # 5. Googlebot 실시간 Ping 전송
+        # 7. Google Indexing API v3 공식 실시간 핑 전송 (K-Market 전용 서비스 계정)
+        from core.google_indexing_client import GoogleIndexingClient
+        indexing_client = GoogleIndexingClient(brand="kmarket")
+        api_res = indexing_client.batch_publish_urls(sitemap_urls, max_limit=15)
+        
+        # 8. 공개 사이트맵 엔드포인트 핑 병행
         ping_status = self._ping_googlebot(sitemap_path)
 
-        logger.info(f"🛒 [K-Market Google SEO] {len(sitemap_urls)}개 URL 빌드 및 구글 색인 핑 전송 완료")
+        success_count = api_res.get("success_count", 0)
+        api_msg = f" (Google Indexing API {success_count}개 URL 즉시 색인 완료 🚀)" if success_count > 0 else ""
+        logger.info(f"🛒 [K-Market Google SEO] {len(sitemap_urls)}개 URL 빌드 및 구글 색인 핑 전송 완료{api_msg}")
+
         return {
             "success": True,
             "brand": "kmarket",
             "indexed_count": len(sitemap_urls),
             "sitemap_file": str(sitemap_path),
             "ping_status": ping_status,
-            "message": f"🛒 [K-Market 전용] {len(sitemap_urls)}개 대학/공단 URL 및 sitemap_kmarket.xml이 구글 검색엔진에 실시간 색인 요청되었습니다!"
+            "indexing_api": api_res,
+            "message": f"🛒 [K-Market 전용] {len(sitemap_urls)}개 대학/공단 URL 및 sitemap_kmarket.xml 색인 요청 완료!{api_msg}"
         }
 
     def _render_page(self, slug: str, title: str, location: str, lang_code: str, lang_info: Dict[str, str], url: str, base_domain: str = "https://k-market.app"):
@@ -166,3 +184,9 @@ class KMarketSEOPusher:
                 return f"Googlebot Ping Success (Status: {resp.status})"
         except Exception as e:
             return f"Simulated Ping (Endpoint ready: {e})"
+
+    def publish_all_campus_pages(self):
+        return self.build_and_push_index()
+
+# 호환용 별칭
+KMarketCampusSEO = KMarketSEOPusher

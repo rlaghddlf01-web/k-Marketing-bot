@@ -1,18 +1,25 @@
-@echo off
-chcp 65001 > nul
-title 🛸 Universal Expat Growth Engine - 로컬 컨트롤 센터
-
-echo ========================================================
-echo 🛸 [Universal Expat Growth Engine] 로컬 컨트롤 센터 실행 중...
-echo ========================================================
-echo.
-
-cd /d "%~dp0\kmarket-marketing-engine"
-
-:: 브라우저 2초 뒤 자동 오픈
-start "" http://localhost:8000
-
-:: 파이썬 대시보드 서버 가동
-python server.py
-
-pause
+@echo off
+chcp 65001 > nul
+set PYTHONIOENCODING=utf-8
+set PYTHONUTF8=1
+title Universal Expat Growth Engine - Control Center
+
+echo ========================================================
+echo [Universal Expat Growth Engine] Local Control Center
+echo ========================================================
+echo.
+
+cd /d "%~dp0kmarket-marketing-engine"
+
+:: Port 8000 cleanup
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
+    taskkill /f /pid %%a >nul 2>&1
+)
+
+:: 2s delay browser open (safe ping delay)
+start /b cmd /c "ping 127.0.0.1 -n 3 >nul && start http://localhost:8000"
+
+:: Start python server
+python server.py
+
+pause

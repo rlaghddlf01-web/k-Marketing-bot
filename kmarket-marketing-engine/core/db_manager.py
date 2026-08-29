@@ -18,7 +18,7 @@ class DBManager:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             
-            # 1. 콘텐츠 발행 및 댓글 응답 이력 테이블
+            # 1. 콘텐츠 발행 및 댓글 응답 이력 테이블 (한국 표준시 KST UTC+9 기준)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS marketing_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +33,7 @@ class DBManager:
                     views INTEGER DEFAULT 0,
                     clicks INTEGER DEFAULT 0,
                     conversions INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT (datetime('now', '+9 hours')),
                     synced_supabase INTEGER DEFAULT 0 -- Supabase 동기화 여부 (0: 미동기화, 1: 완료)
                 )
             """)
@@ -44,22 +44,39 @@ class DBManager:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     channel TEXT NOT NULL,            -- 'reddit:korea', 'telegram:channel', etc.
                     action_type TEXT NOT NULL,        -- 'reply', 'post'
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT (datetime('now', '+9 hours'))
                 )
             """)
 
-            # 3. UTM 유입 로그 테이블
+            # 3. UTM 유입 로그 테이블 (한국 표준시 KST UTC+9 기준)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS utm_logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     utm_source TEXT NOT NULL,
-                    utm_medium TEXT NOT NULL,
-                    utm_campaign TEXT NOT NULL,
+                    utm_medium TEXT,
+                    utm_campaign TEXT,
                     utm_content TEXT,
                     target_service TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    ip TEXT,
+                    user_agent TEXT,
+                    referrer TEXT,
+                    created_at TIMESTAMP DEFAULT (datetime('now', '+9 hours'))
                 )
             """)
+
+            # 기존 테이블 컬럼 마이그레이션 안전 보장
+            try:
+                cursor.execute("ALTER TABLE utm_logs ADD COLUMN ip TEXT")
+            except Exception:
+                pass
+            try:
+                cursor.execute("ALTER TABLE utm_logs ADD COLUMN user_agent TEXT")
+            except Exception:
+                pass
+            try:
+                cursor.execute("ALTER TABLE utm_logs ADD COLUMN referrer TEXT")
+            except Exception:
+                pass
 
             conn.commit()
 
@@ -174,3 +191,53 @@ class DBManager:
             """, (service_id, lang, min_score, limit))
             rows = cursor.fetchall()
             return [r[0] for r in rows]
+
+    def record_utm_log(self, utm_source: str, utm_medium: str = "", utm_campaign: str = "",
+                       utm_content: str = "", target_service: str = "", ip: str = "",
+                       user_agent: str = "", referrer: str = "") -> int:
+        """실제 사람(외부 유입자)의 실시간 접속 로그 기록"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS utm_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    utm_source TEXT NOT NULL,
+                    utm_medium TEXT,
+                    utm_campaign TEXT,
+                    utm_content TEXT,
+                    target_service TEXT,
+                    ip TEXT,
+                    user_agent TEXT,
+                    referrer TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cursor.execute("""
+                INSERT INTO utm_logs (utm_source, utm_medium, utm_campaign, utm_content, target_service, ip, user_agent, referrer)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (utm_source, utm_medium, utm_campaign, utm_content, target_service, ip, user_agent, referrer))
+            conn.commit()
+            return cursor.lastrowid
+
+    def get_recent_utm_logs(self, limit: int = 20, service_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """최근 실제 유입된 방문자 로그 조회 (브랜드별 필터링 지원)"""
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            try:
+                if service_id and service_id.lower() != "all":
+                    cursor.execute("""
+                        SELECT id, utm_source, utm_medium, utm_campaign, utm_content, target_service, ip, user_agent, referrer, created_at
+                        FROM utm_logs
+                        WHERE target_service = ?
+                        ORDER BY id DESC LIMIT ?
+                    """, (service_id.lower(), limit))
+                else:
+                    cursor.execute("""
+                        SELECT id, utm_source, utm_medium, utm_campaign, utm_content, target_service, ip, user_agent, referrer, created_at
+                        FROM utm_logs
+                        ORDER BY id DESC LIMIT ?
+                    """, (limit,))
+                return [dict(r) for r in cursor.fetchall()]
+            except Exception:
+                return []

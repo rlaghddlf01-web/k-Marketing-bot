@@ -82,22 +82,24 @@
 
   <div class="phone-container">
     <div class="notch"></div>
-    <iframe id="kmarketFrame" class="kmarket-iframe" src="https://ktrs-market.vercel.app/?lang=vi"></iframe>
+    <iframe id="kmarketFrame" class="kmarket-iframe" src="/api/kmarket/clean_view?lang=vi"></iframe>
     
     <div class="lang-toolbar">
-      <button class="lang-btn active" onclick="switchLang('vi')">🇻🇳 베트남 (VI)</button>
-      <button class="lang-btn" onclick="switchLang('mn')">🇲🇳 몽골 (MN)</button>
-      <button class="lang-btn" onclick="switchLang('uz')">🇺🇿 우즈벡 (UZ)</button>
-      <button class="lang-btn" onclick="switchLang('zh')">🇨🇳 중국 (ZH)</button>
-      <button class="lang-btn" onclick="switchLang('en')">🇺🇸 영어 (EN)</button>
+      <button class="lang-btn active" onclick="switchLang('vi', event)">🇻🇳 베트남 (VI)</button>
+      <button class="lang-btn" onclick="switchLang('mn', event)">🇲🇳 몽골 (MN)</button>
+      <button class="lang-btn" onclick="switchLang('uz', event)">🇺🇿 우즈벡 (UZ)</button>
+      <button class="lang-btn" onclick="switchLang('zh', event)">🇨🇳 중국 (ZH)</button>
+      <button class="lang-btn" onclick="switchLang('en', event)">🇺🇸 영어 (EN)</button>
     </div>
   </div>
 
   <script>
-    function switchLang(lang) {
+    function switchLang(lang, ev) {
       document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById('kmarketFrame').src = `https://ktrs-market.vercel.app/?lang=${lang}`;
+      if (ev && ev.currentTarget) {
+        ev.currentTarget.classList.add('active');
+      }
+      document.getElementById('kmarketFrame').src = `/api/kmarket/clean_view?lang=${lang}`;
     }
   </script>
 

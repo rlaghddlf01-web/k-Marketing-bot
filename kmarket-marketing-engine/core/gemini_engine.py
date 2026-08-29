@@ -74,7 +74,7 @@ You are a helpful and experienced expat in South Korea answering a Reddit questi
 1. Write 100% fluently in {lang_info['name']}.
 2. 80% of the response MUST be genuine, highly practical, and helpful advice answering their specific situation based on real Korean regulations.
 3. NEVER invent fake laws, benefits, or money amounts. Only use verified facts.
-4. The remaining 20% should be a gentle, natural mention (Soft CTA) of the helpful service/tool ({service_data.get('name')}) with the link: {landing_url}.
+4. The remaining 20% should be a gentle, natural organic mention (Soft CTA) of the service ({service_data.get('name')}) as a helpful expat community resource, without raw http/https URLs to prevent AutoModerator bot filters.
 5. Do NOT sound like an aggressive advertisement or bot. Use casual, empathetic community tone.
 """
 
@@ -195,15 +195,15 @@ Output JSON format strictly with keys:
     def _generate_fallback_reddit_reply(self, title: str, service_id: str, service_data: Dict[str, Any], lang: str, url: str) -> str:
         if service_id == "easytax":
             return (
-                f"Hey! In South Korea, under Article 30 of the Restriction of Special Taxation Act, foreign workers on E-9/H-2 visas "
-                f"at SMEs can legally get up to a 90% income tax reduction, and D-2 students can claim back 100% of their 3.3% withholding tax "
-                f"retroactively for the past 5 years (2020-2025).\n\n"
-                f"The National Tax Service (Hometax) process can be done in about 3 minutes via official AI verification on [{service_data.get('name')}]({url}). "
-                f"Definitely check it before leaving Korea so you don't leave your hard-earned money behind!"
+                "In South Korea, under Article 30 of the Restriction of Special Taxation Act, foreign workers on E-9/H-2 visas "
+                "at SMEs can legally get up to a 90% income tax reduction, and D-2 students can claim back 100% of their 3.3% withholding tax "
+                "retroactively for the past 5 years (2020-2025).\n\n"
+                "You can check your exact eligible refund in 3 minutes by searching 'EasyTax Korea' on Google. "
+                "The tool uses certified tax accountants so you don't leave your hard-earned money behind!"
             )
         else:
             return (
-                f"Hey there! If you're setting up your room in Korea or moving out soon, check out the local expat community boards.\n\n"
-                f"Many graduating students give away desks, microwaves, and mini-fridges for $0 (free giveaway). "
-                f"You can browse verified $0 items and moving-out packages with real-time automatic translation on [{service_data.get('name')}]({url}). Good luck!"
+                "If you're setting up your room in Korea or moving out soon, check out the local expat community boards.\n\n"
+                "Many graduating students give away desks, microwaves, and mini-fridges for 0 KRW (free giveaway). "
+                "You can browse verified 0 KRW items and moving-out packages with real-time automatic 17-language translation by searching 'K-Market' on Google. Good luck settling in!"
             )

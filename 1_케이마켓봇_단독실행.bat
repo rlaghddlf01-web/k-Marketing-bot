@@ -1,10 +1,12 @@
-@echo off
-chcp 65001 > nul
-title 🛒 K-Market 외국인 0원나눔 전담 무인 봇
-cd /d "%~dp0kmarket-marketing-engine"
-
-echo ========================================================
-echo 🛒 [K-Market] 100%% 전담 무인 성장봇을 시작합니다.
-echo ========================================================
-python run_kmarket.py
-pause
+@echo off
+chcp 65001 > nul
+set PYTHONIOENCODING=utf-8
+set PYTHONUTF8=1
+title K-Market Bot
+cd /d "%~dp0kmarket-marketing-engine"
+
+echo ========================================================
+echo [K-Market] Bot Starting...
+echo ========================================================
+python run_kmarket.py
+pause

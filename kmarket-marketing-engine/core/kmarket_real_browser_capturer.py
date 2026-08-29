@@ -28,11 +28,11 @@ class KMarketRealBrowserCapturer:
 
     def capture_real_kmarket_slides(self, lang: str = "vi") -> List[Path]:
         """
-        실제 케이마켓 웹사이트에 접속하여 9:16 (1080x1920) 모바일 스크린샷 4장 캡처
+        실제 케이마켓 클린 뷰어에 접속하여 9:16 (1080x1920) 모바일 스크린샷 4장 캡처
         """
         captured_paths = []
-        target_url = f"{self.base_url}/?lang={lang}"
-        logger.info(f"🌐 [{lang.upper()}] 실제 케이마켓 웹사이트 접속 캡처 시작: {target_url}")
+        target_url = f"http://127.0.0.1:8000/api/kmarket/clean_view?lang={lang}"
+        logger.info(f"🌐 [{lang.upper()}] 케이마켓 클린 모바일 뷰 캡처 시작: {target_url}")
 
         with sync_playwright() as p:
             # iPhone 14 Pro Max 뷰포트 비율 (1080x1920)
@@ -48,6 +48,34 @@ class KMarketRealBrowserCapturer:
                 # 1. 메인 피드 로딩 대기
                 page.goto(target_url, timeout=30000, wait_until="networkidle")
                 page.wait_for_timeout(2000) # 리액트 하이드레이션 및 이미지 렌더링 대기
+
+                # 🛡️ 팝업/모달/배너 100% 완전 박멸 (CSS + DOM 삭제)
+                page.add_style_tag(content="""
+                    div[role="dialog"],
+                    div[aria-modal="true"],
+                    div.fixed.inset-0.z-50,
+                    div.fixed.inset-0.bg-black\\/60,
+                    div.fixed.inset-0.bg-black\\/70,
+                    div.fixed.inset-0.backdrop-blur-sm,
+                    div.fixed.bottom-0.z-50,
+                    div.fixed.inset-x-0.bottom-0.z-50 {
+                        display: none !important;
+                        visibility: hidden !important;
+                        pointer-events: none !important;
+                        opacity: 0 !important;
+                    }
+                    body, html {
+                        overflow: auto !important;
+                        overflow-y: auto !important;
+                    }
+                """)
+                page.evaluate("""() => {
+                    document.querySelectorAll('div[role="dialog"], div[aria-modal="true"], div.fixed.inset-0').forEach(el => el.remove());
+                    document.querySelectorAll('div.fixed.bottom-0').forEach(el => el.remove());
+                    document.body.style.overflow = 'auto';
+                    document.documentElement.style.overflow = 'auto';
+                }""")
+                page.wait_for_timeout(500)
             except Exception as e:
                 logger.warning(f"페이지 로딩 대기 타임아웃 (계속 진행): {e}")
 

@@ -1,0 +1,99 @@
+{
+  "appliances": [
+    "tv", "television", "smart tv", "monitor", "display", "fridge", "refrigerator", "mini fridge",
+    "freezer", "microwave", "microwave oven", "oven", "washing machine", "washer", "dryer",
+    "rice cooker", "cuckoo", "cuchen", "air fryer", "electric kettle", "kettle", "toaster",
+    "coffee maker", "coffee machine", "espresso machine", "blender", "food processor",
+    "heater", "space heater", "radiator", "electric blanket", "heating pad", "electric mat", "ondol",
+    "dehumidifier", "humidifier", "air purifier", "air cleaner", "vacuum", "vacuum cleaner", "robot vacuum",
+    "fan", "cooling fan", "air conditioner", "ac unit", "hair dryer", "hair straightener", "iron", "steamer"
+  ],
+  "furniture": [
+    "bed", "bed frame", "mattress", "mattress topper", "topper", "single bed", "queen bed", "super single",
+    "desk", "study desk", "computer desk", "standing desk", "chair", "office chair", "gaming chair", "desk chair",
+    "couch", "sofa", "sofa bed", "armchair", "recliner", "bean bag",
+    "wardrobe", "closet", "clothes rack", "hanging rack", "hanger", "hangers", "clothing rack",
+    "drawer", "drawers", "chest of drawers", "storage box", "plastic drawer", "nightstand", "bedside table",
+    "bookshelf", "bookcase", "shelf", "shelves", "storage rack",
+    "table", "dining table", "kitchen table", "coffee table", "low table", "folding table",
+    "mirror", "full length mirror", "standing mirror", "vanity", "dressing table",
+    "curtain", "curtains", "blackout curtains", "blinds", "rug", "carpet"
+  ],
+  "household_kitchen": [
+    "pot", "pots", "pan", "frying pan", "pans", "cookware", "kitchenware",
+    "dishes", "plates", "bowls", "cups", "glasses", "cutlery", "utensils", "knives", "knife set",
+    "dish rack", "drying rack", "clothes drying rack", "laundry basket", "laundry hamper",
+    "lamp", "desk lamp", "floor lamp", "stand light", "bedside lamp",
+    "transformer", "voltage converter", "step down transformer", "adapter", "plug adapter", "power strip",
+    "trash can", "garbage can", "recycling bags", "pay as you go bags", "jongnyangje"
+  ],
+  "korean_shopping_platforms": [
+    "coupang", "coupang wow", "gmarket", "gmarket global", "naver shopping", "naver pay", "kakaopay",
+    "karrot", "danggeun", "danggn", "joonggonara", "bunjang", "bungaejangter",
+    "todayhouse", "ohou", "ikea korea", "daiso", "emart", "homeplus", "lotte mart", "costco korea",
+    "shopping", "buy online", "secondhand shop", "flea market"
+  ],
+  "moving_housing_services": [
+    "yongdal", "small move", "van move", "truck moving", "soomgo", "zimsa", "moving service",
+    "moving company", "moving boxes", "box packing", "one-room move", "officetel move",
+    "hasukjib", "gosiwon", "sharehouse", "sublet", "lease takeover", "security deposit",
+    "jeonse", "wolse", "maintenance fee", "unfurnished room", "studio apartment"
+  ],
+  "korean_language_institutes_kli": [
+    "어학당", "kli", "korean language institute", "language school", "language center", "d-4 visa", "d4 visa",
+    "language program", "language student", "yonsei kli", "sogang klp", "ewha elc", "snu lei", "korea univ klc",
+    "hufs kli", "kyunghee iie", "dongguk kli", "konkuk kli", "chung-ang kli", "sookmyung kli", "pusan kli",
+    "chonnam kli", "kyungpook kli", "kli housing", "kli dorm", "kli room", "sinchon oneroom", "anam studio",
+    "hyehwa room", "hoegi room", "gwanak gosiwon"
+  ],
+  "foreigner_support_centers": [
+    "외국인지원센터", "외국인주민지원센터", "글로벌센터", "글로벌빌리지", "다문화가족지원센터", "다누리",
+    "seoul global center", "global village center", "itaewon global village", "yeonnam global village",
+    "gangnam global village", "seorae global village", "ichon global village", "southwest seoul global center",
+    "ansan foreign resident center", "suwon foreign center", "siheung foreign center", "hwaseong foreigner center",
+    "gimhae foreign support", "foreign worker center", "migrant center", "jumin center", "community center",
+    "waste disposal sticker", "large waste sticker", "free donation", "expat support"
+  ],
+  "intent_triggers": [
+    "where to buy", "where can i buy", "where to get", "where can i get", "looking for",
+    "cheap", "affordable", "budget", "inexpensive", "low price", "reasonable price",
+    "secondhand", "second hand", "used", "pre-owned", "buy used", "sell used",
+    "moving in", "moving out", "moving sale", "moving-out sale", "garage sale", "flea market",
+    "leaving korea", "leaving seoul", "leaving the country", "graduating", "heading home",
+    "furnish", "furnishing", "unfurnished", "semi-furnished", "fully furnished",
+    "one-room", "oneroom", "officetel", "studio", "villa", "gosiwon", "dorm", "dormitory", "apartment",
+    "giveaway", "give away", "free stuff", "free item", "free items", "0 krw", "free of charge",
+    "dispose", "disposal", "large waste", "waste sticker", "donation",
+    "without arc", "no korean phone", "foreign card", "english app", "international seller",
+    "recommend", "any recommendations", "bicycle", "bike", "touring bike"
+  ],
+  "target_subreddits": [
+    "Living_in_Korea",
+    "korea",
+    "teachinginkorea",
+    "seoul",
+    "StudyInKorea",
+    "Korean",
+    "movingtokorea",
+    "EPIK",
+    "Yonsei",
+    "KoreaUniversity",
+    "SNU",
+    "Sogang",
+    "Hanyang",
+    "Ewha",
+    "KAIST",
+    "Busan",
+    "Daegu",
+    "Incheon",
+    "Pyeongtaek",
+    "USFK",
+    "CampHumphreys",
+    "Daejeon",
+    "Gwangju",
+    "Jeju",
+    "Hanguk",
+    "koreanlife",
+    "koreatravel"
+  ]
+}

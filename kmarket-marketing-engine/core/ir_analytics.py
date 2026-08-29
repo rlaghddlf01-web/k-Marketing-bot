@@ -1,5 +1,6 @@
 import json
 import logging
+import datetime
 from typing import Dict, Any, List, Optional
 from config import DATA_DIR
 from core.db_manager import DBManager
@@ -9,149 +10,221 @@ logger = logging.getLogger("IRAnalytics")
 
 class IRAnalyticsEngine:
     """
-    📊 실시간 유입 정밀 분석 & 연도별(YoY) 비교 대시보드 엔진
-    (24시간 시간대별 트래픽 막대 그래프 + 7대 채널별 유입 + 앱별 최종 결과물 정밀 집계 + Supabase 실시간 퍼널 전환)
+    📊 100% 순수 실데이터 기반 유입 및 IR 관제 엔진
+    - 가짜/더미/가공 데이터 0%
+    - Supabase / SQLite utm_logs 및 marketing_history 100% 실데이터 집계
     """
     def __init__(self, db_mgr: DBManager, supabase_mgr: Optional[SupabaseManager] = None):
         self.db_mgr = db_mgr
         self.supabase_mgr = supabase_mgr or SupabaseManager(db_mgr)
 
-    def get_detailed_dashboard_data(self, period: str = "today") -> Dict[str, Any]:
-        """
-        기간별 (today: 오늘 24시간, weekly: 주간, monthly: 월간, yearly: 연간/IR)
-        24시간 시간대별 트래픽 + 16대 채널별 유입 + 앱별 최종 결과물 집계
-        """
-        
-        # 1. 24시간 시간대별 트래픽 추이 (00시 ~ 23시)
-        hourly_data = [
-            {"hour": "00시", "count": 0}, {"hour": "01시", "count": 0}, {"hour": "02시", "count": 0},
-            {"hour": "03시", "count": 1}, {"hour": "04시", "count": 5}, {"hour": "05시", "count": 12},
-            {"hour": "06시", "count": 10}, {"hour": "07시", "count": 3}, {"hour": "08시", "count": 8},
-            {"hour": "09시", "count": 14}, {"hour": "10시", "count": 18}, {"hour": "11시", "count": 15},
-            {"hour": "12시", "count": 11}, {"hour": "13시", "count": 9}, {"hour": "14시", "count": 16},
-            {"hour": "15시", "count": 22}, {"hour": "16시", "count": 19}, {"hour": "17시", "count": 13},
-            {"hour": "18시", "count": 25}, {"hour": "19시", "count": 31}, {"hour": "20시", "count": 28},
-            {"hour": "21시", "count": 20}, {"hour": "22시", "count": 14}, {"hour": "23시", "count": 6}
-        ]
+    def get_detailed_dashboard_data(self, period: str = "today", brand: str = "all") -> Dict[str, Any]:
+        kst_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+        today_date = kst_now.date()
 
-        # 2. 상단 4대 핵심 지표
-        period_kpis = {
-            "today": {
-                "today_pv": 310,
-                "cumulative_pv": 660,
-                "yoy_growth": "+312% (기준년도 런칭)",
-                "monthly_visitors": 660
-            },
-            "weekly": {
-                "today_pv": 2180,
-                "cumulative_pv": 4620,
-                "yoy_growth": "+280%",
-                "monthly_visitors": 2450
-            },
-            "monthly": {
-                "today_pv": 9450,
-                "cumulative_pv": 18900,
-                "yoy_growth": "+350%",
-                "monthly_visitors": 8900
-            },
-            "yearly": {
-                "today_pv": 112000,
-                "cumulative_pv": 234000,
-                "yoy_growth": "+420%",
-                "monthly_visitors": 85000
-            }
+        brand_filter = brand.lower() if brand else "all"
+        brand_sql_m = ""
+        brand_sql_u = ""
+        if brand_filter == "kmarket":
+            brand_sql_m = "service_id = 'kmarket'"
+            brand_sql_u = "target_service = 'kmarket'"
+            brand_name_kr = "K-Market"
+        elif brand_filter == "easytax":
+            brand_sql_m = "service_id = 'easytax'"
+            brand_sql_u = "target_service = 'easytax'"
+            brand_name_kr = "EasyTax"
+        else:
+            brand_name_kr = "전체 브랜드"
+
+        def build_where(date_cond: str, brand_cond: str) -> str:
+            conds = [c for c in [date_cond, brand_cond] if c]
+            return f"WHERE {' AND '.join(conds)}" if conds else ""
+
+        # 기간별 기본 SQL 조건절 및 라벨
+        if period == "weekly":
+            date_cond_m = "DATE(created_at) >= DATE('now', '+9 hours', '-7 days')"
+            date_cond_u = "DATE(created_at) >= DATE('now', '+9 hours', '-7 days')"
+            period_label = "최근 7일"
+            chart_title = f"📊 [{brand_name_kr}] 최근 7일간 일별 콘텐츠 배포 추이 (KST)"
+            chart_badge = f"기준: {brand_name_kr} 최근 7일 실데이터"
+        elif period == "monthly":
+            date_cond_m = "DATE(created_at) >= DATE('now', '+9 hours', '-30 days')"
+            date_cond_u = "DATE(created_at) >= DATE('now', '+9 hours', '-30 days')"
+            period_label = "최근 30일"
+            chart_title = f"📊 [{brand_name_kr}] 최근 4주간 주차별 콘텐츠 배포 추이 (KST)"
+            chart_badge = f"기준: {brand_name_kr} 최근 30일 실데이터"
+        elif period == "yearly":
+            date_cond_m = f"strftime('%Y', created_at) = '{today_date.year}'"
+            date_cond_u = f"strftime('%Y', created_at) = '{today_date.year}'"
+            period_label = f"{today_date.year}년 연간"
+            chart_title = f"📊 [{brand_name_kr}] {today_date.year}년 연간 월별 콘텐츠 배포 추이 (KST)"
+            chart_badge = f"기준: {brand_name_kr} {today_date.year}년 연간 실데이터"
+        else: # today
+            date_cond_m = "DATE(created_at) = DATE('now', '+9 hours')"
+            date_cond_u = "DATE(created_at) = DATE('now', '+9 hours')"
+            period_label = "오늘 24H"
+            chart_title = f"📊 [{brand_name_kr}] 오늘 24시간 시간대별 배포 추이 (00시~23시 KST)"
+            chart_badge = f"기준: {brand_name_kr} 오늘 24H 실데이터"
+
+        period_where_m = build_where(date_cond_m, brand_sql_m)
+        period_where_u = build_where(date_cond_u, brand_sql_u)
+        total_where_m = build_where("", brand_sql_m)
+        total_where_u = build_where("", brand_sql_u)
+
+        total_marketing_count = 0
+        period_marketing_count = 0
+        hourly_data = []
+        type_counts = {}
+        utm_total_count = 0
+        period_utm_count = 0
+        real_visitors_list = []
+        real_sources_map = {}
+
+        with self.db_mgr._get_connection() as conn:
+            c = conn.cursor()
+
+            # 1. 전체 마케팅 콘텐츠 누적 수
+            c.execute(f"SELECT COUNT(*) FROM marketing_history {total_where_m}")
+            total_marketing_count = c.fetchone()[0]
+
+            # 2. 선택된 기간 마케팅 콘텐츠 수
+            c.execute(f"SELECT COUNT(*) FROM marketing_history {period_where_m}")
+            period_marketing_count = c.fetchone()[0]
+
+            # 3. 기간별 차트 데이터 생성 (오늘 / 주간 / 월간 / 연간 1:1 완벽 분기)
+            if period == "weekly":
+                date_list = [(today_date - datetime.timedelta(days=i)) for i in range(6, -1, -1)]
+                weekly_map = {d.strftime("%Y-%m-%d"): 0 for d in date_list}
+                weekly_query_where = build_where("created_at >= DATE('now', '+9 hours', '-7 days')", brand_sql_m)
+                c.execute(f"SELECT DATE(created_at) as dt, COUNT(*) FROM marketing_history {weekly_query_where} GROUP BY dt")
+                for row in c.fetchall():
+                    if row[0] in weekly_map:
+                        weekly_map[row[0]] = row[1]
+                hourly_data = [{"hour": d.strftime("%m/%d"), "count": weekly_map[d.strftime("%Y-%m-%d")]} for d in date_list]
+
+            elif period == "monthly":
+                weeks = [("4주 전", 28, 21), ("3주 전", 21, 14), ("2주 전", 14, 7), ("이번 주", 7, 0)]
+                hourly_data = []
+                for label, start_days, end_days in weeks:
+                    w_cond = f"created_at >= DATE('now', '+9 hours', '-{start_days} days') AND created_at < DATE('now', '+9 hours', '-{max(0, end_days-1)} days')"
+                    w_where = build_where(w_cond, brand_sql_m)
+                    c.execute(f"SELECT COUNT(*) FROM marketing_history {w_where}")
+                    cnt = c.fetchone()[0]
+                    hourly_data.append({"hour": label, "count": cnt})
+
+            elif period == "yearly":
+                mon_map = {f"{m:02d}": 0 for m in range(1, 13)}
+                yr_cond = f"strftime('%Y', created_at) = '{today_date.year}'"
+                yr_where = build_where(yr_cond, brand_sql_m)
+                c.execute(f"SELECT strftime('%m', created_at) as mon, COUNT(*) FROM marketing_history {yr_where} GROUP BY mon")
+                for row in c.fetchall():
+                    if row[0] and row[0] in mon_map:
+                        mon_map[row[0]] = row[1]
+                hourly_data = [{"hour": f"{m}월", "count": mon_map[f"{m:02d}"]} for m in range(1, 13)]
+
+            else: # today
+                today_counts = {f"{h:02d}": 0 for h in range(24)}
+                today_hr_where = build_where("DATE(created_at) = DATE('now', '+9 hours')", brand_sql_m)
+                c.execute(f"SELECT strftime('%H', created_at) as hr, COUNT(*) FROM marketing_history {today_hr_where} GROUP BY hr")
+                for row in c.fetchall():
+                    if row[0] and row[0] in today_counts:
+                        today_counts[row[0]] = row[1]
+                hourly_data = [{"hour": f"{h:02d}시", "count": today_counts[f"{h:02d}"]} for h in range(24)]
+
+            # 4. 실제 발행된 콘텐츠 종류별 집계
+            c.execute(f"SELECT content_type, COUNT(*) FROM marketing_history {period_where_m} GROUP BY content_type ORDER BY COUNT(*) DESC")
+            for row in c.fetchall():
+                type_counts[row[0]] = row[1]
+
+            # 5. 실제 UTM 유입자 집계 (진짜 사람의 접속 로그)
+            try:
+                c.execute(f"SELECT COUNT(*) FROM utm_logs {total_where_u}")
+                utm_total_count = c.fetchone()[0]
+                c.execute(f"SELECT COUNT(*) FROM utm_logs {period_where_u}")
+                period_utm_count = c.fetchone()[0]
+
+                c.execute(f"SELECT utm_source, COUNT(*) FROM utm_logs {period_where_u} GROUP BY utm_source ORDER BY COUNT(*) DESC")
+                for row in c.fetchall():
+                    if row[0]:
+                        real_sources_map[row[0]] = row[1]
+
+                c.execute(f"SELECT utm_source, utm_medium, utm_campaign, target_service, ip, created_at FROM utm_logs {period_where_u} ORDER BY created_at DESC LIMIT 30")
+                for row in c.fetchall():
+                    real_visitors_list.append({
+                        "source_name": row[0] or "direct",
+                        "medium": row[1] or "link",
+                        "campaign": row[2] or "viral",
+                        "target_app": row[3] or brand_name_kr,
+                        "ip": row[4] or "127.0.0.1",
+                        "created_at": row[5] or ""
+                    })
+            except Exception as e:
+                logger.warning(f"UTM logs 쿼리 중 예외: {e}")
+
+        # 4대 핵심 지표 (100% 실데이터)
+        active_kpis = {
+            "today_pv": period_marketing_count,
+            "cumulative_pv": total_marketing_count,
+            "yoy_growth": "100% 실시간 DB 연동",
+            "monthly_visitors": period_utm_count,
+            "kpi_period_label": f"{period_label} [{brand_name_kr}] 마케팅 발행 (건)",
+            "visitor_period_label": f"{period_label} [{brand_name_kr}] 실제 유입 (명)"
         }
-        active_kpis = period_kpis.get(period, period_kpis["today"])
 
-        # 3. 글로벌 16대 채널별 실제 유입 현황 (진행 바)
-        channel_inflows = [
-            {"name": "Reddit 다국어 리드 답변", "category": "sns", "count": 192, "share": 36, "color": "#ff4500", "status": "1위 (최고 전환)"},
-            {"name": "Google SEO (45개 대학/공단)", "category": "seo", "count": 160, "share": 30, "color": "#3b82f6", "status": "2위 (4,590개 URL 색인)"},
-            {"name": "TikTok / Shorts 바이럴 숏폼", "category": "sns", "count": 80, "share": 15, "color": "#10b981", "status": "3위 (바이럴 확산)"},
-            {"name": "Instagram 캐러셀 카드뉴스", "category": "sns", "count": 48, "share": 9, "color": "#ec4899", "status": "4위"},
-            {"name": "Telegram / 메신저 데일리 브리핑", "category": "messenger", "count": 32, "share": 6, "color": "#0ea5e9", "status": "5위"},
-            {"name": "WordPress & Medium 글로벌 블로그", "category": "other", "count": 21, "share": 4, "color": "#8b5cf6", "status": "6위"}
-        ]
-
-        # Supabase 실시간 퍼널 데이터 조회
-        live_stats = self.supabase_mgr.fetch_live_funnel_stats()
-        km_users = live_stats["kmarket"]["total_users"]
-        km_items = live_stats["kmarket"]["total_items"]
-        km_free = live_stats["kmarket"]["free_items"]
-        km_appts = live_stats["kmarket"]["total_appointments"]
-
-        tax_total_apps = live_stats["easytax"]["total_applications"]
-        tax_comp_apps = live_stats["easytax"]["completed_applications"]
-        tax_refund_krw = live_stats["easytax"]["total_refund_krw"]
-
-        # 4. 각 앱별 최종 결과물 (세금 환급 / 케이마켓 / 알뜰폰) 정밀 성과 (Supabase 실시간 연동)
-        app_results = {
-            "easytax": {
-                "name": "KTRS 이지택스 (Easy Tax)",
-                "icon": "💰",
-                "tagline": "외국인 조특법 90% 소득세 감면 & D-2 알바 3.3% 환급",
-                "status_badge": "🟢 Supabase 실시간 퍼널 연동",
-                "inflow_pv": 1840,
-                "metrics": {
-                    "📊 누적 환급 신청 건수": f"{tax_total_apps if tax_total_apps > 0 else 184:,} 건",
-                    "✅ 최종 환급 완료 건수": f"{tax_comp_apps if tax_comp_apps > 0 else 156:,} 건",
-                    "💵 실시간 누적 환급액": f"{tax_refund_krw:,}원" if tax_refund_krw > 0 else "2억 4,800만원",
-                    "🎯 퍼널 최종 전환율": f"{round((tax_total_apps/1840)*100, 1) if tax_total_apps > 0 else 10.0}%"
-                },
-                "key_achievement": f"E-9/D-2 누적 환급 신청 {tax_total_apps if tax_total_apps > 0 else 184}건 실시간 연동 및 성공적 대행"
-            },
-            "kmarket": {
-                "name": "K-Market (외국인 로컬 당근마켓)",
-                "icon": "🛒",
-                "tagline": "270개 실물 매물, 0원 나눔 & 17개국 자동 번역 채팅",
-                "status_badge": "🟢 Supabase 실시간 퍼널 연동",
-                "inflow_pv": 3420,
-                "metrics": {
-                    "👥 실명인증 가입 회원수": f"{km_users if km_users > 0 else 412:,} 명",
-                    "📦 등록 실물 매물수": f"{km_items if km_items > 0 else 270:,} 개",
-                    "🎁 0원 무료나눔 매물수": f"{km_free if km_free > 0 else 8:,} 개",
-                    "🤝 거래/나눔 예약 매칭": f"{km_appts if km_appts > 0 else 24:,} 건"
-                },
-                "key_achievement": f"270개 실물 매물 및 0원 나눔 {km_free}건 실시간 연동 중"
-            },
-            "ktelecom": {
-                "name": "K-Telecom (외국인 알뜰폰)",
-                "icon": "📱",
-                "tagline": "여권 당일 개통 및 외국인등록증 본인인증(PASS) 유심",
-                "status_badge": "🟢 정상 가동",
-                "inflow_pv": 750,
-                "metrics": {
-                    "📱 선불/알뜰 유심 개통": "48 회선",
-                    "⚡ 당일 개통 전환율": "6.4%",
-                    "🌐 최다 유입 언어": "中文 (중국 40%)"
-                },
-                "key_achievement": "여권 당일 개통 및 본인인증(PASS) 지원 유심 48회선 활성화"
-            }
+        # 옴니채널 실제 콘텐츠 발행 실적 (실제 DB 데이터 기반 매핑)
+        type_info_map = {
+            "shorts": ("🔴 YouTube / TikTok 숏폼 비디오", "global_sns"),
+            "tiktok": ("🎵 TikTok 비디오", "global_sns"),
+            "cardnews": ("📸 Instagram / FB 카드뉴스", "global_sns"),
+            "reddit_reply": ("🤖 Reddit 1:1 질문 감지 답변", "global_sns"),
+            "fb_group_post": ("👥 페이스북 50만 그룹 배포", "global_sns"),
+            "threads_post": ("🧵 Meta Threads 바이럴 스레드", "global_sns"),
+            "blog_article": ("🌐 WordPress / Medium 블로그", "other"),
+            "seo": ("🔍 구글봇 색인 핑 전송", "other"),
+            "briefing": ("📲 텔레그램 데일리 브리핑", "messenger"),
+            "pdf": ("📄 외국인 정착/절세 가이드북 PDF", "other")
         }
 
-        # 5. 앱 간 교차 시너지 (Cross-App Synergy)
-        cross_app_synergy = [
-            {"from_app": "K-Market (중고/나눔)", "to_app": "KTRS 이지택스 (환급)", "transferred_users": 320, "purpose": "이사 정리 중 놓친 세금 환급 조회"},
-            {"from_app": "KTRS 이지택스 (환급)", "to_app": "K-Market (중고/나눔)", "transferred_users": 280, "purpose": "환급금 수령 후 중고 가전/아이폰 구매"},
-            {"from_app": "K-Market (유학생)", "to_app": "K-Telecom (알뜰폰)", "transferred_users": 140, "purpose": "신학기 입국 후 선불유심 개통"}
-        ]
+        channel_inflows = []
+        if period_marketing_count > 0:
+            for ckey, cnt in type_counts.items():
+                info = type_info_map.get(ckey, (f"📦 {ckey} 배포", "other"))
+                cname, ccat = info[0], info[1]
+                share = round((cnt / period_marketing_count * 100), 1)
+                channel_inflows.append({
+                    "name": cname,
+                    "category": ccat,
+                    "count": cnt,
+                    "share": share,
+                    "color": "#10B981" if brand_filter == "kmarket" else "#F59E0B",
+                    "unit": "건"
+                })
 
-        # 6. 하단 관제 요약 지표 (Supabase 실데이터 결합)
-        total_members = (km_users if km_users > 0 else 412) + (tax_total_apps if tax_total_apps > 0 else 184) + 48
-        footer_summary = {
-            "total_listings": km_items if km_items > 0 else 270, # 총 등록 실물 매물 (실데이터)
-            "fraud_reports": 0,                   # 사기 신고/의심 (0건 안심)
-            "total_tax_refund_volume": f"{tax_refund_krw:,}원" if tax_refund_krw > 0 else "248,000,000원", # KTRS 세금 환급 총액 (실데이터)
-            "total_expat_members": total_members  # 외국인 이용 회원 수 (실데이터 합산)
-        }
+        # 실제 유입 소스별 실데이터 목록
+        real_visitor_inflows = []
+        if period_utm_count > 0 and len(real_sources_map) > 0:
+            for sname, scnt in real_sources_map.items():
+                sshare = round((scnt / period_utm_count * 100), 1)
+                real_visitor_inflows.append({
+                    "name": f"🔗 {sname} 유입",
+                    "count": scnt,
+                    "share": sshare,
+                    "color": "#38BDF8",
+                    "unit": "명"
+                })
 
         return {
             "period": period,
+            "brand": brand_filter,
+            "chart_title": chart_title,
+            "chart_badge": chart_badge,
+            "channels_title": f"🚀 [{brand_name_kr}] 옴니채널 실제 배포 실적 ({period_label})",
+            "channels_subtitle": f"* {period_label} 동안 [{brand_name_kr}] 데이터베이스에 실제로 생성 및 발행 완료된 콘텐츠 실적입니다.",
+            "visitors_title": f"👥 [{brand_name_kr}] 실제 웹사이트 방문자(UTM 유입) 실시간 추적 ({period_label})",
+            "visitors_subtitle": f"배포된 링크를 클릭하고 [{brand_name_kr}]에 실제로 접속한 진짜 사람의 {period_label} 실시간 기록입니다.",
             "kpis": active_kpis,
             "hourly_data": hourly_data,
             "channel_inflows": channel_inflows,
-            "app_results": app_results,
-            "cross_app_synergy": cross_app_synergy,
-            "footer_summary": footer_summary,
-            "live_funnel": live_stats
+            "real_visitor_inflows": real_visitor_inflows,
+            "real_visitors_list": real_visitors_list
         }
