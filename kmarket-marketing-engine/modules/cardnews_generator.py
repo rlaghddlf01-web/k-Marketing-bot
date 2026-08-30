@@ -14,6 +14,8 @@ from core.utm_tracker import UTMTracker
 from core.gemini_media_generator import GeminiMediaGenerator
 from core.media_quality_verifier import MediaQualityVerifier
 from core.scenario_director import ScenarioDirector
+from core.scenario_director_cardnews_easytax import ScenarioDirectorCardnewsEasyTax
+from core.scenario_director_cardnews_kmarket import ScenarioDirectorCardnewsKMarket
 
 logger = logging.getLogger("CardnewsGenerator")
 
@@ -47,6 +49,8 @@ class CardnewsGenerator:
         self.gemini_media_gen = GeminiMediaGenerator()
         self.quality_verifier = MediaQualityVerifier()
         self.scenario_director = ScenarioDirector()
+        self.cardnews_easytax = ScenarioDirectorCardnewsEasyTax()
+        self.cardnews_kmarket = ScenarioDirectorCardnewsKMarket()
 
     # ──────────────────────────────────────────────
     # 1단계: Supabase에서 실제 270개 매물 사진 직접 조회
@@ -241,8 +245,9 @@ class CardnewsGenerator:
                     img.paste(Image.alpha_composite(Image.new("RGBA", (W, H), (0,0,0,0)), overlay), (0, 0), overlay)
                     
                     # 사진 위 환급액 하이라이트 골드 뱃지 오버레이
+                    refund_val = scenario.get("typical_refund_krw", scenario.get("refund_amount_krw", 3500000))
                     draw.rectangle([(50, 180), (580, 260)], fill=(245, 158, 11))
-                    draw.text((70, 195), f"💰 ₩{scenario['refund_amount_krw']:,} KRW", fill=(15, 23, 42), font=font_price)
+                    draw.text((70, 195), f"💰 ₩{refund_val:,} KRW", fill=(15, 23, 42), font=font_price)
                     photo_loaded = True
                 except Exception as e:
                     logger.warning(f"EasyTax 카드뉴스 실사 합성 에러: {e}")

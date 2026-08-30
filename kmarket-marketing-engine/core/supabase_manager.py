@@ -1,6 +1,7 @@
 import logging
+import datetime
 from typing import List, Dict, Any, Optional
-from config import SUPABASE_URL, SUPABASE_KEY
+from config import SUPABASE_URL, SUPABASE_KEY, KST, get_now_kst
 from core.db_manager import DBManager
 
 logger = logging.getLogger("SupabaseManager")
@@ -310,4 +311,40 @@ class SupabaseManager:
                 logger.info(f"🏆 [테마 가중치 자가학습 승격] {lang}/{theme_id} -> 가중치 {cur_weight}")
             except Exception as e:
                 logger.warning(f"테마 가중치 승격 실패: {e}")
+
+    def upload_blog_article(self, service_id: str, payload: Dict[str, Any]) -> bool:
+        """
+        🌐 [17개국어 서브경로 블로그 Supabase 실시간 Upsert]
+        - K-Market은 kmarket_blogs 테이블에 업로드
+        - EasyTax는 easytax_blogs 테이블에 업로드
+        - (slug, target_lang) 복합 유니크 키 기준 자동 Upsert
+        """
+        if not self.client:
+            logger.info(f"Supabase 미연동 -> 블로그 로컬 모드로만 저장됩니다. ({service_id}/{payload.get('slug')})")
+            return False
+
+        target_table = "easytax_blogs" if service_id == "easytax" else "kmarket_blogs"
+
+        try:
+            record = {
+                "slug": payload.get("slug"),
+                "target_lang": payload.get("target_lang", "en"),
+                "title": payload.get("title", ""),
+                "excerpt": payload.get("excerpt", ""),
+                "content_html": payload.get("content_html", ""),
+                "content_md": payload.get("content_md", ""),
+                "thumbnail_url": payload.get("thumbnail_url", ""),
+                "category": payload.get("category", "guide"),
+                "author": payload.get("author", "Expat Editor"),
+                "views": payload.get("views", 0),
+                "likes": payload.get("likes", 0),
+                "published_at": payload.get("published_at") or get_now_kst().isoformat(),
+                "updated_at": get_now_kst().isoformat()
+            }
+            res = self.client.table(target_table).upsert(record, on_conflict="slug,target_lang").execute()
+            logger.info(f"✅ [Supabase Blog 업로드 성공] {target_table} -> [{payload.get('target_lang')}] {payload.get('title')}")
+            return True
+        except Exception as e:
+            logger.error(f"❌ [Supabase Blog 업로드 에러] {target_table} ({payload.get('slug')}): {e}")
+            return False
 

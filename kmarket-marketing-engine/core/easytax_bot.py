@@ -1,6 +1,6 @@
 import time
 import logging
-import datetime
+from config import get_now_kst_str
 from typing import Dict, Any, List
 from config import BASE_URLS
 from core.db_manager import DBManager
@@ -57,7 +57,7 @@ class EasyTaxRefundBot:
     def run_easytax_cycle(self) -> Dict[str, Any]:
         """EasyTax 전담 사이클 1회 실행"""
         self.cycle_count += 1
-        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now_str = get_now_kst_str()
         self.last_run_time = now_str
         logger.info(f"💰 [EasyTax 봇] 사이클 #{self.cycle_count} 가동 시작 ({now_str})")
 

@@ -10,18 +10,17 @@ function renderHubGrid() {
     if (!container) return;
 
     if (currentBrand === "kmarket") {
-        if (panelTitle) panelTitle.innerText = "🎯 K-Market 8대 AI 마케팅 허브 & 24시간 무인 자율 공장";
-        if (panelDesc) panelDesc.innerText = "270개 실물 매물 0원 나눔 숏폼, 카드뉴스, 레딧 1:1, 50만 페북 그룹, 블로그, 구글 색인 핑, 스레드, 텔레그램을 24시간 자율 가동합니다.";
+        if (panelTitle) panelTitle.innerText = "🎯 K-Market 7대 AI 마케팅 허브 & 24시간 무인 자율 공장";
+        if (panelDesc) panelDesc.innerText = "270개 실물 매물 0원 나눔 숏폼, 카드뉴스, 레딧 1:1, 50만 페북 그룹, 블로그, 구글 색인 핑, 스레드를 24시간 자율 가동합니다. (텔레그램은 상단 전용 사령부에서 통합 관제)";
 
         const hubs = [
-            { id: "shorts", name: "0원 나눔 실물 숏폼 팩토리", icon: "🎬", desc: "YouTube Shorts · TikTok · IG Reels · FB Reels (4사 동시 전달)", key: "shorts" },
-            { id: "cardnews", name: "실물 매물 4장 카드뉴스", icon: "📸", desc: "Instagram Feed · Facebook Feed · Reddit Gallery (3사 동시 전달)", key: "cardnews" },
-            { id: "reddit", name: "Reddit 1:1 리드 헌터", icon: "🤖", desc: "26개 서브레딧 가구/원룸 질문 실시간 감지 & 80:20 솔루션 답변", key: "reddit" },
-            { id: "fb_groups", name: "페이스북 50만 그룹 침투기", icon: "👥", desc: "재한 외국인 대형 그룹 정보글 + 첫 댓글 링크 스텔스 침투", key: "fb_groups" },
-            { id: "blog", name: "WordPress & Medium SEO 블로그", icon: "🌐", desc: "17개국어 0원 나눔 1,500자 장문 SEO 칼럼 자동 발행", key: "blog" },
-            { id: "seo", name: "구글 서치콘솔 & 실시간 색인 핑", icon: "🔍", desc: "Googlebot 실시간 색인 핑(URL_UPDATED) 전송 & sitemap.xml 갱신", key: "seo", isSeo: true },
-            { id: "threads", name: "Meta Threads 바이럴 스레드", icon: "🧵", desc: "17개국어 0원 나눔 득템 썰 & 3~4단 구어체 타래 바이럴", key: "threads" },
-            { id: "briefing", name: "0원 나눔 텔레그램 브리핑", icon: "📲", desc: "매일 아침 17개 언어 0원 꿀매물 데일리 모닝 푸시 발송", key: "briefing" }
+            { id: "shorts", name: "0원 나눔 실물 숏폼 팩토리", icon: "🎬", desc: "4개 플랫폼 숏폼 (하루 3회 정시: 12:00 / 20:30 / 23:30 KST)", key: "shorts" },
+            { id: "cardnews", name: "실물 매물 4장 카드뉴스", icon: "📸", desc: "4장 캐러셀 카드뉴스 (하루 3회 정시: 08:00 / 15:30 / 22:30 KST)", key: "cardnews" },
+            { id: "reddit", name: "Reddit 1:1 리드 헌터", icon: "🤖", desc: "26개 서브레딧 실시간 감지 (1시간 간격 정기 자율 헌팅)", key: "reddit" },
+            { id: "fb_groups", name: "페이스북 50만 그룹 침투기", icon: "👥", desc: "4장 카드뉴스 + 첫댓글 (하루 3회 정시: 09:30 / 13:30 / 19:30 KST)", key: "fb_groups" },
+            { id: "blog", name: "17개국어 SEO 블로그 칼럼", icon: "🌐", desc: "17개국어 칼럼 (하루 3회 정시: 09:00 / 13:00 / 19:00 KST)", key: "blog" },
+            { id: "seo", name: "구글 서치콘솔 & 실시간 색인 핑", icon: "🔍", desc: "Googlebot 색인 핑 & 사이트맵 갱신 (하루 1회 정시: 01:00 KST)", key: "seo", isSeo: true },
+            { id: "threads", name: "Meta Threads 바이럴 스레드", icon: "🧵", desc: "3~4단 타래 바이럴 (하루 3회 정시: 11:00 / 16:30 / 21:30 KST)", key: "threads" }
         ];
 
         container.innerHTML = hubs.map((h, idx) => `
@@ -63,18 +62,17 @@ function renderHubGrid() {
         `).join("");
 
     } else {
-        if (panelTitle) panelTitle.innerText = "🎯 EasyTax 8대 AI 세무 허브 & 24시간 무인 자율 공장";
-        if (panelDesc) panelDesc.innerText = "조특법 90% 소득세 감면, D-2 환급 숏폼, 세무 카드뉴스, 세무 레딧, 50만 페북 그룹, 세무 블로그, 구글 색인 핑, 스레드, 텔레그램을 24시간 자율 가동합니다.";
+        if (panelTitle) panelTitle.innerText = "🎯 EasyTax 7대 AI 세무 허브 & 24시간 무인 자율 공장";
+        if (panelDesc) panelDesc.innerText = "조특법 90% 소득세 감면, D-2 환급 숏폼, 세무 카드뉴스, 세무 레딧, 50만 페북 그룹, 세무 블로그, 구글 색인 핑, 스레드를 24시간 자율 가동합니다. (텔레그램은 상단 전용 사령부에서 통합 관제)";
 
         const hubs = [
-            { id: "shorts", name: "E-9 90% 감면 세무 숏폼", icon: "🎬", desc: "YouTube Shorts · TikTok · IG Reels · FB Reels (4사 동시 전달)", key: "shorts" },
-            { id: "cardnews", name: "Anti-Ban 공인 세무 카드뉴스", icon: "📸", desc: "선입금 0원 & 국세청 공인 대리 4장 카드뉴스 3사 동시 전달", key: "cardnews" },
-            { id: "reddit", name: "세금/비자 세무 레딧 헌터", icon: "🤖", desc: "r/korea 세금 질문 감지 & 조특법 팩트 법률 답변", key: "reddit" },
-            { id: "fb_groups", name: "외국인 세무 페이스북 그룹 침투", icon: "👥", desc: "재한 50만 그룹 E-9 90% 감면 가이드 + 첫 댓글 링크", key: "fb_groups" },
-            { id: "blog", name: "WordPress & Medium 글로벌 세무 블로그", icon: "🌐", desc: "17개국어 5개년 경정청구 전문 칼럼 자동 발행", key: "blog" },
-            { id: "seo", name: "구글 서치콘솔 & 세무 색인 핑", icon: "🔍", desc: "전국 325개 거점 세무 랜딩 URL Googlebot 색인 핑 전송", key: "seo", isSeo: true },
-            { id: "threads", name: "Meta Threads 세무 스레드", icon: "🧵", desc: "17개국어 조특법 제30조 90% 감면 합법 권리 타래 바이럴", key: "threads" },
-            { id: "briefing", name: "17개국 세무 팁 텔레그램 브리핑", icon: "📲", desc: "매일 아침 비자별 절세 팁 17개국 채널 데일리 모닝 푸시", key: "briefing" }
+            { id: "shorts", name: "E-9 90% 감면 세무 숏폼", icon: "🎬", desc: "4개 플랫폼 세무 숏폼 (하루 3회 정시: 12:00 / 20:30 / 23:30 KST)", key: "shorts" },
+            { id: "cardnews", name: "Anti-Ban 공인 세무 카드뉴스", icon: "📸", desc: "4장 캐러셀 세무 카드뉴스 (하루 3회 정시: 08:00 / 15:30 / 22:30 KST)", key: "cardnews" },
+            { id: "reddit", name: "세금/비자 세무 레딧 헌터", icon: "🤖", desc: "r/korea 세무 질문 감지 (1시간 간격 정기 자율 헌팅)", key: "reddit" },
+            { id: "fb_groups", name: "외국인 세무 페이스북 그룹 침투", icon: "👥", desc: "4장 카드뉴스 + 첫댓글 (하루 3회 정시: 09:30 / 13:30 / 19:30 KST)", key: "fb_groups" },
+            { id: "blog", name: "15개국어 글로벌 세무 블로그", icon: "🌐", desc: "15개국어 세무 칼럼 (하루 3회 정시: 09:00 / 13:00 / 19:00 KST)", key: "blog" },
+            { id: "seo", name: "구글 서치콘솔 & 세무 색인 핑", icon: "🔍", desc: "Googlebot 색인 핑 & 사이트맵 갱신 (하루 1회 정시: 01:00 KST)", key: "seo", isSeo: true },
+            { id: "threads", name: "Meta Threads 세무 스레드", icon: "🧵", desc: "조특법 90% 감면 타래 (하루 3회 정시: 11:00 / 16:30 / 21:30 KST)", key: "threads" }
         ];
 
         container.innerHTML = hubs.map((h, idx) => `
@@ -252,6 +250,8 @@ async function stopKMarketDaemon() {
         const data = await res.json();
         showToast(data.message || "K-Market 봇이 정지되었습니다.", "info");
         fetchStatus();
+        if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();
+        renderHubGrid();
     } catch (e) {
         showToast("K-Market 정지 통신 오류", "error");
     }
@@ -263,6 +263,8 @@ async function startEasyTaxDaemon() {
         const data = await res.json();
         showToast(data.message || "EasyTax 세금환급 봇 사이클이 가동되었습니다! 💰", "success");
         fetchStatus();
+        if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();
+        renderHubGrid();
     } catch (e) {
         showToast("EasyTax 가동 통신 오류", "error");
     }
@@ -274,6 +276,8 @@ async function stopEasyTaxDaemon() {
         const data = await res.json();
         showToast(data.message || "EasyTax 봇이 정지되었습니다.", "info");
         fetchStatus();
+        if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();
+        renderHubGrid();
     } catch (e) {
         showToast("EasyTax 정지 통신 오류", "error");
     }
@@ -283,12 +287,14 @@ async function startAllBots() {
     showToast("⚡ K-Market & EasyTax 전체 봇을 동시 가동합니다! 🚀", "success");
     await startKMarketDaemon();
     await startEasyTaxDaemon();
+    if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();
 }
 
 async function stopAllBots() {
     showToast("🛑 모든 무인 봇을 정지합니다.", "warning");
     await stopKMarketDaemon();
     await stopEasyTaxDaemon();
+    if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();
 }
 
 // 6. 실시간 서버 상태 폴링 (3초 주기)

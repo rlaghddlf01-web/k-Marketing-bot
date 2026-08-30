@@ -167,22 +167,22 @@ class IRAnalyticsEngine:
             "cumulative_pv": total_marketing_count,
             "yoy_growth": "100% 실시간 DB 연동",
             "monthly_visitors": period_utm_count,
-            "kpi_period_label": f"{period_label} [{brand_name_kr}] 마케팅 발행 (건)",
-            "visitor_period_label": f"{period_label} [{brand_name_kr}] 실제 유입 (명)"
+            "kpi_period_label": f"{period_label} [{brand_name_kr}] 콘텐츠 자동 생산/발행 (건)",
+            "visitor_period_label": f"{period_label} [{brand_name_kr}] 실제 웹사이트 유입 (명)"
         }
 
-        # 옴니채널 실제 콘텐츠 발행 실적 (실제 DB 데이터 기반 매핑)
+        # 옴니채널 실제 콘텐츠 생산/발행 실적 (눈속임 0% 실제 작업 매핑)
         type_info_map = {
-            "shorts": ("🔴 YouTube / TikTok 숏폼 비디오", "global_sns"),
-            "tiktok": ("🎵 TikTok 비디오", "global_sns"),
-            "cardnews": ("📸 Instagram / FB 카드뉴스", "global_sns"),
-            "reddit_reply": ("🤖 Reddit 1:1 질문 감지 답변", "global_sns"),
-            "fb_group_post": ("👥 페이스북 50만 그룹 배포", "global_sns"),
-            "threads_post": ("🧵 Meta Threads 바이럴 스레드", "global_sns"),
-            "blog_article": ("🌐 WordPress / Medium 블로그", "other"),
-            "seo": ("🔍 구글봇 색인 핑 전송", "other"),
-            "briefing": ("📲 텔레그램 데일리 브리핑", "messenger"),
-            "pdf": ("📄 외국인 정착/절세 가이드북 PDF", "other")
+            "blog_article": ("🌐 17개국어 자율 SEO 블로그 발행", "seo_blog"),
+            "shorts": ("🎬 실물 숏폼 영상 렌더링 (MP4)", "global_sns"),
+            "tiktok": ("🎵 틱톡 숏폼 영상 렌더링 (MP4)", "global_sns"),
+            "cardnews": ("📸 실물 4장 카드뉴스 생성 (PNG)", "global_sns"),
+            "fb_group_post": ("👥 페이스북 그룹 스텔스 콘텐츠 조립", "community"),
+            "threads_post": ("🧵 Meta Threads 타래 스레드 생성", "community"),
+            "reddit_reply": ("🤖 Reddit 타깃 질문 감지 및 답변 조립", "community"),
+            "seo": ("🔍 구글봇 색인 핑 전송 (Googlebot)", "seo_blog"),
+            "briefing": ("📲 텔레그램 데일리 브리핑 파일 생성", "messenger"),
+            "pdf": ("📄 외국인 가이드북 PDF 생성", "other")
         }
 
         channel_inflows = []

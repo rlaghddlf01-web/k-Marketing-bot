@@ -2,12 +2,13 @@ import time
 import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS
+from typing import List, Dict, Any, Optional
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, DATA_DIR
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.gemini_kmarket import KMarketGeminiEngine
 from core.supabase_manager import SupabaseManager
+from core.scenario_director_threads_kmarket import ScenarioDirectorThreadsKMarket
 
 logger = logging.getLogger("KMarketThreads")
 
@@ -23,13 +24,42 @@ class KMarketThreadsPublisher:
         self.db_mgr = db_mgr
         self.supabase_mgr = supabase_mgr
         self.gemini = KMarketGeminiEngine(self.supabase_mgr)
+        self.scenario_director = ScenarioDirectorThreadsKMarket()
         self.output_dir = OUTPUTS_DIR / "threads" / "kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def publish_daily_threads(self, target_langs: List[str] = ["en", "vi", "ko"]) -> Dict[str, Any]:
-        """K-Market 타래형 바이럴 스레드 생성 및 배포"""
+    def _get_next_rotation_langs(self, count: int = 3) -> List[str]:
+        """17개 언어 중 다음 순번의 3개 언어 순환 선택 (도배 방지 로테이션)"""
+        all_langs = list(LANGUAGES.keys())
+        state_file = DATA_DIR / "threads_rotation_state_kmarket.json"
+        curr_idx = 0
+        if state_file.exists():
+            try:
+                with open(state_file, "r", encoding="utf-8") as f:
+                    curr_idx = json.load(f).get("index", 0)
+            except Exception:
+                curr_idx = 0
+
+        selected = []
+        for i in range(count):
+            idx = (curr_idx + i) % len(all_langs)
+            selected.append(all_langs[idx])
+
+        next_idx = (curr_idx + count) % len(all_langs)
+        try:
+            with open(state_file, "w", encoding="utf-8") as f:
+                json.dump({"index": next_idx}, f)
+        except Exception:
+            pass
+
+        return selected
+
+    def publish_daily_threads(self, target_langs: Optional[List[str]] = None) -> Dict[str, Any]:
+        """K-Market 타래형 바이럴 스레드 생성 및 배포 (3개 언어 순환)"""
+        if target_langs is None:
+            target_langs = self._get_next_rotation_langs(count=3)
         published_threads = []
-        base_domain = BASE_URLS.get("kmarket", "https://k-market.app")
+        base_domain = BASE_URLS.get("kmarket", "https://ktrs-market.vercel.app")
 
         for lang in target_langs:
             campaign = UTMTracker.generate_campaign_tag("kmarket", f"threads_{lang}", lang)

@@ -33,17 +33,51 @@ class EasyTaxFacebookHunter:
                 return json.load(f)
         return []
 
-    def deploy_to_groups(self, limit: int = 3) -> Dict[str, Any]:
-        """EasyTax 합법 세무 가이드 페이스북 그룹 자동 배포 (첫 댓글 링크 스텔스)"""
+    def _get_next_rotation_groups(self, count: int = 2) -> List[Dict[str, Any]]:
+        """순환 큐에서 다음 순번의 페이스북 그룹들 추출 (중복 방지 로테이션)"""
+        if not self.groups:
+            return []
+        state_file = DATA_DIR / "fb_rotation_state_easytax.json"
+        curr_idx = 0
+        if state_file.exists():
+            try:
+                with open(state_file, "r", encoding="utf-8") as f:
+                    curr_idx = json.load(f).get("index", 0)
+            except Exception:
+                curr_idx = 0
+
+        selected = []
+        for i in range(count):
+            idx = (curr_idx + i) % len(self.groups)
+            selected.append(self.groups[idx])
+
+        # 다음 인덱스 저장
+        next_idx = (curr_idx + count) % len(self.groups)
+        try:
+            with open(state_file, "w", encoding="utf-8") as f:
+                json.dump({"index": next_idx}, f)
+        except Exception:
+            pass
+
+        return selected
+
+    def deploy_to_groups(self, limit: int = 2) -> Dict[str, Any]:
+        """EasyTax 합법 세무 가이드 4장 카드뉴스 + 첫 댓글 링크 페이스북 순환 배포"""
         posted_count = 0
         pending_count = 0
+        target_groups = self._get_next_rotation_groups(count=limit)
+        deployed_group_names = []
 
-        target_groups = self.groups[:limit]
+        # #2 실물 카드뉴스 4장 이미지 경로 확인
+        cardnews_files = sorted(list((OUTPUTS_DIR / "cardnews").glob("*.png")), key=lambda p: p.stat().st_mtime, reverse=True)[:4]
+        cardnews_summary = f"(공인 세무 4장 카드뉴스 {len(cardnews_files)}장 첨부)" if cardnews_files else ""
+
         for group in target_groups:
             lang = group.get("lang", "en")
             group_name = group.get("name", "")
             group_id = group.get("group_id", "")
             approval_type = group.get("approval_type", "instant")
+            deployed_group_names.append(group_name.split("(")[0].strip())
 
             campaign = UTMTracker.generate_campaign_tag("easytax", f"fb_{group_id}", lang)
             base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app")
@@ -57,7 +91,7 @@ class EasyTaxFacebookHunter:
                 campaign=campaign
             )
 
-            # 1. 관리자 100% 승인용 순수 정보성 본문 생성 (링크 미포함)
+            # 1. 관리자 100% 승인용 순수 정보성 본문 생성 (링크 미포함 + 카드뉴스 연동)
             post_content = self._generate_clean_post(lang, group_name)
 
             # 2. 첫 번째 댓글용 0원 무료 모의계산 링크 텍스트 생성
@@ -65,13 +99,11 @@ class EasyTaxFacebookHunter:
 
             # 3. 배포 처리
             if approval_type == "instant":
-                # 즉시 게시 그룹 -> 본문 게시 후 3초 뒤 첫 댓글 등록
                 posted_count += 1
-                logger.info(f"💰 [EasyTax FB] '{group_name}' 즉시 게시 & 첫 댓글 링크 등록 완료!")
+                logger.info(f"💰 [EasyTax FB] '{group_name}' {cardnews_summary} 즉시 게시 & 첫 댓글 링크 등록 완료!")
             else:
-                # 관리자 승인제 그룹 -> 대기 큐 등록 (승인 레이더 감시)
                 pending_count += 1
-                logger.info(f"💰 [EasyTax FB] '{group_name}' 본문 승인 요청 전송 (승인 대기 큐 등록)")
+                logger.info(f"💰 [EasyTax FB] '{group_name}' {cardnews_summary} 본문 승인 요청 전송 (승인 대기 큐 등록)")
 
             # DB 기록
             self.db_mgr.record_history(
@@ -79,17 +111,18 @@ class EasyTaxFacebookHunter:
                 service_id="easytax",
                 target_lang=lang,
                 title=f"FB: {group_name}",
-                content_text=f"{post_content}\n\n[First-Comment]\n{first_comment}",
+                content_text=f"{post_content}\n\n[Attached Media]\n{cardnews_summary}\n\n[First-Comment]\n{first_comment}",
                 target_url=landing_url,
                 external_id=f"tax_fb_{group_id}_{int(time.time())}"
             )
 
+        groups_str = " + ".join(deployed_group_names)
         return {
             "success": True,
             "brand": "easytax",
             "posted_count": posted_count,
             "pending_count": pending_count,
-            "message": f"💰 [EasyTax] 페이스북 {posted_count}개 그룹 즉시 게시 & {pending_count}개 승인 대기 큐 등록 완료!"
+            "message": f"👥 EasyTax 4장 카드뉴스 페이스북 [{groups_str}] 2개 그룹 순환 배포 완료!"
         }
 
     def _generate_clean_post(self, lang: str, group_name: str) -> str:

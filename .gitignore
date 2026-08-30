@@ -37,6 +37,8 @@ outputs/
 *.mp3
 *.png
 
-# 🔐 구글 서비스 계정 키 보안
+# 🔐 구글 서비스 계정 키 및 텔레그램 세션 보안
 *service_account*.json
 *.json.json
+*.session
+*.session-journal

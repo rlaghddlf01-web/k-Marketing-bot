@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR))
 
 
-from config import OUTPUTS_DIR, BASE_DIR as CFG_BASE_DIR, DATA_DIR
+from config import OUTPUTS_DIR, BASE_DIR as CFG_BASE_DIR, DATA_DIR, KST, get_now_kst, get_now_kst_str
 from core.db_manager import DBManager
 from core.supabase_manager import SupabaseManager
 from core.service_router import ServiceRouter
@@ -32,6 +32,8 @@ from core.tts_engine import TTSEngine
 from core.notifier import Notifier
 from core.kmarket_bot import KMarketGrowthBot
 from core.easytax_bot import EasyTaxRefundBot
+from core.blog_scheduler import BlogScheduler
+from core.channel_scheduler import ChannelScheduler
 
 from modules.reddit_lead_hunter import RedditLeadHunter
 from modules.shorts_video_factory import ShortsVideoFactory
@@ -40,6 +42,29 @@ from modules.cardnews_generator import CardnewsGenerator
 from modules.free_stuff_notifier import FreeStuffNotifier
 from modules.guide_pdf_generator import GuidePDFGenerator
 from core.direct_uploader import DirectUploader
+from core.telegram_ai_community_manager import TelegramAICommunityManager
+from core.telegram_member_scraper import TelegramMemberScraper
+from core.telegram_outreach_poster import TelegramOutreachPoster
+from core.telegram_stealth_inviter import TelegramStealthInviter
+from modules.telegram_community_publisher import TelegramCommunityPublisher
+
+# 📲 텔레그램 24시간 커뮤니티 — 브랜드별 독립 인스턴스 (K-Market / EasyTax 완전 분리)
+telegram_ai_managers = {
+    "kmarket": TelegramAICommunityManager(brand="kmarket"),
+    "easytax": TelegramAICommunityManager(brand="easytax")
+}
+# [방법 1] 타 그룹 홍보 게시 엔진 (브랜드별 독립 세션)
+telegram_outreach_posters = {
+    "kmarket": TelegramOutreachPoster(brand="kmarket"),
+    "easytax": TelegramOutreachPoster(brand="easytax")
+}
+# [초대] 서브폰 스텔스 초대기 (브랜드별 독립 세션)
+telegram_stealth_inviters = {
+    "kmarket": TelegramStealthInviter(brand="kmarket"),
+    "easytax": TelegramStealthInviter(brand="easytax")
+}
+telegram_scraper = TelegramMemberScraper()
+telegram_publisher = TelegramCommunityPublisher()
 
 # 듀얼 봇 글로벌 상태
 kmarket_thread = None
@@ -64,7 +89,7 @@ recent_logs = []
 
 def log_event(text: str, log_type: str = "info"):
     global recent_logs
-    recent_logs.append({"text": text, "type": log_type, "time": time.strftime("%H:%M:%S")})
+    recent_logs.append({"text": text, "type": log_type, "time": get_now_kst().strftime("%H:%M:%S")})
     if len(recent_logs) > 50:
         recent_logs.pop(0)
 
@@ -105,21 +130,25 @@ def execute_single_channel_task(module_name: str) -> str:
         import modules.reddit_kmarket
         importlib.reload(modules.reddit_kmarket)
         hunter = modules.reddit_kmarket.KMarketRedditHunter(db_mgr, supabase_mgr)
-        cnt = hunter.scan_and_reply(limit_per_sub=20)
-        if cnt > 0:
-            return f"🎯 K-Market 레딧 질문 포착 & {cnt}건 답변 등록 완료!"
+        res = hunter.run_safe_cycle()
+        if res.get("skipped_reason") == "warmup_phase":
+            return f"🌱 K-Market 레딧 워밍업 완료: 업보트 {res.get('upvotes')}건, 비홍보 도움답변 {res.get('organic_comments')}건 (카르마 축적 중, 홍보 0건 강제 차단)"
+        elif res.get("promo_comments", 0) > 0:
+            return f"🎯 K-Market 레딧 안전 사이클 완료: 홍보 {res.get('promo_comments')}건, 비홍보 {res.get('organic_comments')}건, 업보트 {res.get('upvotes')}건"
         else:
-            return f"📡 K-Market 레딧 26개 전국 외국인/대학 커뮤니티 실시간 감시 중 (신규 질문 대기)"
+            return f"🛡️ K-Market 레딧 안전 사이클 완료: 업보트 {res.get('upvotes')}건, 비홍보 {res.get('organic_comments')}건 (홍보 대기)"
     elif module_name == "easytax_reddit":
         import importlib
         import modules.reddit_easytax
         importlib.reload(modules.reddit_easytax)
         hunter = modules.reddit_easytax.EasyTaxRedditHunter(db_mgr, supabase_mgr)
-        cnt = hunter.scan_and_reply(limit_per_sub=20)
-        if cnt > 0:
-            return f"🎯 EasyTax 레딧 세무 질문 포착 & {cnt}건 답변 등록 완료!"
+        res = hunter.run_safe_cycle()
+        if res.get("skipped_reason") == "warmup_phase":
+            return f"🌱 EasyTax 레딧 워밍업 완료: 업보트 {res.get('upvotes')}건, 비홍보 도움답변 {res.get('organic_comments')}건 (카르마 축적 중, 홍보 0건 강제 차단)"
+        elif res.get("promo_comments", 0) > 0:
+            return f"🎯 EasyTax 레딧 안전 사이클 완료: 팩트안내 {res.get('promo_comments')}건, 비홍보 {res.get('organic_comments')}건, 업보트 {res.get('upvotes')}건"
         else:
-            return f"📡 EasyTax 레딧 10개 서브레딧 실시간 감시 중 (신규 세무 질문 대기)"
+            return f"🛡️ EasyTax 레딧 안전 사이클 완료: 업보트 {res.get('upvotes')}건, 비홍보 {res.get('organic_comments')}건 (홍보 대기)"
     elif module_name == "kmarket_briefing" or module_name == "briefing":
         from modules.telegram_kmarket import KMarketTelegramPusher
         pusher = KMarketTelegramPusher(db_mgr)
@@ -171,15 +200,15 @@ def execute_single_channel_task(module_name: str) -> str:
         import modules.blog_kmarket
         importlib.reload(modules.blog_kmarket)
         publisher = modules.blog_kmarket.KMarketBlogPublisher(db_mgr, supabase_mgr)
-        res = publisher.publish_daily_articles(target_langs=["en", "vi", "ko"])
-        return f"🌐 K-Market 17개국어 SEO 블로그 칼럼 {res.get('count', 3)}건 발행 완료"
+        res = publisher.publish_multilingual_articles()
+        return f"🌐 K-Market 17개국어 SEO 블로그 칼럼 {res.get('total_langs', 17)}건 생성 & Supabase 업로드 완료"
     elif module_name == "easytax_blog":
         import importlib
         import modules.blog_easytax
         importlib.reload(modules.blog_easytax)
         publisher = modules.blog_easytax.EasyTaxBlogPublisher(db_mgr, supabase_mgr)
-        res = publisher.publish_daily_articles(target_langs=["en", "vi", "ko"])
-        return f"🌐 EasyTax 공인 세무 SEO 블로그 칼럼 {res.get('count', 3)}건 발행 완료"
+        res = publisher.publish_multilingual_articles()
+        return f"🌐 EasyTax 공인 세무 SEO 블로그 칼럼 {res.get('total_langs', 15)}건 생성 & Supabase 업로드 완료"
     elif module_name == "kmarket_threads":
         import importlib
         import modules.threads_kmarket
@@ -208,9 +237,134 @@ def execute_single_channel_task(module_name: str) -> str:
     else:
         return f"{module_name} 실행 완료"
 
-# 24시간 연속 무인 자율 공장 루프 (개별 채널 무한 반복)
+# 24시간 연속 무인 자율 공장 루프
 def channel_continuous_worker(module_name: str):
     global running_channels
+
+    # ⏰ #1 숏폼 / 틱톡: 대한민국 표준시(KST) 하루 3회 (12:00 / 20:30 / 23:30) 정시 스케줄러
+    if module_name in ["kmarket_shorts", "easytax_shorts", "kmarket_tiktok", "easytax_tiktok"]:
+        ch_title = "K-Market 숏폼" if "kmarket" in module_name else "EasyTax 숏폼"
+        scheduler = ChannelScheduler(
+            channel_name=ch_title,
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["12:00", "20:30", "23:30"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #2 실물 카드뉴스: 대한민국 표준시(KST) 하루 3회 (08:00 / 15:30 / 22:30) 정시 스케줄러
+    if module_name in ["kmarket_cardnews", "easytax_cardnews"]:
+        ch_title = "K-Market 카드뉴스" if "kmarket" in module_name else "EasyTax 카드뉴스"
+        scheduler = ChannelScheduler(
+            channel_name=ch_title,
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["08:00", "15:30", "22:30"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #3 Reddit 1:1 리드 헌터: 대한민국 표준시(KST) 1시간 간격 정기 자율 스캔
+    if module_name in ["kmarket_reddit", "easytax_reddit", "reddit"]:
+        ch_title = "K-Market 레딧 헌터" if "kmarket" in module_name else ("EasyTax 레딧 헌터" if "easytax" in module_name else "Reddit 헌터")
+        scheduler = ChannelScheduler(
+            channel_name=ch_title,
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            interval_seconds=3600
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #4 페이스북 50만 그룹 침투기: 대한민국 표준시(KST) 하루 3회 (09:30 / 13:30 / 19:30) 2개 그룹 순환 스케줄러
+    if module_name in ["kmarket_fb_groups", "easytax_fb_groups"]:
+        ch_title = "K-Market 페북 침투기" if "kmarket" in module_name else "EasyTax 페북 침투기"
+        scheduler = ChannelScheduler(
+            channel_name=ch_title,
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["09:30", "13:30", "19:30"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #5-1 K-Market 블로그: 대한민국 표준시(KST) 하루 3회 (09:00 / 13:00 / 19:00) 정시 스케줄러
+    if module_name == "kmarket_blog":
+        scheduler = ChannelScheduler(
+            channel_name="K-Market 블로그",
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["09:00", "13:00", "19:00"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #5-2 EasyTax 블로그: 대한민국 표준시(KST) 하루 3회 (09:10 / 13:10 / 19:10) 10분 시차 분산 스케줄러
+    if module_name == "easytax_blog":
+        scheduler = ChannelScheduler(
+            channel_name="EasyTax 블로그",
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["09:10", "13:10", "19:10"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #6 구글 실시간 색인 핑: 대한민국 표준시(KST) 하루 1회 (새벽 01:00) 종합 색인 스케줄러
+    if module_name in ["kmarket_seo", "easytax_seo", "seo"]:
+        ch_title = "K-Market 구글색인" if "kmarket" in module_name else ("EasyTax 구글색인" if "easytax" in module_name else "구글 색인 핑")
+        scheduler = ChannelScheduler(
+            channel_name=ch_title,
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["01:00"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #7 Meta Threads 바이럴 스레드: 대한민국 표준시(KST) 하루 3회 (11:00 / 16:30 / 21:30) 3개 언어 순환 스케줄러
+    if module_name in ["kmarket_threads", "easytax_threads", "threads"]:
+        ch_title = "K-Market 스레드" if "kmarket" in module_name else ("EasyTax 스레드" if "easytax" in module_name else "Meta Threads")
+        scheduler = ChannelScheduler(
+            channel_name=ch_title,
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["11:00", "16:30", "21:30"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
+    # ⏰ #8 텔레그램 데일리 브리핑: 대한민국 표준시(KST) 하루 2회 (08:30 / 18:30) 모닝 & 이브닝 푸시 스케줄러
+    if module_name in ["kmarket_briefing", "easytax_briefing", "briefing"]:
+        ch_title = "K-Market 텔레그램" if "kmarket" in module_name else ("EasyTax 텔레그램" if "easytax" in module_name else "텔레그램 브리핑")
+        scheduler = ChannelScheduler(
+            channel_name=ch_title,
+            publish_fn=lambda: execute_single_channel_task(module_name),
+            time_slots=["08:30", "18:30"]
+        )
+        scheduler.run_scheduled_loop(
+            is_running_checker=lambda: running_channels.get(module_name, False),
+            on_log=log_event
+        )
+        return
+
     log_event(f"🚀 [{module_name}] 24시간 연속 무인 자율 공장이 가동되었습니다.", "success")
     
     cycle = 0
@@ -385,6 +539,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif path == "/api/scenarios" or path.startswith("/api/scenarios"):
             self._handle_get_scenarios(parsed)
             return
+        elif path == "/api/telegram/stats" or path.startswith("/api/telegram/stats"):
+            self._handle_get_telegram_stats(parsed)
+            return
 
         self._set_headers("text/plain", 404)
         self.wfile.write(b"Not Found")
@@ -446,6 +603,20 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._handle_refresh_hashtags()
         elif path == "/api/settings":
             self._handle_save_settings(payload)
+        elif path == "/api/telegram/toggle-manager":
+            self._handle_telegram_toggle_manager(payload)
+        elif path == "/api/telegram/broadcast":
+            self._handle_telegram_broadcast(payload)
+        elif path == "/api/telegram/run-invite":
+            self._handle_telegram_run_invite(payload)
+        # ── [방법 1] 타 그룹 홍보 게시 아웃리치 ──────────────────
+        elif path == "/api/telegram/outreach/run":
+            self._handle_telegram_outreach_run(payload)
+        elif path == "/api/telegram/outreach/status":
+            self._handle_telegram_outreach_status(payload)
+        # ── [초대] 서브폰 스텔스 초대 ─────────────────────────────
+        elif path == "/api/telegram/stealth-invite":
+            self._handle_telegram_stealth_invite(payload)
         else:
             self._set_headers("text/plain", 404)
             self.wfile.write(b"Endpoint Not Found")
@@ -548,7 +719,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         kmarket_running = False
         for ch in ["kmarket_shorts", "kmarket_tiktok", "kmarket_cardnews", "kmarket_reddit", "kmarket_briefing", "kmarket_fb_groups", "kmarket_seo", "kmarket_pdf", "kmarket_blog", "kmarket_threads"]:
             running_channels[ch] = False
-        res = {"success": True, "message": "⏹️ K-Market 10대 채널 무인 공장 정지 완료."}
+        if "kmarket" in telegram_ai_managers:
+            telegram_ai_managers["kmarket"].stop_background_daemon()
+        res = {"success": True, "message": "⏹️ K-Market 10대 채널 및 텔레그램 AI 매니저 무인 공장 정지 완료."}
         self._set_headers("application/json")
         self.wfile.write(json.dumps(res).encode("utf-8"))
 
@@ -574,7 +747,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         easytax_running = False
         for ch in ["easytax_shorts", "easytax_tiktok", "easytax_cardnews", "easytax_reddit", "easytax_briefing", "easytax_fb_groups", "easytax_seo", "easytax_pdf", "easytax_blog", "easytax_threads"]:
             running_channels[ch] = False
-        res = {"success": True, "message": "⏹️ EasyTax 10대 채널 무인 공장 정지 완료."}
+        if "easytax" in telegram_ai_managers:
+            telegram_ai_managers["easytax"].stop_background_daemon()
+        res = {"success": True, "message": "⏹️ EasyTax 10대 채널 및 텔레그램 AI 매니저 무인 공장 정지 완료."}
         self._set_headers("application/json")
         self.wfile.write(json.dumps(res).encode("utf-8"))
 
@@ -609,7 +784,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         easytax_running = False
         for ch in running_channels:
             running_channels[ch] = False
-        res = {"success": True, "message": "🛑 [전체 봇 정지] 모든 무인 성장봇 20대 채널 가동이 안전하게 중지되었습니다."}
+        for mgr in telegram_ai_managers.values():
+            mgr.stop_background_daemon()
+        res = {"success": True, "message": "🛑 [전체 봇 정지] 모든 무인 성장봇 20대 채널 및 텔레그램 AI 매니저 가동이 안전하게 중지되었습니다."}
         self._set_headers("application/json")
         self.wfile.write(json.dumps(res).encode("utf-8"))
 
@@ -1470,6 +1647,131 @@ class DashboardHandler(BaseHTTPRequestHandler):
         log_event(result["message"], "success")
         self._set_headers("application/json")
         self.wfile.write(json.dumps(result, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_get_telegram_stats(self, parsed):
+        query_params = urllib.parse.parse_qs(parsed.query)
+        brand = query_params.get("brand", ["kmarket"])[0].lower()
+        manager = telegram_ai_managers.get(brand, telegram_ai_managers["kmarket"])
+
+        stats = {
+            "brand": brand,
+            "ai_manager": manager.get_stats(),
+            "scraper": {
+                "today_invited": telegram_scraper.get_today_invite_count(),
+                "total_invited_history": len(telegram_scraper.get_already_invited_user_ids()),
+                "target_groups_count": len(telegram_scraper.discoverer.get_all_groups())
+            },
+            "credentials": {
+                "bot_configured": bool(manager.bot_token),
+                "chat_configured": bool(manager.chat_id)
+            }
+        }
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps(stats, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_telegram_toggle_manager(self, payload: Dict[str, Any]):
+        brand = payload.get("brand", "kmarket").lower()
+        action = payload.get("action", "toggle")
+        manager = telegram_ai_managers.get(brand, telegram_ai_managers["kmarket"])
+
+        if action == "start":
+            if not manager.is_running:
+                manager.start_background_daemon()
+            msg = f"🤖 [TelegramAIManager] {brand.upper()} 24시간 17개국어 AI 커뮤니티 매니저가 가동되었습니다!"
+            log_event(msg, "success")
+        elif action == "stop":
+            if manager.is_running:
+                manager.stop_background_daemon()
+            msg = f"⏹️ [TelegramAIManager] {brand.upper()} 24시간 AI 커뮤니티 매니저가 정지되었습니다."
+            log_event(msg, "warning")
+        else:
+            if manager.is_running:
+                manager.stop_background_daemon()
+                msg = f"⏹️ [TelegramAIManager] {brand.upper()} 24시간 AI 커뮤니티 매니저가 정지되었습니다."
+                log_event(msg, "warning")
+            else:
+                manager.start_background_daemon()
+                msg = f"🤖 [TelegramAIManager] {brand.upper()} 24시간 17개국어 AI 커뮤니티 매니저가 가동되었습니다!"
+                log_event(msg, "success")
+
+        result = {"success": True, "brand": brand, "is_running": manager.is_running, "message": msg}
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps(result, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_telegram_broadcast(self, payload: Dict[str, Any]):
+        b_type = payload.get("type", "morning_briefing")
+        brand = payload.get("brand", "kmarket").lower()
+
+        if b_type == "poll":
+            res = telegram_publisher.broadcast_interactive_poll()
+            msg = f"📊 [Telegram] 커뮤니티 참여형 투표 발송 완료 ({brand.upper()})"
+        else:
+            res = telegram_publisher.broadcast_morning_briefing(brand)
+            msg = f"🌅 [Telegram] {brand.upper()} 모닝 브리핑 발송 완료"
+
+        log_event(msg, "success" if res.get("success") else "warning")
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({"success": res.get("success", False), "message": msg, "detail": res}, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_telegram_run_invite(self, payload: Dict[str, Any]):
+        brand = payload.get("brand", "kmarket").lower()
+        manager = telegram_ai_managers.get(brand, telegram_ai_managers["kmarket"])
+        target_chat = payload.get("chat_id") or manager.chat_id or "default_chat"
+        res = telegram_scraper.execute_stealth_invite_cycle(target_chat_id=target_chat)
+        msg = f"🕵️ [TelegramInviter] {brand.upper()} 스텔스 1회 초대 완료 (오늘 누적 {res.get('today_invited', 0)}명)"
+        log_event(msg, "success" if res.get("success") else "warning")
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({"success": res.get("success", False), "message": msg, "detail": res}, ensure_ascii=False).encode("utf-8"))
+
+    # ── [방법 1] 타 그룹 홍보 게시 아웃리치 핸들러 ──────────────────────
+    def _handle_telegram_outreach_run(self, payload):
+        """K-Market / EasyTax 타 그룹 홍보 게시 1회 실행"""
+        brand = payload.get("brand", "kmarket").lower()
+        poster = telegram_outreach_posters.get(brand, telegram_outreach_posters["kmarket"])
+        res = poster.execute_outreach_cycle()
+        status = res.get("status", "")
+        if status == "POSTED":
+            msg = f"📢 [{brand.upper()}] 아웃리치 게시 완료: @{res.get('group_username','')} ({res.get('lang','')})"
+            log_event(msg, "success")
+        elif status == "NO_ELIGIBLE_GROUPS":
+            msg = f"⏸️ [{brand.upper()}] 아웃리치: 오늘 게시 가능한 그룹 없음 (5일 간격 유지 중)"
+            log_event(msg, "info")
+        else:
+            msg = f"⚠️ [{brand.upper()}] 아웃리치 게시 실패: {res.get('error', 'Telethon 세션 미설정')}"
+            log_event(msg, "warning")
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({"success": res.get("success", False), "message": msg, "detail": res}, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_telegram_outreach_status(self, payload):
+        """K-Market / EasyTax 아웃리치 현황 조회"""
+        brand = payload.get("brand", "kmarket").lower()
+        poster = telegram_outreach_posters.get(brand, telegram_outreach_posters["kmarket"])
+        status = poster.get_status()
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps(status, ensure_ascii=False).encode("utf-8"))
+
+    # ── [초대] 서브폰 스텔스 초대 핸들러 ─────────────────────────────────
+    def _handle_telegram_stealth_invite(self, payload):
+        """K-Market / EasyTax 서브폰 스텔스 1회 초대 실행"""
+        brand = payload.get("brand", "kmarket").lower()
+        source_group = payload.get("source_group", None)  # 없으면 라운드로빈 자동 선택
+        inviter = telegram_stealth_inviters.get(brand, telegram_stealth_inviters["kmarket"])
+        res = inviter.execute_invite_cycle(source_group_username=source_group)
+        status = res.get("status", "")
+        if status == "INVITED":
+            msg = f"🎉 [{brand.upper()}] 스텔스 초대 성공: {res.get('invited_user','')}(@{res.get('username','')}) │ 오늘 {res.get('today_count',0)}/{inviter.get_status()['daily_limit']}명"
+            log_event(msg, "success")
+        elif status == "DAILY_LIMIT_REACHED":
+            msg = f"🛑 [{brand.upper()}] 오늘 초대 한도 달성 ({res.get('today_count',0)}명/일)"
+            log_event(msg, "info")
+        elif status == "NO_SESSION":
+            msg = f"⚠️ [{brand.upper()}] 서브폰 세션 파일 없음 → setup_telethon_session.py 실행 필요"
+            log_event(msg, "warning")
+        else:
+            msg = f"⚠️ [{brand.upper()}] 스텔스 초대 결과: {status} - {res.get('error', res.get('message', ''))}"
+            log_event(msg, "warning")
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({"success": res.get("success", False), "message": msg, "detail": res}, ensure_ascii=False).encode("utf-8"))
 
 def run_server(port: int = 8000):
     ThreadingHTTPServer.allow_reuse_address = True

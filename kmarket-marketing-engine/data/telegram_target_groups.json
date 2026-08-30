@@ -1,0 +1,112 @@
+[
+  {
+    "id": "rabota_koreia",
+    "name": "Корея Работа (러시아/CIS 외국인 취업/세무)",
+    "username": "rabota_koreia",
+    "target_country": "Russia/CIS",
+    "language": "ru",
+    "category": "jobs_and_tax",
+    "region": "National",
+    "priority_score": 10,
+    "is_active": true
+  },
+  {
+    "id": "chat_vsya_korea",
+    "name": "ИНФО Вся Корея (러시아/CIS 생활/가구/정보)",
+    "username": "chat_vsya_korea",
+    "target_country": "Russia/CIS",
+    "language": "ru",
+    "category": "secondhand_furniture_free",
+    "region": "National",
+    "priority_score": 10,
+    "is_active": true
+  },
+  {
+    "id": "rabota_vsya_korea",
+    "name": "Работа Вся Корея (취업 및 세무 환급)",
+    "username": "rabota_vsya_korea",
+    "target_country": "Russia/CIS",
+    "language": "ru",
+    "category": "jobs_and_tax",
+    "region": "National",
+    "priority_score": 9,
+    "is_active": true
+  },
+  {
+    "id": "yuzhnaya_korea_rabota",
+    "name": "Южная Корея Работа (공단 취업/세무)",
+    "username": "yuzhnaya_korea_rabota",
+    "target_country": "Russia/CIS",
+    "language": "ru",
+    "category": "jobs_and_tax",
+    "region": "Ansan/Hwaseong",
+    "priority_score": 9,
+    "is_active": true
+  },
+  {
+    "id": "students_of_uzbekistan",
+    "name": "KOREYADAGI O ZBEK TALABALAR (우즈벡 유학생 연합)",
+    "username": "students_of_uzbekistan",
+    "target_country": "Uzbekistan",
+    "language": "uz",
+    "category": "students_secondhand_furniture",
+    "region": "National",
+    "priority_score": 10,
+    "is_active": true
+  },
+  {
+    "id": "koruzuyushma",
+    "name": "Koreyadagi O zbekistonliklar (재한 우즈벡 연합)",
+    "username": "koruzuyushma",
+    "target_country": "Uzbekistan",
+    "language": "uz",
+    "category": "general_expat",
+    "region": "National",
+    "priority_score": 9,
+    "is_active": true
+  },
+  {
+    "id": "koreyadagi_ishlar",
+    "name": "Koreya Ishlar (우즈벡 공단 근로자 커뮤니티)",
+    "username": "KOREYADAGIISHLAR",
+    "target_country": "Uzbekistan",
+    "language": "uz",
+    "category": "worker_jobs_and_tax",
+    "region": "Industrial",
+    "priority_score": 9,
+    "is_active": true
+  },
+  {
+    "id": "vieclamthemchoduhocsinh",
+    "name": "Việc làm thêm Du Học Sinh Hàn Quốc (베트남 유학생 알바/생활)",
+    "username": "vieclamthemchoduhocsinh",
+    "target_country": "Vietnam",
+    "language": "vi",
+    "category": "students_secondhand_furniture",
+    "region": "Seoul/Gyeonggi",
+    "priority_score": 10,
+    "is_active": true
+  },
+  {
+    "id": "vieclamthemchodhshq",
+    "name": "Việc làm DHS Hàn Quốc (베트남 유학생 세무/가구)",
+    "username": "vieclamthemchodhshq",
+    "target_country": "Vietnam",
+    "language": "vi",
+    "category": "students_and_tax",
+    "region": "National",
+    "priority_score": 9,
+    "is_active": true
+  },
+  {
+    "id": "seoul_expats",
+    "name": "Seoul Expats Community (글로벌 외국인 대화방)",
+    "username": "seoul_expats",
+    "target_country": "Global",
+    "language": "en",
+    "category": "expat_secondhand_furniture",
+    "region": "Seoul",
+    "priority_score": 8,
+    "is_active": true
+  }
+]

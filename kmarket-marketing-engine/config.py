@@ -1,6 +1,18 @@
 import os
+import datetime
 from pathlib import Path
 from dotenv import load_dotenv
+
+# 🇰🇷 대한민국 표준시 (KST, UTC+9) 고정 타임존
+KST = datetime.timezone(datetime.timedelta(hours=9))
+
+def get_now_kst() -> datetime.datetime:
+    """현재 한국 표준시(KST) datetime 객체 반환"""
+    return datetime.datetime.now(KST)
+
+def get_now_kst_str(fmt: str = "%Y-%m-%d %H:%M:%S") -> str:
+    """현재 한국 표준시(KST) 문자열 반환"""
+    return get_now_kst().strftime(fmt)
 
 # Base Directory & Paths
 BASE_DIR = Path(__file__).resolve().parent
@@ -186,6 +198,10 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_API_KEY_EASYTAX = os.getenv("GEMINI_API_KEY_EASYTAX", GEMINI_API_KEY)
 GEMINI_API_KEY_KMARKET = os.getenv("GEMINI_API_KEY_KMARKET", GEMINI_API_KEY)
 
+# 🎁 블로그 전담 무료 API 키 (비용 0원 최적화)
+GEMINI_API_KEY_KMARKET_BLOG = os.getenv("GEMINI_API_KEY_KMARKET_BLOG") or GEMINI_API_KEY_KMARKET
+GEMINI_API_KEY_EASYTAX_BLOG = os.getenv("GEMINI_API_KEY_EASYTAX_BLOG") or GEMINI_API_KEY_EASYTAX
+
 # Supabase Settings
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
@@ -217,10 +233,20 @@ BASE_URLS = {
 # Autopilot & Anti-Ban Safety Parameters
 AUTOPILOT_MODE = os.getenv("AUTOPILOT_MODE", "1") == "1"
 REDDIT_AUTO_REPLY = os.getenv("REDDIT_AUTO_REPLY", "1") == "1"
-REPLY_DELAY_MIN_SEC = int(os.getenv("REPLY_DELAY_MIN_SEC", "180"))
-REPLY_DELAY_MAX_SEC = int(os.getenv("REPLY_DELAY_MAX_SEC", "420"))
-DAILY_REDDIT_LIMIT = int(os.getenv("DAILY_REDDIT_LIMIT", "20"))
-HOURLY_REDDIT_LIMIT = int(os.getenv("HOURLY_REDDIT_LIMIT", "3"))
+
+# 🛡️ 안전 레딧 파라미터 (영구 정지 방지 — 2026.08 전면 재설계)
+DAILY_REDDIT_PROMO_LIMIT = int(os.getenv("DAILY_REDDIT_PROMO_LIMIT", "2"))       # 홍보성 댓글 일일 최대 (절대 초과 금지)
+DAILY_REDDIT_ORGANIC_LIMIT = int(os.getenv("DAILY_REDDIT_ORGANIC_LIMIT", "8"))   # 비홍보 댓글 일일 최대
+DAILY_REDDIT_UPVOTE_LIMIT = int(os.getenv("DAILY_REDDIT_UPVOTE_LIMIT", "20"))    # 업보트 일일 최대
+HOURLY_REDDIT_LIMIT = int(os.getenv("HOURLY_REDDIT_LIMIT", "1"))                 # 시간당 최대 홍보 댓글
+REPLY_DELAY_MIN_SEC = int(os.getenv("REPLY_DELAY_MIN_SEC", "600"))               # 홍보 댓글 간 최소 간격 10분
+REPLY_DELAY_MAX_SEC = int(os.getenv("REPLY_DELAY_MAX_SEC", "1800"))              # 홍보 댓글 간 최대 간격 30분
+ORGANIC_DELAY_MIN_SEC = int(os.getenv("ORGANIC_DELAY_MIN_SEC", "120"))           # 유기적 활동 간 최소 간격 2분
+ORGANIC_DELAY_MAX_SEC = int(os.getenv("ORGANIC_DELAY_MAX_SEC", "480"))           # 유기적 활동 간 최대 간격 8분
+WARMUP_KARMA_THRESHOLD = int(os.getenv("WARMUP_KARMA_THRESHOLD", "100"))         # 이 카르마 이하면 홍보 댓글 0건
+
+# 하위 호환성 유지 (기존 코드가 참조하는 변수명)
+DAILY_REDDIT_LIMIT = DAILY_REDDIT_PROMO_LIMIT
 
 # SQLite Database Path
 DB_PATH = DATA_DIR / "history.db"

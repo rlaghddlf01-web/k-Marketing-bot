@@ -18,6 +18,8 @@ from core.video_composer import VideoComposer
 from core.visual_safety_engine import VisualSafetyEngine
 from core.motion_video_composer import MotionVideoComposer
 from core.scenario_director import ScenarioDirector
+from core.scenario_director_shorts_easytax import ScenarioDirectorShortsEasyTax
+from core.scenario_director_shorts_kmarket import ScenarioDirectorShortsKMarket
 from core.gemini_media_generator import GeminiMediaGenerator
 from core.media_quality_verifier import MediaQualityVerifier
 
@@ -42,6 +44,8 @@ class ShortsVideoFactory:
         self.safety_engine = VisualSafetyEngine()
         self.motion_composer = MotionVideoComposer(self.output_dir)
         self.scenario_director = ScenarioDirector()
+        self.shorts_easytax = ScenarioDirectorShortsEasyTax()
+        self.shorts_kmarket = ScenarioDirectorShortsKMarket()
         self.gemini_media_gen = GeminiMediaGenerator()
         self.quality_verifier = MediaQualityVerifier()
 

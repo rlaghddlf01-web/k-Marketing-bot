@@ -96,7 +96,7 @@ class DBManager:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO marketing_history 
+                INSERT OR REPLACE INTO marketing_history 
                 (content_type, service_id, target_lang, title, content_text, target_url, external_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (content_type, service_id, target_lang, title, content_text, target_url, external_id))

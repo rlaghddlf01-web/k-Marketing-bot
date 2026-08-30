@@ -1,6 +1,6 @@
 import time
 import logging
-import datetime
+from config import get_now_kst_str
 from typing import Dict, Any, List
 from core.db_manager import DBManager
 from core.supabase_manager import SupabaseManager
@@ -54,7 +54,7 @@ class KMarketGrowthBot:
     def run_kmarket_cycle(self) -> Dict[str, Any]:
         """K-Market 전담 사이클 1회 실행"""
         self.cycle_count += 1
-        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now_str = get_now_kst_str()
         self.last_run_time = now_str
         logger.info(f"🛒 [K-Market 봇] 사이클 #{self.cycle_count} 가동 시작 ({now_str})")
 

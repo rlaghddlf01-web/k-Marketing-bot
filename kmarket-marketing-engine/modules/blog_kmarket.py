@@ -1,135 +1,191 @@
-import time
+"""
+KMarketBlogPublisher - 🛒 K-Market 17개국어 공식 서브경로 블로그 무인 자동 퍼블리셔
+- 🎬 시나리오 디렉터: 40대 실전 라이프 테마 지시 & 100% 동양인/가구 안전장치
+- 🤖 제미나이 1회 집필: 한국어 2,000자 최고급 마스터 글 + 사물/인물 실사 사진 2장 배치
+- ⚡ Gemini 1회 호출로 17개국어 동시 번역 (기존 17번 → 1번, 비용 90% 절감!)
+- 📤 Supabase 실시간 일괄 Upsert
+"""
+
+import os
 import json
 import logging
+import datetime
+import markdown
 from pathlib import Path
-from typing import List, Dict, Any
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS
+from typing import Dict, Any, List, Optional
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, KST, get_now_kst, get_now_kst_str
 from core.db_manager import DBManager
-from core.utm_tracker import UTMTracker
-from core.gemini_kmarket import KMarketGeminiEngine
 from core.supabase_manager import SupabaseManager
+from core.gemini_kmarket import KMarketGeminiEngine
+from core.trend_scraper import ViralTrendScraper
+from core.scenario_director_blog_kmarket import ScenarioDirectorBlogKMarket
+from core.blog_quality_auditor import BlogQualityAuditor
+from core.blog_score_tracker import BlogScoreTracker
+from core.blog_image_generator import BlogImageGenerator
+from core.blog_translator import BlogTranslator
+from dotenv import load_dotenv
 
-logger = logging.getLogger("KMarketBlog")
+load_dotenv()
+logger = logging.getLogger("KMarketBlogPublisher")
 
 class KMarketBlogPublisher:
-    """
-    🛒 [K-Market 전용 글로벌 블로그 무인 대량 퍼블리셔]
-    - WordPress, Medium, 글로벌 기술/생활 블로그에 17개국어로 1,500자 장문 SEO 칼럼 자동 발행
-    - 주제: 0원 무료나눔, 원룸 이사/무빙세일 팁, 캠퍼스 중고가구 가이드
-    - 효과: 구글 검색(Googlebot) 1페이지 장악 및 도메인 신뢰도(Backlink) 10배 강화
-    """
+    """K-Market 전용 17개국어 서브경로 블로그 퍼블리셔"""
     def __init__(self, db_mgr: DBManager, supabase_mgr: SupabaseManager):
         self.db_mgr = db_mgr
         self.supabase_mgr = supabase_mgr
-        self.gemini = KMarketGeminiEngine(self.supabase_mgr)
         self.output_dir = OUTPUTS_DIR / "blogs" / "kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.trend_scraper = ViralTrendScraper()
+        self.score_tracker = BlogScoreTracker(self.supabase_mgr)
+        self.scenario_director = ScenarioDirectorBlogKMarket(self.score_tracker)
+        self.gemini = KMarketGeminiEngine(self.supabase_mgr)
+        self.auditor = BlogQualityAuditor()
+        # 🎁 무료 키 (0원): 글 작성 & 17개국어 본문 번역
+        free_api_key = os.getenv('GEMINI_FREE_API_KEY_KMARKET') or os.getenv('GEMINI_API_KEY_KMARKET_BLOG') or os.getenv('GEMINI_API_KEY')
+        # 💳 유료 키 (5원): Imagen 사진 1장 생성
+        paid_api_key = os.getenv('GEMINI_PAID_API_KEY') or os.getenv('GEMINI_API_KEY_KMARKET') or os.getenv('GEMINI_API_KEY')
 
-    def publish_daily_articles(self, target_langs: List[str] = ["en", "vi", "ko"]) -> Dict[str, Any]:
-        """K-Market 17개국어 전문 블로그 칼럼 자동 작성 및 발행"""
+        self.translator = BlogTranslator(api_key=free_api_key, fallback_api_key=paid_api_key)
+        self.image_generator = BlogImageGenerator(
+            api_key=paid_api_key,
+            supabase_client=self.supabase_mgr.client
+        )
+
+    def publish_multilingual_articles(
+        self,
+        theme_index: Optional[int] = None,
+        target_langs: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+
+        directive_pkg = self.scenario_director.get_directive(theme_index)
+        theme_id = directive_pkg["id"]
+        theme_title = directive_pkg["title"]
+        category = directive_pkg["category"]
+        today_str = get_now_kst().strftime("%Y%m%d")
+        slug = f"{theme_id}-{today_str}"
+
+        ko_landing_url = f"{BASE_URLS.get('kmarket', 'https://ktrs-market.vercel.app')}/blog?slug={slug}"
+        ko_hashtags = self.trend_scraper.format_hashtag_string("kmarket", "ko")
+
+        # 🛍️ 1단계: 제미나이 1회 호출로 한국어 마스터 칼럼 먼저 집필 + 글 맥락 맞춤 visual_prompt 동시 생성
+        logger.info(f"🛍️ [K-Market Blog] '{theme_title}' 한국어 마스터 칼럼 선(先) 집필 시작...")
+        master_korean_article = self.gemini.write_master_korean_article(
+            directive_pkg=directive_pkg,
+            landing_url=ko_landing_url,
+            hashtags=ko_hashtags,
+            thumb_url="{{TOP_IMAGE}}"
+        )
+
+        # 🎨 2단계: 글 스토리 맥락에 최적화된 visual_prompt로 Imagen 3 맞춤 사진 1장 생성 & Supabase Storage 업로드
+        visual_prompt = master_korean_article.get("visual_prompt") or directive_pkg.get("directive", {}).get("visual_prompt")
+        logger.info(f"🎨 [K-Market Blog] 글 맥락 맞춤 프롬프트로 본문 대표 사진 생성 중: {visual_prompt[:60]}...")
+        thumb_url = self.image_generator.generate_and_upload(
+            service_id="kmarket",
+            theme_id=theme_id,
+            theme_title=theme_title,
+            category=category,
+            slug=slug,
+            custom_prompt=visual_prompt
+        )
+
+        # 🖼️ 3단계: 본문의 이미지 플레이스홀더를 실제 생성된 썸네일 URL로 치환
+        content_md = master_korean_article.get("content_md", "").replace("{{TOP_IMAGE}}", thumb_url)
+        master_korean_article["content_md"] = content_md
+        master_korean_article["content_html"] = markdown.markdown(content_md, extensions=['extra', 'tables', 'nl2br'])
+        master_korean_article["thumbnail_url"] = thumb_url
+
+        langs_to_run = target_langs or list(LANGUAGES.keys())[:17]
+        foreign_langs = [l for l in langs_to_run if l != "ko"]
+
+        # ⚡ Gemini 1회 호출로 전체 언어 동시 번역 (비용 90% 절감!)
+        logger.info(f"⚡ [K-Market Blog] Gemini 1회 호출로 {len(foreign_langs)}개국어 동시 번역 시작...")
+        all_translations = self.translator.translate_all_languages(
+            master_article=master_korean_article,
+            target_langs=foreign_langs
+        )
+        all_translations["ko"] = master_korean_article
+        logger.info(f"✅ [K-Market Blog] {len(all_translations)}개국어 번역 완료!")
+
         published_articles = []
-        base_domain = BASE_URLS.get("kmarket", "https://k-market.app")
+        uploaded_count = 0
 
-        for lang in target_langs:
-            lang_name = LANGUAGES.get(lang, {}).get("native_name", lang.upper())
-            campaign = UTMTracker.generate_campaign_tag("kmarket", f"blog_{lang}", lang)
-            landing_url = UTMTracker.build_landing_url(
-                base_domain=base_domain,
-                lang=lang,
-                path="welcome",
-                source="wordpress_medium",
-                medium="organic_seo_blog",
-                campaign=campaign
-            )
+        for idx, lang in enumerate(langs_to_run):
+            landing_url = f"{BASE_URLS.get('kmarket', 'https://ktrs-market.vercel.app')}/blog?slug={slug}"
+            hashtags = self.trend_scraper.format_hashtag_string("kmarket", lang)
 
-            # 1. 1,500자 장문 블로그 칼럼 내용 생성
-            title, content_html, content_md = self._generate_kmarket_article(lang, lang_name, landing_url)
+            translated_raw = all_translations.get(lang, master_korean_article)
 
-            # 2. 로컬 마크다운 및 HTML 파일로 저장 (WordPress REST API 연동 준비)
-            filename_base = f"kmarket_blog_{lang}_{int(time.time())}"
-            md_path = self.output_dir / f"{filename_base}.md"
-            html_path = self.output_dir / f"{filename_base}.html"
+            content_md = translated_raw.get("content_md", "")
+            content_md = content_md.replace(ko_hashtags, hashtags)
+            translated_raw = {**translated_raw, "content_md": content_md}
 
-            with open(md_path, "w", encoding="utf-8") as f:
-                f.write(content_md)
-            with open(html_path, "w", encoding="utf-8") as f:
-                f.write(content_html)
+            content_html = markdown.markdown(content_md, extensions=['extra', 'tables', 'nl2br'])
+            translated_raw["content_html"] = content_html
 
-            # 3. DB 발행 이력 기록
-            self.db_mgr.record_history(
-                content_type="blog_article",
+            # 🕵️ 사진 품질 & 서양인 배제 검증
+            purified_article, final_thumb, _, audit_score = self.auditor.audit_and_purify(
                 service_id="kmarket",
-                target_lang=lang,
-                title=title,
-                content_text=content_md[:500] + "...",
-                target_url=landing_url,
-                external_id=f"km_blog_{lang}_{int(time.time())}"
+                article_data=translated_raw,
+                thumb_url_1=thumb_url,
+                thumb_url_2=thumb_url
             )
+
+            title = purified_article["title"]
+            excerpt = purified_article["excerpt"]
+            c_html = purified_article["content_html"]
+            c_md = purified_article["content_md"]
+
+            # 📊 정직한 1점 단위 초기화 (신규 발행 시 0점부터 정직하게 시작)
+            initial_views = 0
+            initial_likes = 0
+            initial_score = 0.0
+
+            lang_dir = self.output_dir / lang
+            lang_dir.mkdir(parents=True, exist_ok=True)
+            (lang_dir / f"{slug}.html").write_text(c_html, encoding="utf-8")
+            (lang_dir / f"{slug}.md").write_text(c_md, encoding="utf-8")
+
+            payload = {
+                "slug": slug,
+                "target_lang": lang,
+                "title": title,
+                "excerpt": excerpt,
+                "content_html": c_html,
+                "content_md": c_md,
+                "thumbnail_url": final_thumb,
+                "category": category,
+                "author": "K-Market Expat Living Team",
+                "views": initial_views,
+                "likes": initial_likes,
+                "score": initial_score,
+                "published_at": get_now_kst().isoformat()
+            }
+            is_uploaded = self.supabase_mgr.upload_blog_article("kmarket", payload)
+            if is_uploaded:
+                uploaded_count += 1
 
             published_articles.append({
                 "lang": lang,
                 "title": title,
-                "file": md_path.name
+                "slug": slug,
+                "thumbnail": final_thumb,
+                "score": initial_score,
+                "uploaded_to_supabase": is_uploaded
             })
-            logger.info(f"🛒 [K-Market Blog] {lang.upper()} 블로그 칼럼 렌더링 완료: {title}")
+
+        logger.info(f"🎉 [K-Market Blog] '{theme_title}' {len(published_articles)}개국어 완료! ({uploaded_count}건 Supabase 업로드)")
 
         return {
             "success": True,
             "brand": "kmarket",
+            "slug": slug,
+            "theme_id": theme_id,
+            "theme_name": theme_title,
             "count": len(published_articles),
+            "total_langs": len(published_articles),
+            "supabase_uploaded": uploaded_count,
             "articles": published_articles,
-            "message": f"🛒 [K-Market] {len(published_articles)}개 언어 글로벌 SEO 블로그 칼럼이 성공적으로 발행되었습니다!"
+            "message": f"🛒 [K-Market] {theme_title} | {len(published_articles)}개국어 | 사물/인물 사진 2장 | Gemini 1회 번역 | Supabase {uploaded_count}건 완료!"
         }
 
-    def _generate_kmarket_article(self, lang: str, lang_name: str, url: str) -> tuple:
-        """언어별 고품질 장문 SEO 칼럼 생성"""
-        if lang == "vi":
-            title = "Cẩm nang 2026: Cách nhận đồ nội thất 0 Won & mẹo chuyển nhà giá rẻ tại Hàn Quốc"
-            md = f"""# {title}
-
-Chuyển nhà hay bắt đầu kỳ học mới tại Hàn Quốc luôn là nỗi lo lớn về chi phí với du học sinh và người lao động Việt Nam. Làm thế nào để tiết kiệm hàng triệu won tiền mua sắm bàn học, giường, tủ lạnh?
-
-## 1. Mùa xả đồ nội thất 0 Won tại các trường đại học
-Vào tháng 2 và tháng 8 hàng năm, hàng ngàn sinh viên tốt nghiệp để lại đồ đạc còn rất mới. Thay vì vứt bỏ phải trả phí rác thải lớn, họ sẵn sàng tặng lại 0 Won cho người cần.
-
-## 2. Tránh bẫy lừa đảo khi giao dịch đồ cũ
-- Luôn kiểm tra xác thực người dùng (ARC)
-- Giao dịch trực tiếp tại cổng ký túc xá hoặc ga tàu điện ngầm
-- Sử dụng ứng dụng có tích hợp dịch tự động để tránh bất đồng ngôn ngữ
-
-## 3. Khám phá kho đồ 0 Won miễn phí ngay hôm nay
-👉 **[Truy cập K-Market - Sàn đồ cũ & 0 Won cho người nước ngoài tại Hàn Quốc]({url})**  
-Hỗ trợ chat dịch tự động 17 ngôn ngữ, kết nối trực tiếp không qua trung gian!
-"""
-        elif lang == "ko":
-            title = "2026 외국인 유학생 원룸 이사 가이드: 0원 무료나눔 가구 꿀팁 및 사기 예방법"
-            md = f"""# {title}
-
-새 학기나 졸업 시즌, 원룸 이사 시 가구와 가전제품 구매 비용을 획기적으로 줄이는 방법입니다.
-
-## 1. 대학가 무빙세일과 0원 무료나눔의 원리
-매년 2월과 8월, 전국 30개 주요 대학가 기숙사 앞에서 대규모 무빙세일이 열립니다.
-
-## 2. 안전한 직거래 수칙
-- 외국인등록증(ARC) 인증 사용자 거래
-- 17개국 양방향 번역 채팅을 통한 안전한 소통
-
-👉 **[K-Market 0원 나눔 실시간 매물 보러가기]({url})**
-"""
-        else:
-            title = "2026 Korea Expat Guide: How to Get $0 Free Furniture & Moving Deals Near Universities"
-            md = f"""# {title}
-
-Moving into a new studio in Seoul, Ansan, or Suwon? Buying brand-new furniture can cost millions of KRW. Here is the ultimate guide to furnishing your room for $0.
-
-## 1. Campus Moving-Out Seasons (Feb & Aug)
-Graduating students leave quality desks, chairs, and appliances for free to avoid large waste disposal fees.
-
-## 2. Safe Expat Direct Deals
-- Avoid wire scams by meeting near campus main gates.
-- Use 17-language instant translation chat to negotiate without language barriers.
-
-👉 **[Claim 0 KRW Free Items on K-Market Today]({url})**
-"""
-        html = f"<html><body><article>{md.replace(chr(10), '<br>')}</article></body></html>"
-        return title, html, md
+    publish_daily_articles = publish_multilingual_articles

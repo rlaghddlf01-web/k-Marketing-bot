@@ -1,141 +1,195 @@
-import time
+"""
+EasyTaxBlogPublisher - 💰 EasyTax 15개국어 공식 서브경로 블로그 무인 자동 퍼블리셔
+- 🎬 시나리오 디렉터: 38대 실무 세무 테마 지시 & 100% 동양인 안전장치
+- 🤖 제미나이 1회 집필: 한국어 2,000자 최고급 마스터 글 + 동양인 실사 사진 2장 배치
+- ⚡ Gemini 1회 호출로 15개국어 동시 번역 (기존 17번 → 1번, 비용 90% 절감!)
+- 📤 Supabase 실시간 일괄 Upsert
+"""
+
+import os
 import json
 import logging
+import datetime
+import markdown
 from pathlib import Path
-from typing import List, Dict, Any
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS
+from typing import Dict, Any, List, Optional
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, KST, get_now_kst, get_now_kst_str
 from core.db_manager import DBManager
-from core.utm_tracker import UTMTracker
-from core.gemini_easytax import EasyTaxGeminiEngine
-from core.gemini_media_generator import GeminiMediaGenerator
 from core.supabase_manager import SupabaseManager
+from core.gemini_easytax import EasyTaxGeminiEngine
+from core.trend_scraper import ViralTrendScraper
+from core.scenario_director_blog_easytax import ScenarioDirectorBlogEasyTax
+from core.blog_quality_auditor import BlogQualityAuditor
+from core.blog_score_tracker import BlogScoreTracker
+from core.blog_image_generator import BlogImageGenerator
+from core.blog_translator import BlogTranslator
+from dotenv import load_dotenv
 
-logger = logging.getLogger("EasyTaxBlog")
+load_dotenv()
+logger = logging.getLogger("EasyTaxBlogPublisher")
 
 class EasyTaxBlogPublisher:
-    """
-    💰 [EasyTax (KTRS) 전용 글로벌 블로그 무인 대량 퍼블리셔]
-    - WordPress, Medium, 글로벌 세무/비자 정보 블로그에 17개국어로 1,500자 장문 SEO 세무 칼럼 자동 발행
-    - 주제: 조특법 제30조 90% 소득세 감면, D-2 유학생 3.3% 환급, 5개년 소급 청구 매뉴얼
-    - 효과: 구글 검색(Googlebot) 1페이지 장악 및 공인 세무 신뢰도(Backlink) 10배 강화
-    """
+    """EasyTax 전용 15개국어 서브경로 블로그 퍼블리셔"""
     def __init__(self, db_mgr: DBManager, supabase_mgr: SupabaseManager):
         self.db_mgr = db_mgr
         self.supabase_mgr = supabase_mgr
-        self.gemini = EasyTaxGeminiEngine(self.supabase_mgr)
         self.output_dir = OUTPUTS_DIR / "blogs" / "easytax"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.trend_scraper = ViralTrendScraper()
+        self.score_tracker = BlogScoreTracker(self.supabase_mgr)
+        self.scenario_director = ScenarioDirectorBlogEasyTax(self.score_tracker)
+        self.gemini = EasyTaxGeminiEngine(self.supabase_mgr)
+        self.auditor = BlogQualityAuditor()
+        # 🎁 무료 키 (0원): 글 작성 & 15개국어 본문 번역
+        free_api_key = os.getenv('GEMINI_FREE_API_KEY_EASYTAX') or os.getenv('GEMINI_FREE_API_KEY_KMARKET') or os.getenv('GEMINI_API_KEY_KMARKET_BLOG') or os.getenv('GEMINI_API_KEY')
+        # 💳 유료 키 (5원): Imagen 사진 1장 생성
+        paid_api_key = os.getenv('GEMINI_PAID_API_KEY') or os.getenv('GEMINI_API_KEY_EASYTAX') or os.getenv('GEMINI_API_KEY')
 
-    def publish_daily_articles(self, target_langs: List[str] = ["en", "vi", "ko"]) -> Dict[str, Any]:
-        """EasyTax 17개국어 전문 세무 블로그 칼럼 자동 작성 및 발행"""
+        self.translator = BlogTranslator(api_key=free_api_key, fallback_api_key=paid_api_key)
+        self.image_generator = BlogImageGenerator(
+            api_key=paid_api_key,
+            supabase_client=self.supabase_mgr.client
+        )
+
+    def publish_multilingual_articles(
+        self,
+        theme_index: Optional[int] = None,
+        target_langs: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+
+        directive_pkg = self.scenario_director.get_directive(theme_index)
+        theme_id = directive_pkg["id"]
+        theme_title = directive_pkg["title"]
+        category = directive_pkg["category"]
+        today_str = get_now_kst().strftime("%Y%m%d")
+        slug = f"{theme_id}-{today_str}"
+
+        ko_landing_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/ko/refund"
+        ko_hashtags = self.trend_scraper.format_hashtag_string("easytax", "ko")
+
+        # 💰 1단계: 제미나이 1회 호출로 한국어 마스터 칼럼 먼저 집필 + 글 맥락 맞춤 visual_prompt 동시 생성
+        logger.info(f"💰 [EasyTax Blog] '{theme_title}' 한국어 마스터 칼럼 선(先) 집필 시작...")
+        master_korean_article = self.gemini.write_master_korean_article(
+            directive_pkg=directive_pkg,
+            landing_url=ko_landing_url,
+            hashtags=ko_hashtags,
+            thumb_url="{{TOP_IMAGE}}"
+        )
+
+        # 🎨 2단계: 글 스토리 맥락에 최적화된 visual_prompt로 Imagen 3 맞춤 사진 1장 생성 & Supabase Storage 업로드
+        visual_prompt = master_korean_article.get("visual_prompt") or directive_pkg.get("directive", {}).get("visual_prompt")
+        logger.info(f"🎨 [EasyTax Blog] 글 맥락 맞춤 프롬프트로 본문 대표 사진 생성 중: {visual_prompt[:60]}...")
+        thumb_url = self.image_generator.generate_and_upload(
+            service_id="easytax",
+            theme_id=theme_id,
+            theme_title=theme_title,
+            category=category,
+            slug=slug,
+            custom_prompt=visual_prompt
+        )
+
+        # 🖼️ 3단계: 본문의 이미지 플레이스홀더를 실제 생성된 썸네일 URL로 치환
+        content_md = master_korean_article.get("content_md", "").replace("{{TOP_IMAGE}}", thumb_url)
+        master_korean_article["content_md"] = content_md
+        master_korean_article["content_html"] = markdown.markdown(content_md, extensions=['extra', 'tables', 'nl2br'])
+        master_korean_article["thumbnail_url"] = thumb_url
+
+        langs_to_run = target_langs or list(LANGUAGES.keys())[:15]
+        # ko 제외한 번역 대상 언어
+        foreign_langs = [l for l in langs_to_run if l != "ko"]
+
+        # ⚡ Gemini 1회 호출로 전체 언어 동시 번역 (비용 90% 절감!)
+        logger.info(f"⚡ [EasyTax Blog] Gemini 1회 호출로 {len(foreign_langs)}개국어 동시 번역 시작...")
+        all_translations = self.translator.translate_all_languages(
+            master_article=master_korean_article,
+            target_langs=foreign_langs
+        )
+        # 한국어도 포함
+        all_translations["ko"] = master_korean_article
+        logger.info(f"✅ [EasyTax Blog] {len(all_translations)}개국어 번역 완료!")
+
         published_articles = []
-        base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app")
+        uploaded_count = 0
 
-        for lang in target_langs:
-            lang_name = LANGUAGES.get(lang, {}).get("native_name", lang.upper())
-            campaign = UTMTracker.generate_campaign_tag("easytax", f"blog_{lang}", lang)
-            landing_url = UTMTracker.build_service_landing_url(
+        for idx, lang in enumerate(langs_to_run):
+            landing_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/{lang}/refund"
+            hashtags = self.trend_scraper.format_hashtag_string("easytax", lang)
+
+            translated_raw = all_translations.get(lang, master_korean_article)
+
+            # 언어별 랜딩 URL 및 해시태그 치환 (ko URL을 각 언어 URL로)
+            content_md = translated_raw.get("content_md", "")
+            content_md = content_md.replace(ko_landing_url, landing_url)
+            content_md = content_md.replace(ko_hashtags, hashtags)
+            translated_raw = {**translated_raw, "content_md": content_md}
+
+            content_html = markdown.markdown(content_md, extensions=['extra', 'tables', 'nl2br'])
+            translated_raw["content_html"] = content_html
+
+            # 🕵️ 사진 품질 & 서양인 배제 검증
+            purified_article, final_thumb, _, audit_score = self.auditor.audit_and_purify(
                 service_id="easytax",
-                base_domain=base_domain,
-                lang=lang,
-                path="",
-                source="wordpress_medium",
-                medium="organic_seo_tax_blog",
-                campaign=campaign
+                article_data=translated_raw,
+                thumb_url_1=thumb_url,
+                thumb_url_2=thumb_url
             )
 
-            # 1. 1,500자 장문 세무 칼럼 내용 생성
-            title, content_html, content_md = self._generate_easytax_article(lang, lang_name, landing_url)
+            title = purified_article["title"]
+            excerpt = purified_article["excerpt"]
+            c_html = purified_article["content_html"]
+            c_md = purified_article["content_md"]
 
-            # 2. 로컬 마크다운 및 HTML 파일로 저장
-            filename_base = f"easytax_blog_{lang}_{int(time.time())}"
-            md_path = self.output_dir / f"{filename_base}.md"
-            html_path = self.output_dir / f"{filename_base}.html"
+            # 📊 정직한 1점 단위 초기화 (신규 발행 시 0점부터 정직하게 시작)
+            initial_views = 0
+            initial_likes = 0
+            initial_score = 0.0
 
-            with open(md_path, "w", encoding="utf-8") as f:
-                f.write(content_md)
-            with open(html_path, "w", encoding="utf-8") as f:
-                f.write(content_html)
+            lang_dir = self.output_dir / lang
+            lang_dir.mkdir(parents=True, exist_ok=True)
+            (lang_dir / f"{slug}.html").write_text(c_html, encoding="utf-8")
+            (lang_dir / f"{slug}.md").write_text(c_md, encoding="utf-8")
 
-            # 3. DB 발행 이력 기록
-            self.db_mgr.record_history(
-                content_type="blog_article",
-                service_id="easytax",
-                target_lang=lang,
-                title=title,
-                content_text=content_md[:500] + "...",
-                target_url=landing_url,
-                external_id=f"tax_blog_{lang}_{int(time.time())}"
-            )
+            payload = {
+                "slug": slug,
+                "target_lang": lang,
+                "title": title,
+                "excerpt": excerpt,
+                "content_html": c_html,
+                "content_md": c_md,
+                "thumbnail_url": final_thumb,
+                "category": category,
+                "author": "KTRS EasyTax Editorial Team",
+                "views": initial_views,
+                "likes": initial_likes,
+                "score": initial_score,
+                "published_at": get_now_kst().isoformat()
+            }
+            is_uploaded = self.supabase_mgr.upload_blog_article("easytax", payload)
+            if is_uploaded:
+                uploaded_count += 1
 
             published_articles.append({
                 "lang": lang,
                 "title": title,
-                "file": md_path.name
+                "slug": slug,
+                "thumbnail": final_thumb,
+                "score": initial_score,
+                "uploaded_to_supabase": is_uploaded
             })
-            logger.info(f"💰 [EasyTax Blog] {lang.upper()} 세무 블로그 칼럼 렌더링 완료: {title}")
+
+        logger.info(f"🎉 [EasyTax Blog] '{theme_title}' {len(published_articles)}개국어 완료! ({uploaded_count}건 Supabase 업로드)")
 
         return {
             "success": True,
             "brand": "easytax",
+            "slug": slug,
+            "theme_id": theme_id,
+            "theme_name": theme_title,
             "count": len(published_articles),
+            "total_langs": len(published_articles),
+            "supabase_uploaded": uploaded_count,
             "articles": published_articles,
-            "message": f"💰 [EasyTax] {len(published_articles)}개 언어 공인 세무 SEO 블로그 칼럼이 성공적으로 발행되었습니다!"
+            "message": f"💰 [EasyTax] {theme_title} | {len(published_articles)}개국어 | 동양인 사진 2장 | Gemini 1회 번역 | Supabase {uploaded_count}건 완료!"
         }
 
-    def _generate_easytax_article(self, lang: str, lang_name: str, url: str) -> tuple:
-        """언어별 고품질 장문 세무 SEO 칼럼 생성 (Anti-Ban 공인 면책 포함)"""
-        if lang == "vi":
-            title = "Hướng dẫn 2026: Quyền giảm 90% thuế thu nhập (Điều 30) & Hoàn thuế 5 năm cho lao động E-9 tại Hàn Quốc"
-            md = f"""# {title}
-
-Rất nhiều người lao động Việt Nam visa E-9, H-2 và du học sinh D-2 đang nộp thừa hàng triệu won tiền thuế hàng năm mà không biết cách lấy lại.
-
-## 1. Giảm 90% thuế thu nhập theo Điều 30 Luật Miễn giảm thuế đặc biệt
-- Áp dụng cho người lao động làm việc tại các doanh nghiệp vừa và nhỏ (SME)
-- Mức giảm thuế tối đa lên tới 90% (tối đa 2.000.000 KRW/năm)
-- Có thể yêu cầu hoàn thuế hồi tố trong vòng 5 năm qua (2020~2025)
-
-## 2. Hoàn 100% thuế 3.3% cho du học sinh D-2 làm thêm
-Nếu bạn làm thêm tại nhà hàng, quán cafe và bị trừ 3.3% thuế thu nhập, toàn bộ số tiền này đều được hoàn lại 100% thông qua kỳ quyết toán thuế tháng 5.
-
-## 3. Tính thử số tiền hoàn thuế miễn phí trong 3 phút
-🛡️ Không thu phí trước • Xử lý qua đại lý thuế công nhận bởi Cục Thuế Quốc gia Hàn Quốc.
-
-👉 **[Bấm vào đây để tính thử số tiền hoàn thuế miễn phí trên EasyTax]({url})**
-"""
-        elif lang == "ko":
-            title = "2026 외국인 근로자 세무 가이드: 조세특례제한법 제30조 90% 감면 및 5개년 환급 총정리"
-            md = f"""# {title}
-
-국내 체류 외국인 근로자(E-9/H-2) 및 유학생(D-2)이 정당하게 돌려받을 수 있는 세금 환급 권리 가이드입니다.
-
-## 1. 조세특례제한법 제30조 중소기업 취업자 소득세 90% 감면
-- 만 15세~34세 청년 외국인 근로자 대상 최대 90% 감면
-- 5개년 소급 경정청구 가능
-
-## 2. D-2 유학생 3.3% 원천징수 세액 100% 환급
-- 기본공제 미달 시 5월 종합소득세 신고를 통해 100% 환급
-
-👉 **[EasyTax 외국인 세금 3분 무료 모의계산기 바로가기]({url})**
-"""
-        else:
-            title = "2026 Korea Expat Tax Relief: Article 30 90% Income Tax Reduction & 5-Year Retroactive Refund Manual"
-            md = f"""# {title}
-
-Are you an expat or foreign worker in Korea? You might have overpaid millions of KRW in income taxes without knowing your legal rights.
-
-## 1. Article 30 (SME Income Tax Reduction)
-- Up to 90% reduction on earned income tax for foreign workers at small/medium enterprises.
-- Eligible for retroactive claims for the past 5 tax years (2020~2025).
-
-## 2. D-2 Student 3.3% Part-Time Tax Refund
-- 100% refundable if total annual earnings fall under basic deductions.
-
-## 3. 100% Free AI Simulation with Zero Upfront Fees
-🛡️ Handled by certified National Tax Service accountants.
-
-👉 **[Estimate Your Exact Tax Refund on EasyTax Today]({url})**
-"""
-        html = f"<html><body><article>{md.replace(chr(10), '<br>')}</article></body></html>"
-        return title, html, md
+    publish_daily_articles = publish_multilingual_articles

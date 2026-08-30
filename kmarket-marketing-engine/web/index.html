@@ -158,17 +158,17 @@
                         <div class="stat-icon orange">🛡️</div>
                         <div class="stat-info">
                             <span class="stat-label">Anti-Ban 상태</span>
-                            <h3 class="stat-value" style="color:#10b981;">안전 보호 중</h3>
+                            <h3 class="stat-value" id="stat-antiban-status">100% 안전</h3>
                         </div>
                     </div>
                 </div>
 
-                <!-- 🎯 8대 AI 콘텐츠 제작 허브 & 멀티 채널 자동 배포 센터 (브랜드별 독립) -->
-                <div class="section-card" style="border-top: 4px solid #8B5CF6; background: #0E1229;">
+                <!-- 🎯 7대 AI 콘텐츠 제작 허브 & 멀티 채널 자동 배포 센터 (브랜드별 독립) -->
+                <div class="section-card" style="border-top: 4px solid #8B5CF6; background: #0E1229; margin-bottom: 24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
                         <div>
-                            <h3 class="section-title" id="hub-panel-title" style="color:#A78BFA; font-size:16px;">🎯 8대 AI 마케팅 허브 & 멀티 채널 일괄 배포 센터</h3>
-                            <p class="section-subtitle" id="hub-panel-desc">숏폼(4대 영상) · 카드뉴스(3대 비주얼) · 레딧(1:1) · 페이스북(50만 그룹) · 블로그(SEO) · 구글 색인 핑 · 스레드(타래) · 텔레그램(17개국 브리핑) 동시 송출</p>
+                            <h3 class="section-title" id="hub-panel-title" style="color:#A78BFA; font-size:16px;">🎯 7대 AI 마케팅 허브 & 멀티 채널 일괄 배포 센터</h3>
+                            <p class="section-subtitle" id="hub-panel-desc">숏폼(4대 영상) · 카드뉴스(3대 비주얼) · 레딧(1:1) · 페이스북(50만 그룹) · 블로그(SEO) · 구글 색인 핑 · 스레드(타래) 24시간 자율 송출</p>
                         </div>
                         <button class="btn btn-secondary" onclick="renderHubGrid()" style="font-size:12px; padding:6px 12px;">🔄 허브 새로고침</button>
                     </div>
@@ -177,6 +177,9 @@
                         <!-- renderHubGrid()로 100% 동적 렌더링 -->
                     </div>
                 </div>
+
+                <!-- 📲 텔레그램 24시간 자율 커뮤니티 & 17개국어 AI 매니저 실시간 관제 사령부 -->
+                <div id="telegram-community-panel-container"></div>
 
                 <!-- 실시간 활동 로그 콘솔 -->
                 <div class="section-card">
@@ -637,6 +640,7 @@
     <script src="js/golden_copies.js?v=3.5"></script>
     <script src="js/hashtags.js?v=3.5"></script>
     <script src="js/settings.js?v=3.5"></script>
+    <script src="js/telegram_manager.js?v=3.5"></script>
     <script src="app.js?v=3.5"></script>
 </body>
 </html>

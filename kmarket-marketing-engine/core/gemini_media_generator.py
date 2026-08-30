@@ -54,19 +54,22 @@ class GeminiMediaGenerator:
             output_path = self.cache_dir / f"{cache_key}.png"
 
         # 프롬프트 조립 (극도로 구체적인 실사 촬영 스타일)
-        demo_desc = scenario_plan.get("persona_desc", "Vietnamese young worker in Korea")
+        demo_desc = scenario_plan.get("persona_desc", "Asian expat young worker or student in South Korea")
         action = scenario_plan.get("action_prompt", "looking at smartphone with happy genuine smile")
         
+        # ★ [대표님 절대 지침] 인물 사진 생성 시 무조건 100% 동양인(Asian) 지정 (사물은 자연스럽게)
         prompt = (
-            f"Hyper-realistic authentic documentary photograph of a {demo_desc}, {action}. "
-            f"Cinematic natural outdoor/indoor lighting, 8k resolution, photorealistic skin texture, "
+            f"Hyper-realistic authentic documentary photograph of an Asian person ({demo_desc}), {action}. "
+            f"Realistic East Asian and Southeast Asian facial features, authentic natural Asian skin texture, "
+            f"cinematic natural outdoor/indoor lighting, 8k resolution, "
             f"natural facial expression, genuine emotions, holding smartphone naturally with realistic hands. "
             f"Aspect ratio {aspect_ratio}, masterpiece photography."
         )
 
         negative_prompt = (
             "floating phone, six fingers, deformed hands, extra limbs, disembodied hands, "
-            "creepy smile, dead eyes, cartoon, 3d render, illustration, blurry, caucasian for asian, "
+            "creepy smile, dead eyes, cartoon, 3d render, illustration, blurry, "
+            "caucasian, white people, blonde hair, blue eyes, western model, european features, non-asian, "
             "bad anatomy, mutated fingers, low quality"
         )
 
