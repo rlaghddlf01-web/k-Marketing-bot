@@ -69,7 +69,7 @@ Output strictly a JSON with keys:
         try:
             pil_img = Image.open(image_path)
             res = self.client.models.generate_content(
-                model='gemini-3.6-flash',
+                model='gemini-3.1-flash-lite',
                 contents=[pil_img, prompt],
                 config={"response_mime_type": "application/json"}
             )

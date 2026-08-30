@@ -33,5 +33,5 @@ class KMarketGeminiEngine:
     def generate_reddit_reply(self, post_data: Dict[str, Any]) -> Optional[Dict[str, str]]:
         return self.reddit_engine.generate_reddit_reply(post_data)
 
-    def generate_shorts_script(self, theme_pkg: Dict[str, Any]) -> Dict[str, Any]:
-        return self.shorts_engine.generate_shorts_script(theme_pkg)
+    def generate_shorts_script(self, *args, **kwargs) -> Dict[str, Any]:
+        return self.shorts_engine.generate_shorts_script(*args, **kwargs)

@@ -77,9 +77,9 @@ class GeminiMediaGenerator:
 
         if self.client:
             try:
-                # 구글 공식 Gemini 2.5 Flash Image 모델 호출
+                # 구글 공식 Gemini 3.1 Flash-Lite Image 초저가 모델 호출
                 result = self.client.models.generate_content(
-                    model='gemini-2.5-flash-image',
+                    model='gemini-3.1-flash-lite-image',
                     contents=prompt
                 )
                 # 실제 이미지 바이너리 추출 및 저장

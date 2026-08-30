@@ -29,7 +29,7 @@ class EasyTaxGeminiShorts:
                 self.client = None
 
     def generate_shorts_script(self, *args, target_lang: str = "ko", psychology: str = "relief_rights", **kwargs) -> Dict[str, Any]:
-        """EasyTax 합법 세무 환급 30초 숏폼 대본 생성 (refund_scripts 고도화 & Anti-Ban 가드레일)"""
+        """EasyTax 합법 세무 환급 20초 2단 씬 숏폼 대본 생성 (Scene 1: 훅/입금 9초 + Scene 2: CTA 9초)"""
         if args and isinstance(args[-1], str) and len(args[-1]) == 2:
             target_lang = args[-1]
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["ko"])
@@ -39,31 +39,34 @@ class EasyTaxGeminiShorts:
             proven_guide = f"\n[Proven Real Pitch Reference]: {proven_scripts[0].get('script_text')[:120]}"
 
         prompt = f"""
-Create a highly informative and viral 30-second educational short-form script for expats living in South Korea about Korean Tax Law benefits (Article 30 90% SME tax relief & 5-year retroactive refunds).
+Create a highly engaging, viral 20-second (2-Scene, 18-20s total) short-form video script for expats in South Korea about Korean Tax Law benefits (Article 30 90% tax relief & 5-year retroactive refunds).
 
 [Language]: {lang_info['name']} ({lang_info['native_name']})
+{proven_guide}
 
-### CRITICAL ANTI-BAN & COMPLIANCE RULES:
-1. NO scam triggers: NEVER say 'free fast cash'. Frame strictly as official legal rights under Korean Tax Law.
-2. Highlight: 100% Free AI simulation, ZERO upfront payment, filed via certified tax partner.
-3. Target: E-9/H-2 workers (up to 90% reduction) & D-2 students (3.3% part-time tax refund).
+### 2-SCENE TIMELINE STRUCTURE:
+1. SCENE 1 (0-9s) - [Hook & Bank Deposit Shock]:
+   - Speech (9s): Shocking fact about 90% income tax relief (Article 30) or part-time 3.3% refund with unexpected bank deposit alert (+₩3,840,000 KRW).
+   - Captions: 2 punchy short subtitle lines.
+2. SCENE 2 (9-18s) - [Trust & Profile Link CTA]:
+   - Speech (9s): 100% Free AI calculation via certified tax agents, zero upfront fee, direct to click profile link in bio.
+   - Captions: 2 closing action subtitle lines.
 
-### STRUCTURE:
-1. Hook (0-3s): Informative fact about overpaid taxes for expats in Korea.
-2. Story/Proof (3-23s): Explain the real legal benefit under Korean Tax Law Article 30 and 5-year back claim.
-3. Solution & CTA (23-30s): Direct to check the free official tool in bio.
-
-Output JSON format strictly with keys:
-"hook_title": (punchy informative headline for screen overlay),
-"voiceover_text": (entire 30s speech fluently written in {lang_info['name']}),
-"captions": [(array of 3-4 short sentences for on-screen text overlays)],
-"cta_text": (closing call to action in {lang_info['name']}),
-"disclaimer": (official legal disclaimer in {lang_info['name']}: "Processed via certified tax agents under Korean tax law. Actual refund amounts depend on individual income records.")
+Output strictly JSON with keys:
+"hook_title": (punchy headline for screen overlay),
+"voiceover_text": (entire 18-20s combined voiceover fluently in {lang_info['name']}),
+"scene1_voiceover": (0-9s speech in {lang_info['name']}),
+"scene1_captions": [(array of 2 short strings for Scene 1 subtitles)],
+"scene2_voiceover": (9-18s speech in {lang_info['name']}),
+"scene2_captions": [(array of 2 short strings for Scene 2 subtitles)],
+"cta_text": (closing CTA button label in {lang_info['name']}),
+"captions": [(array of 4 combined short sentences)],
+"disclaimer": (official legal disclaimer in {lang_info['name']}: "Processed via certified tax agents under Korean tax law.")
 """
         if self.client:
             try:
                 response = self.client.models.generate_content(
-                    model='gemini-3.6-flash',
+                    model='gemini-3.1-flash-lite',
                     contents=prompt,
                     config={"response_mime_type": "application/json"}
                 )
@@ -72,13 +75,24 @@ Output JSON format strictly with keys:
                 logger.error(f"EasyTax Gemini 숏폼 생성 에러: {e}")
 
         return {
-            "hook_title": "🏛️ Korean Expat Tax Rights: 90% Relief",
-            "voiceover_text": "Did you know foreign workers in South Korea can legally reduce up to 90% of income tax under Article 30? Check your 5-year overpaid tax refund 100% free with EasyTax!",
+            "hook_title": "🏛️ Korean Expat Tax: 90% Relief",
+            "voiceover_text": "Did you know foreign workers in Korea can get up to 90% tax relief under Article 30? Check your 5-year refund 100% free with certified tax partners via link in bio!",
+            "scene1_voiceover": "Did you know foreign workers in Korea can legally reduce up to 90% of income tax under Article 30? Over 3.8 million KRW deposited!",
+            "scene1_captions": [
+                "🏛️ 90% Income Tax Reduction (Article 30)",
+                "💬 +₩3,840,000 KRW Deposited!"
+            ],
+            "scene2_voiceover": "Check your 5-year retroactive refund in 3 minutes with certified tax partners. Click the link in bio for 100% free check!",
+            "scene2_captions": [
+                "🛡️ 100% Free AI Check • Certified Partner",
+                "👉 Click Link in Bio to Check Now!"
+            ],
             "captions": [
                 "🏛️ 90% Income Tax Reduction (Article 30)",
-                "🎓 D-2 Student Part-Time 3.3% Refund",
-                "🛡️ 100% Free AI Check • Certified Tax Partner"
+                "💬 +₩3,840,000 KRW Deposited!",
+                "🛡️ 100% Free AI Check • Certified Partner",
+                "👉 Click Link in Bio to Check Now!"
             ],
-            "cta_text": "Click profile link to check your free refund amount now!",
-            "disclaimer": "Processed via certified tax agents under Korean tax law. Actual refund amounts depend on individual income records."
+            "cta_text": "👉 Click link in bio to check free refund!",
+            "disclaimer": "Processed via certified tax agents under Korean tax law."
         }

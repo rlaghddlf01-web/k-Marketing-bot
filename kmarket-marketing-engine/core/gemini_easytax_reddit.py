@@ -134,7 +134,7 @@ class EasyTaxGeminiReddit:
         if self.client:
             try:
                 response = self.client.models.generate_content(
-                    model='gemini-3.6-flash',
+                    model='gemini-3.1-flash-lite',
                     contents=prompt
                 )
                 result = response.text.strip()

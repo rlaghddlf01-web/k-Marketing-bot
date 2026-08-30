@@ -76,9 +76,14 @@ class ScenarioDirectorShortsEasyTax:
         lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
 
         # ★ 대표님 절대 수칙: 인물 사진 생성 시 반드시 동양인(Asian) 지정
-        action_prompt = (
-            f"cinematic authentic documentary photo of an Asian (East Asian / Southeast Asian) {persona['gender']} {persona['visa_name']} in South Korea, "
-            f"{theme['action_prompt']}, natural realistic Asian facial features, authentic documentary lighting, 4k ultra-detailed, photorealistic"
+        scene1_action = (
+            f"cinematic authentic vertical 9:16 photo of a young Asian ({persona['gender']}) in South Korea holding smartphone, "
+            f"{theme['action_prompt']}, pleasantly shocked emotional expression looking at bank deposit notification, natural cinematic lighting, 4k ultra-detailed"
+        )
+
+        scene2_action = (
+            f"cinematic authentic vertical 9:16 photo of a young Asian ({persona['gender']}) in South Korea, "
+            f"holding smartphone showing screen to camera with a confident reassuring warm smile, professional modern clean Korean street or cozy indoor background, 4k photorealistic"
         )
 
         negative_prompt = (
@@ -98,6 +103,23 @@ class ScenarioDirectorShortsEasyTax:
             "visa_name": persona["visa_name"],
             "typical_refund_krw": persona["typical_refund_krw"],
             "refund_amount_krw": persona["typical_refund_krw"],
-            "action_prompt": action_prompt,
+            "duration_sec": 18,
+            "scenes": [
+                {
+                    "scene_idx": 1,
+                    "name": "Hook & Bank Deposit Shock",
+                    "duration_sec": 9,
+                    "action_prompt": scene1_action
+                },
+                {
+                    "scene_idx": 2,
+                    "name": "Trust Facts & Profile CTA",
+                    "duration_sec": 9,
+                    "action_prompt": scene2_action
+                }
+            ],
+            "action_prompt": scene1_action,
+            "scene1_action_prompt": scene1_action,
+            "scene2_action_prompt": scene2_action,
             "negative_prompt": negative_prompt
         }

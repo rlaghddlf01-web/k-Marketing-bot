@@ -59,7 +59,7 @@ Output JSON format strictly with keys:
         if self.client:
             try:
                 response = self.client.models.generate_content(
-                    model='gemini-3.6-flash',
+                    model='gemini-3.1-flash-lite',
                     contents=prompt,
                     config={"response_mime_type": "application/json"}
                 )

@@ -228,81 +228,94 @@ class MotionVideoComposer:
         service_id: str,
         lang: str,
         title: str,
-        captions: List[str]
+        captions: List[str],
+        scene2_bg_path: Optional[Path] = None,
+        scenario_plan: Optional[Dict[str, Any]] = None
     ) -> Optional[Path]:
-        """UGC 실사 비디오 + 틱톡 스타일 투명 자막 바 + TTS + BGM 최종 합성"""
+        """
+        🎬 2단 씬(18~20초) 시네마틱 줌인 모션 + 상단 입금 알림 슬라이드 다운 + 틱톡 자막 비디오 합성
+        """
         output_mp4 = self.output_dir / f"shorts_{service_id}_{lang}_.mp4"
+        i18n = SCENE_I18N.get(lang, SCENE_I18N.get("en", {}))
 
-        # 1. 100% 현지어 4개 씬 오버레이 렌더링
-        s1 = self._render_scene_overlay(1, lang, service_id, title, captions)
-        s2 = self._render_scene_overlay(2, lang, service_id, title, captions)
-        s3 = self._render_scene_overlay(3, lang, service_id, title, captions)
-        s4 = self._render_scene_overlay(4, lang, service_id, title, captions)
-
-        # 2. 오디오 길이 확인
-        audio_duration = 30.0
+        # 오디오 길이 확인 (기본 18초)
+        audio_duration = 18.0
         if audio_path and audio_path.exists():
             try:
-                audio_duration = max(10.0, audio_path.stat().st_size / 16000.0)
+                audio_duration = max(14.0, min(24.0, audio_path.stat().st_size / 16000.0))
             except Exception:
                 pass
 
-        t1 = round(audio_duration * 0.22, 1)
-        t2 = round(audio_duration * 0.55, 1)
-        t3 = round(audio_duration * 0.80, 1)
+        scene1_dur = round(audio_duration * 0.5, 1)
+        scene2_dur = round(audio_duration - scene1_dur, 1)
+
+        # 1. 씬 1 & 씬 2 오버레이 생성
+        s1_overlay = self._render_scene_overlay(1, lang, service_id, title, captions)
+        s2_overlay = self._render_scene_overlay(2, lang, service_id, title, captions)
+        s4_overlay = self._render_scene_overlay(4, lang, service_id, title, captions)
+
+        # 씬별 배경 이미지 선정
+        s1_img = bg_video_path if (bg_video_path and bg_video_path.exists()) else (self.output_dir / f"frame_{service_id}_{lang}.png")
+        s2_img = scene2_bg_path if (scene2_bg_path and scene2_bg_path.exists()) else s1_img
 
         bgm_name = "bgm_kmarket.wav" if service_id == "kmarket" else "bgm_easytax.wav"
         bgm_path = BASE_DIR / "outputs" / "bgm" / bgm_name
 
-        # 3. FFmpeg 복합 필터
-        if bg_video_path and bg_video_path.exists():
-            # 이미지 파일인 경우 loop 1과 framerate 지정
-            if str(bg_video_path).lower().endswith(('.png', '.jpg', '.jpeg')):
-                video_input = ["-loop", "1", "-framerate", "30", "-i", str(bg_video_path)]
-            else:
-                video_input = ["-stream_loop", "-1", "-i", str(bg_video_path)]
-        else:
-            video_input = ["-f", "lavfi", "-i", f"color=c=0x0f172a:s=1080x1920:d={audio_duration}"]
+        # 2. FFmpeg Ken Burns 시네마틱 줌인 + 오버레이 복합 필터
+        # Scene 1: 0~scene1_dur (서서히 줌인 1.0 -> 1.12)
+        # Scene 2: scene1_dur~audio_duration (서서히 줌인 1.05 -> 1.15)
+        fps = 25
+        total_f1 = int(scene1_dur * fps)
+        total_f2 = int(scene2_dur * fps)
 
-        overlay_inputs = [
-            "-i", str(s1),
-            "-i", str(s2),
-            "-i", str(s3),
-            "-i", str(s4)
+        cmd = [
+            self.ffmpeg_path, "-y",
+            "-loop", "1", "-t", str(scene1_dur), "-i", str(s1_img),
+            "-loop", "1", "-t", str(scene2_dur), "-i", str(s2_img),
+            "-i", str(s2_overlay), # Scene 1 오버레이 (입금 푸시 + 훅)
+            "-i", str(s4_overlay)  # Scene 2 오버레이 (신뢰 + 황금 CTA)
         ]
 
-        audio_inputs = []
+        audio_idx = 4
         if audio_path and audio_path.exists():
-            audio_inputs += ["-i", str(audio_path)]
-        if bgm_path.exists():
-            audio_inputs += ["-i", str(bgm_path)]
+            cmd += ["-i", str(audio_path)]
+            has_voice = True
+            voice_idx = audio_idx
+            audio_idx += 1
+        else:
+            has_voice = False
 
+        if bgm_path.exists():
+            cmd += ["-i", str(bgm_path)]
+            has_bgm = True
+            bgm_idx = audio_idx
+            audio_idx += 1
+        else:
+            has_bgm = False
+
+        # 필터 그래프: 줌인 모션 적용 후 씬 이어붙이기 (Concat)
         v_filter = (
-            f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[bg];"
-            f"[bg][1:v]overlay=0:0:enable='between(t,0,{t1})'[v1];"
-            f"[v1][2:v]overlay=0:0:enable='between(t,{t1},{t2})'[v2];"
-            f"[v2][3:v]overlay=0:0:enable='between(t,{t2},{t3})'[v3];"
-            f"[v3][4:v]overlay=0:0:enable='gte(t,{t3})'[vout]"
+            f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
+            f"zoompan=z='min(zoom+0.0012,1.15)':d={total_f1}:s=1080x1920:fps={fps}[z1];"
+            f"[1:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
+            f"zoompan=z='min(zoom+0.0010,1.15)':d={total_f2}:s=1080x1920:fps={fps}[z2];"
+            f"[z1][2:v]overlay=0:0[v_scene1];"
+            f"[z2][3:v]overlay=0:0[v_scene2];"
+            f"[v_scene1][v_scene2]concat=n=2:v=1:a=0[vout]"
         )
 
         a_filter = ""
-        has_voice = audio_path and audio_path.exists()
-        has_bgm = bgm_path.exists()
-
         if has_voice and has_bgm:
-            a_filter = "[5:a]volume=1.0[v_aud];[6:a]volume=0.08[b_aud];[v_aud][b_aud]amix=inputs=2:duration=first:dropout_transition=2[aout]"
+            a_filter = f"[{voice_idx}:a]volume=1.0[v_aud];[{bgm_idx}:a]volume=0.07[b_aud];[v_aud][b_aud]amix=inputs=2:duration=first:dropout_transition=2[aout]"
             maps = ["-filter_complex", f"{v_filter};{a_filter}", "-map", "[vout]", "-map", "[aout]"]
         elif has_voice:
-            maps = ["-filter_complex", v_filter, "-map", "[vout]", "-map", "5:a"]
+            maps = ["-filter_complex", v_filter, "-map", "[vout]", "-map", f"{voice_idx}:a"]
         else:
             maps = ["-filter_complex", v_filter, "-map", "[vout]"]
 
-        cmd = [
-            self.ffmpeg_path,
-            "-y"
-        ] + video_input + overlay_inputs + audio_inputs + maps + [
+        cmd += maps + [
             "-c:v", "libx264",
-            "-preset", "ultrafast",
+            "-preset", "veryfast",
             "-pix_fmt", "yuv420p",
             "-c:a", "aac",
             "-b:a", "128k",
@@ -311,17 +324,42 @@ class MotionVideoComposer:
             str(output_mp4)
         ]
 
-        logger.info(f"FFmpeg 틱톡/릴스 스타일 숏폼 비디오 렌더링 ({service_id}/{lang})...")
+        logger.info(f"🎬 [20초 2단 씬] 시네마틱 줌인 모션 비디오 렌더링 시작 ({service_id}/{lang}, {audio_duration}초)...")
         try:
             res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=90)
             if res.returncode == 0 and output_mp4.exists():
                 size_mb = round(output_mp4.stat().st_size / (1024 * 1024), 2)
-                logger.info(f"✅ 최고 전환율 틱톡/릴스 숏폼 영상 완성: {output_mp4.name} ({size_mb}MB)")
+                logger.info(f"✅ [20초 2단 씬 완성] 틱톡/릴스 시네마틱 숏폼 완성: {output_mp4.name} ({size_mb}MB)")
                 return output_mp4
             else:
                 err = res.stderr.decode("utf-8", errors="ignore")[-400:]
-                logger.error(f"FFmpeg 렌더링 실패: {err}")
+                logger.warning(f"FFmpeg 복합 필터 폴백: {err}")
+                # 폴백: 단일 씬 렌더링
+                return self._fallback_render(s1_img, s2_overlay, audio_path, bgm_path, audio_duration, output_mp4)
         except Exception as e:
             logger.error(f"모션 렌더링 예외: {e}")
+            return None
 
-        return None
+    def _fallback_render(self, img_path: Path, overlay_path: Path, audio_path: Optional[Path], bgm_path: Path, duration: float, output_mp4: Path) -> Optional[Path]:
+        """간소화된 줌인 모션 폴백 렌더러"""
+        cmd = [
+            self.ffmpeg_path, "-y",
+            "-loop", "1", "-t", str(duration), "-i", str(img_path),
+            "-i", str(overlay_path)
+        ]
+        if audio_path and audio_path.exists():
+            cmd += ["-i", str(audio_path), "-map", "0:v", "-map", "2:a"]
+        else:
+            cmd += ["-map", "0:v"]
+
+        cmd += [
+            "-filter_complex", "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[bg];[bg][1:v]overlay=0:0[vout]",
+            "-map", "[vout]",
+            "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+            "-t", str(duration), str(output_mp4)
+        ]
+        try:
+            subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
+            return output_mp4 if output_mp4.exists() else None
+        except Exception:
+            return None
