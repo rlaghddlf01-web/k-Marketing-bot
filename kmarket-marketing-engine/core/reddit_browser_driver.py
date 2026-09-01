@@ -296,34 +296,68 @@ class RedditBrowserDriver:
                 self._human_scroll(page, "down", random.randint(150, 350))
                 time.sleep(actual_read)
 
-                # 업보트 버튼 클릭 (shreddit-post 내부의 upvote 버튼)
-                upvote_clicked = page.evaluate("""() => {
-                    // 메인 게시글의 upvote 버튼 찾기
-                    const post = document.querySelector('shreddit-post');
-                    if (post) {
-                        const upBtn = post.querySelector('button[upvote]') ||
-                                      post.querySelector('button[aria-label*="upvote"]') ||
-                                      post.querySelector('button[aria-label*="Upvote"]');
-                        if (upBtn) {
-                            upBtn.click();
-                            return { success: true };
-                        }
-                    }
-                    // 대안: 일반 upvote 버튼
-                    const btns = document.querySelectorAll('button[aria-label*="upvote"], button[aria-label*="Upvote"]');
-                    if (btns.length > 0) {
-                        btns[0].click();
-                        return { success: true };
-                    }
-                    return { success: false, error: 'Upvote button not found' };
-                }""")
+                # 페이지 로딩 대기
+                try:
+                    page.wait_for_selector("shreddit-post, article, main", timeout=8000)
+                except Exception:
+                    pass
 
-                if upvote_clicked.get("success"):
+                # 업보트 버튼 클릭
+                upvote_success = False
+                try:
+                    # 1. Playwright Shadow DOM piercing locators
+                    up_locators = [
+                        page.locator("shreddit-post shreddit-action-row button:first-child"),
+                        page.locator("button[aria-label*='upvote' i]"),
+                        page.locator("button[aria-label*='Upvote']"),
+                        page.locator("button[icon-name='upvote']"),
+                        page.locator("button[icon-name*='up']"),
+                        page.locator("button[data-testid*='upvote']"),
+                        page.locator("shreddit-post button[upvote]"),
+                        page.locator("faceplate-tracker[noun='upvote'] button"),
+                        page.locator("shreddit-post button:has(svg)"),
+                    ]
+                    for loc in up_locators:
+                        if loc.count() > 0 and loc.first.is_visible(timeout=1500):
+                            loc.first.click()
+                            upvote_success = True
+                            break
+                except Exception:
+                    pass
+
+                if not upvote_success:
+                    # 2. 브라우저 내부 JS evaluate 탐색
+                    upvote_clicked = page.evaluate("""() => {
+                        const post = document.querySelector('shreddit-post');
+                        if (post) {
+                            // shadowRoot 탐색
+                            const root = post.shadowRoot || post;
+                            const btn = root.querySelector('button[aria-label*="upvote" i], button[icon-name="upvote"], button:first-child');
+                            if (btn) {
+                                btn.click();
+                                return { success: true, method: 'shadow-upvote' };
+                            }
+                        }
+                        const btns = Array.from(document.querySelectorAll('button'));
+                        for (const b of btns) {
+                            const aria = (b.getAttribute('aria-label') || '').toLowerCase();
+                            const icon = (b.getAttribute('icon-name') || '').toLowerCase();
+                            const title = (b.getAttribute('title') || '').toLowerCase();
+                            if (aria.includes('upvote') || icon.includes('upvote') || title.includes('upvote')) {
+                                b.click();
+                                return { success: true, method: 'query-button' };
+                            }
+                        }
+                        return { success: false, error: 'Upvote button not found' };
+                    }""")
+                    upvote_success = upvote_clicked.get("success", False)
+
+                if upvote_success:
                     page.wait_for_timeout(random.randint(1000, 2000))
                     result["success"] = True
-                    logger.info(f"👍 [Upvote] 업보트 성공!")
+                    logger.info("👍 [Upvote] 업보트 성공!")
                 else:
-                    result["error"] = upvote_clicked.get("error")
+                    result["error"] = "Upvote button not found"
                     logger.warning(f"업보트 실패: {result['error']}")
 
                 context.close()
@@ -453,33 +487,43 @@ class RedditBrowserDriver:
 
                 # 1. 댓글창 활성화 시도
                 reply_activated = page.evaluate("""() => {
-                    // shreddit-composer 찾기
-                    const composer = document.querySelector('shreddit-composer');
+                    // 1. shreddit-composer 및 shadow/slot 탐색
+                    const composer = document.querySelector('shreddit-composer, faceplate-textarea-input');
                     if (composer) {
                         composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         const rte = composer.querySelector('div[slot="rte"]') ||
                                     composer.querySelector('div[contenteditable="true"]') ||
-                                    composer.querySelector('div[role="textbox"]');
+                                    composer.querySelector('div[role="textbox"]') ||
+                                    composer.querySelector('textarea, p');
                         if (rte) {
                             rte.focus();
                             rte.click();
                             return { success: true, method: 'composer' };
                         }
                     }
-                    // 대안: 일반 텍스트 영역
-                    const textbox = document.querySelector('div[contenteditable="true"][role="textbox"]');
+                    // 2. 일반 텍스트 영역
+                    const textbox = document.querySelector('div[contenteditable="true"][role="textbox"], textarea[placeholder*="comment"], div[slot="rte"]');
                     if (textbox) {
                         textbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         textbox.focus();
                         textbox.click();
                         return { success: true, method: 'textbox' };
                     }
+                    // 3. Add a comment 버튼 클릭
+                    const addBtns = Array.from(document.querySelectorAll('button, faceplate-tracker')).filter(el => {
+                        const txt = (el.innerText || el.getAttribute('aria-label') || '').toLowerCase();
+                        return txt.includes('add a comment') || txt.includes('join the conversation');
+                    });
+                    if (addBtns.length > 0) {
+                        addBtns[0].click();
+                        return { success: true, method: 'add_comment_button' };
+                    }
                     return { success: false, error: 'No comment input found' };
                 }""")
 
                 if not reply_activated.get("success"):
                     # Reply 버튼 클릭 시도
-                    reply_btn = page.locator("button:has-text('Reply'), button[aria-label*='Reply']").first
+                    reply_btn = page.locator("button:has-text('Add a comment'), button:has-text('Reply'), button[aria-label*='Reply'], button[aria-label*='Comment']").first
                     try:
                         if reply_btn.is_visible(timeout=3000):
                             reply_btn.click()
@@ -500,39 +544,57 @@ class RedditBrowserDriver:
                 page.wait_for_timeout(random.randint(1500, 3000))
 
                 # 3. 등록 버튼 클릭
-                click_res = page.evaluate("""() => {
-                    const btns = Array.from(document.querySelectorAll(
-                        '#comment-composer-submit-button, button[type="submit"], button:has-text("Comment")'
-                    ));
-                    const activeBtn = btns.find(b => {
-                        const r = b.getBoundingClientRect();
-                        return r.width > 0 && r.height > 0 && !b.disabled;
-                    });
-                    if (activeBtn) {
-                        activeBtn.click();
-                        return { success: true, text: activeBtn.innerText };
-                    }
-                    return { success: false, error: 'No active submit button found' };
-                }""")
+                submit_success = False
+                submit_err = None
 
-                if click_res.get("success"):
-                    page.wait_for_timeout(random.randint(4000, 6000))
-                    logger.info("🎉 [Reddit Driver] 댓글 등록 시도 완료!")
-                    result["success"] = True
-                else:
-                    logger.warning(f"댓글 등록 실패: {click_res.get('error')}")
-                    result["error"] = click_res.get("error")
+                # 3-1. Playwright locators 시도
+                submit_locators = [
+                    page.locator("#comment-composer-submit-button"),
+                    page.locator("shreddit-composer button[type='submit']"),
+                    page.locator("button:has-text('Comment')"),
+                    page.locator("button:has-text('Reply')"),
+                    page.locator("button[slot='submit-button']"),
+                ]
+                for loc in submit_locators:
+                    try:
+                        if loc.is_visible(timeout=1500) and loc.is_enabled():
+                            loc.click()
+                            submit_success = True
+                            break
+                    except Exception:
+                        pass
 
+                # 3-2. 브라우저 내부 JS evaluate 시도
+                if not submit_success:
+                    click_res = page.evaluate("""() => {
+                        const btns = Array.from(document.querySelectorAll('button, [role="button"]'));
+                        for (const b of btns) {
+                            const txt = (b.innerText || b.textContent || '').trim().toLowerCase();
+                            const isSubmit = b.getAttribute('type') === 'submit' || b.id === 'comment-composer-submit-button';
+                            const isComment = txt === 'comment' || txt === 'reply' || txt.includes('comment');
+                            const r = b.getBoundingClientRect();
+                            if ((isSubmit || isComment) && r.width > 0 && r.height > 0 && !b.disabled) {
+                                b.click();
+                                return true;
+                            }
+                        }
+                        return false;
+                    }""")
+                    submit_success = click_res
+
+                if not submit_success:
+                    result["error"] = f"댓글 등록 버튼 클릭 실패: {submit_err}"
+                    context.close()
+                    return result
+
+                page.wait_for_timeout(random.randint(3000, 5000))
+                result["success"] = True
                 context.close()
+                return result
         except Exception as e:
-            logger.error(f"Reddit 자동 댓글 등록 중 예외: {e}")
+            logger.error(f"댓글 작성 중 예외: {e}")
             result["error"] = str(e)
-
-        return result
-
-    # ──────────────────────────────────────────────
-    # 🔍 댓글 삭제 확인 (Account Health 지원)
-    # ──────────────────────────────────────────────
+            return result
 
     def check_comment_visible(self, post_url: str, comment_snippet: str) -> bool:
         """게시한 댓글이 실제로 보이는지 비로그인 상태에서 확인 (shadowban 감지)"""
