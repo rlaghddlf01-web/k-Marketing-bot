@@ -91,10 +91,18 @@ You are a helpful and experienced expat in South Korea answering a Reddit questi
         # Fallback Template
         return self._generate_fallback_reddit_reply(post_title, service_id, service_data, target_lang, landing_url)
 
-    def generate_shorts_script(self, service_id: str, service_data: Dict[str, Any], target_lang: str = "ko") -> Dict[str, Any]:
+    def generate_shorts_script(self, service_id: str, service_data: Dict[str, Any], target_lang: str = "ko", scenario_plan: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         17개국 숏폼 대본 생성 (후킹 3초 -> 핵심 팩트/스토리 20초 -> 해결책 CTA 7초)
         """
+        if service_id == "easytax":
+            try:
+                from core.gemini_easytax_shorts import EasyTaxGeminiShorts
+                easytax_gen = EasyTaxGeminiShorts(self.supabase_mgr)
+                return easytax_gen.generate_shorts_script(target_lang=target_lang, scenario_plan=scenario_plan)
+            except Exception as e:
+                logger.warning(f"EasyTaxGeminiShorts 위임 에러, 기본 엔진 폴백: {e}")
+
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["ko"])
         few_shots = self.supabase_mgr.fetch_golden_few_shots(service_id, target_lang, min_score=80.0, limit=1)
 
@@ -138,6 +146,7 @@ Create a viral 30-second vertical short-form video script for foreign expats liv
 Output JSON format strictly with keys:
 "hook_title": (punchy informative headline for screen overlay),
 "voiceover_text": (entire 30s speech fluently written in {lang_info['name']}),
+"video_description": (detailed, engaging social media post description written in {lang_info['name']} with story, benefits, and call to action),
 "captions": [(array of 3-5 short sentences for on-screen text overlays)],
 "cta_text": (closing call to action in {lang_info['name']}),
 "disclaimer": (official legal disclaimer in {lang_info['name']}: "Processed via certified tax agents under Korean tax law. Actual refund amounts depend on individual income records.")

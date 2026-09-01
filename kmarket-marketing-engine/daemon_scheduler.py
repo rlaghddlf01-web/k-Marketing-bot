@@ -12,7 +12,8 @@ from core.notifier import Notifier
 from core.direct_uploader import DirectUploader
 from modules.reddit_kmarket import KMarketRedditHunter
 from modules.reddit_easytax import EasyTaxRedditHunter
-from modules.shorts_video_factory import ShortsVideoFactory
+from modules.shorts_easytax import ShortsEasyTax
+from modules.shorts_kmarket import ShortsKMarket
 from modules.programmatic_seo import ProgrammaticSEO
 from modules.cardnews_generator import CardnewsGenerator
 from modules.free_stuff_notifier import FreeStuffNotifier
@@ -48,7 +49,8 @@ class AutopilotDaemon:
         # 무인 모듈 인스턴스화 (K-Market / EasyTax 완전 분리)
         self.km_reddit = KMarketRedditHunter(self.db_mgr, self.supabase_mgr)
         self.tax_reddit = EasyTaxRedditHunter(self.db_mgr, self.supabase_mgr)
-        self.shorts_factory = ShortsVideoFactory(self.db_mgr, self.router, self.gemini, self.tts)
+        self.shorts_easytax = ShortsEasyTax()
+        self.shorts_kmarket = ShortsKMarket()
         self.seo_engine = ProgrammaticSEO(self.db_mgr)
         self.cardnews_gen = CardnewsGenerator(self.db_mgr, self.router)
         self.free_notifier = FreeStuffNotifier(self.db_mgr, self.notifier)
@@ -140,10 +142,10 @@ class AutopilotDaemon:
         # 4. 매일 오후 14시: 듀얼 채널 숏폼 일괄 렌더링 (K-Market 70% + EasyTax 30%)
         if current_hour == 14 and self.last_shorts_hour != 14:
             try:
-                # K-Market 공식 채널 (5개 핵심 언어 0원 나눔 숏폼)
-                km_res = self.shorts_factory.produce_shorts(service_id="kmarket", target_langs=["en", "vi", "zh", "ko", "uz"])
+                # K-Market 공식 채널 (5개 핵심 언어 0원 나눔 & 실물 스크롤 숏폼)
+                km_res = [self.shorts_kmarket.produce_shorts(lang=l) for l in ["en", "vi", "zh", "ko", "uz"]]
                 # EasyTax 공식 채널 (3개 핵심 언어 90% 감면 숏폼)
-                tax_res = self.shorts_factory.produce_shorts(service_id="easytax", target_langs=["vi", "en", "zh"])
+                tax_res = [self.shorts_easytax.produce_shorts(lang=l) for l in ["vi", "en", "zh"]]
                 
                 self.last_shorts_hour = 14
                 logger.info(f"오후 14시 듀얼 채널 숏폼 무인 렌더링 완료 (K-Market {len(km_res)}건 + EasyTax {len(tax_res)}건)")

@@ -14,27 +14,20 @@ from core.supabase_manager import SupabaseManager
 
 logger = logging.getLogger("EasyTaxGeminiReddit")
 
-# 3단계 간접 홍보 전략 비율
+# 50:50 황금 비율 (순수 정보 50% vs 구글 검색 유도 50%)
 _PROMO_LEVELS = {
-    1: 0.40,  # 순수 법적 팩트 (브랜드 0%)
-    2: 0.40,  # 간접 유도
-    3: 0.20,  # 브랜드 멘션
+    1: 0.50,  # 순수 법적 팩트/도움 (브랜드/홍보 0%, URL 0개)
+    2: 0.50,  # 자연스러운 구글 'ktrs tax' 검색 유도 (노링크)
 }
 
 
 def _choose_promo_level() -> int:
-    """가중치 기반 랜덤 홍보 레벨 선택"""
-    r = random.random()
-    cumulative = 0
-    for level, weight in _PROMO_LEVELS.items():
-        cumulative += weight
-        if r <= cumulative:
-            return level
-    return 1
+    """가중치 기반 50:50 랜덤 레벨 선택"""
+    return 1 if random.random() < 0.50 else 2
 
 
 class EasyTaxGeminiReddit:
-    """EasyTax 전용 레딧 80:20 세무 법률 3단계 간접 홍보 답변기"""
+    """EasyTax 전용 레딧 50:50 세무 법률 및 구글 검색 유도 답변기"""
     def __init__(self, supabase_mgr: Optional[SupabaseManager] = None):
         self.supabase_mgr = supabase_mgr or SupabaseManager()
         self.client = None
@@ -59,7 +52,7 @@ class EasyTaxGeminiReddit:
         return {}
 
     def generate_reddit_response(self, post_title: str, post_body: str, target_lang: str = "en", landing_url: str = "") -> str:
-        """EasyTax 전용 3단계 간접 홍보 세무 답변 생성"""
+        """EasyTax 전용 50:50 세무 정보 & 구글 검색 유도 답변 생성"""
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["en"])
         promo_level = _choose_promo_level()
 
@@ -80,33 +73,22 @@ class EasyTaxGeminiReddit:
 
         tax_facts_str = json.dumps(self.easytax_rules, ensure_ascii=False)
 
-        # 홍보 레벨별 프롬프트 분기
+        # 홍보 레벨별 프롬프트 분기 (50:50)
         if promo_level == 1:
-            promo_instruction = """### LEVEL 1 — PURE LEGAL FACTS (NO PROMOTION):
-1. DO NOT mention ANY brand, app, service, or company name.
-2. Provide 100% accurate, objective legal/tax explanations with Korean Tax Law citations.
-3. Cite official sources like the National Tax Service (NTS/국세청), Hometax, Framework Act on National Taxes, etc.
-4. Guide the user on exact steps they can take through official government channels.
-5. Write like a knowledgeable peer, not a salesperson."""
-
-        elif promo_level == 2:
-            promo_instruction = """### LEVEL 2 — INDIRECT SERVICE MENTION:
-1. Provide 80% accurate legal facts and official steps first.
-2. Near the end, casually mention something like:
-   - "there are free online tools that let you simulate your refund amount before filing"
-   - "I found a free calculator that shows your potential refund based on NTS records"
-   - "some services help foreigners navigate Hometax without dealing with the Korean-only interface"
-3. DO NOT use the exact service name. Just describe the benefit vaguely.
-4. NEVER include URLs."""
+            promo_instruction = """### TYPE 1 — 100% PURE LEGAL & TAX HELP (NO PROMOTION, NO SEARCH SUGGESTION):
+1. DO NOT mention ANY brand, app, service, search keyword, or company name.
+2. Provide 100% accurate, objective legal/tax explanations citing official Korean Tax Law & NTS (국세청) guidelines.
+3. Guide the user on exact official steps through Hometax or regional tax offices.
+4. Write like a warm, knowledgeable expat peer. ZERO commercial intent."""
 
         else:
-            promo_instruction = """### LEVEL 3 — PROFILE REFERENCE:
-1. Provide 80% accurate legal facts first.
-2. At the very end, add something natural like:
-   - "I used a service called EasyTax Korea that handled everything with licensed accountants, linked in my profile"
-   - "check my profile for the tax refund tool I used — it was free to simulate"
-3. Mention the name ONLY once and ONLY if it flows naturally.
-4. NEVER post a direct URL."""
+            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH SUGGESTION (NO URLS, 100% SAFE):
+1. Provide 80% genuinely accurate legal/tax facts and official advice first.
+2. At the very end of your comment, add ONE natural sentence suggesting them to search on Google:
+   - "If you want to check your estimated refund amount for free, just search 'ktrs tax' or 'ktrs korea' on Google."
+   - "There is an expat tax service in Korea that calculates this for foreigners — search 'ktrs tax' on Google to find it."
+3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
+4. ONLY suggest searching the exact keyword 'ktrs tax' or 'ktrs korea' on Google."""
 
         prompt = f"""You are a knowledgeable, trusted, and empathetic expat tax advisory peer in South Korea, answering a foreign worker or student's question on Reddit about taxes, ARC, salary deductions, Hometax, or tax refunds.
 

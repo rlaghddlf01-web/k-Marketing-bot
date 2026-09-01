@@ -114,35 +114,69 @@ class KMarketThreadsPublisher:
         }
 
     def _generate_kmarket_thread(self, lang: str, landing_url: str) -> Dict[str, Any]:
-        """언어별 맞춤 타래형 스레드 콘텐츠 생성"""
-        if lang == "vi":
-            posts = [
-                "Bí quyết sinh tồn cho du học sinh và người lao động Việt Nam tại Hàn Quốc: Đừng bao giờ mua đồ nội thất mới đắt đỏ khi mới sang! 🧵👇 #DuHocHanQuoc #KMarket #0won",
-                "1/ Mùa tốt nghiệp (tháng 2 & 8), sinh viên tại Yonsei, Korea Univ tặng lại 0 Won rất nhiều giường, bàn học, tủ lạnh mini còn cực mới thay vì vứt bỏ mất phí.",
-                "2/ Cách giao dịch an toàn: Luôn hẹn nhận đồ trực tiếp tại cổng trường hoặc ga tàu, kiểm tra xác thực người dùng và tuyệt đối không chuyển cọc trước.",
-                f"3/ Kho đồ 0 Won miễn phí và chat dịch tiếng Việt tự động đã có sẵn trên app K-Market:\n👉 Xem ngay tại đây: {landing_url}"
-            ]
-            hook = "Bí quyết nhận đồ nội thất 0 Won & sinh tồn tại Hàn Quốc"
-        elif lang == "en":
-            posts = [
-                "Moving to Korea or graduating soon? Here is how international students get 0 KRW verified furniture and appliances in Seoul 🧵👇 #KoreaExpat #SeoulLife #KMarket",
-                "1/ Every semester, graduating expats leave behind barely-used desks, chairs, and mini-fridges in Sinchon, Anam, and Hongdae. Instead of paying trash disposal fees, they give them away for free.",
-                "2/ Anti-scam tip: Always trade in public campus spots, verify user profiles, and use auto-translated chat to overcome language barriers.",
-                f"3/ Browse today's live 0 KRW giveaways with 17-language instant chat on K-Market:\n👉 Claim your items here: {landing_url}"
-            ]
-            hook = "How international students get 0 KRW verified furniture in Seoul"
-        else: # ko
-            posts = [
-                "재한 외국인 유학생 & 직장인을 위한 원룸 이사 꿀팁: 0원 무료나눔 가구 득템하는 법 🧵👇 #KMarket #0원나눔 #외국인생활",
-                "1/ 신촌, 안암, 혜화 대학가 졸업 시즌마다 침대, 책상, 소형 가전이 0원에 대량 등록됩니다. 폐기물 스티커 비용 대신 필요한 외국인에게 무료 나눔하는 문화!",
-                "2/ 안전 직거래 수칙: 기숙사 정문 앞 직거래, 신원 인증 확인, 17개국 자동번역 채팅으로 소통 단절 해결.",
-                f"3/ 오늘 등록된 전국 0원 나눔 실물 매물 실시간 확인:\n👉 K-Market 바로가기: {landing_url}"
-            ]
-            hook = "외국인 유학생 0원 나눔 가구 득템 및 안전 직거래 가이드"
+        """언어별 맞춤 50:50 순수 원룸/생활 정보 vs 구글 'k-market korea' 검색 유도 스레드 콘텐츠 생성"""
+        import random
+        # 50:50 확률로 순수 정보 타래(Type 1) vs 구글 검색 유도 타래(Type 2)
+        is_pure_info = (random.random() < 0.50)
+
+        if is_pure_info:
+            # 🌿 TYPE 1: 100% 순수 생활 정보성 타래 (홍보 0%, URL 0개, 검색유도 0개)
+            if lang == "vi":
+                posts = [
+                    "3 mẹo tiết kiệm tiền triệu khi thuê phòng trọ và vứt rác tại Hàn Quốc 🧵👇 #DuHocHanQuoc #KinhNghiemSong #SeoulLife",
+                    "1/ Vứt rác cồng kềnh (bàn, ghế, nệm): Đừng bao giờ vứt bừa bãi! Phải ra cửa hàng tiện lợi mua tem dán rác thải lớn (대형폐기물 스티커) hoặc quét mã QR dán lên để tránh bị phạt 100,000 won.",
+                    "2/ Tiền cọc phòng (보증금): Khi ký hợp đồng nhà, nhớ đi làm ngay 'Xác nhận ngày chuyển đến' (확정일자) tại trung tâm 주민센터 để bảo vệ 100% tiền cọc khi trả phòng.",
+                    "3/ Đồ dùng mùa đông: Máy sưởi, chăn điện nên mua vào tháng 10 hoặc xin lại của các anh chị khóa trên tốt nghiệp về nước để tiết kiệm chi phí."
+                ]
+                hook = "3 mẹo tiết kiệm tiền triệu khi thuê phòng & sinh sống tại Hàn Quốc"
+            elif lang == "en":
+                posts = [
+                    "3 money-saving studio room hacks every foreigner in Korea needs to know 🧵👇 #KoreaLiving #ExpatHacks #SeoulStudio",
+                    "1/ Bulky Waste Disposal: Never dump desks or mattresses on the street! Buy a disposal sticker (대형폐기물 스티커) at any convenience store to avoid a 100,000 KRW fine.",
+                    "2/ Protect Your Deposit: The moment you move in, visit the local 주민센터 to get the official 'Fixed Date' stamp (확정일자). This legally protects your housing deposit.",
+                    "3/ Winter Heating (난방): Set your boiler to '외출' (away mode) rather than turning it off completely when leaving the house — it saves massive gas bill costs."
+                ]
+                hook = "3 Money-Saving Studio Living & Deposit Protection Hacks in Korea"
+            else: # ko
+                posts = [
+                    "재한 외국인 유학생 & 사회초년생을 위한 원룸 자취 절약 꿀팁 3가지 🧵👇 #자취꿀팁 #원룸생활 #이사팁",
+                    "1/ 대형 폐기물 배출: 가구/가전 버릴 땐 편의점에서 종량제 스티커를 사서 붙이거나 구청 앱으로 신고해야 10만원 과태료를 피할 수 있습니다.",
+                    "2/ 전월세 보증금 보호: 이사 당일 주민센터에서 전입신고와 함께 '확정일자'를 받아야 보증금을 안전하게 법적으로 보호받습니다.",
+                    "3/ 난방법 가스비 절약: 외출 시 보일러를 끄지 말고 '외출 모드'나 20도 정도로 유지하는 것이 난방비 폭탄을 막는 비결입니다."
+                ]
+                hook = "외국인 유학생 및 1인 가구 원룸 자취 절약 & 보증금 보호 수칙"
+
+        else:
+            # 🎯 TYPE 2: 80% 나눔 꿀팁 + 구글 'k-market korea' 검색 유도 타래 (노링크, 스팸 0%)
+            if lang == "vi":
+                posts = [
+                    "Bí quyết sinh tồn cho du học sinh và người lao động Việt Nam: Cách nhận đồ nội thất 0 Won tại Hàn Quốc 🧵👇 #DuHocHanQuoc #KMarket #0wonKorea",
+                    "1/ Mùa tốt nghiệp và chuyển phòng (tháng 2 & 8), sinh viên tại các trường đại học lớn tặng lại 0 Won rất nhiều bàn học, ghế, tủ lạnh mini còn cực kỳ mới.",
+                    "2/ Mẹo nhận đồ an toàn: Luôn hẹn nhận đồ trực tiếp tại cổng trường hoặc ga tàu, kiểm tra tình trạng thực tế và không bao giờ chuyển tiền đặt cọc trước.",
+                    "3/ Muốn xem danh sách các món đồ 0 Won và đồ gia dụng cũ đang được tặng hôm nay, bạn hãy lên Google tìm kiếm: 'k-market korea' nhé!"
+                ]
+                hook = "Bí quyết nhận đồ nội thất 0 Won & sinh tồn tiết kiệm tại Hàn Quốc"
+            elif lang == "en":
+                posts = [
+                    "Moving to Korea or graduating soon? Here is how international students get 0 KRW verified furniture in Seoul 🧵👇 #KoreaExpat #SeoulLife #ExpatHacks",
+                    "1/ Every semester, graduating expats leave behind barely-used desks, chairs, and mini-fridges in university areas like Sinchon, Anam, and Hongdae for free.",
+                    "2/ Anti-scam tip: Always trade in open campus meetup spots, check seller profiles, and use auto-translated chat to overcome language barriers.",
+                    "3/ Want to browse today's live 0 KRW giveaways and moving sales? Just search 'k-market korea' on Google to check the listings!"
+                ]
+                hook = "How international students get 0 KRW verified furniture in Seoul"
+            else: # ko
+                posts = [
+                    "재한 외국인 유학생 & 직장인을 위한 원룸 이사 꿀팁: 0원 무료나눔 가구 득템하는 법 🧵👇 #0원나눔 #무빙세일 #외국인생활",
+                    "1/ 신촌, 안암, 혜화 대학가 졸업 시즌마다 침대, 책상, 소형 가전이 0원에 대량 등록됩니다. 버리는 비용 대신 필요한 이웃에게 무료 나눔하는 문화!",
+                    "2/ 안전 직거래 수칙: 기숙사/지하철역 앞 직거래, 신원 인증 확인, 17개국 자동번역 채팅으로 언어 장벽 해결.",
+                    "3/ 오늘 실시간으로 올라온 0원 무료나눔 가전/가구를 확인해보려면, 구글에서 'k-market korea' 검색해보시면 바로 보실 수 있습니다!"
+                ]
+                hook = "외국인 유학생 0원 나눔 가구 득템 및 안전 직거래 가이드"
 
         full_md = "\n\n---\n\n".join([f"**Post {i+1}**\n{p}" for i, p in enumerate(posts)])
         return {
             "hook_title": hook,
+            "is_pure_info": is_pure_info,
             "posts": posts,
             "full_markdown": full_md,
             "landing_url": landing_url,

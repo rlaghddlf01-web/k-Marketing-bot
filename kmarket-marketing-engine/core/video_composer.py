@@ -114,17 +114,18 @@ class VideoComposer:
             return 30.0
 
     def _select_bgm(self, service_id: str) -> Optional[Path]:
-        """서비스별 BGM 파일 선택"""
-        bgm_name = "bgm_kmarket.wav" if service_id == "kmarket" else "bgm_easytax.wav"
-        bgm_path = self.bgm_dir / bgm_name
-        if bgm_path.exists():
-            return bgm_path
-        # 폴백: bgm 폴더에 아무 wav/mp3나 있으면 사용
-        for ext in ["*.wav", "*.mp3"]:
-            candidates = list(self.bgm_dir.glob(ext))
-            if candidates:
-                return candidates[0]
-        return None
+        """서비스별 BGM 파일 선택 (10대 경쾌한 BGM 자동 로테이션)"""
+        try:
+            from core.bgm_manager import BGMManager
+            mgr = BGMManager(self.bgm_dir)
+            return mgr.get_random_upbeat_bgm(service_id)
+        except Exception as e:
+            logger.warning(f"BGMManager 로드 실패 폴백: {e}")
+            for ext in ["*.wav", "*.mp3"]:
+                candidates = list(self.bgm_dir.glob(ext))
+                if candidates:
+                    return candidates[0]
+            return None
 
     def _run_ffmpeg(
         self,
@@ -168,7 +169,7 @@ class VideoComposer:
             # 음성(입력1) + BGM(입력2) 믹싱: BGM 볼륨을 bgm_volume으로 낮춤
             voice_idx = 1
             bgm_idx = 2
-            audio_filter = "[{}:a]volume=1.0[voice];[{}:a]volume={}[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=3[aout]".format(
+            audio_filter = "[{}:a]volume=1.0[voice];[{}:a]volume={}[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]".format(
                 voice_idx, bgm_idx, bgm_volume
             )
             audio_map = ["-filter_complex", audio_filter, "-map", "0:v", "-map", "[aout]"]

@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from PIL import Image
-from config import GEMINI_API_KEY_EASYTAX, DATA_DIR, OUTPUTS_DIR
+from config import GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET, DATA_DIR, OUTPUTS_DIR
 
 logger = logging.getLogger("GeminiMediaGenerator")
 
@@ -19,20 +19,30 @@ logger = logging.getLogger("GeminiMediaGenerator")
 class GeminiMediaGenerator:
     """
     🎨 Gemini / Imagen AI 기반 고화질 실사 마케팅 이미지 생성기
+    - K-Market: GEMINI_API_KEY_KMARKET (유료 전용 키)
+    - EasyTax: GEMINI_API_KEY_EASYTAX (유료 전용 키)
     """
-    def __init__(self):
-        self.api_key = GEMINI_API_KEY_EASYTAX
+    def __init__(self, service_id: str = "kmarket"):
+        self.service_id = service_id.lower()
+        if self.service_id == "kmarket":
+            self.api_key = GEMINI_API_KEY_KMARKET or GEMINI_API_KEY_EASYTAX
+            self.fallback_key = GEMINI_API_KEY_EASYTAX
+        else:
+            self.api_key = GEMINI_API_KEY_EASYTAX or GEMINI_API_KEY_KMARKET
+            self.fallback_key = GEMINI_API_KEY_KMARKET
+
         self.cache_dir = DATA_DIR / "gemini_generated_media"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.client = None
         self._init_client()
 
-    def _init_client(self):
-        if self.api_key:
+    def _init_client(self, use_fallback: bool = False):
+        key = self.fallback_key if use_fallback else self.api_key
+        if key:
             try:
                 from google import genai
-                self.client = genai.Client(api_key=self.api_key)
-                logger.info("GeminiMediaGenerator Client 초기화 성공")
+                self.client = genai.Client(api_key=key)
+                logger.info(f"GeminiMediaGenerator Client 초기화 성공 (서비스: {self.service_id}, fallback: {use_fallback})")
             except Exception as e:
                 logger.warning(f"Gemini Client 초기화 실패: {e}")
                 self.client = None
@@ -57,20 +67,28 @@ class GeminiMediaGenerator:
         demo_desc = scenario_plan.get("persona_desc", "Asian expat young worker or student in South Korea")
         action = scenario_plan.get("action_prompt", "looking at smartphone with happy genuine smile")
         
-        # ★ [대표님 절대 지침] 인물 사진 생성 시 무조건 100% 동양인(Asian) 지정 (사물은 자연스럽게)
+        # ★ [대표님 절대 지침] 100% 인물 중심(Human-Centric) 시네마틱 인물 사진 헌법
+        human_centric_mandate = (
+            ", [CRITICAL DIRECTING MANDATE: 100% HUMAN-CENTRIC PORTRAIT]: "
+            "The human protagonist is the absolute primary focal subject of this photo. "
+            "The person's expressive face, eyes, genuine smile, and upper body MUST occupy at least 70-80% of the vertical 9:16 frame. "
+            "Sharp portrait focus on the person's face and eyes. Any props must remain small and NEVER cover or block the person's face."
+        )
+
         if any(action.startswith(prefix) for prefix in ["Cinematic", "Ultra close-up", "Extreme close-up", "Professional"]):
-            prompt = f"{action}, Aspect ratio {aspect_ratio}, masterpiece photography, photorealistic 4k."
+            prompt = f"{action}{human_centric_mandate}, Aspect ratio {aspect_ratio}, masterpiece photography, photorealistic 4k."
         else:
             prompt = (
-                f"Hyper-realistic authentic documentary photograph of an Asian person ({demo_desc}), {action}. "
+                f"Hyper-realistic authentic documentary portrait of an Asian person ({demo_desc}), {action}{human_centric_mandate}. "
                 f"Realistic East Asian and Southeast Asian facial features, authentic natural Asian skin texture, "
                 f"cinematic natural outdoor/indoor lighting, 8k resolution, "
-                f"natural facial expression, genuine emotions. "
+                f"natural facial expression, genuine emotions, clear visible face and upper body. "
                 f"Aspect ratio {aspect_ratio}, masterpiece photography."
             )
 
         negative_prompt = scenario_plan.get("negative_prompt") or (
-            "floating phone, six fingers, deformed hands, extra limbs, disembodied hands, "
+            "giant phone blocking face, macro phone screen, phone covering face, oversized phone, extreme close up of phone, "
+            "floating phone, six fingers, deformed hands, extra limbs, disembodied hands, claw hands, "
             "creepy smile, dead eyes, cartoon, 3d render, illustration, blurry, "
             "caucasian, white people, blonde hair, blue eyes, western model, european features, non-asian, "
             "bad anatomy, mutated fingers, low quality"

@@ -14,27 +14,20 @@ from core.supabase_manager import SupabaseManager
 
 logger = logging.getLogger("KMarketGeminiReddit")
 
-# 3단계 간접 홍보 전략 비율
+# 50:50 황금 비율 (순수 정보 50% vs 구글 검색 유도 50%)
 _PROMO_LEVELS = {
-    1: 0.40,  # 순수 도움 (브랜드 0%)
-    2: 0.40,  # 간접 유도
-    3: 0.20,  # 브랜드 멘션
+    1: 0.50,  # 순수 도움 (브랜드/홍보 0%, URL 0개)
+    2: 0.50,  # 자연스러운 구글 'k-market korea' 검색 유도 (노링크)
 }
 
 
 def _choose_promo_level() -> int:
-    """가중치 기반 랜덤 홍보 레벨 선택"""
-    r = random.random()
-    cumulative = 0
-    for level, weight in _PROMO_LEVELS.items():
-        cumulative += weight
-        if r <= cumulative:
-            return level
-    return 1
+    """가중치 기반 50:50 랜덤 레벨 선택"""
+    return 1 if random.random() < 0.50 else 2
 
 
 class KMarketGeminiReddit:
-    """K-Market 전용 레딧 질문 감지 및 3단계 간접 홍보 답변기"""
+    """K-Market 전용 레딧 50:50 생활 정보 및 구글 검색 유도 답변기"""
     def __init__(self, supabase_mgr: Optional[SupabaseManager] = None):
         self.supabase_mgr = supabase_mgr or SupabaseManager()
         self.client = None
@@ -73,7 +66,7 @@ class KMarketGeminiReddit:
         return {"category": "general_living", "score": 75, "is_relevant": False}
 
     def generate_reddit_response(self, post_title: str, post_body: str, target_lang: str = "en", landing_url: str = "") -> str:
-        """K-Market 전용 3단계 간접 홍보 답변 생성"""
+        """K-Market 전용 50:50 생활 정보 & 구글 검색 유도 답변 생성"""
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["en"])
         promo_level = _choose_promo_level()
 
@@ -92,31 +85,22 @@ class KMarketGeminiReddit:
             proven_texts = [f"- {ps.get('script_text')}" for ps in proven_scripts]
             few_shot_prompt += "\n\n### [Proven Examples]:\n" + "\n".join(proven_texts)
 
-        # 홍보 레벨별 프롬프트 분기
+        # 홍보 레벨별 프롬프트 분기 (50:50)
         if promo_level == 1:
-            promo_instruction = """### LEVEL 1 — PURE HELP (NO PROMOTION):
-1. DO NOT mention ANY brand, app, or service name.
-2. Provide 100% genuinely helpful, practical advice.
-3. Share real-world tips like how to avoid bulky waste fees, where to find free giveaways near universities, etc.
-4. Write like you're chatting with a friend, no sales pitch at all."""
-
-        elif promo_level == 2:
-            promo_instruction = """### LEVEL 2 — INDIRECT MENTION:
-1. Provide 80% genuinely helpful, practical advice first.
-2. Near the end, casually mention something like:
-   - "there's this app that auto-translates chat in 17 languages, really helped me with Korean sellers"
-   - "I found this secondhand platform made specifically for foreigners in Korea, it has ARC verification so it's safe"
-3. DO NOT use the exact brand name. Just describe the benefit vaguely.
-4. NEVER include URLs."""
+            promo_instruction = """### TYPE 1 — 100% PURE PRACTICAL HELP (NO PROMOTION, NO SEARCH SUGGESTION):
+1. DO NOT mention ANY brand, app, service, search keyword, or website.
+2. Provide 100% genuinely helpful, practical expat advice for living in Korea.
+3. Share real tips like how to avoid bulky waste disposal sticker fees, recycling rules in Korea, moving tips, etc.
+4. Write like chatting with a close foreign friend. ZERO commercial intent."""
 
         else:
-            promo_instruction = """### LEVEL 3 — PROFILE REFERENCE:
-1. Provide 80% genuinely helpful advice first.
-2. At the very end, add something natural like:
-   - "I linked the platform I use in my profile if you wanna check it out"
-   - "check my profile for the link — it's specifically made for expats"
-3. Mention 'K-Market' or '케이마켓' ONLY if it flows naturally, MAX once.
-4. NEVER post a direct URL."""
+            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH SUGGESTION (NO URLS, 100% SAFE):
+1. Provide 80% genuinely helpful, practical advice first.
+2. At the very end of your comment, add ONE casual recommendation to search on Google:
+   - "If you need $0 free furniture or moving sale items from other expats, try searching 'k-market korea' on Google."
+   - "There's a secondhand platform for foreigners in Korea with auto-translation — search 'k-market korea' on Google to find it."
+3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
+4. ONLY suggest searching the exact keyword 'k-market korea' on Google."""
 
         prompt = f"""You are an experienced, helpful, and friendly senior foreign resident / expat living in South Korea, answering another foreigner's question on Reddit about moving, buying/selling used items, finding free giveaways, or studio living tips.
 

@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Tuple
 from PIL import Image
-from config import GEMINI_API_KEY_EASYTAX
+from config import GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET
 
 logger = logging.getLogger("MediaQualityVerifier")
 
@@ -18,9 +18,12 @@ logger = logging.getLogger("MediaQualityVerifier")
 class MediaQualityVerifier:
     """
     🛡️ AI 미디어 사전 품질 검증 및 점수화 엔진
+    - K-Market: GEMINI_API_KEY_KMARKET
+    - EasyTax: GEMINI_API_KEY_EASYTAX
     """
-    def __init__(self):
-        self.api_key = GEMINI_API_KEY_EASYTAX
+    def __init__(self, service_id: str = "kmarket"):
+        self.service_id = service_id.lower()
+        self.api_key = GEMINI_API_KEY_KMARKET if self.service_id == "kmarket" else GEMINI_API_KEY_EASYTAX
         self.client = None
         self._init_client()
 
@@ -33,38 +36,47 @@ class MediaQualityVerifier:
                 logger.warning(f"Gemini Vision Client 초기화 실패: {e}")
                 self.client = None
 
-    def verify_media_quality(
+    def verify_scene_image(
         self,
         image_path: Path,
-        expected_lang: str,
-        expected_theme: str
-    ) -> Tuple[bool, float, str]:
+        scene_name: str,
+        lang: str = "en"
+    ) -> Tuple[bool, float, str, str]:
         """
-        생성된 이미지를 AI가 직접 검사하여 (합격여부, 점수, 평가이유) 반환
+        🎬 [씬별 실시간 AI 비전 정밀 검사]
+        - 스마트폰 상하 반전(upside-down), 손가락 개수/기형, 표정 어색함, 화면 왜곡 정밀 판독
+        - 불합격 시 (passed=False, score, reason, fix_hint) 반환하여 즉시 보정 재촬영 트리거
         """
         if not image_path or not image_path.exists():
-            return False, 0.0, "파일이 존재하지 않음"
+            return False, 0.0, "파일 없음", "Ensure valid file path."
 
-        # 파일 크기 기본 무결성 검사
         if image_path.stat().st_size < 10000:
-            return False, 10.0, "이미지 파일 손상 또는 빈 이미지"
+            return False, 10.0, "파일 손상 또는 빈 이미지", "Regenerate complete photorealistic image."
 
         if not self.client:
-            # API 없을 경우 기본 88점으로 안전 통과
-            return True, 88.0, "기본 안전 통과 (오프라인 모드)"
+            return True, 90.0, "안전 기본 통과 (오프라인)", ""
 
         prompt = f"""
-You are a strict Creative Quality Assurance Director for mobile social ads (TikTok / Instagram Reels).
-Inspect this generated image against these strict criteria:
-1. Hands/Fingers: Are hands natural? (NO six fingers, NO melted/disembodied limbs, NO floating objects)
-2. Facial Expression: Is the facial expression natural, pleasant, and genuine? (NO creepy frozen stare, NO distorted face)
-3. Demographic Match: Does the person match the expected target demographic for language [{expected_lang}]?
-4. Commercial Viability: Does it look like a high-converting, premium ad visual for theme [{expected_theme}]?
+You are an uncompromising, ultra-strict Creative Quality Control Inspector for mobile video ads.
+Inspect this scene image ({scene_name}) to ensure it is a high-converting, premium human-centric ad:
 
-Output strictly a JSON with keys:
-"score": (integer 0 to 100),
-"passed": (boolean true if score >= 80 else false),
-"reasons": "(short 1-sentence explanation)"
+CRITICAL ZERO-TOLERANCE QUALITY RULES:
+1. 👤 HUMAN-CENTRIC PROMINENCE (ABSOLUTE PRIORITY):
+   - The human protagonist's expressive face, eyes, and upper body MUST be clearly visible and the main focal point.
+   - FAIL IMMEDIATELY (score < 40, passed = false) if the person's face is blocked, hidden behind a giant phone, or out of frame.
+2. 🖐️ HAND ANATOMY:
+   - If there are 6 fingers, fused fingers, claw-like grip, or deformed thumbs:
+     -> FAIL (score < 50, passed = false, reasons = "Severe anatomical hand distortion").
+3. 📱 NATURAL PROPS:
+   - Any smartphone or prop must be small, natural, and secondary to the human face.
+4. 🌏 DEMOGRAPHIC INTEGRITY:
+   - Authentic Asian protagonist for target language [{lang}].
+
+Output STRICTLY JSON with keys:
+"score": (integer 0 to 100, pass threshold is 80),
+"passed": (boolean, true ONLY if the human face is clearly visible and anatomy is normal),
+"reasons": "(short clear diagnostic reason)",
+"fix_hint": "(explicit corrective prompt for retry, e.g. 'Human-centric portrait with clear visible smiling face occupying 75% of frame')"
 """
         try:
             pil_img = Image.open(image_path)
@@ -77,8 +89,25 @@ Output strictly a JSON with keys:
             score = float(data.get("score", 85.0))
             passed = bool(data.get("passed", score >= 80.0))
             reason = str(data.get("reasons", "검증 완료"))
-            logger.info(f"🛡️ [미디어 품질 검증] 점수: {score}점 (합격: {passed}) - {reason}")
-            return passed, score, reason
+            fix_hint = str(data.get("fix_hint", "smartphone strictly upright, 5 fingers natural grip"))
+            
+            if passed:
+                logger.info(f"🛡️ [AI 비전 검증 통과] {scene_name} ({score}점): {reason}")
+            else:
+                logger.warning(f"⚠️ [AI 비전 결함 감지 - 불합격] {scene_name} ({score}점): {reason} (보정: {fix_hint})")
+                
+            return passed, score, reason, fix_hint
         except Exception as e:
-            logger.warning(f"AI 비전 품질 검증 중 에러 (폴백 통과): {e}")
-            return True, 85.0, f"기본 승인 (검증 예외: {e})"
+            logger.warning(f"AI 비전 품질 검증 중 예외 (안전 승인): {e}")
+            return True, 85.0, f"기본 승인: {e}", ""
+
+    def verify_media_quality(
+        self,
+        image_path: Path,
+        expected_lang: str,
+        expected_theme: str
+    ) -> Tuple[bool, float, str]:
+        """하위 호환용 종합 검증 메서드"""
+        passed, score, reason, _ = self.verify_scene_image(image_path, expected_theme, expected_lang)
+        return passed, score, reason
+

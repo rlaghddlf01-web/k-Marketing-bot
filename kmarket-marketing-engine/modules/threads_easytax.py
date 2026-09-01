@@ -115,35 +115,69 @@ class EasyTaxThreadsPublisher:
         }
 
     def _generate_easytax_thread(self, lang: str, landing_url: str) -> Dict[str, Any]:
-        """언어별 맞춤 세무 타래형 스레드 콘텐츠 생성"""
-        if lang == "vi":
-            posts = [
-                "Lao động Việt Nam visa E-9, E-7 và du học sinh D-2 tại Hàn Quốc nhất định phải biết điều này nếu không muốn mất hàng triệu won tiền thuế 🧵👇 #HoanThueHanQuoc #EasyTax #VisaE9",
-                "1/ Điều 30 Luật Miễn giảm thuế đặc biệt (조특법 제30조): Người lao động nước ngoài làm việc tại doanh nghiệp vừa và nhỏ (SME) được GIẢM 90% thuế thu nhập trong 5 năm đầu (tối đa 2.000.000 KRW/năm).",
-                "2/ Du học sinh D-2 làm thêm bị trừ 3.3% thuế hoặc lao động đã về nước/chuyển xưởng từ 2021-2025 đều có thể yêu cầu HOÀN LẠI 100% hợp pháp.",
-                f"3/ Kiểm tra số tiền hoàn thuế miễn phí trong 3 phút (Đại lý thuế công nhận của Cục Thuế Quốc gia - 선입금 0원):\n👉 Tính tiền hoàn thuế ngay: {landing_url}"
-            ]
-            hook = "Quyền giảm 90% thuế thu nhập (Điều 30) & Hoàn thuế 5 năm cho lao động E-9"
-        elif lang == "en":
-            posts = [
-                "Foreign workers & international students in Korea: You might be leaving up to 2,000,000 KRW in unclaimed tax refunds every year 🧵👇 #KoreaTax #ExpatFinance #EasyTax",
-                "1/ Under Article 30 of the Restriction of Special Taxation Act, foreign employees in Korean SMEs are entitled to a 90% INCOME TAX REDUCTION for their first 5 years.",
-                "2/ Worked part-time with 3.3% withholding tax under D-2 visa? Or missed tax filing between 2021-2025? You can legally claim retroactive refunds for the past 5 years.",
-                f"3/ Certified NTS tax accountants, zero upfront fee. Calculate your refund in 3 mins:\n👉 Free Tax Calculator: {landing_url}"
-            ]
-            hook = "90% Income Tax Exemption & 5-Year Retroactive Refund Guide for Expats"
-        else: # ko
-            posts = [
-                "외국인 근로자(E-9/E-7) 및 유학생(D-2) 국세청 소득세 90% 감면 팩트체크 🧵👇 #외국인세금환급 #EasyTax #조특법30조",
-                "1/ 조특법 제30조(중소기업 취업자 소득세 감면): 중소기업에 취업한 외국인 근로자는 5년간 소득세 90%(연 최대 200만원 한도)를 합법 감면받을 수 있습니다.",
-                "2/ D-2 유학생 3.3% 원천징수 환급 및 최근 5개년(2021~2025) 누락된 환급금 소급 경정청구 전액 지원.",
-                f"3/ 선입금 0원 국세청 공인 세무대리 3분 무료 환급 조회:\n👉 EasyTax 바로가기: {landing_url}"
-            ]
-            hook = "외국인 근로자 조특법 제30조 90% 소득세 감면 및 5개년 소급 환급"
+        """언어별 맞춤 50:50 순수 생활/비자 정보 vs 구글 'ktrs tax' 검색 유도 스레드 콘텐츠 생성"""
+        import random
+        # 50:50 확률로 순수 정보 타래(Type 1) vs 구글 검색 유도 타래(Type 2)
+        is_pure_info = (random.random() < 0.50)
+
+        if is_pure_info:
+            # 🌿 TYPE 1: 100% 순수 정보성 타래 (홍보 0%, URL 0개, 검색유도 0개)
+            if lang == "vi":
+                posts = [
+                    "3 điều cực kỳ quan trọng về Visa E-9 và D-2 tại Hàn Quốc bạn nhất định phải nhớ 🧵👇 #KinhNghiemHanQuoc #VisaE9 #DuHocHanQuoc",
+                    "1/ Gia hạn thẻ ARC: Hãy đặt lịch hẹn trên Hikorea trước ngày hết hạn ít nhất 2-3 tháng. Quá hạn dù chỉ 1 ngày bạn sẽ bị phạt hành chính rất nặng.",
+                    "2/ Bảo hiểm y tế quốc dân (NHIS): Tiền bảo hiểm tự động trừ hàng tháng. Nếu đi khám tại phòng khám nội khoa (내과) gần nhà, chi phí chỉ khoảng 5,000 - 10,000 won.",
+                    "3/ Đổi nơi làm việc (E-9): Phải hoàn tất đăng ký tại Trung tâm Việc làm (고용센터) trong vòng 3 tháng kể từ ngày nghỉ việc cũ."
+                ]
+                hook = "3 lưu ý sống còn về Visa E-9 & D-2 tại Hàn Quốc (Cập nhật 2026)"
+            elif lang == "en":
+                posts = [
+                    "3 essential survival tips for foreign workers & students living in South Korea 🧵👇 #KoreaTips #ExpatLife #LifeInKorea",
+                    "1/ ARC Renewal: Always book your appointment on HiKorea at least 2 months before expiration. Overstaying by even one day results in heavy fines.",
+                    "2/ National Health Insurance (NHIS): Standard clinic visits (내과/이비인후과) usually cost under 10,000 KRW with insurance. Don't avoid going to the doctor!",
+                    "3/ Moving registration (전입신고): You must report your new address within 14 days of moving at your local community center (주민센터)."
+                ]
+                hook = "3 Essential Expat Survival & Bureaucracy Tips in Korea (2026)"
+            else: # ko
+                posts = [
+                    "외국인 유학생(D-2) & 근로자(E-9) 한국 생활 필수 행정 꿀팁 3가지 🧵👇 #외국인생활 #한국생활꿀팁 #비자연장",
+                    "1/ 외국인등록증(ARC) 연장: 만료일 2~3달 전 하이코리아에서 사전 방문예약 필수. 단 하루만 늦어도 과태료가 부과됩니다.",
+                    "2/ 국민건강보험 활용: 동네 내과/이비인후과 진료비는 보험 적용 시 5,000~10,000원 선으로 매우 저렴하니 아플 때 참지 마세요.",
+                    "3/ 이사 후 전입신고: 이사한 날로부터 14일 이내 관할 주민센터에 주소지 변경 신고를 반드시 완료해야 합니다."
+                ]
+                hook = "외국인 유학생 및 근로자 한국 생활 필수 행정 수칙 3가지"
+
+        else:
+            # 🎯 TYPE 2: 80% 세법 팩트 + 구글 'ktrs tax' 검색 유도 타래 (노링크, 스팸 0%)
+            if lang == "vi":
+                posts = [
+                    "Lao động Việt Nam visa E-9, E-7 và du học sinh D-2 tại Hàn Quốc: Quyền nhận lại hàng triệu won tiền thuế thu nhập 🧵👇 #HoanThueHanQuoc #ThueThuNhap #E9Korea",
+                    "1/ Điều 30 Luật Miễn giảm thuế đặc biệt (조특법 제30조): Người lao động nước ngoài làm việc tại doanh nghiệp SME được GIẢM 90% thuế thu nhập trong 5 năm đầu (tối đa 2.000.000 KRW/năm).",
+                    "2/ Du học sinh D-2 làm thêm bị trừ 3.3% thuế hoặc lao động đã về nước từ 2021-2025 đều có quyền nộp đơn yêu cầu hoàn thuế 5 năm (경정청구).",
+                    "3/ Muốn tự kiểm tra xem mình được hoàn lại bao nhiêu tiền, bạn chỉ cần lên Google tìm kiếm: 'ktrs tax' hoặc 'ktrs korea' để xem bảng tính miễn phí nhé!"
+                ]
+                hook = "Quyền giảm 90% thuế thu nhập (Điều 30) & Hoàn thuế 5 năm cho lao động E-9"
+            elif lang == "en":
+                posts = [
+                    "Foreign workers & international students in Korea: You might be leaving up to 2,000,000 KRW in unclaimed tax refunds every year 🧵👇 #KoreaTax #ExpatFinance #KoreaRefund",
+                    "1/ Under Article 30 of the Restriction of Special Taxation Act, foreign employees in Korean SMEs are entitled to a 90% INCOME TAX REDUCTION for their first 5 years.",
+                    "2/ Worked part-time with 3.3% withholding tax under D-2 visa? Or missed filing between 2021-2025? You can legally claim retroactive refunds for the past 5 years.",
+                    "3/ Want to check your estimated refund amount for free? Just search 'ktrs tax' or 'ktrs korea' on Google to calculate it in 3 minutes!"
+                ]
+                hook = "90% Income Tax Exemption & 5-Year Retroactive Refund Guide for Expats"
+            else: # ko
+                posts = [
+                    "외국인 근로자(E-9/E-7) 및 유학생(D-2) 국세청 소득세 90% 감면 팩트체크 🧵👇 #외국인세금환급 #조특법30조 #경정청구",
+                    "1/ 조특법 제30조(중소기업 취업자 소득세 감면): 중소기업에 취업한 외국인 근로자는 5년간 소득세 90%(연 최대 200만원 한도)를 합법 감면받을 수 있습니다.",
+                    "2/ D-2 유학생 3.3% 원천징수 환급 및 최근 5개년(2021~2025) 누락된 환급금 소급 경정청구 전액 신청 가능.",
+                    "3/ 본인이 돌려받을 수 있는 예상 환급금이 얼마인지 무료로 확인해보려면, 구글에서 'ktrs tax' 검색해보시면 바로 계산 가능합니다!"
+                ]
+                hook = "외국인 근로자 조특법 제30조 90% 소득세 감면 및 5개년 소급 환급"
 
         full_md = "\n\n---\n\n".join([f"**Post {i+1}**\n{p}" for i, p in enumerate(posts)])
         return {
             "hook_title": hook,
+            "is_pure_info": is_pure_info,
             "posts": posts,
             "full_markdown": full_md,
             "landing_url": landing_url,

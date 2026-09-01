@@ -69,8 +69,8 @@ class ScenarioDirector:
         """숏폼/카드뉴스 전담 디렉터로 위임"""
         service_id = service_id.lower()
         if service_id == "kmarket":
-            # 케이마켓 숏폼 전담 디렉터 호출
-            return self.shorts_kmarket.get_shorts_scenario(lang=lang)
+            # 케이마켓 숏폼 전담 디렉터 호출 (A타입 실물 피드 vs B타입 5단계 감동 50:50)
+            return self.shorts_kmarket.plan_daily_scenario(lang=lang)
         else:
             # 이지텍스 숏폼 전담 디렉터 호출 (6대 감정 테마 x 페르소나)
             return self.shorts_easytax.plan_daily_scenario(lang=lang)

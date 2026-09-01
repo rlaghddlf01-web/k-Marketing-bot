@@ -17,19 +17,51 @@ from config import OUTPUTS_DIR, BASE_DIR
 
 logger = logging.getLogger("MotionVideoComposer")
 
+import re
+
 # 🎯 17개국 언어별 최적화 폰트 매핑 테이블 (글자 깨짐 0% 보장)
 LANGUAGE_FONT_MAP = {
-    # 중국어 (간체/번체 한자 100% 지원)
+    # 🇳🇵 네팔어 (데바나가리 문자 100% 지원)
+    "ne": {
+        "bold": [r"C:\Windows\Fonts\nirmalab.ttf", r"C:\Windows\Fonts\nirmala.ttf"],
+        "regular": [r"C:\Windows\Fonts\nirmala.ttf", r"C:\Windows\Fonts\nirmalab.ttf"]
+    },
+    # 🇧🇩 벵골어 (방글라데시 벵골 문자 100% 지원)
+    "bn": {
+        "bold": [r"C:\Windows\Fonts\nirmalab.ttf", r"C:\Windows\Fonts\nirmala.ttf"],
+        "regular": [r"C:\Windows\Fonts\nirmala.ttf", r"C:\Windows\Fonts\nirmalab.ttf"]
+    },
+    # 🇲🇲 미얀마어 (버마 문자 100% 지원)
+    "my": {
+        "bold": [r"C:\Windows\Fonts\mmrtextb.ttf", r"C:\Windows\Fonts\mmrtext.ttf"],
+        "regular": [r"C:\Windows\Fonts\mmrtext.ttf", r"C:\Windows\Fonts\mmrtextb.ttf"]
+    },
+    # 🇰🇭 캄보디아 크메르어
+    "km": {
+        "bold": [r"C:\Windows\Fonts\leelawdb.ttf", r"C:\Windows\Fonts\leelawad.ttf"],
+        "regular": [r"C:\Windows\Fonts\leelawad.ttf", r"C:\Windows\Fonts\leelawdb.ttf"]
+    },
+    # 🇹🇭 태국어
+    "th": {
+        "bold": [r"C:\Windows\Fonts\leelawdb.ttf", r"C:\Windows\Fonts\tahomabd.ttf", r"C:\Windows\Fonts\leelawad.ttf"],
+        "regular": [r"C:\Windows\Fonts\leelawad.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
+    },
+    # 🇻🇳 베트남어 (다이아크리틱 성조 100% 지원)
+    "vi": {
+        "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
+        "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
+    },
+    # 🇨🇳 중국어 (간체/번체 한자 100% 지원)
     "zh": {
         "bold": [r"C:\Windows\Fonts\msyhbd.ttc", r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simsun.ttc"],
         "regular": [r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simsun.ttc"]
     },
-    # 태국어
-    "th": {
-        "bold": [r"C:\Windows\Fonts\tahomabd.ttf", r"C:\Windows\Fonts\tahoma.ttf", r"C:\Windows\Fonts\arialbd.ttf"],
-        "regular": [r"C:\Windows\Fonts\tahoma.ttf", r"C:\Windows\Fonts\arial.ttf"]
+    # 🇯🇵 일본어
+    "ja": {
+        "bold": [r"C:\Windows\Fonts\msgothic.ttc", r"C:\Windows\Fonts\msyhbd.ttc"],
+        "regular": [r"C:\Windows\Fonts\msgothic.ttc", r"C:\Windows\Fonts\msyh.ttc"]
     },
-    # 러시아어 / 몽골어 / 우즈벡어 / 중앙아시아 (키릴 문자 100% 지원)
+    # 🇷🇺 러시아어 / 🇲🇳 몽골어 / 🇺🇿 우즈벡어 (키릴/라틴 문자 100% 지원)
     "ru": {
         "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\tahomabd.ttf", r"C:\Windows\Fonts\segoeuib.ttf"],
         "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\tahoma.ttf", r"C:\Windows\Fonts\segoeui.ttf"]
@@ -42,12 +74,49 @@ LANGUAGE_FONT_MAP = {
         "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
         "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf"]
     },
-    # 베트남어 / 인도네시아어 / 영어 / 글로벌 라틴어
+    # 🇦🇪 아랍어
+    "ar": {
+        "bold": [r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf", r"C:\Windows\Fonts\arialbd.ttf"],
+        "regular": [r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\tahoma.ttf", r"C:\Windows\Fonts\arial.ttf"]
+    },
+    # 🇮🇩 인도네시아어 / 🇵🇭 필리핀 타갈로그어 / 🇺🇸 영어 / 🇪🇸 스페인어
+    "id": {
+        "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
+        "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
+    },
+    "tl": {
+        "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
+        "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
+    },
+    "en": {
+        "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
+        "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
+    },
+    "es": {
+        "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
+        "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
+    },
+    # 🇰🇷 한국어
+    "ko": {
+        "bold": [r"C:\Windows\Fonts\malgunbd.ttf", r"C:\Windows\Fonts\gulim.ttc"],
+        "regular": [r"C:\Windows\Fonts\malgun.ttf", r"C:\Windows\Fonts\gulim.ttc"]
+    },
+    # 글로벌 기본
     "default": {
-        "bold": [r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
-        "regular": [r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
+        "bold": [r"C:\Windows\Fonts\arialbd.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\tahomabd.ttf"],
+        "regular": [r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\segoeui.ttf", r"C:\Windows\Fonts\tahoma.ttf"]
     }
 }
+
+def clean_display_text(text: str) -> str:
+    """폰트 렌더링 시 네모 박스(□ tofu)를 유발하는 이모지 및 제어 문자를 안전하게 제거"""
+    if not text:
+        return ""
+    # 이모지 유니코드 범위 필터링
+    cleaned = re.sub(r'[\U00010000-\U0010ffff]', '', text)
+    # 특수 이모지 기호 필터링 (폰트에 없는 문자)
+    cleaned = re.sub(r'[🏛🔥💬⚡📍🎁🏷️👉🛡️✅✨🥺❤️🏠🎓✈️•]', '', cleaned)
+    return cleaned.strip()
 
 def get_unicode_font(size: int, bold: bool = True, lang: str = "en") -> ImageFont.FreeTypeFont:
     """타깃 언어에 100% 호환되는 최적의 폰트를 자동으로 탐색하여 로드"""
@@ -111,7 +180,7 @@ SCENE_I18N: Dict[str, Dict[str, Any]] = {
         "scene2_caption_1": "• Up to 90% Income Tax Relief (Article 30)",
         "scene2_caption_2": "• 100% Refund on 3.3% Tax for D-2 Students",
         "scene3_trust_main": "🏛️ 100% LEGAL EXPATS TAX RELIEF",
-        "scene3_trust_sub": "Handled via Certified Licensed Tax Partners",
+        "scene3_trust_sub": "Handled via Certified Licensed Tax Accountants",
         "scene3_trust_badge": "⚡ ZERO Upfront Fee • 100% Free AI Check",
         "scene4_cta_btn": "👉 CLICK LINK IN BIO NOW",
         "scene4_cta_sub": "Check your free refund amount in 3 minutes!",
@@ -137,6 +206,8 @@ SCENE_I18N: Dict[str, Dict[str, Any]] = {
 }
 
 
+from core.bgm_manager import BGMManager
+
 class MotionVideoComposer:
     """
     🎬 틱톡/릴스 스타일의 세련된 투명 자막 바 & 상단 푸시 알림 모션 비디오 렌더러
@@ -146,6 +217,7 @@ class MotionVideoComposer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir = self.output_dir / "temp_scenes"
         self.temp_dir.mkdir(parents=True, exist_ok=True)
+        self.bgm_manager = BGMManager()
 
         try:
             import imageio_ffmpeg
@@ -283,8 +355,7 @@ class MotionVideoComposer:
         s1_img = bg_video_path if (bg_video_path and bg_video_path.exists()) else (self.output_dir / f"frame_{service_id}_{lang}.png")
         s2_img = scene2_bg_path if (scene2_bg_path and scene2_bg_path.exists()) else s1_img
 
-        bgm_name = "bgm_kmarket.wav" if service_id == "kmarket" else "bgm_easytax.wav"
-        bgm_path = BASE_DIR / "outputs" / "bgm" / bgm_name
+        bgm_path = self.bgm_manager.get_random_upbeat_bgm(service_id)
 
         # 2. FFmpeg Ken Burns 시네마틱 줌인 + 오버레이 복합 필터
         # Scene 1: 0~scene1_dur (서서히 줌인 1.0 -> 1.12)
@@ -331,7 +402,7 @@ class MotionVideoComposer:
 
         a_filter = ""
         if has_voice and has_bgm:
-            a_filter = f"[{voice_idx}:a]volume=1.0[v_aud];[{bgm_idx}:a]volume=0.07[b_aud];[v_aud][b_aud]amix=inputs=2:duration=first:dropout_transition=2[aout]"
+            a_filter = f"[{voice_idx}:a]volume=1.0[v_aud];[{bgm_idx}:a]volume=0.20[b_aud];[v_aud][b_aud]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
             maps = ["-filter_complex", f"{v_filter};{a_filter}", "-map", "[vout]", "-map", "[aout]"]
         elif has_voice:
             maps = ["-filter_complex", v_filter, "-map", "[vout]", "-map", f"{voice_idx}:a"]
@@ -409,7 +480,10 @@ class MotionVideoComposer:
         - concat → TTS 보이스오버 + BGM amix
         - K-Market compose_motion_shorts()와 완전히 분리된 독립 메서드
         """
-        output_mp4 = self.output_dir / f"shorts_{service_id}_{lang}_.mp4"
+        import time
+        theme_tag = scenario_plan.get("theme_id", "story5") if scenario_plan else "story5"
+        ts = int(time.time())
+        output_mp4 = self.output_dir / f"{service_id}_story5_{lang}_{theme_tag}_{ts}.mp4"
         i18n = SCENE_I18N.get(lang, SCENE_I18N.get("en", {}))
 
         # 오디오 총 길이 계산
@@ -426,7 +500,7 @@ class MotionVideoComposer:
         # 총 오디오 길이에 맞게 비율 조정
         durations = [round(total_dur * d / dur_sum, 1) for d in durations]
 
-        bgm_path = BASE_DIR / "outputs" / "bgm" / "bgm_easytax.wav"
+        bgm_path = self.bgm_manager.get_random_upbeat_bgm(service_id)
         fps = 25
 
         # 5장면 자막 텍스트 (SCENE_I18N + captions 조합)
@@ -510,8 +584,8 @@ class MotionVideoComposer:
                 "-stream_loop", "-1", "-i", str(bgm_path),
                 "-filter_complex",
                 "[1:a]aresample=44100,volume=1.0[va];"
-                "[2:a]aresample=44100,volume=0.30[ba];"
-                "[va][ba]amix=inputs=2:duration=first:dropout_transition=2[aout]",
+                "[2:a]aresample=44100,volume=0.22[ba];"
+                "[va][ba]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]",
                 "-map", "0:v", "-map", "[aout]"
             ]
         elif has_voice:
@@ -568,9 +642,9 @@ class MotionVideoComposer:
         img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
 
-        badge_text = scene_meta.get("badge", "")
-        main_text = scene_meta.get("main_text", scene_meta.get("name", ""))
-        sub_text = scene_meta.get("sub_text", "")
+        badge_text = clean_display_text(scene_meta.get("badge", ""))
+        main_text = clean_display_text(scene_meta.get("main_text", scene_meta.get("name", "")))
+        sub_text = clean_display_text(scene_meta.get("sub_text", ""))
         card_style = scene_meta.get("card_style", f"s{scene_idx}")
 
         font_badge = get_unicode_font(38, bold=True, lang=lang)
@@ -578,95 +652,151 @@ class MotionVideoComposer:
         font_sub = get_unicode_font(36, bold=False, lang=lang)
         font_amount = get_unicode_font(68, bold=True, lang=lang)
 
-        if card_style == "neon_hook" or scene_idx == 1:
-            # ── 1. 훅 카드: 상단 옐로우 뱃지 + 하단 헤드라인 ──
-            # 상단 뱃지 (y=140)
-            if badge_text:
-                bb = draw.textbbox((0, 0), badge_text, font=font_badge)
-                bw, bh = bb[2] - bb[0], bb[3] - bb[1]
-                bx0, by0 = (W - bw) // 2 - 24, 140
-                draw.rounded_rectangle([bx0, by0, bx0 + bw + 48, by0 + bh + 24], radius=14, fill=(255, 215, 0, 235))
-                draw.text(((W - bw) // 2, by0 + 12), badge_text, font=font_badge, fill=(15, 23, 42, 255))
+        if service_id == "kmarket":
+            # 🛒 ──────────────────────────────────────────
+            # K-MARKET 전용 5대 씬 실물 나눔 비주얼 카드
+            # ──────────────────────────────────────────
+            if scene_idx == 1:
+                # ── 1. 훅 카드: 상단 옐로우 뱃지 + 하단 헤드라인 ──
+                if badge_text:
+                    bb = draw.textbbox((0, 0), badge_text, font=font_badge)
+                    bw, bh = bb[2] - bb[0], bb[3] - bb[1]
+                    bx0, by0 = (W - bw) // 2 - 24, 140
+                    draw.rounded_rectangle([bx0, by0, bx0 + bw + 48, by0 + bh + 24], radius=14, fill=(255, 215, 0, 235))
+                    draw.text(((W - bw) // 2, by0 + 12), badge_text, font=font_badge, fill=(15, 23, 42, 255))
 
-            # 하단 메인 텍스트 바 (y=H-340)
-            mb = draw.textbbox((0, 0), main_text, font=font_main)
-            mw, mh = mb[2] - mb[0], mb[3] - mb[1]
-            mx0, my0 = (W - mw) // 2 - 28, H - 340
-            draw.rounded_rectangle([mx0, my0, mx0 + mw + 56, my0 + mh + 28], radius=18, fill=(15, 23, 42, 220))
-            draw.text(((W - mw) // 2, my0 + 14), main_text, font=font_main, fill=(255, 255, 255, 255))
+                mb = draw.textbbox((0, 0), main_text, font=font_main)
+                mw, mh = mb[2] - mb[0], mb[3] - mb[1]
+                mx0, my0 = (W - mw) // 2 - 28, H - 340
+                draw.rounded_rectangle([mx0, my0, mx0 + mw + 56, my0 + mh + 28], radius=18, fill=(15, 23, 42, 220))
+                draw.text(((W - mw) // 2, my0 + 14), main_text, font=font_main, fill=(255, 255, 255, 255))
 
-            # 서브 텍스트 (y=H-250)
-            if sub_text:
-                sb = draw.textbbox((0, 0), sub_text, font=font_sub)
-                sw, sh = sb[2] - sb[0], sb[3] - sb[1]
-                sx0, sy0 = (W - sw) // 2 - 20, H - 250
-                draw.rounded_rectangle([sx0, sy0, sx0 + sw + 40, sy0 + sh + 18], radius=12, fill=(0, 0, 0, 180))
-                draw.text(((W - sw) // 2, sy0 + 9), sub_text, font=font_sub, fill=(203, 213, 225, 255))
+                if sub_text:
+                    sb = draw.textbbox((0, 0), sub_text, font=font_sub)
+                    sw, sh = sb[2] - sb[0], sb[3] - sb[1]
+                    sx0, sy0 = (W - sw) // 2 - 20, H - 250
+                    draw.rounded_rectangle([sx0, sy0, sx0 + sw + 40, sy0 + sh + 18], radius=12, fill=(0, 0, 0, 180))
+                    draw.text(((W - sw) // 2, sy0 + 9), sub_text, font=font_sub, fill=(203, 213, 225, 255))
 
-        elif card_style == "push_bank" or scene_idx == 2:
-            # ── 2. 모바일 뱅킹 입금 푸시 카드 (글래스모피즘 다크그린) ──
-            card_w, card_h = 960, 260
-            cx0 = (W - card_w) // 2
-            cy0 = H - 420
-            # 반투명 배경
-            draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=24, fill=(10, 40, 25, 235), outline=(52, 211, 153, 200), width=3)
-            # 상단 앱 뱃지
-            draw.text((cx0 + 40, cy0 + 30), badge_text or "MOBILE BANKING ALERT", font=font_badge, fill=(167, 243, 208, 255))
-            # 메인 입금 금액
-            draw.text((cx0 + 40, cy0 + 80), sub_text if ("KRW" in sub_text or "원" in sub_text) else "+3,450,000 KRW", font=font_amount, fill=(52, 211, 153, 255))
-            # 하단 상태 설명
-            draw.text((cx0 + 40, cy0 + 175), main_text or "Tax Refund Deposited!", font=font_sub, fill=(240, 253, 250, 255))
+            elif scene_idx == 2:
+                # ── 2. 가구 가격 부담 카드 (글래스모피즘 다크오렌지/레드) ──
+                card_w, card_h = 960, 260
+                cx0 = (W - card_w) // 2
+                cy0 = H - 420
+                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=24, fill=(45, 15, 15, 235), outline=(239, 68, 68, 200), width=3)
+                draw.text((cx0 + 40, cy0 + 30), badge_text or "EXPENSE BURDEN", font=font_badge, fill=(252, 165, 165, 255))
+                draw.text((cx0 + 40, cy0 + 80), main_text or "Too Expensive?", font=font_main, fill=(255, 255, 255, 255))
+                draw.text((cx0 + 40, cy0 + 165), sub_text or "Costs hundreds of thousands of Won...", font=font_sub, fill=(254, 202, 202, 255))
 
-        elif card_style == "benefit_card" or scene_idx == 3:
-            # ── 3. 2열 혜택 체크리스트 카드 (다크 네이비 + 옐로우 포인트) ──
-            card_w, card_h = 980, 240
-            cx0 = (W - card_w) // 2
-            cy0 = H - 380
-            draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=22, fill=(15, 23, 42, 230), outline=(245, 158, 11, 180), width=2)
-            # 상단 뱃지
-            draw.text((cx0 + 36, cy0 + 26), badge_text or "LEGAL TAX RELIEF", font=font_badge, fill=(251, 191, 36, 255))
-            # 메인 문구
-            draw.text((cx0 + 36, cy0 + 85), f"• {main_text}", font=font_main, fill=(255, 255, 255, 255))
-            # 서브 문구
-            if sub_text:
-                draw.text((cx0 + 36, cy0 + 160), f"• {sub_text}", font=font_sub, fill=(148, 163, 184, 255))
+            elif scene_idx == 3:
+                # ── 3. K-Market 0원 무료나눔 득템 카드 (에메랄드 민트 그린) ──
+                card_w, card_h = 980, 260
+                cx0 = (W - card_w) // 2
+                cy0 = H - 420
+                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=24, fill=(6, 44, 33, 240), outline=(16, 185, 129, 220), width=3)
+                draw.text((cx0 + 40, cy0 + 26), badge_text or "K-MARKET FREE 0 WON", font=font_badge, fill=(110, 231, 183, 255))
+                draw.text((cx0 + 40, cy0 + 75), "0 WON GIVEAWAYS!", font=font_amount, fill=(52, 211, 153, 255))
+                draw.text((cx0 + 40, cy0 + 175), f"• {sub_text or '100% Free verified second-hand items'}", font=font_sub, fill=(209, 250, 229, 255))
 
-        elif card_style == "remit_tag" or scene_idx == 4:
-            # ── 4. 글로벌 송금 카드 (로열 블루 + 화이트) ──
-            card_w, card_h = 960, 230
-            cx0 = (W - card_w) // 2
-            cy0 = H - 360
-            draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=22, fill=(29, 78, 216, 230), outline=(147, 197, 253, 200), width=2)
-            # 뱃지
-            draw.text((cx0 + 40, cy0 + 26), badge_text or "GLOBAL REMITTANCE", font=font_badge, fill=(219, 234, 254, 255))
-            # 메인 문구
-            draw.text((cx0 + 40, cy0 + 82), main_text, font=font_main, fill=(255, 255, 255, 255))
-            # 서브 문구
-            if sub_text:
-                draw.text((cx0 + 40, cy0 + 155), sub_text, font=font_sub, fill=(191, 219, 254, 255))
+            elif scene_idx == 4:
+                # ── 4. 따뜻한 1:1 직거래 카드 (스카이블루) ──
+                card_w, card_h = 960, 230
+                cx0 = (W - card_w) // 2
+                cy0 = H - 360
+                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=22, fill=(14, 46, 92, 235), outline=(56, 189, 248, 200), width=2)
+                draw.text((cx0 + 40, cy0 + 26), badge_text or "SAFE DIRECT MEETUP", font=font_badge, fill=(186, 230, 253, 255))
+                draw.text((cx0 + 40, cy0 + 82), main_text, font=font_main, fill=(255, 255, 255, 255))
+                if sub_text:
+                    draw.text((cx0 + 40, cy0 + 155), sub_text, font=font_sub, fill=(125, 211, 252, 255))
+
+            else:
+                # ── 5. 황금빛 3D CTA 버튼 카드 ──
+                if badge_text:
+                    bb = draw.textbbox((0, 0), badge_text, font=font_badge)
+                    bw, bh = bb[2] - bb[0], bb[3] - bb[1]
+                    bx0, by0 = (W - bw) // 2 - 24, H - 340
+                    draw.rounded_rectangle([bx0, by0, bx0 + bw + 48, by0 + bh + 20], radius=12, fill=(0, 0, 0, 200))
+                    draw.text(((W - bw) // 2, by0 + 10), badge_text, font=font_badge, fill=(251, 191, 36, 255))
+
+                cb = draw.textbbox((0, 0), main_text, font=font_main)
+                cw, ch = cb[2] - cb[0], cb[3] - cb[1]
+                btn_w = max(cw + 80, 880)
+                cx0 = (W - btn_w) // 2
+                cy0 = H - 240
+                draw.rounded_rectangle([cx0, cy0 + 6, cx0 + btn_w, cy0 + ch + 46], radius=26, fill=(180, 83, 9, 255))
+                draw.rounded_rectangle([cx0, cy0, cx0 + btn_w, cy0 + ch + 40], radius=26, fill=(245, 158, 11, 245), outline=(254, 240, 138, 255), width=3)
+                draw.text(((W - cw) // 2, cy0 + 20), main_text, font=font_main, fill=(15, 23, 42, 255))
 
         else:
-            # ── 5. 황금빛 3D CTA 버튼 카드 ──
-            # 상단 뱃지 (y=H-340)
-            if badge_text:
-                bb = draw.textbbox((0, 0), badge_text, font=font_badge)
-                bw, bh = bb[2] - bb[0], bb[3] - bb[1]
-                bx0, by0 = (W - bw) // 2 - 24, H - 340
-                draw.rounded_rectangle([bx0, by0, bx0 + bw + 48, by0 + bh + 20], radius=12, fill=(0, 0, 0, 200))
-                draw.text(((W - bw) // 2, by0 + 10), badge_text, font=font_badge, fill=(251, 191, 36, 255))
+            # 💰 ──────────────────────────────────────────
+            # EASYTAX 전용 5대 씬 국세청 세무 환급 카드
+            # ──────────────────────────────────────────
+            if card_style == "neon_hook" or scene_idx == 1:
+                if badge_text:
+                    bb = draw.textbbox((0, 0), badge_text, font=font_badge)
+                    bw, bh = bb[2] - bb[0], bb[3] - bb[1]
+                    bx0, by0 = (W - bw) // 2 - 24, 140
+                    draw.rounded_rectangle([bx0, by0, bx0 + bw + 48, by0 + bh + 24], radius=14, fill=(255, 215, 0, 235))
+                    draw.text(((W - bw) // 2, by0 + 12), badge_text, font=font_badge, fill=(15, 23, 42, 255))
 
-            # 황금 CTA 메인 버튼 (y=H-240)
-            cb = draw.textbbox((0, 0), main_text, font=font_main)
-            cw, ch = cb[2] - cb[0], cb[3] - cb[1]
-            btn_w = max(cw + 80, 880)
-            cx0 = (W - btn_w) // 2
-            cy0 = H - 240
-            # 골드 버튼 그림자
-            draw.rounded_rectangle([cx0, cy0 + 6, cx0 + btn_w, cy0 + ch + 46], radius=26, fill=(180, 83, 9, 255))
-            # 골드 버튼 메인
-            draw.rounded_rectangle([cx0, cy0, cx0 + btn_w, cy0 + ch + 40], radius=26, fill=(245, 158, 11, 245), outline=(254, 240, 138, 255), width=3)
-            # 버튼 텍스트
-            draw.text(((W - cw) // 2, cy0 + 20), main_text, font=font_main, fill=(15, 23, 42, 255))
+                mb = draw.textbbox((0, 0), main_text, font=font_main)
+                mw, mh = mb[2] - mb[0], mb[3] - mb[1]
+                mx0, my0 = (W - mw) // 2 - 28, H - 340
+                draw.rounded_rectangle([mx0, my0, mx0 + mw + 56, my0 + mh + 28], radius=18, fill=(15, 23, 42, 220))
+                draw.text(((W - mw) // 2, my0 + 14), main_text, font=font_main, fill=(255, 255, 255, 255))
+
+                if sub_text:
+                    sb = draw.textbbox((0, 0), sub_text, font=font_sub)
+                    sw, sh = sb[2] - sb[0], sb[3] - sb[1]
+                    sx0, sy0 = (W - sw) // 2 - 20, H - 250
+                    draw.rounded_rectangle([sx0, sy0, sx0 + sw + 40, sy0 + sh + 18], radius=12, fill=(0, 0, 0, 180))
+                    draw.text(((W - sw) // 2, sy0 + 9), sub_text, font=font_sub, fill=(203, 213, 225, 255))
+
+            elif card_style == "push_bank" or scene_idx == 2:
+                card_w, card_h = 960, 260
+                cx0 = (W - card_w) // 2
+                cy0 = H - 420
+                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=24, fill=(10, 40, 25, 235), outline=(52, 211, 153, 200), width=3)
+                draw.text((cx0 + 40, cy0 + 30), badge_text or "MOBILE BANKING ALERT", font=font_badge, fill=(167, 243, 208, 255))
+                draw.text((cx0 + 40, cy0 + 80), sub_text if ("KRW" in sub_text or "원" in sub_text) else "+3,840,000 KRW", font=font_amount, fill=(52, 211, 153, 255))
+                draw.text((cx0 + 40, cy0 + 175), main_text or "Tax Refund Deposited!", font=font_sub, fill=(240, 253, 250, 255))
+
+            elif card_style == "benefit_card" or scene_idx == 3:
+                card_w, card_h = 980, 240
+                cx0 = (W - card_w) // 2
+                cy0 = H - 380
+                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=22, fill=(15, 23, 42, 230), outline=(245, 158, 11, 180), width=2)
+                draw.text((cx0 + 36, cy0 + 26), badge_text or "LEGAL TAX RELIEF", font=font_badge, fill=(251, 191, 36, 255))
+                draw.text((cx0 + 36, cy0 + 85), f"• {main_text}", font=font_main, fill=(255, 255, 255, 255))
+                if sub_text:
+                    draw.text((cx0 + 36, cy0 + 160), f"• {sub_text}", font=font_sub, fill=(148, 163, 184, 255))
+
+            elif card_style == "remit_tag" or scene_idx == 4:
+                card_w, card_h = 960, 230
+                cx0 = (W - card_w) // 2
+                cy0 = H - 360
+                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=22, fill=(29, 78, 216, 230), outline=(147, 197, 253, 200), width=2)
+                draw.text((cx0 + 40, cy0 + 26), badge_text or "GLOBAL REMITTANCE", font=font_badge, fill=(219, 234, 254, 255))
+                draw.text((cx0 + 40, cy0 + 82), main_text, font=font_main, fill=(255, 255, 255, 255))
+                if sub_text:
+                    draw.text((cx0 + 40, cy0 + 155), sub_text, font=font_sub, fill=(191, 219, 254, 255))
+
+            else:
+                if badge_text:
+                    bb = draw.textbbox((0, 0), badge_text, font=font_badge)
+                    bw, bh = bb[2] - bb[0], bb[3] - bb[1]
+                    bx0, by0 = (W - bw) // 2 - 24, H - 340
+                    draw.rounded_rectangle([bx0, by0, bx0 + bw + 48, by0 + bh + 20], radius=12, fill=(0, 0, 0, 200))
+                    draw.text(((W - bw) // 2, by0 + 10), badge_text, font=font_badge, fill=(251, 191, 36, 255))
+
+                cb = draw.textbbox((0, 0), main_text, font=font_main)
+                cw, ch = cb[2] - cb[0], cb[3] - cb[1]
+                btn_w = max(cw + 80, 880)
+                cx0 = (W - btn_w) // 2
+                cy0 = H - 240
+                draw.rounded_rectangle([cx0, cy0 + 6, cx0 + btn_w, cy0 + ch + 46], radius=26, fill=(180, 83, 9, 255))
+                draw.rounded_rectangle([cx0, cy0, cx0 + btn_w, cy0 + ch + 40], radius=26, fill=(245, 158, 11, 245), outline=(254, 240, 138, 255), width=3)
+                draw.text(((W - cw) // 2, cy0 + 20), main_text, font=font_main, fill=(15, 23, 42, 255))
 
         img.save(str(overlay_path), "PNG")
 
