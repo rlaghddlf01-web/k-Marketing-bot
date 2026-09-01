@@ -1,0 +1,6 @@
+{
+  "kmarket_shorts": "ab_auto",
+  "kmarket_cardnews": "ab_auto",
+  "easytax_shorts": "gemini",
+  "easytax_cardnews": "colab_gpu"
+}

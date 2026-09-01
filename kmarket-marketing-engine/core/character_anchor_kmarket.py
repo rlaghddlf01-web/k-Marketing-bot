@@ -111,27 +111,28 @@ def build_kmarket_scene_prompt(
     extra_detail: str = ""
 ) -> str:
     """
-    K-Market 전용 5단계 헐리웃 감동 드라마 씬 프롬프트 생성
-    - 씬 1: 텅 빈 원룸의 막막함
-    - 씬 2: 비싼 가구 가격에 좌절
-    - 씬 3: K-Market 0원 나눔 발견의 기쁨
-    - 씬 4: 따뜻한 이웃과의 무료 직거래
-    - 씬 5: 아늑한 방 완성 & 행복한 미소
+    K-Market 전용 5단계 자취 생활 다큐멘터리 씬 프롬프트 생성 (인스타 화보 탈피 ➔ 100% 리얼 생활감)
+    - 씬 1: 텅 빈 원룸 바닥 & 이사 박스 앞 막막함 (Candid Medium Shot)
+    - 씬 2: 비싼 가구 가격에 현실 좌절
+    - 씬 3: K-Market 0원 나눔 앱 발견 (양손 폰 집중 샷)
+    - 씬 4: 동네 골목/빌라 앞 무료 나눔 직거래 현장감
+    - 씬 5: 0원 가구 배치 & 방 청소 완성 생활 샷
     """
     continuity = SCENE_CONTINUITY_HINTS.get(scene_idx, "the same protagonist,")
     if scene_idx == 1:
         prompt = (
-            f"cinematic authentic 9:16 portrait of {char}, "
+            f"candid documentary medium shot of {char}, "
             f"{scene_action}, "
-            f"highly detailed realistic face, 4k ultra realistic photograph, "
-            f"human-centric framing, face occupying 60% of frame"
+            f"authentic Korean studio apartment interior background with yellow linoleum floor and real room atmosphere, "
+            f"unposed raw documentary photography, natural ambient room lighting, 4k ultra realistic photograph"
         )
     else:
         prompt = (
-            f"cinematic authentic 9:16 portrait of {continuity} {char}, "
+            f"candid documentary medium shot of {continuity} {char}, "
             f"{scene_action}, "
             f"same consistent face and clothing as scene {scene_idx-1}, "
-            f"4k ultra realistic photograph, human-centric framing"
+            f"authentic real Korean studio room living environment, "
+            f"unposed natural candid photography, 4k realistic documentary"
         )
     if extra_detail:
         prompt += f", {extra_detail}"
@@ -140,15 +141,17 @@ def build_kmarket_scene_prompt(
 
 def build_kmarket_negative_prompt(lang: str, extra: str = "") -> str:
     """
-    K-Market 전용 부정 프롬프트 (타깃 외 민족 차단 + 가구 왜곡/배경 찌그러짐 방지 + 기괴한 표정 차단)
+    K-Market 전용 부정 프롬프트:
+    - 인스타 모델 포즈, 화보 촬영, 카메라 정면 응시, 왁스 인형 피부 원천 차단
     """
     ethnic_neg = LANG_NEGATIVE_ETHNIC.get(lang, "")
     base_neg = (
+        "instagram influencer pose, glamour model shoot, professional fashion photoshoot, "
+        "posing for camera, looking straight at camera, studio headshot portrait, "
         "caucasian, white person, blonde hair, blue eyes, "
-        "deformed fingers, extra fingers, fused fingers, bad anatomy, "
-        "cartoon, 3d render, illustration, painting, CGI, "
-        "elderly, old person, middle-aged, age inconsistency, "
-        "different person, character change, multiple people, crowd"
+        "deformed fingers, extra fingers, fused fingers, claw hands, floating phone, "
+        "cartoon, 3d render, illustration, painting, CGI, plastic skin, "
+        "elderly, old person, middle-aged, different person, character change, crowd"
     )
     parts = [base_neg]
     if ethnic_neg:

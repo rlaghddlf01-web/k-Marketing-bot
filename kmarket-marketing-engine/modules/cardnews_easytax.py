@@ -1,11 +1,10 @@
 """
-CardnewsEasyTax - 💰 [EasyTax 전담 4장 국세청 공인 세무 환급 카드뉴스 생성 공장]
-- 조특법 제30조(90% 감면), D-2 유학생 3.3% 환급, 5개년 소급 경정청구 전담
-- ScenarioDirectorCardnewsEasyTax 기반 4장 캐러셀 시나리오 기획
-- Gemini 고화질 이미지 생성 + AI 비전 품질 심사 (MediaQualityVerifier)
-- 1080x1080 고화질 캐러셀 카드뉴스 4장 렌더링
-- outputs/cardnews/easytax 및 바탕화면 '카드뉴스_산출물_이지텍스' 폴더 실시간 저장
-- Supabase easytax_golden_copies 자가학습 DB 기록
+CardnewsEasyTax - 💰 [EasyTax 전담 5장 7:3 황금 분할 국세청 세무 환급 카드뉴스 생성 공장]
+- 5장 7:3 분할 1080x1350 카드뉴스 무과금 렌더링
+- 상단 70% (1080x945): LocalGPUMediaGeneratorEasyTax (구글 무료 GPU RealVisXL V4.0)
+- 하단 30% (1080x405): CardnewsComposerEasyTax (딥네이비 & 골드 룩앤필)
+- 1~5장 전체 동일 인물 시드 고정 관리
+- 바탕화면 '카드뉴스_산출물/이지텍스' 자동 저장
 """
 
 import os
@@ -15,29 +14,19 @@ import logging
 import shutil
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from PIL import Image, ImageDraw, ImageFont
 
 from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_URLS
 from core.scenario_director_cardnews_easytax import ScenarioDirectorCardnewsEasyTax
+from core.local_gpu_media_generator_easytax import LocalGPUMediaGeneratorEasyTax
 from core.gemini_media_generator import GeminiMediaGenerator
-from core.media_quality_verifier import MediaQualityVerifier
+from core.cardnews_composer_easytax import CardnewsComposerEasyTax
 from core.supabase_manager import SupabaseManager
 
 logger = logging.getLogger("CardnewsEasyTax")
 
-FONT_BOLD_PATH = r"C:\Windows\Fonts\malgunbd.ttf"
-FONT_REGULAR_PATH = r"C:\Windows\Fonts\malgun.ttf"
-
-def get_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont:
-    path = FONT_BOLD_PATH if bold else FONT_REGULAR_PATH
-    try:
-        return ImageFont.truetype(path, size)
-    except Exception:
-        return ImageFont.load_default()
-
 
 class CardnewsEasyTax:
-    """EasyTax 전담 4장 카드뉴스 무인 생산 공장"""
+    """EasyTax 전담 5장 카드뉴스 무인 생산 공장"""
     def __init__(self):
         self.service_id = "easytax"
         self.output_dir = OUTPUTS_DIR / "cardnews" / "easytax"
@@ -46,102 +35,83 @@ class CardnewsEasyTax:
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorCardnewsEasyTax()
-        self.gemini_media_gen = GeminiMediaGenerator()
-        self.quality_verifier = MediaQualityVerifier()
+        self.media_gen = LocalGPUMediaGeneratorEasyTax()
+        self.composer = CardnewsComposerEasyTax()
         self.supabase = SupabaseManager()
 
     def generate_carousel_cardnews(
         self,
         lang: str = "vi",
-        theme_index: Optional[int] = None
-    ) -> List[Path]:
+        theme_index: Optional[int] = None,
+        engine_mode: str = "colab_gpu"
+    ) -> Dict[str, Any]:
         """
-        EasyTax 전용 4장 캐러셀 카드뉴스 (1080x1080) 생성 및 저장
+        EasyTax 전용 5장 7:3 황금 분할 카드뉴스 (1080x1350) 생성 및 저장
         """
-        logger.info(f"[{lang.upper()}] 💰 [EasyTax 카드뉴스 공장] 4장 캐러셀 생성 시작...")
-        timestamp = int(time.time())
-
-        # 1. 4장 시나리오 기획
         scenario = self.scenario_director.get_carousel_scenario(lang=lang, theme_index=theme_index)
         cards = scenario.get("cards", [])
+        episode_id = scenario.get("episode_id", f"easytax_{lang}_{int(time.time())}")
+        
+        # 1~5장 동일 인물 시드 고정 발급
+        self.media_gen.set_episode_seed(episode_id)
 
-        rendered_paths = []
-        for idx, card in enumerate(cards, start=1):
-            out_file = self.output_dir / f"easytax_card_{lang}_{timestamp}_{idx}.png"
-            img = self._render_card(lang, idx, card, scenario)
-            img.save(out_file, "PNG")
-            rendered_paths.append(out_file)
+        # ⚡ 이미지 생성 엔진 동적 선택 (대시보드 스위치 연동)
+        if engine_mode == "gemini":
+            active_media_gen = GeminiMediaGenerator(service_id="easytax")
+            logger.info(f"💰 [EasyTax 카드뉴스] 제미나이 Imagen AI 엔진으로 생성")
+        else:
+            active_media_gen = self.media_gen  # 기존 LocalGPUMediaGeneratorEasyTax
+            logger.info(f"💰 [EasyTax 카드뉴스] 무료 코랩 GPU 엔진으로 생성")
 
-            # 바탕화면 자동 복사
+        timestamp = int(time.time())
+        saved_paths: List[Path] = []
+
+        logger.info(f"💰 [EasyTax 7:3 카드뉴스 생산 시작] {lang.upper()} - {scenario.get('theme_name')} (5장 슬라이드)...")
+
+        for card in cards:
+            s_idx = card.get("slide_idx", 1)
+            # 1. 상단 70% (1080x945) 고화질 실사 이미지 생성 (무료 GPU)
+            img_plan = {
+                "action_prompt": card.get("image_prompt"),
+                "negative_prompt": card.get("negative_prompt"),
+                "gender": "m"
+            }
+            top_img_path = active_media_gen.generate_theme_image(
+                lang=lang,
+                theme_id=f"card_{episode_id}_s{s_idx}",
+                scenario_plan=img_plan,
+                aspect_ratio="16:9"  # 16:9 가로형을 1080x945로 완벽 센터크롭
+            )
+
+            # 2. 7:3 분할 캔버스 합성 (1080x1350)
+            out_filename = f"easytax_cardnews_{lang}_s{s_idx}_{timestamp}.jpg"
+            out_path = self.output_dir / out_filename
+
+            composed_path = self.composer.compose_slide(
+                top_image_path=top_img_path,
+                card_data=card,
+                slide_idx=s_idx,
+                total_slides=len(cards),
+                output_path=out_path
+            )
+
+            # 3. 바탕화면 자동 복사
+            desktop_path = self.desktop_dir / out_filename
             try:
-                shutil.copy2(str(out_file), str(self.desktop_dir / out_file.name))
-            except Exception:
-                pass
+                shutil.copy(composed_path, desktop_path)
+            except Exception as e:
+                logger.warning(f"바탕화면 복사 에러: {e}")
 
-        logger.info(f"[{lang.upper()}] ✅ EasyTax 4장 카드뉴스 생성 완료 (바탕화면 복사 완료)")
+            saved_paths.append(desktop_path if desktop_path.exists() else composed_path)
 
-        # 2. Supabase 자가학습 기록
-        try:
-            if self.supabase.client and rendered_paths:
-                self.supabase.client.table("easytax_golden_copies").upsert({
-                    "content_type": "cardnews",
-                    "service_id": "easytax",
-                    "target_lang": lang,
-                    "title": scenario.get("title", "EasyTax 4-Card Guide"),
-                    "content_text": f"Cardnews 4장: {scenario.get('title')}",
-                    "target_url": f"https://ktrs.kr/{lang if lang != 'ko' else ''}",
-                    "external_id": f"card_et_{lang}_{timestamp}",
-                    "score": 95
-                }).execute()
-        except Exception as e:
-            logger.warning(f"EasyTax Supabase 카드뉴스 기록 경고: {e}")
+        logger.info(f"🎉 [EasyTax 5장 카드뉴스 완성] 총 {len(saved_paths)}장 바탕화면 저장 완료!")
 
-        return rendered_paths
-
-    def _render_card(self, lang: str, card_idx: int, card_data: Dict[str, Any], scenario: Dict[str, Any]) -> Image.Image:
-        """1080x1080 국세청 신뢰감 블루 테마 카드뉴스 단일 장 렌더링"""
-        W, H = 1080, 1080
-        img = Image.new("RGB", (W, H), color=(15, 23, 42)) # 다크 네이비 프리미엄 배경
-        draw = ImageDraw.Draw(img)
-
-        f_badge = get_font(28, bold=True)
-        f_title = get_font(52, bold=True)
-        f_sub = get_font(34, bold=False)
-        f_body = get_font(30, bold=False)
-        f_cta = get_font(38, bold=True)
-
-        # 상단 공인 헤더 바
-        draw.rectangle([(0, 0), (W, 120)], fill=(30, 41, 59))
-        draw.text((50, 40), "🏛️ EasyTax • 대한민국 외국인 소득세 환급 센터", fill=(255, 215, 0), font=f_badge)
-        draw.text((W - 160, 40), f"{card_idx} / 4", fill=(148, 163, 184), font=f_badge)
-
-        # 본문 영역
-        badge_text = card_data.get("badge", f"STEP {card_idx}")
-        draw.rounded_rectangle([(50, 160), (320, 215)], radius=12, fill=(37, 99, 235))
-        draw.text((70, 172), badge_text, fill=(255, 255, 255), font=get_font(24, bold=True))
-
-        card_title = card_data.get("title", scenario.get("title", "외국인 세금 환급"))
-        draw.text((50, 240), card_title, fill=(255, 255, 255), font=f_title)
-
-        card_sub = card_data.get("subtitle", "")
-        if card_sub:
-            draw.text((50, 315), card_sub, fill=(203, 213, 225), font=f_sub)
-
-        # 핵심 내용 박스
-        draw.rounded_rectangle([(50, 390), (W - 50, H - 180)], radius=25, fill=(30, 41, 59), outline=(51, 65, 85), width=2)
-        bullets = card_data.get("bullets", [
-            "• 조특법 제30조 중소기업 소득세 90% 감면 혜택",
-            "• D-2 유학생 아르바이트 3.3% 원천징수 전액 환급",
-            "• 지난 5개년 누락 환급금 무료 AI 진단",
-            "• 선입금/수수료 0원 • 100% 비대면 1분 간편 신청"
-        ])
-        y_pos = 430
-        for b in bullets[:4]:
-            draw.text((80, y_pos), b, fill=(241, 245, 249), font=f_body)
-            y_pos += 70
-
-        # 하단 황금 CTA 바
-        draw.rounded_rectangle([(50, H - 150), (W - 50, H - 50)], radius=20, fill=(37, 99, 235))
-        draw.text((220, H - 115), "👉 프로필 링크에서 1분 무료 환급 조회", fill=(255, 255, 255), font=f_cta)
-
-        return img
+        return {
+            "success": True,
+            "service_id": "easytax",
+            "lang": lang,
+            "theme_name": scenario.get("theme_name"),
+            "total_slides": len(saved_paths),
+            "image_paths": [str(p) for p in saved_paths],
+            "desktop_dir": str(self.desktop_dir)
+        }

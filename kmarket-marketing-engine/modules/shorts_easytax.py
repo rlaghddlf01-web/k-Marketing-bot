@@ -18,6 +18,7 @@ from typing import Dict, Any, List, Optional
 
 from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
 from core.scenario_director_shorts_easytax import ScenarioDirectorShortsEasyTax
+from core.local_gpu_media_generator_easytax import LocalGPUMediaGeneratorEasyTax
 from core.gemini_media_generator import GeminiMediaGenerator
 from core.media_quality_verifier import MediaQualityVerifier
 from core.motion_video_composer import MotionVideoComposer
@@ -36,19 +37,27 @@ class ShortsEasyTax:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorShortsEasyTax()
-        self.gemini_media_gen = GeminiMediaGenerator(service_id=self.service_id)
+        self.gemini_media_gen = LocalGPUMediaGeneratorEasyTax()
         self.quality_verifier = MediaQualityVerifier(service_id=self.service_id)
         self.motion_composer = MotionVideoComposer(output_dir=self.output_dir)
         self.tts_engine = TTSEngine()
         self.publisher = ShortsMultiPublisher()
         self.supabase = SupabaseManager()
 
-    def produce_shorts(self, lang: str = "vi", force_run: bool = False) -> Dict[str, Any]:
+    def produce_shorts(self, lang: str = "vi", force_run: bool = False, engine_mode: str = "colab_gpu") -> Dict[str, Any]:
         """
         EasyTax 전용 숏폼 비디오 1편을 기획 ➔ 생성 ➔ 품질검증 ➔ 렌더링 ➔ 배포까지 100% 무인 실행
         """
-        logger.info(f"[{lang.upper()}] 💰 [EasyTax 숏폼 공장] 생산 가동 시작...")
+        logger.info(f"[{lang.upper()}] 💰 [EasyTax 숏폼 공장] 생산 가동 시작... (엔진: {engine_mode})")
         timestamp = int(time.time())
+
+        # ⚡ 이미지 생성 엔진 동적 선택 (대시보드 스위치 연동)
+        if engine_mode == "gemini":
+            active_media_gen = GeminiMediaGenerator(service_id="easytax")
+            logger.info(f"[{lang.upper()}] 💎 [EasyTax 숏폼] 제미나이 Imagen AI 엔진으로 생성")
+        else:
+            active_media_gen = self.gemini_media_gen  # 기존 LocalGPUMediaGeneratorEasyTax
+            logger.info(f"[{lang.upper()}] 🆓 [EasyTax 숏폼] 무료 코랩 GPU 엔진으로 생성")
 
         # 1. 5단계 시네마틱 환급 시나리오 기획
         scenario = self.scenario_director.plan_daily_scenario(lang=lang)
@@ -74,7 +83,7 @@ class ShortsEasyTax:
             for attempt in range(1, 4):
                 theme_id_attempt = f"{scenario['theme_id']}_s{scene['scene_idx']}" if attempt == 1 else f"{scenario['theme_id']}_s{scene['scene_idx']}_r{attempt}_{int(time.time())}"
 
-                img_path = self.gemini_media_gen.generate_theme_image(
+                img_path = active_media_gen.generate_theme_image(
                     lang=lang,
                     theme_id=theme_id_attempt,
                     scenario_plan={

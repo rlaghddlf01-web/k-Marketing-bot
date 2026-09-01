@@ -353,10 +353,10 @@ class ScenarioDirectorShortsKMarket:
                     "sub_text": script_meta["s1_sub"],
                     "image_prompt": build_scene_prompt(
                         scene_idx=1, char=char,
-                        scene_action=f"sitting stressed on the floor of a completely empty studio apartment room in Korea near {theme['target']}, moving cardboard boxes around, soft dramatic window light casting long shadows",
-                        extra_detail="worried facial expression, face occupying main frame"
+                        scene_action=f"sitting on the yellow linoleum floor of a real empty Korean studio apartment room surrounded by open cardboard moving boxes and packing tape near {theme['target']}, wiping forehead looking exhausted and overwhelmed by moving costs",
+                        extra_detail="unposed candid shot, natural room lighting through window, looking away at the empty room NOT at camera"
                     ),
-                    "negative_prompt": build_negative_prompt(lang, "floating furniture, ugly, blurry")
+                    "negative_prompt": build_negative_prompt(lang, "floating furniture, instagram model pose, glamour shoot")
                 },
                 {
                     "scene_idx": 2,
@@ -367,10 +367,10 @@ class ScenarioDirectorShortsKMarket:
                     "sub_text": script_meta["s2_sub"],
                     "image_prompt": build_scene_prompt(
                         scene_idx=2, char=char,
-                        scene_action=f"looking shocked and worried with troubled eyes at glowing high price tags of expensive furniture near {theme['target']}",
-                        extra_detail="hands resting naturally NOT holding objects, authentic stressed facial expression"
+                        scene_action=f"leaning against the plain wallpaper in the studio apartment room, looking distressed and troubled by high prices of {theme['item']}, open taped cardboard boxes on floor",
+                        extra_detail="authentic candid lifestyle documentary, natural stressed expression, room interior visible"
                     ),
-                    "negative_prompt": build_negative_prompt(lang, "extra fingers, deformed hands")
+                    "negative_prompt": build_negative_prompt(lang, "extra fingers, deformed hands, posing for camera")
                 },
                 {
                     "scene_idx": 3,
@@ -381,10 +381,10 @@ class ScenarioDirectorShortsKMarket:
                     "sub_text": script_meta["s3_sub"],
                     "image_prompt": build_scene_prompt(
                         scene_idx=3, char=char,
-                        scene_action=f"looking down at smartphone discovering 0 KRW free {theme['item']} on K-Market app with neat Korean dorm background",
-                        extra_detail="face glowing with pure joy and relief, bright joyful smile, soft warm lighting"
+                        scene_action=f"sitting on floor next to moving boxes, holding modern smartphone securely with both hands, looking down at the glowing screen discovering 0 KRW free {theme['item']} on K-Market app",
+                        extra_detail="eyes wide with genuine surprise and joy, looking down at phone screen NOT at camera, authentic candid capture"
                     ),
-                    "negative_prompt": build_negative_prompt(lang, "deformed hands, creepy smile")
+                    "negative_prompt": build_negative_prompt(lang, "deformed hands, claw hands, floating phone, creepy smile")
                 },
                 {
                     "scene_idx": 4,
@@ -395,10 +395,10 @@ class ScenarioDirectorShortsKMarket:
                     "sub_text": script_meta["s4_sub"],
                     "image_prompt": build_scene_prompt(
                         scene_idx=4, char=char,
-                        scene_action=f"happily receiving clean {theme['item']} from a kind Korean neighbor near {theme['target']}",
-                        extra_detail="warm friendly atmosphere, bright sunny daytime outdoor lighting, medium portrait framing"
+                        scene_action=f"standing in a real Korean residential villa alley street near {theme['target']}, receiving clean {theme['item']} from a friendly neighbor, real outdoor street direct trade moment",
+                        extra_detail="candid documentary medium shot, genuine gratitude and warm gentle smile, natural Korean street background"
                     ),
-                    "negative_prompt": build_negative_prompt(lang, "bad anatomy, distorted hands")
+                    "negative_prompt": build_negative_prompt(lang, "bad anatomy, distorted hands, fashion model photoshoot")
                 },
                 {
                     "scene_idx": 5,
@@ -409,10 +409,10 @@ class ScenarioDirectorShortsKMarket:
                     "sub_text": script_meta["s5_sub"],
                     "image_prompt": build_scene_prompt(
                         scene_idx=5, char=char,
-                        scene_action=f"sitting warmly and happily inside fully decorated cozy studio room with clean {theme['item']}, holding a ceramic hot mug with two natural hands",
-                        extra_detail="warm fairy lights in background, beaming joyful relaxed smile, cozy home masterpiece"
+                        scene_action=f"arranging and wiping clean the newly received {theme['item']} in the cozy Korean studio apartment room, sitting comfortably on floor with a proud relieved happy smile, realistic furnished student room interior",
+                        extra_detail="warm cozy room ambience, authentic candid moment of settled student life, master documentary photography"
                     ),
-                    "negative_prompt": build_negative_prompt(lang, "extra limbs, creepy face, distorted furniture")
+                    "negative_prompt": build_negative_prompt(lang, "extra limbs, creepy face, distorted furniture, instagram selfie")
                 }
             ]
 

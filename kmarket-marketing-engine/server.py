@@ -85,7 +85,36 @@ running_channels = {
     "easytax_seo": False, "easytax_pdf": False, "easytax_blog": False, "easytax_threads": False,
 }
 
+from core.ab_evolution_engine import ABEvolutionEngine
+
 recent_logs = []
+
+ab_evolution_engine = ABEvolutionEngine()
+MEDIA_ENGINE_SETTINGS_FILE = DATA_DIR / "media_engine_settings.json"
+
+def get_media_engine_settings() -> dict:
+    if MEDIA_ENGINE_SETTINGS_FILE.exists():
+        try:
+            with open(MEDIA_ENGINE_SETTINGS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "kmarket_shorts": "ab_auto",
+        "kmarket_cardnews": "ab_auto",
+        "easytax_shorts": "ab_auto",
+        "easytax_cardnews": "ab_auto"
+    }
+
+def set_media_engine_setting(channel_key: str, engine_mode: str):
+    settings = get_media_engine_settings()
+    settings[channel_key] = engine_mode
+    try:
+        MEDIA_ENGINE_SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(MEDIA_ENGINE_SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(settings, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        pass
 
 def log_event(text: str, log_type: str = "info"):
     global recent_logs
@@ -101,30 +130,48 @@ def execute_single_channel_task(module_name: str) -> str:
     gemini = GeminiEngine(supabase_mgr)
     tts = TTSEngine()
     
+    engine_settings = get_media_engine_settings()
+
     if module_name == "kmarket_shorts":
+        setting_mode = engine_settings.get("kmarket_shorts", "ab_auto")
+        chosen_engine = ab_evolution_engine.get_next_engine("kmarket_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="kmarket", target_langs=["en", "vi", "zh", "ko", "uz"])
-        return f"🔴 K-Market 쇼츠 실물 매물 {len(res)}건 렌더링 완료"
+        res = factory.produce_shorts(service_id="kmarket", target_langs=["en", "vi", "zh", "ko", "uz"], engine_mode=chosen_engine)
+        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
+        return f"🔴 K-Market 쇼츠 ({mode_label}) {len(res)}건 렌더링 완료"
     elif module_name == "easytax_shorts":
+        setting_mode = engine_settings.get("easytax_shorts", "ab_auto")
+        chosen_engine = ab_evolution_engine.get_next_engine("easytax_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="easytax", target_langs=["vi", "en", "zh"])
-        return f"🔴 EasyTax 세무 쇼츠 {len(res)}건 렌더링 완료"
+        res = factory.produce_shorts(service_id="easytax", target_langs=["vi", "en", "zh"], engine_mode=chosen_engine)
+        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
+        return f"🔴 EasyTax 세무 쇼츠 ({mode_label}) {len(res)}건 렌더링 완료"
     elif module_name == "kmarket_tiktok":
+        setting_mode = engine_settings.get("kmarket_shorts", "ab_auto")
+        chosen_engine = ab_evolution_engine.get_next_engine("kmarket_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="kmarket", target_langs=["vi", "uz", "mn", "en"])
-        return f"🎵 K-Market 틱톡 알고리즘 비디오 {len(res)}건 렌더링 완료"
+        res = factory.produce_shorts(service_id="kmarket", target_langs=["vi", "uz", "mn", "en"], engine_mode=chosen_engine)
+        return f"🎵 K-Market 틱톡 알고리즘 비디오 ({chosen_engine}) {len(res)}건 렌더링 완료"
     elif module_name == "easytax_tiktok":
+        setting_mode = engine_settings.get("easytax_shorts", "ab_auto")
+        chosen_engine = ab_evolution_engine.get_next_engine("easytax_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="easytax", target_langs=["vi", "uz", "en"])
-        return f"🎵 EasyTax 틱톡 세무 환급 비디오 {len(res)}건 렌더링 완료"
+        res = factory.produce_shorts(service_id="easytax", target_langs=["vi", "uz", "en"], engine_mode=chosen_engine)
+        return f"🎵 EasyTax 틱톡 세무 환급 비디오 ({chosen_engine}) {len(res)}건 렌더링 완료"
     elif module_name == "kmarket_cardnews":
+        setting_mode = engine_settings.get("kmarket_cardnews", "ab_auto")
+        chosen_engine = ab_evolution_engine.get_next_engine("kmarket_cardnews", setting_mode)
         card = CardnewsGenerator(db_mgr, router)
-        cards = card.generate_carousel(service_id="kmarket", lang="en")
-        return f"📸 K-Market 실물 카드뉴스 {len(cards)}장 생성 완료"
+        cards = card.generate_carousel(service_id="kmarket", lang="en", engine_mode=chosen_engine)
+        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
+        return f"📸 K-Market 카드뉴스 ({mode_label}) {len(cards)}장 생성 완료"
     elif module_name == "easytax_cardnews":
+        setting_mode = engine_settings.get("easytax_cardnews", "ab_auto")
+        chosen_engine = ab_evolution_engine.get_next_engine("easytax_cardnews", setting_mode)
         card = CardnewsGenerator(db_mgr, router)
-        cards = card.generate_carousel(service_id="easytax", lang="en")
-        return f"📸 EasyTax 카드뉴스 {len(cards)}장 생성 완료"
+        cards = card.generate_carousel(service_id="easytax", lang="en", engine_mode=chosen_engine)
+        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
+        return f"📸 EasyTax 카드뉴스 ({mode_label}) {len(cards)}장 생성 완료"
     elif module_name == "kmarket_reddit" or module_name == "reddit":
         import importlib
         import modules.reddit_kmarket
@@ -457,6 +504,20 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.send_header("Expires", "0")
         self.end_headers()
 
+    def _serve_file(self, file_path: Path, content_type: str = "text/html; charset=utf-8"):
+        if not file_path.exists():
+            self._set_headers("text/plain", 404)
+            self.wfile.write(b"404 Not Found")
+            return
+        try:
+            with open(file_path, "rb") as f:
+                content = f.read()
+            self._set_headers(content_type, 200)
+            self.wfile.write(content)
+        except Exception as e:
+            self._set_headers("text/plain", 500)
+            self.wfile.write(f"500 Internal Error: {e}".encode("utf-8"))
+
     def do_OPTIONS(self):
         self._set_headers()
 
@@ -506,7 +567,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._serve_file(file_path, mime_type)
             return
 
-        # 3. API 엔드포인트
+        elif path == "/api/media_engine":
+            self._handle_get_media_engine()
+            return
         elif path == "/api/status":
             self._handle_get_status()
             return
@@ -558,7 +621,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
             payload = {}
 
         # 듀얼 봇 독립 제어 & 전체 일괄 제어
-        if path == "/api/kmarket/start":
+        if path == "/api/media_engine":
+            self._handle_post_media_engine(payload)
+            return
+        elif path == "/api/kmarket/start":
             self._handle_kmarket_start()
         elif path == "/api/kmarket/stop":
             self._handle_kmarket_stop()
@@ -1100,11 +1166,43 @@ class DashboardHandler(BaseHTTPRequestHandler):
             """, (utm_source, utm_medium, utm_campaign, utm_content, target, ip))
             conn.commit()
 
+        # 🧬 [A/B 자가학습] 링크 클릭 유입 시 5점 적립 (좋아요 1점, 댓글 2점, 클릭 5점)
+        try:
+            channel_hint = f"{target}_shorts" if "shorts" in utm_content else f"{target}_cardnews"
+            engine_hint = "gemini" if "gemini" in utm_content else "colab_gpu"
+            ab_evolution_engine.record_engagement(channel_hint, engine_hint, clicks=1)
+            log_event(f"🎯 [A/B 전환 5점 적립] {target.upper()} 링크 클릭 유입 (+5점) -> {engine_hint}", "success")
+        except Exception:
+            pass
+
         # 타겟 서비스로 리다이렉트
         target_url = "https://ktrs-market.vercel.app" if target == "kmarket" else "https://easytax.co.kr"
         self._set_headers("text/html", 302)
         self.send_header("Location", target_url)
         self.end_headers()
+
+    def _handle_get_media_engine(self):
+        """미디어 생성 엔진 설정 및 A/B 자가학습 통계 조회"""
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({
+            "success": True,
+            "settings": get_media_engine_settings(),
+            "stats": ab_evolution_engine.get_all_stats()
+        }, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_post_media_engine(self, payload):
+        """미디어 생성 엔진 모드 변경"""
+        channel_key = payload.get("channel_key")
+        engine_mode = payload.get("engine_mode", "ab_auto")
+        if channel_key:
+            set_media_engine_setting(channel_key, engine_mode)
+            log_event(f"⚡ [엔진 전환] {channel_key} -> {engine_mode}", "info")
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({
+            "success": True,
+            "settings": get_media_engine_settings(),
+            "stats": ab_evolution_engine.get_all_stats()
+        }, ensure_ascii=False).encode("utf-8"))
 
     def _handle_kmarket_clean_view(self, parsed_url):
         """

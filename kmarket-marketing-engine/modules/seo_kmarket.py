@@ -63,7 +63,7 @@ class KMarketSEOPusher:
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{u_name}] 0 KRW Free Giveaways & Moving Sales for Expats", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
-        # 2. 전국 15개 공단 근로자 가전/가구 직거래 SEO 페이지 (15 × 17 = 255개)
+        # 2. 전국 40개 산업단지 근로자 가전/가구 직거래 SEO 페이지 (40 × 17 = 680개)
         for ind in self.industrials:
             i_name = ind["name_en"]
             region = ind["region"]
@@ -74,7 +74,7 @@ class KMarketSEOPusher:
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{i_name}] Foreign Worker Secondhand Appliances & Moving Sale", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
-        # 3. 전국 20개 외국인 밀집촌/다문화거리 SEO 페이지 (20 × 17 = 340개)
+        # 3. 전국 58개 외국인 밀집촌/다문화거리 SEO 페이지 (58 × 17 = 986개)
         for town in self.expat_towns:
             t_name = town["name_en"]
             region = town["region"]
@@ -85,10 +85,10 @@ class KMarketSEOPusher:
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{t_name}] Expat Community Marketplace & 0 KRW Free Share", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
-        # 4. 전국 30개 외국인 지원센터 & 출입국청 직거래/나눔 SEO 페이지 (30 × 17 = 510개)
+        # 4. 전국 29개 외국인 지원센터 & 출입국청 직거래/나눔 SEO 페이지 (29 × 17 = 493개)
         for sc in self.support_centers:
             sc_name = sc["name_en"]
-            region = f"{sc['region']} {sc['district']}"
+            region = f"{sc.get('region', '')} {sc.get('district', '')}".strip()
             c_slug = clean_slug(sc_name)
             for lang_code, lang_info in LANGUAGES.items():
                 slug = f"kmarket-center-{c_slug}-{lang_code}"
@@ -106,11 +106,21 @@ class KMarketSEOPusher:
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{c_name}] Official Expat Community Safe Trade Hub", comm['country'], lang_code, lang_info, target_url, base_domain=base_domain)
 
-        # 6. sitemap_kmarket.xml 생성
+        # 6. 실물 등록 매물 270개 다국어 상세 SEO 페이지 (270 × 17 = 4,590개)
+        for item in self.kmarket_items:
+            item_id = str(item.get("id", item.get("item_id", "")))
+            if not item_id:
+                continue
+            item_title = item.get("title", item.get("title_ko", f"Item {item_id}"))
+            for lang_code, lang_info in LANGUAGES.items():
+                target_url = f"{base_domain}/{lang_code}/item/{item_id}"
+                sitemap_urls.append(target_url)
+
+        # 7. sitemap_kmarket.xml 생성
         sitemap_path = self.sitemap_dir / "sitemap_kmarket.xml"
         self._write_sitemap(sitemap_path, sitemap_urls)
 
-        # 7. Google Indexing API v3 공식 실시간 핑 전송 (K-Market 전용 서비스 계정)
+        # 8. Google Indexing API v3 공식 실시간 핑 전송 (K-Market 전용 서비스 계정)
         from core.google_indexing_client import GoogleIndexingClient
         indexing_client = GoogleIndexingClient(brand="kmarket")
         api_res = indexing_client.batch_publish_urls(sitemap_urls, max_limit=15)

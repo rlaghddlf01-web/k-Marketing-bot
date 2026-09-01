@@ -10,20 +10,26 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Tuple
 from PIL import Image
-from config import GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET
+from config import (
+    GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET,
+    GEMINI_FREE_API_KEY_EASYTAX, GEMINI_FREE_API_KEY_KMARKET
+)
 
 logger = logging.getLogger("MediaQualityVerifier")
 
 
 class MediaQualityVerifier:
     """
-    🛡️ AI 미디어 사전 품질 검증 및 점수화 엔진
-    - K-Market: GEMINI_API_KEY_KMARKET
-    - EasyTax: GEMINI_API_KEY_EASYTAX
+    🛡️ AI 미디어 사전 품질 검증 및 점수화 엔진 (100% 무료 키 사용)
+    - K-Market: GEMINI_FREE_API_KEY_KMARKET
+    - EasyTax: GEMINI_FREE_API_KEY_EASYTAX
     """
     def __init__(self, service_id: str = "kmarket"):
         self.service_id = service_id.lower()
-        self.api_key = GEMINI_API_KEY_KMARKET if self.service_id == "kmarket" else GEMINI_API_KEY_EASYTAX
+        if self.service_id == "kmarket":
+            self.api_key = GEMINI_FREE_API_KEY_KMARKET or GEMINI_API_KEY_KMARKET
+        else:
+            self.api_key = GEMINI_FREE_API_KEY_EASYTAX or GEMINI_API_KEY_EASYTAX
         self.client = None
         self._init_client()
 

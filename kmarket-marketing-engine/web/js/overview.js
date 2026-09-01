@@ -23,7 +23,41 @@ function renderHubGrid() {
             { id: "threads", name: "Meta Threads 바이럴 스레드", icon: "🧵", desc: "3~4단 타래 바이럴 (하루 3회 정시: 11:00 / 16:30 / 21:30 KST)", key: "threads" }
         ];
 
-        container.innerHTML = hubs.map((h, idx) => `
+        container.innerHTML = hubs.map((h, idx) => {
+            const isMediaHub = (h.key === "shorts" || h.key === "cardnews");
+            const engineSwitchHtml = isMediaHub ? `
+                <!-- ⚡ 이미지 생성 엔진 3단 스마트 스위치 (A/B 자가진화 탑재) -->
+                <div style="background:#090C19;padding:8px 10px;border-radius:8px;border:1px solid #1E2442;margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-size:10.5px;color:#38BDF8;font-weight:700;">⚡ 생성 엔진:</span>
+                        <span id="engine-label-kmarket-${h.key}" style="font-size:10px;color:#A855F7;font-weight:800;">🔄 A/B 자율 (50:50)</span>
+                    </div>
+
+                    <!-- 1. [상단] A/B 자율 자가학습 메인 버튼 -->
+                    <button type="button" class="btn" id="btn-engine-kmarket-${h.key}-auto" onclick="setMediaEngine('kmarket_${h.key}', 'ab_auto')" style="width:100%;font-size:10.5px;padding:5px 0;background:linear-gradient(135deg, #7C3AED, #9333EA);color:#FFFFFF;border:none;border-radius:5px;font-weight:800;cursor:pointer;margin-bottom:5px;box-shadow:0 2px 8px rgba(124,58,237,0.3);">
+                        🔄 AI 자율 A/B 자가학습 (8:2 가드레일)
+                    </button>
+
+                    <!-- 2. [하단] 수동 고정 버튼 그룹 -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px;">
+                        <button type="button" class="btn" id="btn-engine-kmarket-${h.key}-colab" onclick="setMediaEngine('kmarket_${h.key}', 'colab_gpu')" style="font-size:10px;padding:4px 2px;background:rgba(255,255,255,0.06);color:#94A3B8;border:1px solid rgba(255,255,255,0.1);border-radius:4px;font-weight:600;cursor:pointer;">
+                            🆓 무료 코랩
+                        </button>
+                        <button type="button" class="btn" id="btn-engine-kmarket-${h.key}-gemini" onclick="setMediaEngine('kmarket_${h.key}', 'gemini')" style="font-size:10px;padding:4px 2px;background:rgba(255,255,255,0.06);color:#94A3B8;border:1px solid rgba(255,255,255,0.1);border-radius:4px;font-weight:600;cursor:pointer;">
+                            💎 제미나이 AI
+                        </button>
+                    </div>
+
+                    <!-- 3. 실시간 성과 점수 관제창 (좋아요 1점, 댓글 2점, 클릭 5점) -->
+                    <div id="engine-stats-kmarket-${h.key}" style="font-size:9.5px;color:#94A3B8;background:rgba(0,0,0,0.3);padding:3px 6px;border-radius:4px;display:flex;justify-content:space-between;border:1px dashed rgba(255,255,255,0.06);">
+                        <span>코랩: <b id="score-kmarket-${h.key}-colab" style="color:#10B981;">0점</b></span>
+                        <span style="color:#64748B;">│</span>
+                        <span>제미나이: <b id="score-kmarket-${h.key}-gemini" style="color:#38BDF8;">0점</b></span>
+                    </div>
+                </div>
+            ` : "";
+
+            return `
             <div class="action-card" id="card-kmarket-${h.key}" style="background:#13172E;border:1px solid #22294E;border-top:3px solid #10B981;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,0.3);">
                 <div>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -35,6 +69,8 @@ function renderHubGrid() {
                     </div>
                     <p style="font-size:11.5px;color:#94A3B8;margin:0 0 10px 0;line-height:1.4;">${h.desc}</p>
                     
+                    ${engineSwitchHtml}
+
                     <!-- 실시간 24시간 가동 상태 바 -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#090C19;padding:6px 10px;border-radius:8px;border:1px solid #1E2442;margin-bottom:10px;">
                         <span style="font-size:11px;color:#94A3B8;">실시간 상태:</span>
@@ -59,7 +95,7 @@ function renderHubGrid() {
                     </button>
                 </div>
             </div>
-        `).join("");
+        `}).join("");
 
     } else {
         if (panelTitle) panelTitle.innerText = "🎯 EasyTax 7대 AI 세무 허브 & 24시간 무인 자율 공장";
@@ -75,7 +111,41 @@ function renderHubGrid() {
             { id: "threads", name: "Meta Threads 세무 스레드", icon: "🧵", desc: "조특법 90% 감면 타래 (하루 3회 정시: 11:00 / 16:30 / 21:30 KST)", key: "threads" }
         ];
 
-        container.innerHTML = hubs.map((h, idx) => `
+        container.innerHTML = hubs.map((h, idx) => {
+            const isMediaHub = (h.key === "shorts" || h.key === "cardnews");
+            const engineSwitchHtml = isMediaHub ? `
+                <!-- ⚡ 이미지 생성 엔진 3단 스마트 스위치 (A/B 자가진화 탑재) -->
+                <div style="background:#090C19;padding:8px 10px;border-radius:8px;border:1px solid #1E2442;margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-size:10.5px;color:#38BDF8;font-weight:700;">⚡ 생성 엔진:</span>
+                        <span id="engine-label-easytax-${h.key}" style="font-size:10px;color:#A855F7;font-weight:800;">🔄 A/B 자율 (50:50)</span>
+                    </div>
+
+                    <!-- 1. [상단] A/B 자율 자가학습 메인 버튼 -->
+                    <button type="button" class="btn" id="btn-engine-easytax-${h.key}-auto" onclick="setMediaEngine('easytax_${h.key}', 'ab_auto')" style="width:100%;font-size:10.5px;padding:5px 0;background:linear-gradient(135deg, #7C3AED, #9333EA);color:#FFFFFF;border:none;border-radius:5px;font-weight:800;cursor:pointer;margin-bottom:5px;box-shadow:0 2px 8px rgba(124,58,237,0.3);">
+                        🔄 AI 자율 A/B 자가학습 (8:2 가드레일)
+                    </button>
+
+                    <!-- 2. [하단] 수동 고정 버튼 그룹 -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px;">
+                        <button type="button" class="btn" id="btn-engine-easytax-${h.key}-colab" onclick="setMediaEngine('easytax_${h.key}', 'colab_gpu')" style="font-size:10px;padding:4px 2px;background:rgba(255,255,255,0.06);color:#94A3B8;border:1px solid rgba(255,255,255,0.1);border-radius:4px;font-weight:600;cursor:pointer;">
+                            🆓 무료 코랩
+                        </button>
+                        <button type="button" class="btn" id="btn-engine-easytax-${h.key}-gemini" onclick="setMediaEngine('easytax_${h.key}', 'gemini')" style="font-size:10px;padding:4px 2px;background:rgba(255,255,255,0.06);color:#94A3B8;border:1px solid rgba(255,255,255,0.1);border-radius:4px;font-weight:600;cursor:pointer;">
+                            💎 제미나이 AI
+                        </button>
+                    </div>
+
+                    <!-- 3. 실시간 성과 점수 관제창 (좋아요 1점, 댓글 2점, 클릭 5점) -->
+                    <div id="engine-stats-easytax-${h.key}" style="font-size:9.5px;color:#94A3B8;background:rgba(0,0,0,0.3);padding:3px 6px;border-radius:4px;display:flex;justify-content:space-between;border:1px dashed rgba(255,255,255,0.06);">
+                        <span>코랩: <b id="score-easytax-${h.key}-colab" style="color:#F59E0B;">0점</b></span>
+                        <span style="color:#64748B;">│</span>
+                        <span>제미나이: <b id="score-easytax-${h.key}-gemini" style="color:#38BDF8;">0점</b></span>
+                    </div>
+                </div>
+            ` : "";
+
+            return `
             <div class="action-card" id="card-easytax-${h.key}" style="background:#13172E;border:1px solid #22294E;border-top:3px solid #F59E0B;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,0.3);">
                 <div>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -87,6 +157,8 @@ function renderHubGrid() {
                     </div>
                     <p style="font-size:11.5px;color:#94A3B8;margin:0 0 10px 0;line-height:1.4;">${h.desc}</p>
                     
+                    ${engineSwitchHtml}
+
                     <!-- 실시간 24시간 가동 상태 바 -->
                     <div style="display:flex;justify-content:space-between;align-items:center;background:#090C19;padding:6px 10px;border-radius:8px;border:1px solid #1E2442;margin-bottom:10px;">
                         <span style="font-size:11px;color:#94A3B8;">실시간 상태:</span>
@@ -111,8 +183,10 @@ function renderHubGrid() {
                     </button>
                 </div>
             </div>
-        `).join("");
+        `}).join("");
     }
+    // 스위치 UI 상태 동기화
+    setTimeout(loadMediaEngineSettings, 50);
 }
 
 // 2. 24시간 무인 자율 채널 데몬 시작
@@ -423,10 +497,141 @@ async function triggerGoogleIndex() {
     }
 }
 
+// 9. 이미지 생성 엔진 3단 원클릭 전환 제어 (A/B 자가진화 탑재)
+async function setMediaEngine(channelKey, engineMode) {
+    const brand = channelKey.startsWith("easytax") ? "easytax" : "kmarket";
+    const subKey = channelKey.replace(`${brand}_`, "");
+    const engineTitle = engineMode === "gemini" ? "💎 제미나이 AI" : (engineMode === "colab_gpu" ? "🆓 무료 코랩 GPU" : "🔄 AI 자율 A/B 학습");
+    
+    appendLog(`[Engine] ${channelKey} 생성 엔진 전환 -> ${engineTitle}`, "info");
+    showToast(`[${channelKey}] 엔진이 [${engineTitle}]로 전환되었습니다.`);
+
+    try {
+        const res = await fetch("/api/media_engine", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ channel_key: channelKey, engine_mode: engineMode })
+        });
+        const data = await res.json();
+        if (data.success) {
+            updateMediaEngineUI(data.settings, data.stats);
+        }
+    } catch (e) {
+        console.error("엔진 전환 통신 에러:", e);
+    }
+}
+
+async function loadMediaEngineSettings() {
+    try {
+        const res = await fetch("/api/media_engine");
+        const data = await res.json();
+        if (data.success && data.settings) {
+            updateMediaEngineUI(data.settings, data.stats);
+        }
+    } catch (e) {
+        console.error("엔진 설정 로드 실패:", e);
+    }
+}
+
+function updateMediaEngineUI(settings, stats = {}) {
+    const brands = ["kmarket", "easytax"];
+    const hubs = ["shorts", "cardnews"];
+
+    brands.forEach(b => {
+        hubs.forEach(h => {
+            const channelKey = `${b}_${h}`;
+            const mode = settings[channelKey] || "ab_auto";
+            const autoBtn = document.getElementById(`btn-engine-${b}-${h}-auto`);
+            const colabBtn = document.getElementById(`btn-engine-${b}-${h}-colab`);
+            const geminiBtn = document.getElementById(`btn-engine-${b}-${h}-gemini`);
+            const label = document.getElementById(`engine-label-${b}-${h}`);
+
+            const scoreColabEl = document.getElementById(`score-${b}-${h}-colab`);
+            const scoreGeminiEl = document.getElementById(`score-${b}-${h}-gemini`);
+
+            const chStat = stats[channelKey] || {};
+            const scoreColab = chStat.colab_gpu?.score || 0;
+            const scoreGemini = chStat.gemini?.score || 0;
+            const ratioColab = chStat.current_ratio?.colab_gpu || 50;
+            const ratioGemini = chStat.current_ratio?.gemini || 50;
+
+            // 실시간 점수 표기
+            if (scoreColabEl) scoreColabEl.innerText = `${scoreColab}점 (${ratioColab}%)`;
+            if (scoreGeminiEl) scoreGeminiEl.innerText = `${scoreGemini}점 (${ratioGemini}%)`;
+
+            const brandAccent = b === "easytax" ? "#F59E0B" : "#10B981";
+
+            // 라벨 및 버튼 스타일 분기
+            if (mode === "ab_auto") {
+                if (label) {
+                    label.innerText = `🔄 A/B 자율 (${ratioColab}:${ratioGemini})`;
+                    label.style.color = "#A855F7";
+                }
+                if (autoBtn) {
+                    autoBtn.style.background = "linear-gradient(135deg, #7C3AED, #9333EA)";
+                    autoBtn.style.color = "#FFFFFF";
+                    autoBtn.style.boxShadow = "0 2px 10px rgba(124,58,237,0.4)";
+                }
+                if (colabBtn) {
+                    colabBtn.style.background = "rgba(255,255,255,0.06)";
+                    colabBtn.style.color = "#94A3B8";
+                    colabBtn.style.border = "1px solid rgba(255,255,255,0.1)";
+                }
+                if (geminiBtn) {
+                    geminiBtn.style.background = "rgba(255,255,255,0.06)";
+                    geminiBtn.style.color = "#94A3B8";
+                    geminiBtn.style.border = "1px solid rgba(255,255,255,0.1)";
+                }
+            } else if (mode === "colab_gpu") {
+                if (label) {
+                    label.innerText = `무료 코랩 고정 (0원)`;
+                    label.style.color = brandAccent;
+                }
+                if (autoBtn) {
+                    autoBtn.style.background = "rgba(255,255,255,0.04)";
+                    autoBtn.style.color = "#94A3B8";
+                    autoBtn.style.boxShadow = "none";
+                }
+                if (colabBtn) {
+                    colabBtn.style.background = brandAccent;
+                    colabBtn.style.color = "#FFFFFF";
+                    colabBtn.style.border = "none";
+                }
+                if (geminiBtn) {
+                    geminiBtn.style.background = "rgba(255,255,255,0.06)";
+                    geminiBtn.style.color = "#94A3B8";
+                    geminiBtn.style.border = "1px solid rgba(255,255,255,0.1)";
+                }
+            } else if (mode === "gemini") {
+                if (label) {
+                    label.innerText = `제미나이 AI 고정`;
+                    label.style.color = "#38BDF8";
+                }
+                if (autoBtn) {
+                    autoBtn.style.background = "rgba(255,255,255,0.04)";
+                    autoBtn.style.color = "#94A3B8";
+                    autoBtn.style.boxShadow = "none";
+                }
+                if (colabBtn) {
+                    colabBtn.style.background = "rgba(255,255,255,0.06)";
+                    colabBtn.style.color = "#94A3B8";
+                    colabBtn.style.border = "1px solid rgba(255,255,255,0.1)";
+                }
+                if (geminiBtn) {
+                    geminiBtn.style.background = "#38BDF8";
+                    geminiBtn.style.color = "#090C19";
+                    geminiBtn.style.border = "none";
+                }
+            }
+        });
+    });
+}
+
 function refreshOverview(btn) {
     animateRefreshBtn(btn, "대시보드 활동 로그와 상태가 새로고침되었습니다! 📊");
     fetchStatus();
     renderHubGrid();
+    loadMediaEngineSettings();
 }
 
 window.renderHubGrid = renderHubGrid;
@@ -434,6 +639,21 @@ window.renderActionGrid = renderHubGrid;
 window.startChannelDaemon = startChannelDaemon;
 window.stopChannelDaemon = stopChannelDaemon;
 window.startKMarketDaemon = startKMarketDaemon;
+window.stopKMarketDaemon = stopKMarketDaemon;
+window.startEasyTaxDaemon = startEasyTaxDaemon;
+window.stopEasyTaxDaemon = stopEasyTaxDaemon;
+window.startAllDaemons = startAllDaemons;
+window.stopAllDaemons = stopAllDaemons;
+window.runModule = runModule;
+window.triggerGoogleIndex = triggerGoogleIndex;
+window.refreshOverview = refreshOverview;
+window.setMediaEngine = setMediaEngine;
+window.loadMediaEngineSettings = loadMediaEngineSettings;
+
+// 초기화 시 엔진 상태 로드
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(loadMediaEngineSettings, 200);
+});
 window.stopKMarketDaemon = stopKMarketDaemon;
 window.startEasyTaxDaemon = startEasyTaxDaemon;
 window.stopEasyTaxDaemon = stopEasyTaxDaemon;

@@ -1,0 +1,86 @@
+{
+  "kmarket_shorts": {
+    "turn_count": 0,
+    "colab_gpu": {
+      "count": 0,
+      "likes": 5,
+      "comments": 0,
+      "clicks": 0,
+      "score": 5
+    },
+    "gemini": {
+      "count": 0,
+      "likes": 3,
+      "comments": 1,
+      "clicks": 102,
+      "score": 515
+    },
+    "current_ratio": {
+      "colab_gpu": 20,
+      "gemini": 80
+    }
+  },
+  "kmarket_cardnews": {
+    "turn_count": 0,
+    "colab_gpu": {
+      "count": 0,
+      "likes": 0,
+      "comments": 0,
+      "clicks": 0,
+      "score": 0
+    },
+    "gemini": {
+      "count": 0,
+      "likes": 0,
+      "comments": 0,
+      "clicks": 0,
+      "score": 0
+    },
+    "current_ratio": {
+      "colab_gpu": 50,
+      "gemini": 50
+    }
+  },
+  "easytax_shorts": {
+    "turn_count": 0,
+    "colab_gpu": {
+      "count": 0,
+      "likes": 0,
+      "comments": 0,
+      "clicks": 0,
+      "score": 0
+    },
+    "gemini": {
+      "count": 0,
+      "likes": 0,
+      "comments": 0,
+      "clicks": 0,
+      "score": 0
+    },
+    "current_ratio": {
+      "colab_gpu": 50,
+      "gemini": 50
+    }
+  },
+  "easytax_cardnews": {
+    "turn_count": 0,
+    "colab_gpu": {
+      "count": 0,
+      "likes": 0,
+      "comments": 0,
+      "clicks": 0,
+      "score": 0
+    },
+    "gemini": {
+      "count": 0,
+      "likes": 0,
+      "comments": 0,
+      "clicks": 0,
+      "score": 0
+    },
+    "current_ratio": {
+      "colab_gpu": 50,
+      "gemini": 50
+    }
+  }
+}

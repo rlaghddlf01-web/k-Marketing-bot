@@ -204,15 +204,18 @@ class RedditSafetyOrchestrator:
 
                     time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
 
-                    # 🛡️ 카르마 100 미만 워밍업 상태면 홍보 댓글 0건 강제 차단
-                    if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
+                    # 🛡️ 카르마 100 미만 워밍업 상태면 순수 정보성 댓글로 카르마 파밍
+                    if self.health.is_warmup_phase():
+                        logger.info(f"🌱 [1단계 워밍업] 카르마 {self.health.get_karma()}/{WARMUP_KARMA_THRESHOLD} — 정보성 댓글로 카르마 파밍 가동!")
+                        c_res = self.organic.run_organic_comment_session(count=1)
+                        results["organic_comments"] = c_res.get("commented", 0)
+                    elif self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
                         try:
+                            logger.info("🚀 [카르마 100점 이상] 50:50 간접 홍보 댓글 실행...")
                             p_cnt = self._promo_handler()
                             results["promo_comments"] = p_cnt
                         except Exception as e:
                             logger.error(f"홍보 댓글 실행 에러: {e}")
-                    else:
-                        logger.info(f"🌱 [워밍업/한도 보호] 카르마 {self.health.get_karma()}/{WARMUP_KARMA_THRESHOLD} — 홍보 댓글 0건 유지")
 
                 # 4. 오후 활성 (기본 16:00 ±30분)
                 elif slot_id == "slot_16":
@@ -327,29 +330,33 @@ class RedditSafetyOrchestrator:
 
         time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
 
-        # 4. 비홍보 댓글 세션
+        # 4. 정보성 도움 댓글 세션 (카르마 100 미만일 때도 100% 가동하여 카르마 집중 육성)
         try:
-            organic_count = random.randint(1, 2)
+            is_warmup = self.health.is_warmup_phase()
+            # 워밍업 기간에는 카르마 파밍을 위해 정보성 댓글을 적극 작성
+            organic_count = random.randint(1, 2) if is_warmup else random.randint(1, 2)
+            logger.info(f"🌱 [정보성 댓글 세션] (워밍업 모드: {is_warmup}, 목표 건수: {organic_count}건)...")
             organic_res = self.organic.run_organic_comment_session(count=organic_count)
             results["organic_comments"] = organic_res.get("commented", 0)
         except Exception as e:
-            logger.error(f"유기적 댓글 세션 에러: {e}")
+            logger.error(f"유기적 정보성 댓글 세션 에러: {e}")
 
         time.sleep(random.randint(REPLY_DELAY_MIN_SEC, REPLY_DELAY_MAX_SEC))
 
-        # 5. 홍보 댓글 (워밍업 통과 & 일일 한도 미달 시에만)
-        if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
-            try:
-                promo_count = self._promo_handler()
-                results["promo_comments"] = promo_count
-            except Exception as e:
-                logger.error(f"홍보 댓글 세션 에러: {e}")
-        else:
-            if self.health.is_warmup_phase():
-                results["skipped_reason"] = "warmup_phase"
-                logger.info(f"🌱 워밍업 단계(카르마 {self.health.get_karma()}/{WARMUP_KARMA_THRESHOLD}) — 홍보 댓글 0건 유지")
+        # 5. 홍보/간접유도 댓글 세션 (카르마 100점 돌파 후 50:50 비율로 가동)
+        if not self.health.is_warmup_phase():
+            if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
+                try:
+                    logger.info("🚀 [카르마 100점 돌파 완료] 50:50 간접 홍보 댓글 세션 가동...")
+                    promo_count = self._promo_handler()
+                    results["promo_comments"] = promo_count
+                except Exception as e:
+                    logger.error(f"홍보 댓글 세션 에러: {e}")
             elif not self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
                 results["skipped_reason"] = "daily_limit_or_cooldown"
+        else:
+            results["skipped_reason"] = "warmup_organic_only"
+            logger.info(f"🌱 [1단계 워밍업 집중 육성] 카르마 {self.health.get_karma()}/{WARMUP_KARMA_THRESHOLD} — 링크 없는 순수 정보성 댓글+좋아요로 카르마 파밍 중!")
 
         return results
 

@@ -53,7 +53,7 @@ class EasyTaxSEOPusher:
         def clean_slug(text: str) -> str:
             return re.sub(r'[^a-zA-Z0-9_\-]+', '-', text.lower()).strip('-')
 
-        # 1. 전국 15개 국가산업단지 근로자 90% 소득세 감면 SEO (15 × 17 = 255개)
+        # 1. 전국 40개 국가산업단지 근로자 90% 소득세 감면 SEO (40 × 17 = 680개)
         for ind in self.industrials:
             i_name = ind["name_en"]
             region = ind["region"]
@@ -75,10 +75,10 @@ class EasyTaxSEOPusher:
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{u_name}] D-2 International Student Part-Time 3.3% Tax Refund in {region}", region, lang_code, lang_info, target_url, base_domain=base_domain)
 
-        # 3. 전국 20개 외국인 거주지 5개년 연말정산 누락 소급 환급 SEO (20 × 17 = 340개)
+        # 3. 전국 58개 외국인 거주지 5개년 연말정산 누락 소급 환급 SEO (58 × 17 = 986개)
         for town in self.expat_towns:
             t_name = town["name_en"]
-            dist = town["district"]
+            dist = town.get("district", town.get("region", ""))
             c_slug = clean_slug(t_name)
             for lang_code, lang_info in LANGUAGES.items():
                 slug = f"easytax-town-{c_slug}-{lang_code}"
@@ -86,10 +86,10 @@ class EasyTaxSEOPusher:
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{t_name}, {dist}] Claim 5-Year Overpaid Taxes (2020-2025) via Hometax", dist, lang_code, lang_info, target_url, base_domain=base_domain)
 
-        # 4. 전국 30개 외국인 지원센터 & 출입국청 방문 외국인 특화 세무 지원 (30 × 17 = 510개)
+        # 4. 전국 29개 외국인 지원센터 & 출입국청 방문 외국인 특화 세무 지원 (29 × 17 = 493개)
         for sc in self.support_centers:
             sc_name = sc["name_en"]
-            region = f"{sc['region']} {sc['district']}"
+            region = f"{sc.get('region', '')} {sc.get('district', '')}".strip()
             c_slug = clean_slug(sc_name)
             for lang_code, lang_info in LANGUAGES.items():
                 slug = f"easytax-center-{c_slug}-{lang_code}"
@@ -107,11 +107,25 @@ class EasyTaxSEOPusher:
                 sitemap_urls.append(target_url)
                 self._render_page(slug, f"[{c_name}] Certified Tax Refund & Income Protection Portal", comm['country'], lang_code, lang_info, target_url, base_domain=base_domain)
 
-        # 6. sitemap_easytax.xml 생성
+        # 6. 비자별 맞춤 세무 가이드 6종 (6 × 17 = 102개)
+        visas = ["e-9", "h-2", "f-4", "e-7", "d-2", "d-4"]
+        for v in visas:
+            for lang_code, lang_info in LANGUAGES.items():
+                target_url = f"{base_domain}/visa/{v}?lang={lang_code}"
+                sitemap_urls.append(target_url)
+
+        # 7. 핵심 세목 가이드 6종 (6 × 17 = 102개)
+        guides = ["tax-reduction-90", "student-3-3-refund", "5-year-backpay", "social-insurance-refund", "severance-tax", "year-end-settlement"]
+        for g in guides:
+            for lang_code, lang_info in LANGUAGES.items():
+                target_url = f"{base_domain}/guide/{g}?lang={lang_code}"
+                sitemap_urls.append(target_url)
+
+        # 8. sitemap_easytax.xml 생성
         sitemap_path = self.sitemap_dir / "sitemap_easytax.xml"
         self._write_sitemap(sitemap_path, sitemap_urls)
 
-        # 7. Google Indexing API v3 공식 실시간 핑 전송 (EasyTax 전용 서비스 계정)
+        # 9. Google Indexing API v3 공식 실시간 핑 전송 (EasyTax 전용 서비스 계정)
         from core.google_indexing_client import GoogleIndexingClient
         indexing_client = GoogleIndexingClient(brand="easytax")
         api_res = indexing_client.batch_publish_urls(sitemap_urls, max_limit=15)

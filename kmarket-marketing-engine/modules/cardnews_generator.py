@@ -30,11 +30,28 @@ class CardnewsGenerator:
         self,
         service_id: str = "kmarket",
         lang: str = "vi",
-        theme_index: Optional[int] = None
+        theme_index: Optional[int] = None,
+        engine_mode: str = "colab_gpu"
     ) -> List[Path]:
         """서비스 ID에 따라 전담 카드뉴스 공장으로 즉시 분기 위임"""
         service_id = service_id.lower()
         if service_id == "easytax":
-            return self.cardnews_easytax.generate_carousel_cardnews(lang=lang, theme_index=theme_index)
+            return self.cardnews_easytax.generate_carousel_cardnews(lang=lang, theme_index=theme_index, engine_mode=engine_mode)
         else:
-            return self.cardnews_kmarket.generate_carousel_cardnews(lang=lang, theme_index=theme_index)
+            return self.cardnews_kmarket.generate_carousel_cardnews(lang=lang, theme_index=theme_index, engine_mode=engine_mode)
+
+    # server.py 호환 별칭 (generate_carousel → generate_carousel_cardnews)
+    def generate_carousel(
+        self,
+        service_id: str = "kmarket",
+        lang: str = "vi",
+        theme_index: Optional[int] = None,
+        engine_mode: str = "colab_gpu"
+    ) -> List[Path]:
+        """generate_carousel_cardnews의 server.py 호환 별칭"""
+        return self.generate_carousel_cardnews(
+            service_id=service_id,
+            lang=lang,
+            theme_index=theme_index,
+            engine_mode=engine_mode
+        )

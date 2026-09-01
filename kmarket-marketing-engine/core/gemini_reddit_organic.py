@@ -52,15 +52,26 @@ class RedditOrganicAI:
         self._init_gemini()
 
     def _init_gemini(self):
-        api_key = GEMINI_API_KEY_KMARKET
-        if api_key:
-            try:
-                from google import genai
-                self.client = genai.Client(api_key=api_key)
-                logger.info("Reddit Organic AI Gemini Client 초기화 성공")
-            except Exception as e:
-                logger.warning(f"Reddit Organic AI Gemini 초기화 실패: {e}")
-                self.client = None
+        from config import (
+            GEMINI_FREE_API_KEY_KMARKET, GEMINI_FREE_API_KEY_EASYTAX,
+            GEMINI_API_KEY_KMARKET_BLOG, GEMINI_API_KEY_KMARKET
+        )
+        keys = [
+            GEMINI_FREE_API_KEY_KMARKET,
+            GEMINI_FREE_API_KEY_EASYTAX,
+            GEMINI_API_KEY_KMARKET_BLOG,
+            GEMINI_API_KEY_KMARKET
+        ]
+        from google import genai
+        for k in keys:
+            if k:
+                try:
+                    self.client = genai.Client(api_key=k)
+                    logger.info("Reddit Organic AI Gemini Client 초기화 성공")
+                    return
+                except Exception:
+                    continue
+        self.client = None
 
     def generate_organic_comment(self, post_title: str, post_body: str, target_lang: str = "en") -> Optional[str]:
         """

@@ -348,3 +348,72 @@ class SupabaseManager:
             logger.error(f"❌ [Supabase Blog 업로드 에러] {target_table} ({payload.get('slug')}): {e}")
             return False
 
+    def set_active_gpu_url(self, url: str) -> bool:
+        """
+        🚀 [구글 코랩 무료 GPU URL 클라우드 실시간 등록]
+        - 코랩 서버 가동 즉시 Supabase에 새 터널 URL 자동 등록
+        - 로컬 .env 파일도 자동 동기화 갱신
+        """
+        url = url.strip().rstrip("/")
+        if not url:
+            return False
+
+        # 1. Supabase system_settings 테이블에 기록
+        if self.client:
+            try:
+                self.client.table("system_settings").upsert({
+                    "setting_key": "colab_gpu_api_url",
+                    "setting_value": url,
+                    "updated_at": get_now_kst().isoformat()
+                }, on_conflict="setting_key").execute()
+                logger.info(f"☁️ [Supabase GPU URL 동기화 완료]: {url}")
+            except Exception as e:
+                logger.warning(f"Supabase system_settings 기록 실패 (경고): {e}")
+
+        # 2. 로컬 .env 파일도 자동 갱신
+        try:
+            from config import BASE_DIR
+            env_file = BASE_DIR / ".env"
+            if env_file.exists():
+                lines = env_file.read_text(encoding="utf-8", errors="ignore").splitlines()
+                new_lines = []
+                found = False
+                for line in lines:
+                    if line.startswith("COLAB_GPU_API_URL="):
+                        new_lines.append(f"COLAB_GPU_API_URL={url}")
+                        found = True
+                    else:
+                        new_lines.append(line)
+                if not found:
+                    new_lines.append(f"COLAB_GPU_API_URL={url}")
+                env_file.write_text("\n".join(new_lines), encoding="utf-8")
+        except Exception as e:
+            logger.warning(f".env 파일 GPU URL 갱신 실패: {e}")
+
+        return True
+
+    def get_active_gpu_url(self) -> str:
+        """
+        🔍 [최신 활성 구글 코랩 GPU URL 실시간 조회]
+        - 1순위: Supabase 클라우드 실시간 조회
+        - 2순위: 로컬 .env 및 config 조회
+        """
+        # 1. Supabase 클라우드에서 조회
+        if self.client:
+            try:
+                res = self.client.table("system_settings") \
+                    .select("setting_value") \
+                    .eq("setting_key", "colab_gpu_api_url") \
+                    .execute()
+                if res.data and len(res.data) > 0:
+                    cloud_url = res.data[0].get("setting_value", "").strip()
+                    if cloud_url.startswith("http"):
+                        return cloud_url
+            except Exception as e:
+                pass
+
+        # 2. Fallback: 로컬 환경 변수
+        import os
+        return os.getenv("COLAB_GPU_API_URL", "").strip()
+
+

@@ -19,6 +19,7 @@ from typing import Dict, Any, List, Optional
 from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
 from core.scenario_director_shorts_kmarket import ScenarioDirectorShortsKMarket
 from core.kmarket_iframe_composer import KMarketIframeComposer
+from core.local_gpu_media_generator_kmarket import LocalGPUMediaGeneratorKMarket
 from core.gemini_media_generator import GeminiMediaGenerator
 from core.media_quality_verifier import MediaQualityVerifier
 from core.motion_video_composer import MotionVideoComposer
@@ -38,20 +39,28 @@ class ShortsKMarket:
 
         self.scenario_director = ScenarioDirectorShortsKMarket()
         self.iframe_composer = KMarketIframeComposer()
-        self.gemini_media_gen = GeminiMediaGenerator(service_id=self.service_id)
+        self.gemini_media_gen = LocalGPUMediaGeneratorKMarket()
         self.quality_verifier = MediaQualityVerifier(service_id=self.service_id)
         self.motion_composer = MotionVideoComposer(output_dir=self.output_dir)
         self.tts_engine = TTSEngine()
         self.publisher = ShortsMultiPublisher()
         self.supabase = SupabaseManager()
 
-    def produce_shorts(self, lang: str = "vi", force_mode: Optional[str] = None) -> Dict[str, Any]:
+    def produce_shorts(self, lang: str = "vi", force_mode: Optional[str] = None, engine_mode: str = "colab_gpu") -> Dict[str, Any]:
         """
         K-Market 전용 숏폼 비디오 1편을 기획 ➔ 생성 ➔ 품질검증 ➔ 렌더링 ➔ 배포까지 100% 무인 실행
         (force_mode: 'A_feed_scroll' 또는 'B_gemini_story5')
         """
-        logger.info(f"[{lang.upper()}] 🛒 [K-Market 숏폼 공장] 생산 가동 시작...")
+        logger.info(f"[{lang.upper()}] 🛒 [K-Market 숏폼 공장] 생산 가동 시작... (엔진: {engine_mode})")
         timestamp = int(time.time())
+
+        # ⚡ 이미지 생성 엔진 동적 선택 (대시보드 스위치 연동)
+        if engine_mode == "gemini":
+            active_media_gen = GeminiMediaGenerator(service_id="kmarket")
+            logger.info(f"[{lang.upper()}] 💎 [K-Market 숏폼] 제미나이 Imagen AI 엔진으로 생성")
+        else:
+            active_media_gen = self.gemini_media_gen  # 기존 LocalGPUMediaGeneratorKMarket
+            logger.info(f"[{lang.upper()}] 🆓 [K-Market 숏폼] 무료 코랩 GPU 엔진으로 생성")
 
         # 1. 일일 50:50 시나리오 기획
         scenario = self.scenario_director.plan_daily_scenario(lang=lang, force_mode=force_mode)
@@ -91,7 +100,7 @@ class ShortsKMarket:
                 for attempt in range(1, 4):
                     theme_id_attempt = f"{scenario['theme_id']}_s{scene['scene_idx']}" if attempt == 1 else f"{scenario['theme_id']}_s{scene['scene_idx']}_r{attempt}_{int(time.time())}"
 
-                    img_path = self.gemini_media_gen.generate_theme_image(
+                    img_path = active_media_gen.generate_theme_image(
                         lang=lang,
                         theme_id=theme_id_attempt,
                         scenario_plan={
