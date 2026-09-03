@@ -175,6 +175,10 @@ class DirectUploader:
             )
         }
 
+    def get_platforms_health(self) -> Dict[str, Any]:
+        """하위 호환성을 위한 채널 상태 조회 alias"""
+        return self.get_all_platforms_status()
+
     def test_publish_single_platform(self, platform_id: str) -> Dict[str, Any]:
         """각 채널 전용 커넥터로 1:1 직접 라우팅하여 시험 발행 실행"""
         brand = "easytax" if "easytax" in platform_id else "kmarket"

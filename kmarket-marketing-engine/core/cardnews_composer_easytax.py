@@ -4,10 +4,11 @@ CardnewsComposerEasyTax - 💰 [EasyTax 전용 7:3 황금 분할 1080x1350 카�
 - 상단 70% (1080 × 945px): 4K 극실사 환급/산단 사진 배치
 - 구분선: 3px 럭셔리 골드 라인 (#D4AF37)
 - 하단 30% (1080 × 405px): 딥 네이비(#0B132B) 전용 텍스트 컨테이너
-- 17개국어 전용 폰트 렌더링 (베트남어, 러시아어, 네팔어, 우즈베크어 등 100% 무결성)
+- 17개국어 전용 폰트 렌더링 (베트남어 복합성조, 러시아어, 우즈베크어, 한국어 등 100% 무결점)
 """
 
 import os
+import re
 import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
@@ -15,14 +16,39 @@ from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger("CardnewsComposerEasyTax")
 
-# 폰트 경로 탐색
-def _load_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont:
-    font_candidates = [
-        r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-        r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
-        r"C:\Windows\Fonts\tahomabd.ttf" if bold else r"C:\Windows\Fonts\tahoma.ttf",
-        r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf",
-    ]
+
+def _load_font(size: int, bold: bool = True, lang: str = "vi") -> ImageFont.FreeTypeFont:
+    """
+    🎯 언어별 최적 유니코드 폰트 자동 매칭
+    - 한국어: Malgun Gothic (맑은 고딕)
+    - 베트남어/라틴/키릴(우즈벡, 러시아 등): Segoe UI / Arial (베트남어 복합 성조 100% 지원)
+    """
+    if lang == "ko":
+        font_candidates = [
+            r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf",
+            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
+            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
+        ]
+    elif lang in ["vi", "es", "id", "tl", "en"]:  # 베트남어 및 라틴 성조 문자 100% 지원
+        font_candidates = [
+            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
+            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
+            r"C:\Windows\Fonts\tahomabd.ttf" if bold else r"C:\Windows\Fonts\tahoma.ttf",
+            r"C:\Windows\Fonts\timesbd.ttf" if bold else r"C:\Windows\Fonts\times.ttf",
+        ]
+    elif lang in ["ru", "uz", "mn", "kk"]:  # 키릴 및 중앙아시아 문자
+        font_candidates = [
+            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
+            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
+            r"C:\Windows\Fonts\tahomabd.ttf" if bold else r"C:\Windows\Fonts\tahoma.ttf",
+        ]
+    else:
+        font_candidates = [
+            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
+            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
+            r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf",
+        ]
+
     for p in font_candidates:
         if os.path.exists(p):
             try:
@@ -30,6 +56,15 @@ def _load_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont:
             except Exception:
                 continue
     return ImageFont.load_default()
+
+
+def _sanitize_display_text(text: str) -> str:
+    """화면 렌더링 시 네모(□)로 깨지는 4바이트 특수 이모지를 안전하게 제거"""
+    if not text:
+        return ""
+    emoji_pattern = re.compile("[\U00010000-\U0010ffff]", flags=re.UNICODE)
+    cleaned = emoji_pattern.sub("", text)
+    return cleaned.strip()
 
 
 class CardnewsComposerEasyTax:
@@ -50,8 +85,7 @@ class CardnewsComposerEasyTax:
     BADGE_BG = (30, 41, 59)         # #1E293B
 
     def __init__(self):
-        self.font_badge = _load_font(30, bold=True)
-        self.font_indicator = _load_font(30, bold=True)
+        pass
 
     def _draw_centered_autofit_text(
         self,
@@ -60,19 +94,18 @@ class CardnewsComposerEasyTax:
         y: int,
         target_w: int = 984,
         max_h: int = 110,
-        start_size: int = 62,
+        start_size: int = 60,
         min_size: int = 24,
         bold: bool = True,
         fill_color: tuple = (255, 255, 255),
-        line_spacing: int = 8
+        line_spacing: int = 8,
+        lang: str = "vi"
     ) -> int:
         """
         🎯 [가로 너비 맞춤 동적 폰트 스케일링 & 중앙 정렬 엔진]
-        - target_w (984px)를 절대로 벗어나지 않도록 폰트 크기와 줄바꿈을 완벽 제어
-        - 단어 단위 자동 줄바꿈 및 화면 정중앙(Center Alignment) 배치
         """
         for size in range(start_size, min_size - 1, -1):
-            font = _load_font(size, bold=bold)
+            font = _load_font(size, bold=bold, lang=lang)
             words = text.split(" ")
             lines = []
             current_line = ""
@@ -107,33 +140,36 @@ class CardnewsComposerEasyTax:
                 continue
 
             total_h = sum(line_heights) + line_spacing * max(0, len(lines) - 1)
-
             if total_h <= max_h or size == min_size:
-                # 🎯 정중앙 정렬 렌더링
+                # 🎯 정중앙(Center) 배치 렌더링
                 curr_y = y
-                for i, l in enumerate(lines):
-                    line_w = line_widths[i]
-                    center_x = max(margin_x := 48, (self.WIDTH - line_w) // 2)
-                    draw.text((center_x, curr_y), l, font=font, fill=fill_color)
-                    curr_y += line_heights[i] + line_spacing
+                for idx, line_str in enumerate(lines):
+                    lw = line_widths[idx]
+                    center_x = (self.WIDTH - lw) // 2
+                    draw.text((center_x, curr_y), line_str, font=font, fill=fill_color)
+                    curr_y += line_heights[idx] + line_spacing
                 return curr_y
 
         return y + max_h
 
     def compose_slide(
         self,
-        top_image_path: Path,
+        top_image_path: Optional[Path],
         card_data: Dict[str, Any],
         slide_idx: int,
         total_slides: int = 5,
-        output_path: Optional[Path] = None
+        output_path: Optional[Path] = None,
+        lang: str = "vi"
     ) -> Path:
         """
-        상단 70% 실사 사진 + 하단 30% 독립 텍스트 영역을 조립하여 1080x1350 카드뉴스 1장 생성
+        7:3 분할 완성형 카드뉴스 단일 슬라이드 합성
         """
-        # 1. 1080 x 1350 메인 캔버스 생성
-        canvas = Image.new("RGB", (self.WIDTH, self.HEIGHT), color=self.BG_COLOR)
+        # 1. 베이스 캔버스 생성 (1080 x 1350)
+        canvas = Image.new("RGB", (self.WIDTH, self.HEIGHT), self.BG_COLOR)
         draw = ImageDraw.Draw(canvas)
+
+        font_badge = _load_font(30, bold=True, lang=lang)
+        font_indicator = _load_font(30, bold=True, lang=lang)
 
         # 2. 상단 70% 사진 합성 (1080 x 945px 맞춤 크롭 & 배치)
         if top_image_path and os.path.exists(top_image_path):
@@ -169,54 +205,53 @@ class CardnewsComposerEasyTax:
         margin_x = 48
         target_content_w = 984  # 1080 - 96 (안전 가로 영역)
 
-        # ── A. 상단 배지 & 슬라이드 인디케이터 (헤더 바 2배 대형화)
-        badge_text = card_data.get("badge", f"STEP {slide_idx:02d}")
+        # ── A. 상단 배지 & 슬라이드 인디케이터
+        badge_text = _sanitize_display_text(card_data.get("badge", f"STEP {slide_idx:02d}"))
         indicator_text = f"{slide_idx:02d} / {total_slides:02d} >"
 
-        badge_bbox = draw.textbbox((margin_x, y_cursor), f"  {badge_text}  ", font=self.font_badge)
-        # 패딩 확장 (상하좌우 여백)
+        badge_bbox = draw.textbbox((margin_x, y_cursor), f"  {badge_text}  ", font=font_badge)
         padded_bbox = (badge_bbox[0], badge_bbox[1] - 4, badge_bbox[2] + 4, badge_bbox[3] + 4)
         draw.rectangle(padded_bbox, fill=self.BADGE_BG, outline=self.BORDER_COLOR, width=2)
-        draw.text((margin_x + 10, y_cursor), badge_text, font=self.font_badge, fill=self.TEXT_GOLD)
+        draw.text((margin_x + 10, y_cursor), badge_text, font=font_badge, fill=self.TEXT_GOLD)
 
-        ind_bbox = draw.textbbox((0, 0), indicator_text, font=self.font_indicator)
+        ind_bbox = draw.textbbox((0, 0), indicator_text, font=font_indicator)
         ind_w = ind_bbox[2] - ind_bbox[0]
-        draw.text((self.WIDTH - margin_x - ind_w, y_cursor), indicator_text, font=self.font_indicator, fill=self.TEXT_GOLD)
+        draw.text((self.WIDTH - margin_x - ind_w, y_cursor), indicator_text, font=font_indicator, fill=self.TEXT_GOLD)
 
         y_cursor += 56
 
-        # ── B. 🎯 [가로 꽉 채움 초대형 헤드라인] (62pt ~ 32pt 중앙 정렬)
-        title_text = card_data.get("title", "")
+        # ── B. 🎯 [가로 꽉 채움 초대형 헤드라인] (60pt ~ 30pt 중앙 정렬)
+        title_text = _sanitize_display_text(card_data.get("title", ""))
         y_cursor = self._draw_centered_autofit_text(
             draw=draw, text=title_text,
             y=y_cursor, target_w=target_content_w,
-            max_h=110, start_size=60, min_size=30, bold=True,
-            fill_color=self.TEXT_WHITE, line_spacing=6
+            max_h=110, start_size=60, min_size=28, bold=True,
+            fill_color=self.TEXT_WHITE, line_spacing=6, lang=lang
         )
         y_cursor += 6
 
-        # ── C. 🎯 [가로 꽉 채움 골드 서브카피] (38pt ~ 24pt 중앙 정렬)
-        sub_text = card_data.get("subtitle", "")
+        # ── C. 🎯 [가로 꽉 채움 골드 서브카피] (36pt ~ 24pt 중앙 정렬)
+        sub_text = _sanitize_display_text(card_data.get("subtitle", ""))
         if sub_text:
             y_cursor = self._draw_centered_autofit_text(
                 draw=draw, text=sub_text,
                 y=y_cursor, target_w=target_content_w,
-                max_h=65, start_size=36, min_size=24, bold=True,
-                fill_color=self.TEXT_GOLD, line_spacing=4
+                max_h=65, start_size=34, min_size=22, bold=True,
+                fill_color=self.TEXT_GOLD, line_spacing=4, lang=lang
             )
             y_cursor += 8
 
-        # ── D. 🎯 [3줄 핵심 요약 대형 불릿 포인트] (30pt ~ 22pt 시원한 줄간격)
+        # ── D. 🎯 [3줄 핵심 요약 대형 불릿 포인트] (28pt ~ 20pt 시원한 줄간격)
         bullets = card_data.get("bullets", [])
         for b in bullets[:3]:
-            b_str = str(b).strip()
+            b_str = _sanitize_display_text(str(b).strip())
             if not b_str.startswith("•") and not b_str[0].isdigit():
                 b_str = f"• {b_str}"
             y_cursor = self._draw_centered_autofit_text(
                 draw=draw, text=b_str,
                 y=y_cursor, target_w=target_content_w,
-                max_h=55, start_size=28, min_size=20, bold=False,
-                fill_color=self.TEXT_MUTED, line_spacing=4
+                max_h=55, start_size=26, min_size=18, bold=False,
+                fill_color=self.TEXT_MUTED, line_spacing=4, lang=lang
             )
             y_cursor += 6
 
@@ -224,6 +259,6 @@ class CardnewsComposerEasyTax:
         if output_path:
             output_path.parent.mkdir(parents=True, exist_ok=True)
             canvas.save(output_path, "JPEG", quality=95)
-            logger.info(f"✅ [EasyTax 7:3 대형 중앙 정렬 카드뉴스 렌더링 완료]: {output_path.name}")
+            logger.info(f"✅ [EasyTax 7:3 카드뉴스 렌더링 완료]: {output_path.name}")
 
         return output_path

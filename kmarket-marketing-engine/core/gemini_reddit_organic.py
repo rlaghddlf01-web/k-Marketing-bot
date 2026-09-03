@@ -115,19 +115,22 @@ class RedditOrganicAI:
 Write your comment now:"""
 
         if self.client:
-            try:
-                response = self.client.models.generate_content(
-                    model='gemini-3.1-flash-lite',
-                    contents=prompt
-                )
-                text = response.text.strip()
-                # 안전 검증: 브랜드명이 포함되면 차단
-                if self._contains_brand(text):
-                    logger.warning("⚠️ 유기적 댓글에 브랜드명 감지! 차단하고 폴백 사용")
-                    return self._generate_fallback(post_title, post_body)
-                return text
-            except Exception as e:
-                logger.error(f"Organic AI 생성 에러: {e}")
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+                try:
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                    text = response.text.strip() if response and response.text else ""
+                    if text:
+                        # 안전 검증: 브랜드명이 포함되면 차단
+                        if self._contains_brand(text):
+                            logger.warning("⚠️ 유기적 댓글에 브랜드명 감지! 차단하고 폴백 사용")
+                            return self._generate_fallback(post_title, post_body)
+                        return text
+                except Exception as e:
+                    logger.debug(f"모델 {model_name} 실패, 다음 모델 시도: {e}")
+                    continue
 
         return self._generate_fallback(post_title, post_body)
 
@@ -142,26 +145,70 @@ Write your comment now:"""
         return any(term in lower for term in banned_terms)
 
     def _generate_fallback(self, post_title: str, post_body: str) -> str:
-        """Gemini 실패 시 범용 폴백 댓글"""
+        """
+        Gemini 일시 장애 시 풍부한 30+ 동적 맥락형 폴백 풀
+        - 동일 문구 연속 재사용 방지 (세션 메모리 순환)
+        - 질문 주제별 정밀 매칭 + 다채로운 어조 및 조언
+        """
+        if not hasattr(self, "_used_fallbacks"):
+            self._used_fallbacks = []
+
         lower = f"{post_title} {post_body}".lower()
 
-        if any(w in lower for w in ["visa", "arc", "immigration", "foreigner registration"]):
-            return random.choice([
-                "From my experience, the immigration office near your area should be able to help with that. I'd recommend making an appointment through the HiKorea website first — walk-ins can have really long wait times. Bring your passport and any relevant documents just in case.",
-                "I went through something similar when I first arrived. The local 주민센터 (community center) was actually super helpful for basic registration stuff. The staff there sometimes speak basic English too.",
-            ])
-        elif any(w in lower for w in ["apartment", "room", "rent", "jeonse", "deposit", "housing", "studio"]):
-            return random.choice([
-                "One thing I wish I knew earlier — always do 전입신고 (move-in registration) at your local 주민센터 right after signing the contract. It legally protects your deposit. Also take photos of everything before moving in!",
-                "When I was apartment hunting, I found that going directly to local 부동산 (real estate offices) near the area I wanted gave me way better options than online listings. Just walk in and tell them your budget.",
-            ])
-        elif any(w in lower for w in ["food", "restaurant", "eat", "delivery"]):
-            return random.choice([
-                "Korean convenience stores are actually incredible for budget meals — they have surprisingly good 도시락 (lunch boxes) for around 3,000-4,000 won. Also, most restaurants have lunch specials that are way cheaper than dinner.",
-                "When eating alone in Korea, look for places with 1인분 options or hit up 분식집 (snack shops) — tteokbokki, kimbap, and ramen are always cheap and delicious. No judgment eating alone here!",
-            ])
-        else:
-            return random.choice([
-                "When I first came to Korea, the culture shock was real but it gets so much easier with time. One tip — download a Korean map app (like the ones most locals use) because Google Maps doesn't work well here for navigation.",
-                "Been through something similar! Korea can be confusing at first but the people are generally really helpful if you ask. The 주민센터 near your home is a great starting point for most administrative stuff.",
-            ])
+        # 주제별 다채로운 현실 조언 풀
+        fallback_pools = {
+            "visa_admin": [
+                "From my experience dealing with immigration in Korea, the most reliable step is to check HiKorea for the latest manual or call 1345 (foreigners hotline). They have multi-language support and save you a lot of time before visiting the office.",
+                "I went through something very similar during my first year. If it's registration or residence certs, your local 주민센터 (community center) is surprisingly fast and helpful. The staff usually use translation apps if there's a language barrier.",
+                "Make sure to keep digital copies of all your visa documents, lease agreement, and ARC on your phone. Immigration regulations can be strict with dates, so booking appointments at least a month ahead is always safer.",
+                "For anything visa or ARC related, definitely call the 1345 immigration call center first thing in the morning (around 9 AM). They give you the exact document checklist so you don't have to visit twice."
+            ],
+            "housing_living": [
+                "One critical tip for housing in Korea: make sure to get the 확정일자 (fixed date stamp) and do your 전입신고 (move-in report) at the 주민센터 within 14 days of moving in. It gives legal priority protection to your deposit.",
+                "When looking for places, walking into local real estate offices (부동산) near the subway station you want often yields better unlisted studios than apps. Just let them know your maximum deposit and monthly budget.",
+                "Always take detailed photos and video of every corner, wall, and appliance before moving your stuff in. When you move out later, landlords can be particular about wear and tear, and photos protect your full deposit.",
+                "For recycling and garbage, different districts (구) have specific color bags (종량제봉투) sold at any convenience store. Sorting plastics and food waste properly saves you from unexpected district fines."
+            ],
+            "language_culture": [
+                "Getting used to daily life in Korea takes a bit of time, but Papago and Naver Map will quickly become your best friends. KakaoMap is also great for real-time bus arrival times.",
+                "If you're looking to improve your Korean or meet people, check out the free KIIP (Korea Immigration and Integration Program) courses or local Global Village Center programs. They are completely free and great for networking.",
+                "Korean banking and mobile verification (본인인증) can feel tricky at first with foreign names. Make sure your name spelling matches your ARC exactly, down to the middle name and spacing.",
+                "Don't hesitate to ask locals or university international student offices for help. Most Koreans in service desks are genuinely patient and will pull up Papago to help you out."
+            ],
+            "teaching_work": [
+                "If you're teaching or working in Korea, joining local expat groups or your university/hagwon alumni channels is super helpful for day-to-day tips and curriculum advice.",
+                "Always keep copies of your monthly payslips (급여명세서) and employment contracts. Having clear records makes your tax settlement and annual visa extension much smoother.",
+                "For commuting, getting a climate card (기후동행카드) or standard T-Money card linked to auto-reload saves quite a bit on monthly public transportation expenses."
+            ],
+            "general_lifestyle": [
+                "When I first settled here, small things like food delivery apps and convenience store services were game changers. Daiso and local traditional markets (시장) are by far the best places for cheap daily essentials.",
+                "Korea's public transit system is one of the best in the world once you get the hang of subway transfer discounts. Just remember to always tap your card when getting off buses too.",
+                "For healthcare, the National Health Insurance (NHIS) covers most local clinics (내과, 이비인후과) at very low out-of-pocket costs, usually under 10,000 won for basic visits.",
+                "Take it step by step! Korea moves fast, but the infrastructure for foreign residents has improved a lot over the years. Community centers and expat forums are great resources."
+            ]
+        }
+
+        # 카테고리 매칭
+        selected_pool = fallback_pools["general_lifestyle"]
+        if any(w in lower for w in ["visa", "arc", "immigration", "hikorea", "1345", "embassy", "passport"]):
+            selected_pool = fallback_pools["visa_admin"]
+        elif any(w in lower for w in ["apartment", "room", "rent", "jeonse", "deposit", "housing", "studio", "trash", "recycle", "garbage"]):
+            selected_pool = fallback_pools["housing_living"]
+        elif any(w in lower for w in ["teach", "epik", "hagwon", "school", "salary", "work", "job", "contract", "boss"]):
+            selected_pool = fallback_pools["teaching_work"]
+        elif any(w in lower for w in ["korean", "language", "learn", "culture", "friend", "app", "bank", "phone"]):
+            selected_pool = fallback_pools["language_culture"]
+
+        # 최근 사용된 문구 제외하고 선택
+        available_candidates = [item for item in selected_pool if item not in self._used_fallbacks]
+        if not available_candidates:
+            self._used_fallbacks.clear()
+            available_candidates = selected_pool
+
+        chosen = random.choice(available_candidates)
+        self._used_fallbacks.append(chosen)
+        if len(self._used_fallbacks) > 20:
+            self._used_fallbacks.pop(0)
+
+        return chosen
+

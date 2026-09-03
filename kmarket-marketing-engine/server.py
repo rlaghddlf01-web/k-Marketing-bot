@@ -916,7 +916,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             importlib.reload(core.direct_uploader)
             DirectUploader = core.direct_uploader.DirectUploader
             uploader = DirectUploader()
-            platforms = uploader.get_platforms_health()
+            platforms = uploader.get_all_platforms_status()
         except Exception as e:
             platforms = {}
         self._set_headers("application/json")

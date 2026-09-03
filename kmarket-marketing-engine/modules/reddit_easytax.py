@@ -69,7 +69,11 @@ class EasyTaxRedditHunter:
     def scan_and_reply(self, limit_per_sub: int = 15, max_promo: int = 1, auto_post: bool = True, **kwargs) -> int:
         """타깃 서브레딧들의 실시간 글을 무인 스캔하고, 세무/비자/환급 질문에 3단계 간접 팩트 답변 게시"""
         if not self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
-            logger.info("🛡️ [EasyTax] 일일 홍보 한도 초과 또는 쿨다운/워밍업 상태로 스킵")
+            if self.health.is_warmup_phase():
+                logger.info("🌱 [EasyTax] 워밍업 모드 (카르마 < 100) — 홍보 대신 순수 정보성 댓글로 카르마 파밍 가동!")
+                res = self.orchestrator.organic.run_organic_comment_session(count=1)
+                return res.get("commented", 0)
+            logger.info("🛡️ [EasyTax] 일일 홍보 한도 초과 또는 쿨다운 상태로 스킵")
             return 0
 
         logger.info(f"💰 [EasyTax Reddit Hunter] {len(self.target_subreddits)}개 외국인/강사/유학생 커뮤니티 실시간 스캔 가동...")

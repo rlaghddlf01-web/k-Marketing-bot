@@ -35,15 +35,27 @@ class EasyTaxGeminiReddit:
         self.easytax_rules = self._load_json(DATA_DIR / "easytax_rules.json")
 
     def _init_gemini(self):
-        api_key = GEMINI_API_KEY_EASYTAX
-        if api_key:
-            try:
-                from google import genai
-                self.client = genai.Client(api_key=api_key)
-                logger.info("EasyTax 레딧 전용 Gemini Client 초기화 성공")
-            except Exception as e:
-                logger.warning(f"EasyTax 레딧 Gemini 초기화 실패: {e}")
-                self.client = None
+        from config import (
+            GEMINI_FREE_API_KEY_EASYTAX, GEMINI_API_KEY_EASYTAX_BLOG,
+            GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY
+        )
+        keys = [
+            GEMINI_FREE_API_KEY_EASYTAX,
+            GEMINI_API_KEY_EASYTAX_BLOG,
+            GEMINI_API_KEY_EASYTAX,
+            GEMINI_API_KEY
+        ]
+        from google import genai
+        for k in keys:
+            if k:
+                try:
+                    self.client = genai.Client(api_key=k)
+                    logger.info("EasyTax 레딧 전용 Gemini Client 초기화 성공")
+                    return
+                except Exception as e:
+                    logger.warning(f"EasyTax 레딧 Gemini 초기화 시도 실패: {e}")
+        self.client = None
+
 
     def _load_json(self, path) -> Any:
         if path.exists():
@@ -114,16 +126,20 @@ class EasyTaxGeminiReddit:
 6. DO NOT use bullet points — write like a normal Reddit comment.
 """
         if self.client:
-            try:
-                response = self.client.models.generate_content(
-                    model='gemini-3.1-flash-lite',
-                    contents=prompt
-                )
-                result = response.text.strip()
-                logger.info(f"💰 [EasyTax Reddit AI] Level {promo_level} 답변 생성 완료")
-                return result
-            except Exception as e:
-                logger.error(f"EasyTax Gemini 레딧 생성 에러: {e}")
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+                try:
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                    if response and response.text:
+                        result = response.text.strip()
+                        logger.info(f"💰 [EasyTax Reddit AI] Level {promo_level} 답변 생성 완료 ({model_name})")
+                        return result
+                except Exception as e:
+                    logger.debug(f"EasyTax Gemini 모델 {model_name} 실패, 다음 시도: {e}")
+                    continue
+
 
         # Level 1 순수 팩트 기반 Fallback
         lower_q = f"{post_title} {post_body}".lower()

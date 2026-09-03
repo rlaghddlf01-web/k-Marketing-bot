@@ -67,12 +67,14 @@ class GeminiMediaGenerator:
         demo_desc = scenario_plan.get("persona_desc", "Asian expat young worker or student in South Korea")
         action = scenario_plan.get("action_prompt", "looking at smartphone with happy genuine smile")
         
-        # ★ [대표님 절대 지침] 100% 인물 중심(Human-Centric) 시네마틱 인물 사진 헌법
+        # ★ [대표님 절대 지침] 세계 최고의 바이럴 사진작가 실사 헌법 & 100% 무결점 사진 렌더링
         human_centric_mandate = (
-            ", [CRITICAL DIRECTING MANDATE: 100% HUMAN-CENTRIC PORTRAIT]: "
+            ", [CRITICAL DIRECTING MANDATE: WORLD-CLASS VIRAL PHOTOGRAPHY - 100% ERROR-FREE AUTHENTIC PORTRAIT]: "
+            "You are the world's greatest viral documentary portrait photographer. "
             "The human protagonist is the absolute primary focal subject of this photo. "
-            "The person's expressive face, eyes, genuine smile, and upper body MUST occupy at least 70-80% of the vertical 9:16 frame. "
-            "Sharp portrait focus on the person's face and eyes. Any props must remain small and NEVER cover or block the person's face."
+            "The person's expressive face, eyes, genuine smile, and upper body MUST occupy at least 70-80% of the frame. "
+            "The photo MUST look 100% like a real live photograph with zero anatomical errors, natural skin textures, and genuine human emotions. "
+            "Sharp portrait focus on the person's face and eyes. Any smartphone prop must be held upright in normal vertical orientation, small, and NEVER cover or block the person's face."
         )
 
         if any(action.startswith(prefix) for prefix in ["Cinematic", "Ultra close-up", "Extreme close-up", "Professional"]):
@@ -87,6 +89,7 @@ class GeminiMediaGenerator:
             )
 
         negative_prompt = scenario_plan.get("negative_prompt") or (
+            "upside down phone, inverted smartphone, backwards phone, phone held upside down, deformed hand holding phone, "
             "giant phone blocking face, macro phone screen, phone covering face, oversized phone, extreme close up of phone, "
             "floating phone, six fingers, deformed hands, extra limbs, disembodied hands, claw hands, "
             "creepy smile, dead eyes, cartoon, 3d render, illustration, blurry, "

@@ -50,7 +50,7 @@ class SystemHealthChecker:
         }
 
         # 2. 🛒 K-Market & 💰 EasyTax 채널 상태 수집
-        platforms = self.uploader.get_platforms_health()
+        platforms = self.uploader.get_all_platforms_status()
         km_channels = {}
         tax_channels = {}
 

@@ -20,6 +20,7 @@ from core.scenario_director_cardnews_kmarket import ScenarioDirectorCardnewsKMar
 from core.local_gpu_media_generator_kmarket import LocalGPUMediaGeneratorKMarket
 from core.gemini_media_generator import GeminiMediaGenerator
 from core.cardnews_composer_kmarket import CardnewsComposerKMarket
+from core.media_quality_verifier import MediaQualityVerifier
 from core.supabase_manager import SupabaseManager
 
 logger = logging.getLogger("CardnewsKMarket")
@@ -37,6 +38,7 @@ class CardnewsKMarket:
         self.scenario_director = ScenarioDirectorCardnewsKMarket()
         self.media_gen = LocalGPUMediaGeneratorKMarket()
         self.composer = CardnewsComposerKMarket()
+        self.quality_verifier = MediaQualityVerifier(service_id=self.service_id)
         self.supabase = SupabaseManager()
 
     def generate_carousel_cardnews(
@@ -69,7 +71,8 @@ class CardnewsKMarket:
 
         for card in cards:
             s_idx = card.get("slide_idx", 1)
-            # 1. 상단 70% (1080x945) 고화질 실사 이미지 생성 (무료 GPU)
+            # 🛡️ 1. 상단 70% (1080x945) 고화질 실사 이미지 1회 생성 (비용 1/3 통제 1-Shot 모드)
+            theme_id = f"card_{episode_id}_s{s_idx}"
             img_plan = {
                 "action_prompt": card.get("image_prompt"),
                 "negative_prompt": card.get("negative_prompt"),
@@ -77,10 +80,20 @@ class CardnewsKMarket:
             }
             top_img_path = active_media_gen.generate_theme_image(
                 lang=lang,
-                theme_id=f"card_{episode_id}_s{s_idx}",
+                theme_id=theme_id,
                 scenario_plan=img_plan,
                 aspect_ratio="16:9"
             )
+
+            # AI 비전 품질 검사관 (로깅 및 품질 측정 전용 - 유료 재촬영 차단)
+            if top_img_path and Path(top_img_path).exists():
+                passed, q_score, reason, _ = self.quality_verifier.verify_scene_image(
+                    top_img_path,
+                    scene_name=f"K-Market Card Slide {s_idx} ({card.get('title')})",
+                    lang=lang
+                )
+                logger.info(f"[{lang.upper()}] 🖼 K-Market 카드뉴스 슬라이드 {s_idx}/5 AI 품질 점수: {q_score}점 ({reason})")
+
 
             # 2. 7:3 분할 캔버스 합성 (1080x1350)
             out_filename = f"kmarket_cardnews_{lang}_s{s_idx}_{timestamp}.jpg"
@@ -91,7 +104,8 @@ class CardnewsKMarket:
                 card_data=card,
                 slide_idx=s_idx,
                 total_slides=len(cards),
-                output_path=out_path
+                output_path=out_path,
+                lang=lang
             )
 
             # 3. 바탕화면 자동 복사

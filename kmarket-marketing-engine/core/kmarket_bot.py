@@ -93,10 +93,11 @@ class KMarketGrowthBot:
         except Exception as e:
             logger.error(f"K-Market 카드뉴스 생성 에러: {e}")
 
-        # 3. 레딧 중고/가구 질문 실시간 스캔 & 안내
+        # 3. 레딧 중고/가구 질문 실시간 스캔 & 안전 유기적 활동 (워밍업 시 정보성 댓글 자동 작성)
         try:
-            replied = self.reddit_hunter.scan_and_reply(limit=3)
-            results["reddit_count"] = replied
+            safe_res = self.reddit_hunter.run_safe_cycle()
+            results["reddit_count"] = safe_res.get("promo_comments", 0) + safe_res.get("organic_comments", 0)
+            logger.info(f"✅ [K-Market 봇] 레딧 사이클 완료 (홍보: {safe_res.get('promo_comments', 0)}, 정보성: {safe_res.get('organic_comments', 0)}, 좋아요: {safe_res.get('upvotes', 0)})")
         except Exception as e:
             logger.error(f"K-Market 레딧 스캔 에러: {e}")
 

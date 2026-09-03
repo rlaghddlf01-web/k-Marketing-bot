@@ -96,37 +96,31 @@ class ShortsKMarket:
                 current_neg = scene["negative_prompt"]
                 final_img_path = None
 
-                # 🛡️ 최대 3회 AI 비전 품질 검사 & 자가 재촬영(Auto-Retry)
-                for attempt in range(1, 4):
-                    theme_id_attempt = f"{scenario['theme_id']}_s{scene['scene_idx']}" if attempt == 1 else f"{scenario['theme_id']}_s{scene['scene_idx']}_r{attempt}_{int(time.time())}"
+                # 🛡️ 1회 생성 모드 (비용 1/3 통제 1-Shot 모드)
+                theme_id = f"{scenario['theme_id']}_s{scene['scene_idx']}"
+                img_path = active_media_gen.generate_theme_image(
+                    lang=lang,
+                    theme_id=theme_id,
+                    scenario_plan={
+                        "action_prompt": current_prompt,
+                        "negative_prompt": current_neg,
+                        "theme_name": scene["name"],
+                        "persona_desc": scenario.get("persona_name", "Asian college student in Korea")
+                    },
+                    aspect_ratio="9:16"
+                )
 
-                    img_path = active_media_gen.generate_theme_image(
-                        lang=lang,
-                        theme_id=theme_id_attempt,
-                        scenario_plan={
-                            "action_prompt": current_prompt,
-                            "negative_prompt": current_neg,
-                            "theme_name": scene["name"],
-                            "persona_desc": scenario.get("persona_name", "Asian college student in Korea")
-                        },
-                        aspect_ratio="9:16"
-                    )
+                final_img_path = img_path if img_path and Path(img_path).exists() else None
 
-                    if img_path and Path(img_path).exists():
-                        final_img_path = img_path
-
-                    passed, q_score, reason, fix_hint = self.quality_verifier.verify_scene_image(
-                        img_path,
+                # AI 비전 품질 검사관 (로깅 및 품질 측정 전용 - 유료 재촬영 차단)
+                if final_img_path:
+                    passed, q_score, reason, _ = self.quality_verifier.verify_scene_image(
+                        final_img_path,
                         scene_name=f"K-Market Scene {scene['scene_idx']} ({scene['name']})",
                         lang=lang
                     )
+                    logger.info(f"[{lang.upper()}] 🖼 K-Market 씬 {scene['scene_idx']}/5 AI 품질 점수: {q_score}점 ({reason})")
 
-                    if passed:
-                        logger.info(f"[{lang.upper()}] 🖼 K-Market 씬 {scene['scene_idx']}/5 AI 비전 합격 ({q_score}점): {scene['name']}")
-                        break
-                    else:
-                        logger.warning(f"[{lang.upper()}] ⚠️ K-Market 씬 {scene['scene_idx']}/5 결함 감지 ({reason}) -> 프롬프트 보정 후 재촬영 ({attempt}/3)...")
-                        current_prompt = f"{current_prompt}, [HUMAN-CENTRIC PORTRAIT: clear visible face occupying 75% of frame], {fix_hint}"
 
                 scene_images.append({
                     "scene_idx": scene["scene_idx"],

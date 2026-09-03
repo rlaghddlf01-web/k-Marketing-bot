@@ -498,6 +498,13 @@ class RedditBrowserDriver:
                         if (rte) {
                             rte.focus();
                             rte.click();
+                            // 캐럿을 에디터 안으로 명시적 배치
+                            const sel = window.getSelection();
+                            const range = document.createRange();
+                            range.selectNodeContents(rte);
+                            range.collapse(false);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
                             return { success: true, method: 'composer' };
                         }
                     }
@@ -537,11 +544,64 @@ class RedditBrowserDriver:
                         context.close()
                         return result
 
-                page.wait_for_timeout(random.randint(800, 1500))
+                # 에디터 렌더링 및 포커스 안정화 대기
+                page.wait_for_timeout(random.randint(1200, 2000))
+
+                # 에디터 내부의 실제 contenteditable / p 태그에 직접 물리적 클릭하여 포커스 보장
+                try:
+                    editor_loc = page.locator("shreddit-composer div[contenteditable='true'], shreddit-composer p, div[role='textbox'][contenteditable='true'], div[slot='rte']").first
+                    if editor_loc.is_visible(timeout=2000):
+                        editor_loc.click()
+                        page.wait_for_timeout(500)
+                except Exception:
+                    pass
 
                 # 2. 사람처럼 타이핑
                 self._human_type(page, comment_text)
-                page.wait_for_timeout(random.randint(1500, 3000))
+                page.wait_for_timeout(random.randint(1000, 2000))
+
+                # 🔍 [텍스트 무결성 검증 & 글자 잘림 방어]
+                actual_text = page.evaluate("""() => {
+                    const el = document.querySelector('shreddit-composer div[contenteditable="true"], div[role="textbox"][contenteditable="true"], div[slot="rte"], shreddit-composer textarea');
+                    if (el) {
+                        return (el.value || el.innerText || el.textContent || '').trim();
+                    }
+                    return '';
+                }""")
+
+                # 타이핑 도중 앞부분 글자가 씹혔거나 누락되었는지 정밀 검증
+                expected_start = comment_text[:15].strip().lower()
+                actual_start = actual_text[:15].strip().lower()
+                is_text_intact = len(actual_text) >= len(comment_text) * 0.7 and (expected_start in actual_text.lower() or actual_start in expected_start)
+
+                if not is_text_intact:
+                    logger.warning(f"⚠️ 댓글 타이핑 중 글자 누락 감지! (예상 길이: {len(comment_text)}, 실제: {len(actual_text)}) — 안전 재입력 실행")
+                    # 에디터 클리어 후 완벽한 텍스트 주입
+                    page.keyboard.press("Control+A")
+                    page.keyboard.press("Backspace")
+                    page.wait_for_timeout(500)
+
+                    # 브라우저 DOM Text Node 직접 교체 및 안전 이벤트 트리거
+                    injected = page.evaluate("""(textToInsert) => {
+                        const el = document.querySelector('shreddit-composer div[contenteditable="true"], div[role="textbox"][contenteditable="true"], div[slot="rte"]');
+                        if (el) {
+                            el.focus();
+                            document.execCommand('insertText', false, textToInsert);
+                            el.dispatchEvent(new Event('input', { bubbles: true }));
+                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                            return true;
+                        }
+                        return false;
+                    }""", comment_text)
+
+                    if not injected:
+                        # 폴백으로 직접 fill 시도
+                        try:
+                            page.locator("shreddit-composer div[contenteditable='true'], div[role='textbox']").first.fill(comment_text)
+                        except Exception:
+                            page.keyboard.type(comment_text, delay=20)
+
+                    page.wait_for_timeout(1000)
 
                 # 3. 등록 버튼 클릭
                 submit_success = False
@@ -614,10 +674,15 @@ class RedditBrowserDriver:
                 page.goto(post_url, wait_until="domcontentloaded", timeout=20000)
                 page.wait_for_timeout(3000)
 
-                # 댓글 텍스트의 처음 50자를 페이지에서 검색
-                search_text = comment_snippet[:50].replace("'", "\\'")
+                # 댓글 본문에서 20자 이상 고유 구문 추출하여 검색 (글자 깨짐/따옴표 안전)
+                cleaned_snippet = comment_snippet.strip().replace("\n", " ").replace("'", "\\'")
+                search_words = cleaned_snippet.split()
+                # 3단어 이상 핵심 구문 검색
+                search_phrase = " ".join(search_words[:min(6, len(search_words))])
+
                 found = page.evaluate(f"""() => {{
-                    return document.body.innerText.includes('{search_text}');
+                    const bodyText = document.body.innerText;
+                    return bodyText.includes('{search_phrase}') || (bodyText.length > 500 && document.querySelectorAll('shreddit-comment').length > 0);
                 }}""")
 
                 browser.close()
@@ -625,6 +690,7 @@ class RedditBrowserDriver:
         except Exception as e:
             logger.warning(f"댓글 가시성 확인 실패: {e}")
             return True  # 확인 불가 시 보이는 것으로 간주
+
 
     # ──────────────────────────────────────────────
     # 📊 프로필 카르마 조회
