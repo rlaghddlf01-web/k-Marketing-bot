@@ -14,16 +14,16 @@ from core.supabase_manager import SupabaseManager
 
 logger = logging.getLogger("EasyTaxGeminiReddit")
 
-# 50:50 황금 비율 (순수 정보 50% vs 구글 검색 유도 50%)
+# 80:20 황금 비율 (구글 검색 유도 80% vs 순수 정보 20%)
 _PROMO_LEVELS = {
-    1: 0.50,  # 순수 법적 팩트/도움 (브랜드/홍보 0%, URL 0개)
-    2: 0.50,  # 자연스러운 구글 'ktrs tax' 검색 유도 (노링크)
+    1: 0.20,  # 순수 법적 팩트/도움 (브랜드 0%, URL 0개)
+    2: 0.80,  # 자연스러운 구글 'EasyTax Korea' / '이지텍스' 검색 유도 (노링크)
 }
 
 
 def _choose_promo_level() -> int:
-    """가중치 기반 50:50 랜덤 레벨 선택"""
-    return 1 if random.random() < 0.50 else 2
+    """가중치 기반 레벨 선택 (구글 검색 유도 80%)"""
+    return 2 if random.random() < 0.80 else 1
 
 
 class EasyTaxGeminiReddit:
@@ -95,12 +95,12 @@ class EasyTaxGeminiReddit:
 
         else:
             promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH SUGGESTION (NO URLS, 100% SAFE):
-1. Provide 80% genuinely accurate legal/tax facts and official advice first.
-2. At the very end of your comment, add ONE natural sentence suggesting them to search on Google:
-   - "If you want to check your estimated refund amount for free, just search 'ktrs tax' or 'ktrs korea' on Google."
-   - "There is an expat tax service in Korea that calculates this for foreigners — search 'ktrs tax' on Google to find it."
+1. Provide 80% genuinely accurate legal/tax facts and official advice first tailored directly to the OP's specific situation.
+2. At the very end of your comment, add ONE natural, friendly sentence suggesting them to search on Google:
+   - "If you want to check your estimated refund amount for free, just search 'KTRS tax' or 'Korea Tax Refund Service' on Google."
+   - "There is an official foreigner tax service in Korea that calculates this — search 'KTRS tax' on Google to find their portal."
 3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
-4. ONLY suggest searching the exact keyword 'ktrs tax' or 'ktrs korea' on Google."""
+4. ONLY suggest searching the exact keyword 'KTRS tax' or 'Korea Tax Refund Service' on Google."""
 
         prompt = f"""You are a knowledgeable, trusted, and empathetic expat tax advisory peer in South Korea, answering a foreign worker or student's question on Reddit about taxes, ARC, salary deductions, Hometax, or tax refunds.
 

@@ -11,6 +11,7 @@ import io
 import json
 import base64
 import random
+import time
 import logging
 import urllib.request
 import urllib.error
@@ -56,7 +57,8 @@ class LocalGPUMediaGeneratorKMarket:
         scenario_plan: Dict[str, Any],
         aspect_ratio: str = "9:16",
         output_path: Optional[Path] = None,
-        seed: Optional[int] = None
+        seed: Optional[int] = None,
+        reference_image_path: Optional[str] = None
     ) -> Optional[Path]:
         """
         K-Market 5단계 감동 자취/0원 나눔 숏폼에 맞춰 100% 동일 인물 극실사 이미지 생성
@@ -85,6 +87,16 @@ class LocalGPUMediaGeneratorKMarket:
             "fused fingers, floating phone, disembodied hands, cartoon, 3d render, plastic skin, ugly, blurry"
         )
 
+        # ── 씬 1 실제 사진 참조(IP-Adapter Face Lock) 준비 ──
+        ref_b64 = None
+        if reference_image_path and Path(reference_image_path).exists():
+            try:
+                with open(reference_image_path, "rb") as rf:
+                    ref_b64 = base64.b64encode(rf.read()).decode("utf-8")
+                logger.info(f"🔒 [K-Market Face Lock] 씬 1 인물 사진 주입: {Path(reference_image_path).name}")
+            except Exception as e:
+                logger.warning(f"참조 이미지 base64 인코딩 실패: {e}")
+
         # ── 1. 구글 코랩 무료 GPU 서버 호출 (비용 0원 & 3회 자동 재시도 탑재) ──
         for attempt in range(1, 4):
             active_url = self.colab_api_url
@@ -102,15 +114,19 @@ class LocalGPUMediaGeneratorKMarket:
                 continue
 
             try:
-                logger.info(f"[{lang.upper()}] 🛒 [K-Market 무료 GPU 시도 {attempt}/3] RealVisXL 렌더링 요청 ({active_url}, Seed: {target_seed})...")
-                payload = json.dumps({
+                logger.info(f"[{lang.upper()}] 🛒 [K-Market 무료 GPU 시도 {attempt}/3] RealVisXL 렌더링 요청 ({active_url}, Seed: {target_seed}, FaceLock: {bool(ref_b64)})...")
+                req_data = {
                     "prompt": prompt,
                     "negative_prompt": negative_prompt,
                     "aspect_ratio": aspect_ratio,
                     "seed": target_seed,
                     "guidance_scale": 5.0,
                     "num_inference_steps": 25
-                }).encode("utf-8")
+                }
+                if ref_b64:
+                    req_data["ref_image_base64"] = ref_b64
+
+                payload = json.dumps(req_data).encode("utf-8")
 
                 req = urllib.request.Request(
                     f"{active_url}/generate",
@@ -119,7 +135,7 @@ class LocalGPUMediaGeneratorKMarket:
                     method="POST"
                 )
 
-                with urllib.request.urlopen(req, timeout=60) as resp:
+                with urllib.request.urlopen(req, timeout=180) as resp:
                     if resp.status == 200:
                         res_data = json.loads(resp.read().decode("utf-8"))
                         if res_data.get("success") and res_data.get("image_base64"):

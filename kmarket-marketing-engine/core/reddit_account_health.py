@@ -141,8 +141,8 @@ class AccountHealthMonitor:
         logger.info(f"📊 카르마 업데이트: {karma} (username: {username})")
 
     def is_warmup_phase(self) -> bool:
-        """워밍업 단계인지 확인 (카르마 < 임계값)"""
-        return self.state.get("karma", 0) < WARMUP_KARMA_THRESHOLD
+        """워밍업 단계 여부 (카르마 100 락 해제: 노링크 구글 검색 유도 댓글 허용)"""
+        return False
 
     def get_karma(self) -> int:
         """현재 카르마 반환"""

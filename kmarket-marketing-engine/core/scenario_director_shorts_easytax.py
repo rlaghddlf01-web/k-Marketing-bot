@@ -165,11 +165,11 @@ def get_easytax_i18n_script(lang: str, theme: Dict[str, Any], refund_amount_form
     scripts = {
         "vi": {
             "title": f"EasyTax Hoàn Thuế 90%: {name}",
-            "voice_text": f"Bạn đang làm việc hoặc học tập tại {target}? Đừng bỏ lỡ quyền lợi giảm 90% thuế thu nhập theo Điều 30! Hàng ngàn lao động và du học sinh đã nhận lại số tiền hoàn thuế trung bình {refund_amount_formatted}. Miễn phí 100%, không thu phí trước. Nhấp vào link bio kiểm tra ngay trong 1 phút!",
+            "voice_text": f"Bạn đang làm việc hoặc học tập tại Hàn Quốc? Đừng bỏ lỡ quyền lợi giảm 90% thuế thu nhập theo Điều 30! Nhận lại số tiền hoàn thuế trung bình {refund_amount_formatted}. Miễn phí 100%, không thu phí trước. Nhấp vào link bio kiểm tra ngay trong 1 phút!",
             "captions": ["🏛️ GIẢM 90% THUẾ", f"💰 {refund_amount_formatted}"],
             "s1_badge": "ĐIỀU 30 LUẬT THUẾ HÀN QUỐC",
-            "s1_main": f"{target} Quyền Lợi Hoàn Thuế",
-            "s1_sub": f"Giảm tới 90% thuế thu nhập cho {persona}",
+            "s1_main": "Quyền Lợi Hoàn Thuế Hàn Quốc",
+            "s1_sub": "Giảm tới 90% thuế thu nhập cho người lao động",
             "s2_badge": "THÔNG BÁO TÀI KHOẢN",
             "s2_main": f"Đã Nhận {refund_amount_formatted}!",
             "s2_sub": "Tiền hoàn thuế 5 năm đã chuyển vào tài khoản",
@@ -185,11 +185,11 @@ def get_easytax_i18n_script(lang: str, theme: Dict[str, Any], refund_amount_form
         },
         "uz": {
             "title": f"EasyTax 90% Soliq Qaytarmasi: {name}",
-            "voice_text": f"Siz {target} hududida ishlayapsizmi yoki o'qiysizmi? 30-modda bo'yicha 90% soliq imtiyozini qo'ldan boy bermang! O'rtacha {refund_amount_formatted} miqdoridagi soliq qaytarmasini oling. 100% bepul, oldindan to'lov yo'q. Profil havolasida 1 daqiqada tekshiring!",
+            "voice_text": f"Siz Koreyada ishlayapsizmi yoki o'qiysizmi? 30-modda bo'yicha 90% soliq imtiyozini qo'ldan boy bermang! O'rtacha {refund_amount_formatted} miqdoridagi soliq qaytarmasini oling. 100% bepul, oldindan to'lov yo'q. Profil havolasida 1 daqiqada tekshiring!",
             "captions": ["🏛️ 90% SOLIQ QAYTARMASI", f"💰 {refund_amount_formatted}"],
             "s1_badge": "KOREYA DAROMAD SOLIG'I 30-MODDA",
-            "s1_main": f"{target} Soliq Imtiyozi",
-            "s1_sub": f"{persona} uchun 90% gacha soliq chegirmasi",
+            "s1_main": "Koreyada Soliq Imtiyozi",
+            "s1_sub": "90% gacha daromad solig'i chegirmasi",
             "s2_badge": "BANK BILDIRISHNOMASI",
             "s2_main": f"{refund_amount_formatted} Hisobga Tushdi!",
             "s2_sub": "5 yillik ortiqcha to'langan soliqlar qaytarildi",
@@ -205,11 +205,11 @@ def get_easytax_i18n_script(lang: str, theme: Dict[str, Any], refund_amount_form
         },
         "ru": {
             "title": f"EasyTax Налоговый Возврат 90%: {name}",
-            "voice_text": f"Работаете или учитесь в {target}? Не упустите скидку 90% по Статье 30! Получите возврат налогов в среднем {refund_amount_formatted} за 5 лет. 100% бесплатно и без предоплаты. Переходите по ссылке в профиле прямо сейчас!",
+            "voice_text": f"Работаете или учитесь в Корее? Не упустите скидку 90% по Статье 30! Получите возврат налогов в среднем {refund_amount_formatted} за 5 лет. 100% бесплатно и без предоплаты. Переходите по ссылке в профиле прямо сейчас!",
             "captions": ["🏛️ СКИДКА 90% НА НАЛОГИ", f"💰 {refund_amount_formatted}"],
             "s1_badge": "НАЛОГОВОЕ ПРАВО КОРЕИ (СТАТЬЯ 30)",
-            "s1_main": f"{target} Законный Возврат",
-            "s1_sub": f"Скидка до 90% на налог для {persona}",
+            "s1_main": "Законный Возврат Налогов в Корее",
+            "s1_sub": "Скидка до 90% на налог для иностранных работников",
             "s2_badge": "МОБИЛЬНЫЙ БАНКИНГ",
             "s2_main": f"Поступило {refund_amount_formatted}!",
             "s2_sub": "Возврат за последние 5 лет прямо на карту",
@@ -225,11 +225,11 @@ def get_easytax_i18n_script(lang: str, theme: Dict[str, Any], refund_amount_form
         },
         "en": {
             "title": f"EasyTax 90% Tax Relief: {name}",
-            "voice_text": f"Working or studying near {target}? Don't miss out on Article 30 up to 90% income tax exemption! Claim your average refund of {refund_amount_formatted} over 5 years. 100% free with zero upfront fees. Click the link in bio to check in 1 minute!",
+            "voice_text": f"Working or studying in Korea? Don't miss out on Article 30 up to 90% income tax exemption! Claim your average refund of {refund_amount_formatted} over 5 years. 100% free with zero upfront fees. Click the link in bio to check in 1 minute!",
             "captions": ["🏛️ 90% TAX EXEMPTION", f"💰 {refund_amount_formatted}"],
             "s1_badge": "KOREAN TAX LAW ARTICLE 30",
-            "s1_main": f"{target} Tax Relief Rights",
-            "s1_sub": f"Up to 90% tax exemption for {persona}",
+            "s1_main": "Korea Tax Relief Rights",
+            "s1_sub": "Up to 90% tax exemption for foreign workers",
             "s2_badge": "MOBILE BANKING ALERT",
             "s2_main": f"{refund_amount_formatted} Deposited!",
             "s2_sub": "5-year retroactive refund in your bank account",
@@ -245,11 +245,11 @@ def get_easytax_i18n_script(lang: str, theme: Dict[str, Any], refund_amount_form
         },
         "zh": {
             "title": f"EasyTax 韩国国税退税 90%: {name}",
-            "voice_text": f"在 {target} 工作或留学的各位朋友！千万不要错过《租特法》第30条最高90%所得税减免优惠！平均可领取退税款 {refund_amount_formatted}。前期 0 费用，持牌税务师合规办理。立即点击主页链接，1分钟免费查询！",
+            "voice_text": f"在韩国工作或留学的各位朋友！千万不要错过《租特法》第30条最高90%所得税减免优惠！平均可领取退税款 {refund_amount_formatted}。前期 0 费用，持牌税务师合规办理。立即点击主页链接，1分钟免费查询！",
             "captions": ["🏛️ 所得税减免 90%", f"💰 {refund_amount_formatted}"],
             "s1_badge": "韩国租税特例限制法第30条",
-            "s1_main": f"{target} 正规退税特惠",
-            "s1_sub": f"外籍人士及留学生 ({persona}) 最高减免90%",
+            "s1_main": "韩国国税 90% 正规退税特惠",
+            "s1_sub": "外籍人士及留学生专属所得税减免",
             "s2_badge": "银行入账提醒",
             "s2_main": f"到账 {refund_amount_formatted}！",
             "s2_sub": "过去5年多缴税款全额汇入韩国银行卡",
@@ -261,7 +261,7 @@ def get_easytax_i18n_script(lang: str, theme: Dict[str, Any], refund_amount_form
             "s4_sub": "拿回属于您的辛勤汗水钱",
             "s5_badge": "🏛️ 韩国国税厅 国税退税通知书",
             "s5_main": "立即点击主页简介链接",
-            "s5_sub": "3分钟极速免费查询您的退税金额！"
+            "s5_sub": "1分钟极速免费查询您的退税金额！"
         },
         "ko": {
             "title": f"EasyTax 90% 소득세 감면: {name}",
@@ -331,12 +331,12 @@ class ScenarioDirectorShortsEasyTax:
 
         script_meta = get_easytax_i18n_script(lang, theme, refund_formatted)
 
-        # 5개 시네마틱 씬 프롬프트 및 자막 메타데이터 설계 (동일 인물 완전 고정)
+        # 5개 시네마틱 씬 프롬프트 및 자막 메타데이터 설계 (14~18초 황금 템포: 16.5초 스위트 스팟)
         scenes = [
             {
                 "scene_idx": 1,
                 "name": "성실 근로와 세금 고민",
-                "duration_sec": 4.5,
+                "duration_sec": 3.0,
                 "badge": script_meta["s1_badge"],
                 "main_text": script_meta["s1_main"],
                 "sub_text": script_meta["s1_sub"],
@@ -350,7 +350,7 @@ class ScenarioDirectorShortsEasyTax:
             {
                 "scene_idx": 2,
                 "name": "국세청 환급금 입금 알림",
-                "duration_sec": 4.5,
+                "duration_sec": 3.5,
                 "badge": script_meta["s2_badge"],
                 "main_text": script_meta["s2_main"],
                 "sub_text": script_meta["s2_sub"],
@@ -364,7 +364,7 @@ class ScenarioDirectorShortsEasyTax:
             {
                 "scene_idx": 3,
                 "name": "국세청 공인 안심 확인",
-                "duration_sec": 4.5,
+                "duration_sec": 3.5,
                 "badge": script_meta["s3_badge"],
                 "main_text": script_meta["s3_main"],
                 "sub_text": script_meta["s3_sub"],
@@ -378,7 +378,7 @@ class ScenarioDirectorShortsEasyTax:
             {
                 "scene_idx": 4,
                 "name": "고향 여행 & 가족 효도",
-                "duration_sec": 5.5,
+                "duration_sec": 3.0,
                 "badge": script_meta["s4_badge"],
                 "main_text": script_meta["s4_main"],
                 "sub_text": script_meta["s4_sub"],
@@ -392,7 +392,7 @@ class ScenarioDirectorShortsEasyTax:
             {
                 "scene_idx": 5,
                 "name": "국세청 환급 통지서 & CTA",
-                "duration_sec": 5.0,
+                "duration_sec": 3.5,
                 "badge": script_meta["s5_badge"],
                 "main_text": script_meta["s5_main"],
                 "sub_text": script_meta["s5_sub"],
@@ -416,6 +416,7 @@ class ScenarioDirectorShortsEasyTax:
             "target": theme["target"],
             "persona_type": theme["persona_type"],
             "refund_amount": refund_formatted,
+            "estimated_krw": final_refund,
             "persona_name": persona["visa_name"],
             "gender": persona["gender"],
             "age_group": persona["age_group"],

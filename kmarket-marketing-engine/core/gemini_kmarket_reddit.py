@@ -14,16 +14,16 @@ from core.supabase_manager import SupabaseManager
 
 logger = logging.getLogger("KMarketGeminiReddit")
 
-# 50:50 황금 비율 (순수 정보 50% vs 구글 검색 유도 50%)
+# 80:20 황금 비율 (구글 검색 유도 80% vs 순수 정보 20%)
 _PROMO_LEVELS = {
-    1: 0.50,  # 순수 도움 (브랜드/홍보 0%, URL 0개)
-    2: 0.50,  # 자연스러운 구글 'k-market korea' 검색 유도 (노링크)
+    1: 0.20,  # 순수 도움 (브랜드 0%, URL 0개)
+    2: 0.80,  # 자연스러운 구글 'k-market korea' / '케이마켓' 검색 유도 (노링크)
 }
 
 
 def _choose_promo_level() -> int:
-    """가중치 기반 50:50 랜덤 레벨 선택"""
-    return 1 if random.random() < 0.50 else 2
+    """가중치 기반 레벨 선택 (구글 검색 유도 80%)"""
+    return 2 if random.random() < 0.80 else 1
 
 
 class KMarketGeminiReddit:
@@ -107,12 +107,12 @@ class KMarketGeminiReddit:
 
         else:
             promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH SUGGESTION (NO URLS, 100% SAFE):
-1. Provide 80% genuinely helpful, practical advice first.
-2. At the very end of your comment, add ONE casual recommendation to search on Google:
-   - "If you need $0 free furniture or moving sale items from other expats, try searching 'k-market korea' on Google."
-   - "There's a secondhand platform for foreigners in Korea with auto-translation — search 'k-market korea' on Google to find it."
+1. Provide 80% genuinely helpful, practical advice first tailored to the OP's situation.
+2. At the very end of your comment, add ONE casual, friendly recommendation to search on Google:
+   - "If you need $0 free furniture or moving sale items from other expats, try searching 'k-market korea' or 'KTRS market' on Google."
+   - "There's an expat secondhand and community platform in Korea with auto-translation — search 'k-market korea' or 'KTRS market' on Google to check it out."
 3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
-4. ONLY suggest searching the exact keyword 'k-market korea' on Google."""
+4. ONLY suggest searching the exact keyword 'k-market korea' or 'KTRS market' on Google."""
 
         prompt = f"""You are an experienced, helpful, and friendly senior foreign resident / expat living in South Korea, answering another foreigner's question on Reddit about moving, buying/selling used items, finding free giveaways, or studio living tips.
 

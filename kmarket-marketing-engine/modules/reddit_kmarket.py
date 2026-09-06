@@ -74,14 +74,10 @@ class KMarketRedditHunter:
     def scan_and_reply(self, limit_per_sub: int = 15, max_promo: int = 1, auto_post: bool = True, **kwargs) -> int:
         """
         타깃 서브레딧들의 실시간 글을 무인 스캔하고,
-        품목 + AI 문맥 검증을 통과한 글에 3단계 간접 홍보 답변 게시
+        품목 + AI 문맥 검증을 통과한 글에 100% 맞춤 생활 팩트 + 구글 검색 유도 댓글 게시
         """
         if not self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
-            if self.health.is_warmup_phase():
-                logger.info("🌱 [K-Market] 워밍업 모드 (카르마 < 100) — 홍보 대신 순수 정보성 댓글로 카르마 파밍 가동!")
-                res = self.orchestrator.organic.run_organic_comment_session(count=1)
-                return res.get("commented", 0)
-            logger.info("🛡️ [K-Market] 일일 홍보 한도 초과 또는 쿨다운 상태로 스킵")
+            logger.info("🛡️ [K-Market] 일일 안전 한도 초과 또는 쿨다운 상태로 스킵")
             return 0
 
         subreddits = self.keywords_matrix.get("target_subreddits", [

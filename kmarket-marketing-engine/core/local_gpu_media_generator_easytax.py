@@ -11,6 +11,7 @@ import io
 import json
 import base64
 import random
+import time
 import logging
 import urllib.request
 import urllib.error
@@ -56,7 +57,8 @@ class LocalGPUMediaGeneratorEasyTax:
         scenario_plan: Dict[str, Any],
         aspect_ratio: str = "9:16",
         output_path: Optional[Path] = None,
-        seed: Optional[int] = None
+        seed: Optional[int] = None,
+        reference_image_path: Optional[str] = None
     ) -> Optional[Path]:
         """
         EasyTax 5단계 시네마틱 환급 숏폼에 맞춰 100% 동일 인물 극실사 이미지 생성
@@ -103,14 +105,16 @@ class LocalGPUMediaGeneratorEasyTax:
 
             try:
                 logger.info(f"[{lang.upper()}] 💰 [EasyTax 무료 GPU 시도 {attempt}/3] RealVisXL 렌더링 요청 ({active_url}, Seed: {target_seed})...")
-                payload = json.dumps({
+                req_data = {
                     "prompt": prompt,
                     "negative_prompt": negative_prompt,
                     "aspect_ratio": aspect_ratio,
                     "seed": target_seed,
                     "guidance_scale": 5.0,
                     "num_inference_steps": 25
-                }).encode("utf-8")
+                }
+
+                payload = json.dumps(req_data).encode("utf-8")
 
                 req = urllib.request.Request(
                     f"{active_url}/generate",
@@ -119,7 +123,7 @@ class LocalGPUMediaGeneratorEasyTax:
                     method="POST"
                 )
 
-                with urllib.request.urlopen(req, timeout=60) as resp:
+                with urllib.request.urlopen(req, timeout=180) as resp:
                     if resp.status == 200:
                         res_data = json.loads(resp.read().decode("utf-8"))
                         if res_data.get("success") and res_data.get("image_base64"):

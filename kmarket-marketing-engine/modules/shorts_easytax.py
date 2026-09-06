@@ -116,8 +116,7 @@ class ShortsEasyTax:
                 logger.info(f"[{lang.upper()}] 📱 EasyTax 씬 3/5 실물 모바일 웹 스크린캐스트 클립 결합 완료!")
                 continue
 
-            # 🖼️ 씬 1, 2, 4, 5: 고화질 인물 이미지 생성 (씬 2, 4, 5는 씬 1 기준 인물 얼굴/의상 고정!)
-            ref_path = scene1_ref_img_path if s_idx > 1 else None
+            # 🖼️ 씬 1, 2, 4, 5: 고화질 인물 이미지 생성 (씬별 역동적 장소/구도/행동 변화)
             img_path = active_media_gen.generate_theme_image(
                 lang=lang,
                 theme_id=theme_id,
@@ -128,15 +127,10 @@ class ShortsEasyTax:
                     "persona_desc": scenario.get("persona_name", "Asian foreign worker in Korea")
                 },
                 aspect_ratio="9:16",
-                reference_image_path=ref_path
+                reference_image_path=None
             )
 
             final_img_path = img_path if img_path and Path(img_path).exists() else None
-
-            # 씬 1 인물 레퍼런스 확보 (동일 인물 연속성 유지)
-            if s_idx == 1 and final_img_path:
-                scene1_ref_img_path = final_img_path
-                logger.info(f"[{lang.upper()}] 👤 [인물 일관성 앵커 확정] 씬 1 주인공 프로필 고정: {Path(final_img_path).name}")
 
             # AI 비전 품질 검사관 (로깅 및 품질 측정 전용 - 유료 재촬영 차단)
             if final_img_path:

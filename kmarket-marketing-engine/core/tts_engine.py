@@ -121,19 +121,21 @@ class TTSEngine:
         text: str,
         lang: str = "ko",
         gender: str = "f",
-        filename: str = "voiceover.mp3"
+        filename: str = "voiceover.mp3",
+        rate: str = "+15%"
     ) -> Optional[Path]:
         """
         주어진 텍스트를 대상 언어와 성별에 맞는 네이티브 음성으로 합성하여 mp3 파일로 저장
+        - rate: 발화 속도 조절 (기본값 '+15%'로 14~18초 숏폼 황금 템포 완독 보장)
         """
         voice = self.select_voice(lang=lang, gender=gender)
         target_path = self.output_dir / filename
 
         try:
             import edge_tts
-            communicate = edge_tts.Communicate(text, voice)
+            communicate = edge_tts.Communicate(text, voice, rate=rate)
             await communicate.save(str(target_path))
-            logger.info(f"[{lang.upper()}] TTS 생성 완료 ({voice}): {target_path}")
+            logger.info(f"[{lang.upper()}] TTS 생성 완료 ({voice}, rate={rate}): {target_path}")
             return target_path
         except Exception as e:
             logger.error(f"Edge-TTS 생성 실패 ({lang}, {voice}): {e}")
@@ -144,11 +146,12 @@ class TTSEngine:
         text: str,
         lang: str = "ko",
         gender: str = "f",
-        filename: str = "voiceover.mp3"
+        filename: str = "voiceover.mp3",
+        rate: str = "+15%"
     ) -> Optional[Path]:
         """동기 래퍼 함수"""
         try:
-            return asyncio.run(self.generate_speech_async(text, lang, gender, filename))
+            return asyncio.run(self.generate_speech_async(text, lang, gender, filename, rate=rate))
         except Exception as e:
             logger.error(f"TTS 동기 실행 에러: {e}")
             return None

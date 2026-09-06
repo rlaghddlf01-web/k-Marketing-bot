@@ -218,12 +218,29 @@ class MotionVideoComposer:
         self.temp_dir = self.output_dir / "temp_scenes"
         self.temp_dir.mkdir(parents=True, exist_ok=True)
         self.bgm_manager = BGMManager()
+        from core.sfx_manager import SFXManager
+        self.sfx_manager = SFXManager()
 
         try:
             import imageio_ffmpeg
             self.ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
         except Exception:
             self.ffmpeg_path = "ffmpeg"
+
+    def _get_media_duration(self, file_path: Optional[Path]) -> Optional[float]:
+        """ffmpeg를 통해 오디오/비디오 파일의 정확한 재생 길이(초)를 0.01초 단위로 측정"""
+        if not file_path or not Path(file_path).exists():
+            return None
+        try:
+            cmd = [self.ffmpeg_path, "-i", str(file_path)]
+            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="ignore")
+            m = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", p.stderr)
+            if m:
+                hours, mins, secs = float(m.group(1)), float(m.group(2)), float(m.group(3))
+                return hours * 3600.0 + mins * 60.0 + secs
+        except Exception as e:
+            logger.warning(f"미디어 듀레이션 파싱 실패 ({file_path}): {e}")
+        return None
 
     def _render_scene_overlay(
         self,
@@ -486,19 +503,24 @@ class MotionVideoComposer:
         output_mp4 = self.output_dir / f"{service_id}_story5_{lang}_{theme_tag}_{ts}.mp4"
         i18n = SCENE_I18N.get(lang, SCENE_I18N.get("en", {}))
 
-        # 오디오 총 길이 계산
-        total_dur = 18.0
-        if audio_path and audio_path.exists():
-            try:
-                total_dur = max(14.0, min(22.0, audio_path.stat().st_size / 16000.0))
-            except Exception:
-                pass
+        # 🎯 틱톡/릴스/쇼츠 최고 전환율 14.0초 ~ 18.0초 황금 템포 (대본 음성 100% 무손실 완독)
+        audio_dur = self._get_media_duration(audio_path) if audio_path else None
+        if audio_dur and audio_dur > 0:
+            # 음성 완독 후 0.4초 여운(CTA 링크 인지 시간) 확보, 14.0~18.0초 범위 자동 수용
+            total_dur = max(14.0, min(18.0, round(audio_dur + 0.4, 1)))
+            logger.info(f"🎙️ [무손실 싱크] 실제 음성 길이: {audio_dur:.2f}초 → 비디오 총 길이: {total_dur:.1f}초 (100% 완독)")
+        else:
+            total_dur = 16.5  # 음성 부재 시 기본 16.5초
 
         # 5장면 duration 분배 (시나리오에서 지정한 값 사용, 합계 맞춤)
-        durations = [s.get("duration_sec", 3) for s in scene_images]
-        dur_sum = sum(durations)
-        # 총 오디오 길이에 맞게 비율 조정
+        durations = [s.get("duration_sec", 3.3) for s in scene_images]
+        dur_sum = sum(durations) if durations else 16.5
+        # 총 길이에 맞게 비율 조정
         durations = [round(total_dur * d / dur_sum, 1) for d in durations]
+        # 반올림 오차 보정 (마지막 씬에 잔여 시간 맞춤)
+        dur_diff = round(total_dur - sum(durations), 1)
+        if dur_diff != 0 and durations:
+            durations[-1] = round(durations[-1] + dur_diff, 1)
 
         bgm_path = self.bgm_manager.get_random_upbeat_bgm(service_id)
         fps = 25
@@ -623,16 +645,33 @@ class MotionVideoComposer:
             for c in clip_files:
                 f.write(f"file '{c.name}'\n")
 
-        # ── Step 4: 5개 클립 Concat + TTS 보이스오버 + BGM 믹싱 ──
+        # ── Step 4: 5개 클립 Concat + TTS 보이스오버 + BGM + 카카오뱅크 입금 카칭 SFX 3채널 믹싱 ──
         has_voice = bool(audio_path and audio_path.exists())
         has_bgm = bool(bgm_path and bgm_path.exists())
+        sfx_path = self.sfx_manager.get_kakaobank_chaching_sfx()
+        has_sfx = bool(sfx_path and sfx_path.exists())
+
+        # 씬 2 시작 시점(씬 1 종료 직후)에 SFX 정확히 발동 (밀리초 딜레이)
+        sfx_delay_ms = int(durations[0] * 1000) if durations else 2000
 
         cmd_final = [
             self.ffmpeg_path, "-y",
             "-f", "concat", "-safe", "0", "-i", str(concat_txt)
         ]
 
-        if has_voice and has_bgm:
+        if has_voice and has_bgm and has_sfx:
+            cmd_final += [
+                "-i", str(audio_path),
+                "-stream_loop", "-1", "-i", str(bgm_path),
+                "-i", str(sfx_path),
+                "-filter_complex",
+                f"[1:a]aresample=44100,volume=1.0[va];"
+                f"[2:a]aresample=44100,volume=0.18[ba];"
+                f"[3:a]aresample=44100,adelay={sfx_delay_ms}|{sfx_delay_ms},volume=1.3[sa];"
+                f"[va][ba][sa]amix=inputs=3:duration=first:dropout_transition=0:normalize=0[aout]",
+                "-map", "0:v", "-map", "[aout]"
+            ]
+        elif has_voice and has_bgm:
             cmd_final += [
                 "-i", str(audio_path),
                 "-stream_loop", "-1", "-i", str(bgm_path),

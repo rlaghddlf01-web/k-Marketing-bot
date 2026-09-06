@@ -22,7 +22,7 @@ from typing import Optional
 from PIL import Image
 import uvicorn
 import nest_asyncio
-from diffusers import AutoPipelineForText2Image, DPMSolverMultistepScheduler
+from diffusers import AutoPipelineForText2Image, AutoPipelineForImage2Image, DPMSolverMultistepScheduler
 
 app = FastAPI(title="KTRS Colab RealVisXL GPU Image Server")
 
@@ -30,21 +30,24 @@ app = FastAPI(title="KTRS Colab RealVisXL GPU Image Server")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"🚀 가동 디바이스: {device} ({torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'})")
 
-# ── 1. RealVisXL V4.0 극실사 모델 파이프라인 로딩
+# ── 1. RealVisXL V4.0 극실사 모델 파이프라인 로딩 (가벼운 7.5GB)
 MODEL_ID = "SG161222/RealVisXL_V4.0"
 print(f"📦 모델 로딩 중: {MODEL_ID} (약 1분 소요)...")
 
-pipe = AutoPipelineForText2Image.from_pretrained(
+pipe_text = AutoPipelineForText2Image.from_pretrained(
     MODEL_ID,
     torch_dtype=torch.float16 if device == "cuda" else torch.float32,
     variant="fp16" if device == "cuda" else None
 )
-pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config, use_karras_sigmas=True)
-pipe = pipe.to(device)
+pipe_text.scheduler = DPMSolverMultistepScheduler.from_config(pipe_text.scheduler.config, use_karras_sigmas=True)
+pipe_text = pipe_text.to(device)
 
 if device == "cuda":
-    pipe.enable_attention_slicing()
-print("✅ RealVisXL 극실사 AI 모델 준비 완료!")
+    pipe_text.enable_attention_slicing()
+
+# ── 2. RealVisXL 내장 img2img 파이프라인 (가중치 100% 공유, 추가 RAM 0MB!)
+pipe_img2img = AutoPipelineForImage2Image.from_pipe(pipe_text)
+print("✅ RealVisXL 극실사 AI 모델 + 동일 인물 락(img2img) 준비 완료!")
 
 
 class ImageGenRequest(BaseModel):
@@ -54,11 +57,16 @@ class ImageGenRequest(BaseModel):
     seed: Optional[int] = -1
     guidance_scale: Optional[float] = 5.0
     num_inference_steps: Optional[int] = 25
+    ref_image_base64: Optional[str] = None  # 씬 1 얼굴 사진 base64 주입용
 
 
 @app.get("/")
 def health():
-    return {"status": "ok", "engine": "RealVisXL V4.0", "device": device}
+    return {
+        "status": "ok",
+        "engine": "RealVisXL V4.0 + Zero-RAM Face Lock",
+        "device": device
+    }
 
 
 @app.post("/generate")
@@ -84,16 +92,41 @@ def generate_image(req: ImageGenRequest):
             used_seed = random.randint(100000, 999999999)
             generator = torch.Generator(device=device).manual_seed(used_seed)
 
-        # 실사 인물 사진 생성 (25 스텝)
-        image = pipe(
-            prompt=req.prompt,
-            negative_prompt=req.negative_prompt,
-            width=width,
-            height=height,
-            guidance_scale=req.guidance_scale,
-            num_inference_steps=req.num_inference_steps,
-            generator=generator
-        ).images[0]
+        # 🔒 동일 인물 락 검사 (씬 1 사진이 있으면 씬 1 얼굴 뼈대 기반 렌더링)
+        ref_image = None
+        if req.ref_image_base64:
+            try:
+                import base64
+                ref_bytes = base64.b64decode(req.ref_image_base64)
+                ref_image = Image.open(io.BytesIO(ref_bytes)).convert("RGB")
+                ref_image = ref_image.resize((width, height), Image.LANCZOS)
+                print("🔒 [얼굴 락(Lock) 발동] 씬 1 인물 뼈대 기반 렌더링 (동일 인물 유지)!")
+            except Exception as e:
+                print(f"참조 이미지 디코딩 실패: {e}")
+                ref_image = None
+
+        if ref_image is not None:
+            # 씬 2, 4, 5: 씬 1 인물 얼굴 뼈대 60% 보존하면서 포즈/배경만 자연스럽게 변경
+            image = pipe_img2img(
+                prompt=req.prompt,
+                negative_prompt=req.negative_prompt,
+                image=ref_image,
+                strength=0.55,
+                guidance_scale=req.guidance_scale,
+                num_inference_steps=req.num_inference_steps,
+                generator=generator
+            ).images[0]
+        else:
+            # 씬 1: 원본 인물 생성
+            image = pipe_text(
+                prompt=req.prompt,
+                negative_prompt=req.negative_prompt,
+                width=width,
+                height=height,
+                guidance_scale=req.guidance_scale,
+                num_inference_steps=req.num_inference_steps,
+                generator=generator
+            ).images[0]
 
         # Base64 인코딩 반환
         import base64
@@ -106,7 +139,8 @@ def generate_image(req: ImageGenRequest):
             "seed": used_seed,
             "image_base64": img_str,
             "width": width,
-            "height": height
+            "height": height,
+            "face_locked": bool(ref_image is not None)
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

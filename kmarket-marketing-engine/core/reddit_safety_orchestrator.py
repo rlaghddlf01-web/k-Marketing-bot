@@ -204,14 +204,10 @@ class RedditSafetyOrchestrator:
 
                     time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
 
-                    # 🛡️ 카르마 100 미만 워밍업 상태면 순수 정보성 댓글로 카르마 파밍
-                    if self.health.is_warmup_phase():
-                        logger.info(f"🌱 [1단계 워밍업] 카르마 {self.health.get_karma()}/{WARMUP_KARMA_THRESHOLD} — 정보성 댓글로 카르마 파밍 가동!")
-                        c_res = self.organic.run_organic_comment_session(count=1)
-                        results["organic_comments"] = c_res.get("commented", 0)
-                    elif self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
+                    # 🎯 노링크 구글 검색 유도 팩트 댓글 실행 (일일 안전 한도 내)
+                    if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
                         try:
-                            logger.info("🚀 [카르마 100점 이상] 50:50 간접 홍보 댓글 실행...")
+                            logger.info(f"🚀 [{self.service_id}] 점심 골든타임 질문 맞춤 구글 검색 유도 댓글 실행...")
                             p_cnt = self._promo_handler()
                             results["promo_comments"] = p_cnt
                         except Exception as e:
@@ -238,15 +234,14 @@ class RedditSafetyOrchestrator:
 
                     time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
 
-                    # 🛡️ 워밍업 통과 & 일일 한도(2건) 미달 시에만 홍보
+                    # 🎯 노링크 구글 검색 유도 팩트 댓글 실행 (일일 안전 한도 내)
                     if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
                         try:
+                            logger.info(f"🚀 [{self.service_id}] 저녁 피크 질문 맞춤 구글 검색 유도 댓글 실행...")
                             p_cnt = self._promo_handler()
                             results["promo_comments"] = p_cnt
                         except Exception as e:
                             logger.error(f"홍보 댓글 실행 에러: {e}")
-                    else:
-                        logger.info(f"🌱 [워밍업/한도 보호] 카르마 {self.health.get_karma()}/{WARMUP_KARMA_THRESHOLD} — 홍보 댓글 0건 유지")
 
                     time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
 
