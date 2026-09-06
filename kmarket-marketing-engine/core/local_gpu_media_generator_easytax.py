@@ -74,13 +74,29 @@ class LocalGPUMediaGeneratorEasyTax:
         target_seed = seed if seed is not None else self._current_episode_seed
 
         action = scenario_plan.get("action_prompt", "authentic documentary portrait")
-        human_centric_mandate = (
-            ", [CRITICAL DIRECTING MANDATE: 100% HUMAN-CENTRIC PORTRAIT]: "
-            "The human protagonist is the absolute primary focal subject of this photo. "
-            "Clear expressive face, genuine eyes, upper body occupying 70% of frame, "
-            "photorealistic human skin texture, authentic natural lighting, master photography, 8k."
-        )
-        prompt = f"{action}{human_centric_mandate}"
+        is_scene_focus = scenario_plan.get("is_scene_focus", False)
+        is_app_screen = scenario_plan.get("is_app_screen", False)
+
+        if is_app_screen:
+            directing_mandate = (
+                ", [CRITICAL DIRECTING MANDATE: CLEAN COMMERCIAL DESK STILL-LIFE]: "
+                "Crisp photorealistic details, modern finance office desk surface, clean spacious center composition for mobile device display, "
+                "perfectly balanced architectural lighting, no human face close-up, 8k commercial photography."
+            )
+        elif is_scene_focus:
+            directing_mandate = (
+                ", [CRITICAL DIRECTING MANDATE: CINEMATIC ATMOSPHERIC SCENE]: "
+                "Crisp photorealistic details, magnificent natural atmosphere, perfect lighting, "
+                "no human face close-up, authentic travel or still-life photography, 8k masterpiece."
+            )
+        else:
+            directing_mandate = (
+                ", [CRITICAL DIRECTING MANDATE: 100% HUMAN-CENTRIC PORTRAIT]: "
+                "The human protagonist is the absolute primary focal subject of this photo. "
+                "Clear expressive face, genuine eyes, upper body occupying 60-70% of frame, "
+                "photorealistic human skin texture, authentic natural lighting, master photography, 8k."
+            )
+        prompt = f"{action}{directing_mandate}"
 
         negative_prompt = scenario_plan.get("negative_prompt") or (
             "caucasian, white, blonde hair, blue eyes, deformed fingers, extra limbs, claw hands, "

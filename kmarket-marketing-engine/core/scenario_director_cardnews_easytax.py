@@ -75,11 +75,30 @@ class ScenarioDirectorCardnewsEasyTax:
             return gender_matched[0] if gender_matched else random.choice(e9_pool)
 
     def get_carousel_scenario(self, lang: str = "vi", theme_index: Optional[int] = None) -> Dict[str, Any]:
-        """60대 세무 테마 중 1개를 선택하고 제미나이 100% 현지어 카피라이팅으로 5장 카드뉴스 생성"""
+        """60대 세무 테마 중 1개를 순환 선택하고 제미나이 100% 현지어 카피라이팅으로 5장 카드뉴스 생성"""
+        from config import DATA_DIR
+        import json
+        rotation_file = DATA_DIR / "cardnews_rotation_state_easytax.json"
+        
         if theme_index is not None:
             chosen_theme = self.themes[theme_index % len(self.themes)]
         else:
-            chosen_theme = random.choice(self.themes)
+            curr_idx = 0
+            if rotation_file.exists():
+                try:
+                    with open(rotation_file, "r", encoding="utf-8") as f:
+                        curr_idx = json.load(f).get("index", 0)
+                except Exception:
+                    curr_idx = 0
+            
+            chosen_theme = self.themes[curr_idx % len(self.themes)]
+            next_idx = (curr_idx + 1) % len(self.themes)
+            try:
+                rotation_file.parent.mkdir(parents=True, exist_ok=True)
+                with open(rotation_file, "w", encoding="utf-8") as f:
+                    json.dump({"index": next_idx}, f)
+            except Exception:
+                pass
 
         theme_id = chosen_theme["id"]
         theme_name = chosen_theme["name"]
@@ -105,31 +124,124 @@ class ScenarioDirectorCardnewsEasyTax:
             refund_formatted=refund_formatted
         )
 
-        # 3. 🎯 4장 꿈의 실현(효도송금/비행기표/학비/자기보상) 테마별 사진 프롬프트 분기
+        # 3. 🎯 테마별 5단계 슬라이드 기승전결 다채로운 연출 (1:일상인물 -> 2:일터현장동일인물 -> 3:실제앱0원보증 -> 4:비행기사연 -> 5:실제앱1분조회)
         theme_text_lower = (theme_id + " " + theme_name + " " + target).lower()
-        if any(w in theme_text_lower for w in ["flight", "vacation", "비행기", "여행", "귀국"]):
-            s4_prompt = "cinematic authentic portrait, bright joyful beaming smile holding flight itinerary ticket, looking forward to heartwarming family reunion, bright sunny lighting"
-        elif any(w in theme_text_lower for w in ["parent", "house", "송금", "가족", "효도"]):
-            s4_prompt = "cinematic authentic portrait, heartwarming joyful emotional smile holding mobile remittance receipt, deep sense of pride and filial love, warm natural lighting"
-        elif any(w in theme_text_lower for w in ["tuition", "student", "등록금", "유학", "d-2", "알바"]):
-            s4_prompt = "cinematic authentic portrait, proud happy smile on university campus holding textbooks, youthful confident relief, bright ambient lighting"
-        else:
-            s4_prompt = "cinematic authentic close-up portrait, triumphant overjoyed expression, radiant smile of accomplishment and financial relief, pure happiness in eyes"
+        
+        # 1번: 일상 실내(카페/방)에서 환급 알림을 받고 환호하며 기뻐하는 주인공 인물
+        s1_prompt = (
+            f"cinematic authentic portrait, sitting relaxed and happily in cozy cafe or bright modern living room, "
+            f"warm natural sunlight pouring in, ecstatic overjoyed facial expression with radiant beaming smile, "
+            f"one arm welcoming towards camera celebrating financial breakthrough and huge tax refund relief, "
+            f"warm cinematic portrait lighting, highly detailed skin texture, 8k masterpiece"
+        )
 
-        # 4. 5단계 슬라이드별 헐리웃 감동 시네마틱 사진 프롬프트
+        # 2번: 치열한 작업 현장(공장/농장/물류) 속 작업복을 착용하고 땀 흘리며 일하는 동일 인물 주인공
+        if any(w in theme_text_lower for w in ["flight", "vacation", "비행기", "여행", "귀국"]):
+            s2_prompt = (
+                f"wearing realistic industrial factory work uniform or agricultural work clothes with safety gear, "
+                f"working diligently amidst busy Korean manufacturing factory assembly line or greenhouse, "
+                f"sweat glistening on brow, honest hardworking authentic expression, proud determined eyes, "
+                f"cinematic industrial lighting, depth of field showing working machines in background"
+            )
+        elif any(w in theme_text_lower for w in ["parent", "house", "송금", "가족", "효도"]):
+            s2_prompt = (
+                f"wearing authentic Korean factory work jacket, taking a brief respectful breath during night shift, "
+                f"gentle sincere thoughtful face, wiping sweat with honest hardworking posture, factory background with machinery"
+            )
+        elif any(w in theme_text_lower for w in ["tuition", "student", "등록금", "유학", "d-2", "알바"]):
+            s2_prompt = (
+                f"wearing convenience store / restaurant work apron or delivery jacket, honest student working evening shift, "
+                f"tired but determined eyes, genuine hardworking student in Korea, authentic atmospheric lighting"
+            )
+        else:
+            s2_prompt = (
+                f"wearing industrial work clothes in realistic Korean manufacturing or logistics warehouse, "
+                f"honest sincere expression of dedicated foreign worker, holding tools, hardworking sweat, cinematic natural lighting"
+            )
+
+        # 3번: [이지텍스 앱 환급 0단계 모의조회] 모던한 금융 오피스 원목 데스크 실사 배경 (스마트폰 인셋 탑재)
+        s3_prompt = (
+            "clean minimalist modern finance office wooden desk background, smooth warm oak wood grain surface, "
+            "elegant luxury pen, clean glass paperweight, warm ceramic cup of coffee, gentle natural window sunlight, "
+            "clean empty center desk surface ready for smartphone display, 8k commercial still-life photograph"
+        )
+
+        # 4번: [사연의 절정/꿈의 실현 현장 컷] 인물 얼굴 대신 사연에 맞는 비행기/송금/공항/학비 리얼 현장 사진
+        if any(w in theme_text_lower for w in ["flight", "vacation", "비행기", "여행", "귀국", "고향"]):
+            s4_prompt = (
+                "cinematic photorealistic shot of an airplane wing flying high above magnificent sunset clouds through passenger window, "
+                "warm golden glow across fluffy sea of clouds, pure wanderlust and homecoming joy, hyper-realistic 8k masterpiece"
+            )
+        elif any(w in theme_text_lower for w in ["parent", "house", "송금", "가족", "효도"]):
+            s4_prompt = (
+                "cinematic close-up shot of a cozy family living room table with warm cup of tea and lovely family photo, "
+                "international money remittance receipt resting peacefully in warm golden hour afternoon sunlight, 8k photograph"
+            )
+        elif any(w in theme_text_lower for w in ["tuition", "student", "등록금", "유학", "d-2", "알바"]):
+            s4_prompt = (
+                "cinematic beautiful shot of Korean university campus walkway in autumn with golden leaves, "
+                "student desk with textbooks and official university tuition payment receipt stamped paid, bright hopeful morning sunlight, 8k photograph"
+            )
+        else:
+            s4_prompt = (
+                "cinematic shot of a packed travel luggage suitcase with Korean gifts, flight ticket and passport on the table, "
+                "bright morning sunlight pouring through the window, feeling of going back home triumphantly, 8k photograph"
+            )
+
+        # 5번: [이지텍스 앱 1분 조회 CTA] 따뜻한 홈/오피스 데스크 실사 배경 (스마트폰 인셋 탑재)
+        s5_prompt = (
+            "modern cozy wooden desk surface with warm ambient lighting, small green potted succulent plant on side, "
+            "inviting ceramic coffee mug, blurred indoor cozy living room background, clean empty center desk ready for smartphone display, 8k commercial photograph"
+        )
+
         scene_actions = {
-            1: f"cinematic authentic bust-shot portrait, holding smartphone upright naturally forward towards camera showing a clear bright mobile banking notification screen with official Korean National Tax Service (국세청 NTS) deposit alert of {refund_formatted}, ecstatic overjoyed facial expression with wide happy eyes and victorious radiant smile, sharp focus on face and upright phone screen, natural hand grip",
-            2: "cinematic authentic bust-shot portrait, looking towards audience with an engaging, friendly, and enthusiastic explanatory expression, encouraging and warm gesture, sharp focus on face",
-            3: "cinematic authentic portrait, warm confident reassuring smile, trustworthy dependable posture in modern workplace hallway, professional comforting expression",
+            1: s1_prompt,
+            2: s2_prompt,
+            3: s3_prompt,
             4: s4_prompt,
-            5: "cinematic authentic direct-gaze portrait, looking directly into camera with an encouraging and decisive confident smile, warm direct eye contact motivating the viewer to take action"
+            5: s5_prompt
         }
 
         cards = []
         for idx in range(1, 6):
             copy_item = generated_copy[idx - 1] if len(generated_copy) >= idx else {}
             action_desc = scene_actions.get(idx, "working in workplace")
-            full_prompt = build_easytax_scene_prompt(scene_idx=idx, char=char_anchor, scene_action=action_desc)
+
+            if idx == 1:
+                # 1번: 일상 실내 주인공 (인물 락 + 스마트폰 통지 인셋)
+                full_prompt = build_easytax_scene_prompt(scene_idx=1, char=char_anchor, scene_action=action_desc)
+                neg_prompt = f"upside down phone, deformed hand holding phone, bad anatomy, ugly, blurry, 3d render, cartoon, {LANG_NEGATIVE_ETHNIC.get(lang, '')}"
+                is_scene_focus = False
+                is_app_screen = False
+                app_screen_type = None
+            elif idx == 2:
+                # 2번: 일터 현장의 동일 인물 주인공 (Zero-RAM 인물 락)
+                full_prompt = build_easytax_scene_prompt(scene_idx=2, char=char_anchor, scene_action=action_desc)
+                neg_prompt = f"bad anatomy, extra limbs, ugly, blurry, 3d render, cartoon, suit, tie, luxury clothes, {LANG_NEGATIVE_ETHNIC.get(lang, '')}"
+                is_scene_focus = False
+                is_app_screen = False
+                app_screen_type = None
+            elif idx == 3:
+                # 3번: 실제 이지텍스 앱 화면 (환급 0단계 모의 조회)
+                full_prompt = f"{action_desc}, master commercial product photography, 8k"
+                neg_prompt = "human face close-up, people, distorted desk, blurry, 3d render, cartoon, papers with writing, text on paper, handwriting, gibberish letters, messy papers, documents"
+                is_scene_focus = True
+                is_app_screen = True
+                app_screen_type = "step0"
+            elif idx == 4:
+                # 4번: 사연의 결실 현장 컷 (비행기 노을 등)
+                full_prompt = f"{action_desc}, 4k ultra realistic photograph, master cinematographic lighting, 8k"
+                neg_prompt = "human face close-up, ugly, blurry, 3d render, cartoon, deformed objects"
+                is_scene_focus = True
+                is_app_screen = False
+                app_screen_type = None
+            else:
+                # 5번: 실제 이지텍스 앱 메인 화면 (1분 조회 시작 CTA)
+                full_prompt = f"{action_desc}, master commercial product photography, 8k"
+                neg_prompt = "human face close-up, people, ugly, blurry, 3d render, cartoon, laptop screen text, screens with text, papers with writing, messy desk, gibberish letters"
+                is_scene_focus = True
+                is_app_screen = True
+                app_screen_type = "home_cta"
 
             cards.append({
                 "slide_idx": idx,
@@ -138,7 +250,10 @@ class ScenarioDirectorCardnewsEasyTax:
                 "subtitle": copy_item.get("subtitle", ""),
                 "bullets": copy_item.get("bullets", []),
                 "image_prompt": full_prompt,
-                "negative_prompt": f"upside down phone, inverted smartphone, backwards phone, phone held upside down, deformed hand holding phone, caucasian, white, deformed fingers, extra limbs, claw hands, bad anatomy, ugly, blurry, 3d render, cartoon, {LANG_NEGATIVE_ETHNIC.get(lang, '')}"
+                "negative_prompt": neg_prompt,
+                "is_scene_focus": is_scene_focus,
+                "is_app_screen": is_app_screen,
+                "app_screen_type": app_screen_type
             })
 
         return {

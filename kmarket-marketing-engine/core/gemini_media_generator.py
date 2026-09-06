@@ -37,15 +37,13 @@ class GeminiMediaGenerator:
         self._init_client()
 
     def _init_client(self, use_fallback: bool = False):
-        key = self.fallback_key if use_fallback else self.api_key
-        if key:
-            try:
-                from google import genai
-                self.client = genai.Client(api_key=key)
-                logger.info(f"GeminiMediaGenerator Client 초기화 성공 (서비스: {self.service_id}, fallback: {use_fallback})")
-            except Exception as e:
-                logger.warning(f"Gemini Client 초기화 실패: {e}")
-                self.client = None
+        try:
+            from core.gemini_smart_client import GeminiSmartClient
+            self.client = GeminiSmartClient(service_id=self.service_id)
+            logger.info(f"GeminiMediaGenerator 스마트 클라이언트 초기화 성공 (서비스: {self.service_id}, 무료키 1순위)")
+        except Exception as e:
+            logger.warning(f"Gemini 스마트 클라이언트 초기화 실패: {e}")
+            self.client = None
 
     def generate_theme_image(
         self,

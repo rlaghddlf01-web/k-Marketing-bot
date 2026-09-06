@@ -46,7 +46,8 @@ class MediaQualityVerifier:
         self,
         image_path: Path,
         scene_name: str,
-        lang: str = "en"
+        lang: str = "en",
+        is_scene_focus: bool = False
     ) -> Tuple[bool, float, str, str]:
         """
         🎬 [씬별 실시간 AI 비전 정밀 검사]
@@ -62,7 +63,23 @@ class MediaQualityVerifier:
         if not self.client:
             return True, 90.0, "안전 기본 통과 (오프라인)", ""
 
-        prompt = f"""
+        if is_scene_focus:
+            prompt = f"""
+You are a Creative Quality Control Inspector for mobile advertising visuals.
+Inspect this scene image ({scene_name}) which is an atmospheric scene / still-life photograph:
+
+QUALITY RULES:
+1. 📸 VISUAL CLARITY: High aesthetic appeal, crisp focus, beautiful lighting, cinematic atmosphere.
+2. 🚫 NO DISTORTION: No grotesque deformities, weird artifacts, or severe rendering errors.
+
+Output STRICTLY JSON with keys:
+"score": (integer 0 to 100, pass threshold is 80),
+"passed": (boolean, true if visually appealing and clean),
+"reasons": "(short clear diagnostic reason)",
+"fix_hint": "(explicit corrective prompt if needed)"
+"""
+        else:
+            prompt = f"""
 You are an uncompromising, ultra-strict Creative Quality Control Inspector for mobile video ads.
 Inspect this scene image ({scene_name}) to ensure it is a high-converting, premium human-centric ad:
 

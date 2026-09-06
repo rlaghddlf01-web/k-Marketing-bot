@@ -123,6 +123,16 @@ class CardnewsComposerEasyTax:
             if current_line:
                 lines.append(current_line)
 
+            # 외톨이 단어 방지 (마지막 줄에 1단어만 남는 경우 균형 조정)
+            if len(lines) == 2 and len(lines[1].split()) == 1 and len(lines[0].split()) > 2:
+                words_l0 = lines[0].split()
+                cand_l0 = " ".join(words_l0[:-1])
+                cand_l1 = f"{words_l0[-1]} {lines[1]}"
+                b0 = draw.textbbox((0, 0), cand_l0, font=font)
+                b1 = draw.textbbox((0, 0), cand_l1, font=font)
+                if (b0[2] - b0[0]) <= target_w and (b1[2] - b1[0]) <= target_w:
+                    lines = [cand_l0, cand_l1]
+
             # 각 줄의 가로폭 및 전체 높이 계산
             line_heights = []
             line_widths = []
@@ -196,6 +206,60 @@ class CardnewsComposerEasyTax:
                 draw.rectangle([(0, 0), (self.WIDTH, self.TOP_HEIGHT)], fill=(15, 23, 42))
         else:
             draw.rectangle([(0, 0), (self.WIDTH, self.TOP_HEIGHT)], fill=(15, 23, 42))
+
+        # 📱 2-1. [스마트폰 인셋 합성]: 1번(NH BANK 통지), 3번(이지텍스 0원보증 앱화면), 5번(이지텍스 1분조회 메인화면)
+        try:
+            from core.screen_inset_compositor import ScreenInsetCompositor
+            compositor = ScreenInsetCompositor()
+            top_part = canvas.crop((0, 0, self.WIDTH, self.TOP_HEIGHT))
+
+            if slide_idx == 1:
+                search_scope = f"{card_data.get('title', '')} {card_data.get('subtitle', '')} {' '.join(card_data.get('bullets', []))}"
+                amount_candidates = re.findall(r'\b\d{1,3}(?:[,\.\s]\d{3})+\b', search_scope)
+                parsed_amount = 3800000
+                if amount_candidates:
+                    valid_nums = [int(re.sub(r'[^\d]', '', c)) for c in amount_candidates if int(re.sub(r'[^\d]', '', c)) >= 100000]
+                    if valid_nums:
+                        parsed_amount = valid_nums[0]
+                composed_top = compositor.composite_screen_onto_photo(
+                    base_photo=top_part,
+                    amount_krw=parsed_amount,
+                    lang=lang,
+                    user_name="E-9 WORKER"
+                )
+                canvas.paste(composed_top, (0, 0))
+                logger.info("📱 [슬라이드 1] 대표님 레퍼런스 스타일 스마트폰 액정 실물 인셋 합성 성공!")
+
+            elif slide_idx == 3:
+                from core.easytax_app_capturer import EasyTaxAppCapturer
+                capturer = EasyTaxAppCapturer()
+                screen_path = capturer.get_screen_path(lang=lang, screen_type="step0")
+                composed_top = compositor.composite_easytax_screen_onto_photo(
+                    base_photo=top_part,
+                    screen_img_path=screen_path,
+                    lang=lang,
+                    position="center",
+                    scale=0.74
+                )
+                canvas.paste(composed_top, (0, 0))
+                logger.info(f"📱 [슬라이드 3] 이지텍스 실제 앱 0원 보증 모바일 화면 인셋 합성 성공! ({lang})")
+
+            elif slide_idx == 5:
+                from core.easytax_app_capturer import EasyTaxAppCapturer
+                capturer = EasyTaxAppCapturer()
+                screen_path = capturer.get_screen_path(lang=lang, screen_type="home_cta")
+                composed_top = compositor.composite_easytax_screen_onto_photo(
+                    base_photo=top_part,
+                    screen_img_path=screen_path,
+                    lang=lang,
+                    position="center",
+                    scale=0.74
+                )
+                canvas.paste(composed_top, (0, 0))
+                logger.info(f"📱 [슬라이드 5] 이지텍스 실제 앱 1분 조회 CTA 모바일 화면 인셋 합성 성공! ({lang})")
+
+        except Exception as e:
+            logger.warning(f"슬라이드 {slide_idx} 화면 인셋 합성 건너뜀: {e}")
 
         # 3. 7:3 경계 골드 구분선 그리기 (3px)
         draw.line([(0, self.TOP_HEIGHT), (self.WIDTH, self.TOP_HEIGHT)], fill=self.BORDER_COLOR, width=3)

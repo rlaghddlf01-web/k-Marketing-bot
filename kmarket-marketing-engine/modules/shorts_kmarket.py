@@ -28,6 +28,7 @@ from core.tts_engine import TTSEngine
 from core.auto_publishers.shorts_multi_publisher import ShortsMultiPublisher
 from core.supabase_manager import SupabaseManager
 from core.trend_scraper import ViralTrendScraper
+from core.gemini_shorts_copywriter import GeminiShortsCopywriter
 
 logger = logging.getLogger("ShortsKMarket")
 
@@ -38,6 +39,8 @@ class ShortsKMarket:
         self.service_id = "kmarket"
         self.output_dir = OUTPUTS_DIR / "shorts_kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\케이마켓")
+        self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorShortsKMarket()
         self.iframe_composer = KMarketIframeComposer()
@@ -49,6 +52,7 @@ class ShortsKMarket:
         self.publisher = ShortsMultiPublisher()
         self.supabase = SupabaseManager()
         self.trend_scraper = ViralTrendScraper()
+        self.copywriter = GeminiShortsCopywriter(service_id=self.service_id)
 
     def produce_shorts(self, lang: str = "vi", force_mode: Optional[str] = None, engine_mode: str = "colab_gpu") -> Dict[str, Any]:
         """
@@ -188,18 +192,112 @@ class ShortsKMarket:
             logger.error(f"[{lang.upper()}] ❌ K-Market 숏폼 MP4 렌더링 실패")
             return {"success": False, "error": "mp4 rendering failed"}
 
-        # 🖥️ 바탕화면 전용 폴더로 실시간 자동 저장
-        desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\케이마켓")
-        desktop_dir.mkdir(parents=True, exist_ok=True)
+        # 4. ✍️ 4대 숏폼 플랫폼(유튜브/틱톡/릴스/페북) 알고리즘 맞춤 포스팅 팩 생성
+        post_pkg = self.copywriter.generate_shorts_post_package(
+            service_id=self.service_id,
+            lang=lang,
+            scenario=scenario
+        )
+        channels = post_pkg.get("channels", {})
+        landing_url = post_pkg.get("landing_url", f"https://ktrs-market.vercel.app/{lang if lang != 'ko' else ''}")
+        hashtags_list = post_pkg.get("hashtags", [])
+        hashtags_str = post_pkg.get("hashtags_str", "")
+
+        yt = channels.get("youtube_shorts", {})
+        tt = channels.get("tiktok", {})
+        ig = channels.get("instagram_reels", {})
+        fb = channels.get("facebook_reels", {})
+
+        # 5. 🖥️ 바탕화면 전용 폴더로 3종 세트(MP4 + 4대 채널 메모장 + 메타데이터) 실시간 자동 저장
+        import shutil
+        desktop_mp4_name = f"kmarket_shorts_{lang}_{timestamp}.mp4"
+        desktop_mp4_path = self.desktop_dir / desktop_mp4_name
         try:
-            import shutil
-            desktop_mp4 = desktop_dir / Path(mp4_path).name
-            shutil.copy2(str(mp4_path), str(desktop_mp4))
-            logger.info(f"📁 [바탕화면 저장] K-Market 숏폼 영상 복사 완료: {desktop_mp4}")
+            shutil.copy2(str(mp4_path), str(desktop_mp4_path))
+            logger.info(f"📁 [바탕화면 저장] K-Market 숏폼 영상 복사 완료: {desktop_mp4_name}")
         except Exception as e:
             logger.warning(f"바탕화면 복사 경고: {e}")
 
-        # 4. Supabase marketing_media_assets & kmarket_golden_copies 자가학습 기록
+        # 4대 채널 섹션별 원클릭 복사용 메모장 (.txt)
+        caption_txt_name = f"kmarket_shorts_{lang}_caption_{timestamp}.txt"
+        desktop_caption_path = self.desktop_dir / caption_txt_name
+        caption_content = (
+            f"================================================================================\n"
+            f"📢 [K-Market 9:16 숏폼 — 4대 SNS 알고리즘 맞춤형 원클릭 포스팅 패키지]\n"
+            f"• 타깃 언어: {lang.upper()} | 테마: {scenario.get('theme_name')}\n"
+            f"• 공식 링크: {landing_url}\n"
+            f"• 생성 일시: {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"================================================================================\n\n"
+
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"1. 🔴 [유튜브 쇼츠 (YouTube Shorts) — 채널 바이오 링크 & 고정 댓글 전략]\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📌 쇼츠 제목: {yt.get('title', hook_title)}\n\n"
+            f"📝 설명란 (Description - 채널 링크 유도):\n"
+            f"{yt.get('description', '')}\n\n"
+            f"🏷️ 해시태그: {yt.get('hashtags', hashtags_str)}\n\n"
+            f"★ [고정 댓글 (게시 직후 0.1초 만에 달고 상단 고정할 댓글)]:\n"
+            f"{yt.get('pinned_comment', f'👉 {landing_url}')}\n\n"
+
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"2. 🎵 [틱톡 (TikTok Video) — 프로필 바이오 링크 전략]\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📝 틱톡 캡션 (복사용):\n"
+            f"{tt.get('caption', '')}\n\n"
+            f"🏷️ 해시태그: {tt.get('hashtags', hashtags_str)}\n\n"
+
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"3. 📸 [인스타그램 릴스 (Instagram Reels) — 바이오 링크 전략]\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📝 릴스 캡션 (복사용):\n"
+            f"{ig.get('caption', '')}\n\n"
+            f"🏷️ 릴스 해시태그: {ig.get('hashtags', hashtags_str)}\n\n"
+
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"4. 📘 [페이스북 릴스 (Facebook Reels) — 첫 댓글 스텔스 링크 기법]\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📝 [릴스 본문 (링크 0% - 알고리즘 도달률 5배 극대화)]:\n"
+            f"{fb.get('post_content', '')}\n\n"
+            f"★ [첫 번째 댓글 (릴스 게시 직후 바로 달아줄 스텔스 링크)]:\n"
+            f"{fb.get('first_comment', f'👉 {landing_url}')}\n\n"
+
+            f"================================================================================\n"
+            f"💡 실전 팁: 각 숏폼 플랫폼에 올릴 때 해당 섹션의 [제목], [본문], [★첫/고정 댓글]을 그대로 복사하세요!\n"
+            f"================================================================================\n"
+        )
+        try:
+            with open(desktop_caption_path, "w", encoding="utf-8") as f:
+                f.write(caption_content)
+            logger.info(f"📝 [바탕화면 4대 숏폼 원클릭 메모장] 저장 완료: {caption_txt_name}")
+        except Exception as e:
+            logger.warning(f"캡션 메모장 저장 실패: {e}")
+
+        # 자동 배포용 metadata.json 생성
+        meta_json_name = f"kmarket_shorts_{lang}_metadata_{timestamp}.json"
+        desktop_meta_path = self.desktop_dir / meta_json_name
+        metadata_payload = {
+            "service_id": "kmarket",
+            "lang": lang,
+            "theme_name": scenario.get("theme_name"),
+            "hook_title": hook_title,
+            "timestamp": timestamp,
+            "title": hook_title,
+            "description": yt.get("description", ""),
+            "landing_url": landing_url,
+            "hashtags": hashtags_list,
+            "channels": channels,
+            "video_path": str(desktop_mp4_path),
+            "mp4_path": str(desktop_mp4_path),
+            "caption_file": str(desktop_caption_path)
+        }
+        try:
+            with open(desktop_meta_path, "w", encoding="utf-8") as f:
+                json.dump(metadata_payload, f, ensure_ascii=False, indent=2)
+            logger.info(f"🤖 [자동 배포용 메타데이터] 4대 숏폼 JSON 저장 완료: {meta_json_name}")
+        except Exception as e:
+            logger.warning(f"메타데이터 JSON 저장 실패: {e}")
+
+        # 6. Supabase 자가학습 기록
         try:
             self.supabase.record_marketing_media_asset({
                 "service_id": "kmarket",
@@ -209,49 +307,18 @@ class ShortsKMarket:
                 "age_group": scenario.get("age_group", "20s"),
                 "gender": scenario.get("gender", "neutral"),
                 "prompt_used": scenario.get("action_prompt", ""),
-                "file_path": str(mp4_path),
+                "file_path": str(desktop_mp4_path),
                 "quality_score": 95,
                 "verification_passed": True
             })
-
-            if self.supabase.client:
-                self.supabase.client.table("kmarket_golden_copies").upsert({
-                    "content_type": "shorts",
-                    "service_id": "kmarket",
-                    "target_lang": lang,
-                    "title": hook_title,
-                    "content_text": voice_text,
-                    "target_url": f"https://ktrs-market.vercel.app/{lang if lang != 'ko' else ''}",
-                    "external_id": f"shorts_km_{lang}_{timestamp}",
-                    "score": 95
-                }).execute()
-                logger.info(f"💎 [Supabase] K-Market 골든 카피 자가학습 기록 완료")
         except Exception as e:
             logger.warning(f"K-Market Supabase 기록 경고: {e}")
 
-        # 5. 🚀 4대 플랫폼(유튜브/틱톡/릴스/페북) K-Market 공식 채널 배포 (나라별 고유 해시태그 100% 자동 주입)
-        landing_url = f"https://ktrs-market.vercel.app/{lang if lang != 'ko' else ''}"
-        country_hashtags = self.trend_scraper.format_hashtag_string("kmarket", lang, count=10)
-        country_tags_list = [t.lstrip('#') for t in self.trend_scraper.get_viral_hashtags("kmarket", lang, count=10)]
-
-        video_description = (
-            f"{hook_title}\n\n"
-            f"Free 0 Won Giveaways & Safe Second-Hand Campus Trades in South Korea!\n"
-            f"Download/Visit: {landing_url}\n\n"
-            f"{country_hashtags}"
-        )
-
+        # 7. 🚀 4대 플랫폼(유튜브/틱톡/인스타릴스/페북릴스) 실제 API 및 첫댓글 자동 배포
         publish_results = {}
         try:
-            publish_results = self.publisher.publish_all({
-                "service_id": "kmarket",
-                "lang": lang,
-                "title": hook_title,
-                "description": video_description,
-                "video_path": str(mp4_path),
-                "tags": country_tags_list or ["KMarket", "KoreaExpat", "FreeStuffKorea", "KoreaLife"]
-            })
-            logger.info(f"[{lang.upper()}] 🚀 K-Market 4대 플랫폼 배포 완료: {publish_results}")
+            publish_results = self.publisher.publish_all(metadata_payload)
+            logger.info(f"[{lang.upper()}] 🚀 K-Market 4대 숏폼 멀티 API 배포 완료: {list(publish_results.get('platforms', {}).keys())}")
         except Exception as e:
             logger.warning(f"K-Market 배포 큐 적재 경고: {e}")
 
@@ -262,7 +329,9 @@ class ShortsKMarket:
             "content_mix_type": content_mix,
             "theme_name": scenario["theme_name"],
             "title": hook_title,
-            "video_path": str(mp4_path),
-            "audio_path": str(audio_path) if audio_path else "",
-            "publish_results": publish_results
+            "video_path": str(desktop_mp4_path),
+            "caption_file": str(desktop_caption_path),
+            "metadata_file": str(desktop_meta_path),
+            "publish_results": publish_results,
+            "desktop_dir": str(self.desktop_dir)
         }
