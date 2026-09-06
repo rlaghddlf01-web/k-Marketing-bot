@@ -53,10 +53,12 @@ class GeminiMediaGenerator:
         theme_id: str,
         scenario_plan: Dict[str, Any],
         aspect_ratio: str = "9:16",
-        output_path: Optional[Path] = None
+        output_path: Optional[Path] = None,
+        reference_image_path: Optional[Path] = None
     ) -> Optional[Path]:
         """
         ScenarioDirector의 기획안에 맞춰 100% 실사 피드/숏폼 이미지 생성 (1080x1920 또는 1080x1080)
+        - reference_image_path 전달 시: 씬 1 기준 인물의 얼굴/헤어/의상을 100% 고정하는 연속 씬 생성
         """
         # 캐시 키 생성
         cache_key = f"{lang}_{theme_id}_{scenario_plan.get('gender','m')}_{aspect_ratio.replace(':','x')}"
@@ -74,14 +76,30 @@ class GeminiMediaGenerator:
             "The human protagonist is the absolute primary focal subject of this photo. "
             "The person's expressive face, eyes, genuine smile, and upper body MUST occupy at least 70-80% of the frame. "
             "The photo MUST look 100% like a real live photograph with zero anatomical errors, natural skin textures, and genuine human emotions. "
-            "Sharp portrait focus on the person's face and eyes. Any smartphone prop must be held upright in normal vertical orientation, small, and NEVER cover or block the person's face."
+            "Sharp portrait focus on the person's face and eyes. Any smartphone prop must be held upright in normal vertical orientation, small, and NEVER cover or block the person's face. "
+            "Do NOT draw fake unreadable text or inverted numbers on smartphone screens; keep screen display clean or blank."
         )
 
+        continuity_prefix = ""
+        ref_image = None
+        if reference_image_path and Path(reference_image_path).exists():
+            try:
+                ref_image = Image.open(reference_image_path)
+                continuity_prefix = (
+                    "[CRITICAL CHARACTER CONTINUITY MANDATE]: "
+                    "The protagonist in this image MUST be the EXACT SAME Asian person as shown in the provided reference image. "
+                    "Keep identical facial features, identical hairstyle, identical eye shape, identical skin tone, and identical outfit styling. "
+                    "Only change the character's facial expression, action, and environment according to this scene: "
+                )
+            except Exception as e:
+                logger.warning(f"참조 이미지 로드 실패: {e}")
+                ref_image = None
+
         if any(action.startswith(prefix) for prefix in ["Cinematic", "Ultra close-up", "Extreme close-up", "Professional"]):
-            prompt = f"{action}{human_centric_mandate}, Aspect ratio {aspect_ratio}, masterpiece photography, photorealistic 4k."
+            prompt = f"{continuity_prefix}{action}{human_centric_mandate}, Aspect ratio {aspect_ratio}, masterpiece photography, photorealistic 4k."
         else:
             prompt = (
-                f"Hyper-realistic authentic documentary portrait of an Asian person ({demo_desc}), {action}{human_centric_mandate}. "
+                f"{continuity_prefix}Hyper-realistic authentic documentary portrait of an Asian person ({demo_desc}), {action}{human_centric_mandate}. "
                 f"Realistic East Asian and Southeast Asian facial features, authentic natural Asian skin texture, "
                 f"cinematic natural outdoor/indoor lighting, 8k resolution, "
                 f"natural facial expression, genuine emotions, clear visible face and upper body. "
@@ -92,26 +110,27 @@ class GeminiMediaGenerator:
             "upside down phone, inverted smartphone, backwards phone, phone held upside down, deformed hand holding phone, "
             "giant phone blocking face, macro phone screen, phone covering face, oversized phone, extreme close up of phone, "
             "floating phone, six fingers, deformed hands, extra limbs, disembodied hands, claw hands, "
-            "creepy smile, dead eyes, cartoon, 3d render, illustration, blurry, "
+            "creepy smile, dead eyes, cartoon, 3d render, illustration, blurry, unreadable fake text on screen, "
             "caucasian, white people, blonde hair, blue eyes, western model, european features, non-asian, "
             "bad anatomy, mutated fingers, low quality"
         )
 
-        logger.info(f"[{lang.upper()}] 🎨 Gemini Imagen 비주얼 생성 시작 (테마: {scenario_plan.get('theme_name')})...")
+        logger.info(f"[{lang.upper()}] 🎨 Gemini Imagen 비주얼 생성 시작 (테마: {scenario_plan.get('theme_name')}, 인물고정: {bool(ref_image)})...")
 
         if self.client:
             try:
-                # 구글 공식 Gemini 3.1 Flash-Lite Image 초저가 모델 호출
+                # 멀티모달 인풋 구성: 참조 이미지가 있으면 [prompt, ref_image], 없으면 prompt 단독
+                contents_payload = [prompt, ref_image] if ref_image else prompt
                 result = self.client.models.generate_content(
                     model='gemini-3.1-flash-lite-image',
-                    contents=prompt
+                    contents=contents_payload
                 )
                 # 실제 이미지 바이너리 추출 및 저장
                 for part in result.candidates[0].content.parts:
                     if hasattr(part, 'inline_data') and part.inline_data and part.inline_data.data:
                         image = Image.open(io.BytesIO(part.inline_data.data)).convert("RGB")
                         image.save(output_path, "JPEG", quality=95)
-                        logger.info(f"🎉 [봇 자동화 - Gemini Flash Image] 100% 실사 사진 생성 성공: {output_path.name}")
+                        logger.info(f"🎉 [봇 자동화 - Gemini Flash Image] 100% 실사 사진 생성 성공 (인물고정: {bool(ref_image)}): {output_path.name}")
                         return output_path
             except Exception as e:
                 logger.warning(f"Gemini Image 생성 실패: {e}")

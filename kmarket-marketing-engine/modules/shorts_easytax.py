@@ -25,6 +25,8 @@ from core.motion_video_composer import MotionVideoComposer
 from core.tts_engine import TTSEngine
 from core.auto_publishers.shorts_multi_publisher import ShortsMultiPublisher
 from core.supabase_manager import SupabaseManager
+from core.ui_overlay_easytax import UIOverlayEasyTax
+from core.screencast_video_provider import ScreencastVideoProvider
 
 logger = logging.getLogger("ShortsEasyTax")
 
@@ -43,6 +45,8 @@ class ShortsEasyTax:
         self.tts_engine = TTSEngine()
         self.publisher = ShortsMultiPublisher()
         self.supabase = SupabaseManager()
+        self.ui_overlay = UIOverlayEasyTax()
+        self.screencast_provider = ScreencastVideoProvider()
 
     def produce_shorts(self, lang: str = "vi", force_run: bool = False, engine_mode: str = "colab_gpu") -> Dict[str, Any]:
         """
@@ -73,12 +77,47 @@ class ShortsEasyTax:
         audio_path = self.tts_engine.generate_speech(voice_text, lang=lang, filename=audio_filename)
 
         # 3. 5단계 시네마틱 씬별 Gemini 고화질 이미지 생성 & AI 비전 품질 심사
+        # 💎 3대 품질 혁신: 인물 일관성 앵커 + 무결점 실물 UI 오버레이 + 실물 스크린캐스트 비디오 결합
         scene_images = []
+        scene1_ref_img_path = None
+
+        # 씬 2용 모바일 뱅킹 입금 카드 오버레이 미리 준비
+        deposit_card_path = self.ui_overlay.render_deposit_push_card(
+            amount_krw=estimated_krw,
+            lang=lang
+        )
+        # 씬 5용 국세청 환급 통지서 오버레이 미리 준비
+        cert_overlay_path = self.ui_overlay.render_tax_refund_certificate_overlay(
+            amount_krw=estimated_krw,
+            lang=lang
+        )
+
         for scene in scenario.get("scenes", []):
+            s_idx = scene["scene_idx"]
             current_prompt = scene["image_prompt"]
             current_neg = scene["negative_prompt"]
-            # 🛡️ 1회 생성 모드 (비용 1/3 통제 1-Shot 모드)
-            theme_id = f"{scenario['theme_id']}_s{scene['scene_idx']}"
+            theme_id = f"{scenario['theme_id']}_s{s_idx}"
+
+            # 📱 씬 3: 실물 스마트폰 3초 간편조회 화면 녹화 비디오 클립 투입 (영상 생동감 극대화)
+            if s_idx == 3:
+                screencast_clip = self.screencast_provider.get_or_render_screencast_clip(
+                    lang=lang,
+                    amount_krw=estimated_krw,
+                    duration_sec=scene.get("duration_sec", 4.0)
+                )
+                scene_images.append({
+                    "scene_idx": s_idx,
+                    "duration_sec": scene["duration_sec"],
+                    "image_path": None,
+                    "video_path": str(screencast_clip) if screencast_clip else None,
+                    "extra_overlay_path": None,
+                    "name": scene["name"]
+                })
+                logger.info(f"[{lang.upper()}] 📱 EasyTax 씬 3/5 실물 모바일 웹 스크린캐스트 클립 결합 완료!")
+                continue
+
+            # 🖼️ 씬 1, 2, 4, 5: 고화질 인물 이미지 생성 (씬 2, 4, 5는 씬 1 기준 인물 얼굴/의상 고정!)
+            ref_path = scene1_ref_img_path if s_idx > 1 else None
             img_path = active_media_gen.generate_theme_image(
                 lang=lang,
                 theme_id=theme_id,
@@ -88,24 +127,39 @@ class ShortsEasyTax:
                     "theme_name": scene["name"],
                     "persona_desc": scenario.get("persona_name", "Asian foreign worker in Korea")
                 },
-                aspect_ratio="9:16"
+                aspect_ratio="9:16",
+                reference_image_path=ref_path
             )
 
             final_img_path = img_path if img_path and Path(img_path).exists() else None
+
+            # 씬 1 인물 레퍼런스 확보 (동일 인물 연속성 유지)
+            if s_idx == 1 and final_img_path:
+                scene1_ref_img_path = final_img_path
+                logger.info(f"[{lang.upper()}] 👤 [인물 일관성 앵커 확정] 씬 1 주인공 프로필 고정: {Path(final_img_path).name}")
 
             # AI 비전 품질 검사관 (로깅 및 품질 측정 전용 - 유료 재촬영 차단)
             if final_img_path:
                 passed, q_score, reason, _ = self.quality_verifier.verify_scene_image(
                     final_img_path,
-                    scene_name=f"EasyTax Scene {scene['scene_idx']} ({scene['name']})",
+                    scene_name=f"EasyTax Scene {s_idx} ({scene['name']})",
                     lang=lang
                 )
-                logger.info(f"[{lang.upper()}] 🖼 EasyTax 씬 {scene['scene_idx']}/5 AI 품질 점수: {q_score}점 ({reason})")
+                logger.info(f"[{lang.upper()}] 🖼 EasyTax 씬 {s_idx}/5 AI 품질 점수: {q_score}점 ({reason})")
+
+            # 씬별 맞춤 실물 UI 오버레이 부착
+            extra_overlay = None
+            if s_idx == 2:
+                extra_overlay = str(deposit_card_path)  # 카카오뱅크 무결점 입금 푸시 카드
+            elif s_idx == 5:
+                extra_overlay = str(cert_overlay_path)  # 국세청 공식 환급결정통지서 카드
 
             scene_images.append({
-                "scene_idx": scene["scene_idx"],
+                "scene_idx": s_idx,
                 "duration_sec": scene["duration_sec"],
                 "image_path": final_img_path,
+                "video_path": None,
+                "extra_overlay_path": extra_overlay,
                 "name": scene["name"]
             })
 

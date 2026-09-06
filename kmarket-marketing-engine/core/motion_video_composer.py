@@ -527,31 +527,85 @@ class MotionVideoComposer:
             )
             overlay_paths.append(overlay_path)
 
-        # ── Step 2: 5개 각 장면을 독립 MP4 클립으로 렌더링 (확실한 씬 전환 보장) ──
+        # ── Step 2: 5개 각 장면을 독립 MP4 클립으로 렌더링 (비디오 클립 및 무결점 UI 오버레이 지원) ──
         clip_files = []
         for idx, (scene, overlay_path) in enumerate(zip(scene_images, overlay_paths)):
             dur = durations[idx]
             total_f = int(dur * fps)
-            img_p = scene.get("image_path")
-            if not (img_p and Path(img_p).exists()):
-                img_p = self.output_dir / f"frame_{service_id}_{lang}.png"
-
             clip_path = self.temp_dir / f"clip_{service_id}_{lang}_s{idx+1}.mp4"
             zoom_speed = round(0.0012 + idx * 0.0001, 4)
+            extra_ov = scene.get("extra_overlay_path")
+            has_extra = bool(extra_ov and Path(extra_ov).exists())
+            vid_p = scene.get("video_path")
+            has_video = bool(vid_p and Path(vid_p).exists())
 
-            v_filter = (
-                f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
-                f"zoompan=z='min(zoom+{zoom_speed},1.15)':d={total_f}:s=1080x1920:fps={fps}[z];"
-                f"[1:v]scale=1080:1920[o];[z][o]overlay=0:0"
-            )
-            clip_cmd = [
-                self.ffmpeg_path, "-y",
-                "-loop", "1", "-t", str(dur), "-i", str(img_p),
-                "-loop", "1", "-t", str(dur), "-i", str(overlay_path),
-                "-filter_complex", v_filter,
-                "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
-                "-t", str(dur), str(clip_path)
-            ]
+            if has_video:
+                # 📱 실물 스크린캐스트 비디오 클립인 경우: 정지 이미지 대신 실제 비디오 영상 합성
+                if has_extra:
+                    v_filter = (
+                        f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v];"
+                        f"[v][1:v]overlay=0:0[vo];"
+                        f"[vo][2:v]overlay=0:0"
+                    )
+                    clip_cmd = [
+                        self.ffmpeg_path, "-y",
+                        "-i", str(vid_p),
+                        "-loop", "1", "-t", str(dur), "-i", str(overlay_path),
+                        "-loop", "1", "-t", str(dur), "-i", str(extra_ov),
+                        "-filter_complex", v_filter,
+                        "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+                        "-t", str(dur), str(clip_path)
+                    ]
+                else:
+                    v_filter = (
+                        f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v];"
+                        f"[v][1:v]overlay=0:0"
+                    )
+                    clip_cmd = [
+                        self.ffmpeg_path, "-y",
+                        "-i", str(vid_p),
+                        "-loop", "1", "-t", str(dur), "-i", str(overlay_path),
+                        "-filter_complex", v_filter,
+                        "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+                        "-t", str(dur), str(clip_path)
+                    ]
+            else:
+                # 🖼️ 정지 사진인 경우
+                img_p = scene.get("image_path")
+                if not (img_p and Path(img_p).exists()):
+                    img_p = self.output_dir / f"frame_{service_id}_{lang}.png"
+
+                if has_extra:
+                    v_filter = (
+                        f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
+                        f"zoompan=z='min(zoom+{zoom_speed},1.15)':d={total_f}:s=1080x1920:fps={fps}[z];"
+                        f"[z][1:v]overlay=0:0[zo];"
+                        f"[zo][2:v]overlay=0:0"
+                    )
+                    clip_cmd = [
+                        self.ffmpeg_path, "-y",
+                        "-loop", "1", "-t", str(dur), "-i", str(img_p),
+                        "-loop", "1", "-t", str(dur), "-i", str(overlay_path),
+                        "-loop", "1", "-t", str(dur), "-i", str(extra_ov),
+                        "-filter_complex", v_filter,
+                        "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+                        "-t", str(dur), str(clip_path)
+                    ]
+                else:
+                    v_filter = (
+                        f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,"
+                        f"zoompan=z='min(zoom+{zoom_speed},1.15)':d={total_f}:s=1080x1920:fps={fps}[z];"
+                        f"[1:v]scale=1080:1920[o];[z][o]overlay=0:0"
+                    )
+                    clip_cmd = [
+                        self.ffmpeg_path, "-y",
+                        "-loop", "1", "-t", str(dur), "-i", str(img_p),
+                        "-loop", "1", "-t", str(dur), "-i", str(overlay_path),
+                        "-filter_complex", v_filter,
+                        "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+                        "-t", str(dur), str(clip_path)
+                    ]
+
             try:
                 subprocess.run(clip_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
                 if clip_path.exists():
