@@ -1176,7 +1176,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             pass
 
         # 타겟 서비스로 리다이렉트
-        target_url = "https://ktrs-market.vercel.app" if target == "kmarket" else "https://easytax.co.kr"
+        target_url = "https://ktrs-market.vercel.app" if target == "kmarket" else "https://ktrs-service.vercel.app"
         self._set_headers("text/html", 302)
         self.send_header("Location", target_url)
         self.end_headers()
@@ -1732,7 +1732,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         from core.google_indexing_client import GoogleIndexingClient
         client = GoogleIndexingClient(brand=brand)
         if brand == "kmarket":
-            res = client.publish_url("https://k-market.app/en")
+            res = client.publish_url("https://ktrs-market.vercel.app/en")
         else:
             res = client.publish_url("https://ktrs-service.vercel.app/?lang=en")
 

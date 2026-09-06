@@ -5,6 +5,7 @@ EasyTaxGeminiReddit - 💰 EasyTax 레딧 외국인 세금/비자 질문 3단계
 - Level 3 (브랜드 멘션, 20%): 프로필 참고 유도
 """
 
+import re
 import json
 import random
 import logging
@@ -33,6 +34,23 @@ class EasyTaxGeminiReddit:
         self.client = None
         self._init_gemini()
         self.easytax_rules = self._load_json(DATA_DIR / "easytax_rules.json")
+
+    @staticmethod
+    def _eradicate_urls(text: str) -> str:
+        """
+        🚨 레딧 섀도우밴/차단 0% 보장:
+        모든 형태의 raw URL(http, https, www, .com, .app, .kr 등) 및 마크다운 링크를
+        물리적으로 100% 탐지하여 구글 자연 검색어('KTRS tax')로 강제 치환
+        """
+        # 1. 마크다운 링크 [anchor](url) -> anchor (search 'KTRS tax' on Google)
+        text = re.sub(r'\[([^\]]+)\]\((?:https?://|www\.)[^\)]+\)', r"\1 (search 'KTRS tax' on Google)", text)
+        # 2. 일반 raw URL (http://..., https://...)
+        text = re.sub(r'https?://\S+', "search 'KTRS tax' on Google", text)
+        # 3. www. 시작 주소
+        text = re.sub(r'www\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', "search 'KTRS tax' on Google", text)
+        # 4. 도메인 잔존 텍스트 박멸 (vercel.app, ktrs.kr 등)
+        text = re.sub(r'\b[a-zA-Z0-9-]+\.(?:vercel\.app|app|co\.kr|kr|com|net|org)\b(?:\/\S*)?', "search 'KTRS tax' on Google", text)
+        return text.strip()
 
     def _init_gemini(self):
         from config import (
@@ -133,7 +151,7 @@ class EasyTaxGeminiReddit:
                         contents=prompt
                     )
                     if response and response.text:
-                        result = response.text.strip()
+                        result = self._eradicate_urls(response.text.strip())
                         logger.info(f"💰 [EasyTax Reddit AI] Level {promo_level} 답변 생성 완료 ({model_name})")
                         return result
                 except Exception as e:

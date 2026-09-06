@@ -84,7 +84,7 @@ class KMarketFacebookHunter:
             landing_url = UTMTracker.build_landing_url(
                 base_domain=base_domain,
                 lang=lang,
-                path="welcome",
+                path="",
                 source="facebook_group",
                 medium="stealth_first_comment",
                 campaign=campaign

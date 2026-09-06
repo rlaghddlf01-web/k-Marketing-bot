@@ -38,7 +38,7 @@ class GuidePDFGenerator:
         c.setFont("Helvetica", 11)
         c.drawString(70, 605, "- Graduating students leave desks, beds, and fridges for 0 KRW in Feb & Aug.")
         c.drawString(70, 585, "- Over 270 verified items listed daily across 30 university campuses.")
-        c.drawString(70, 565, "- Claim free items directly: https://k-market.app")
+        c.drawString(70, 565, "- Claim free items directly: https://ktrs-market.vercel.app")
 
         # 2. 17개국 양방향 번역 채팅
         c.setFont("Helvetica-Bold", 15)

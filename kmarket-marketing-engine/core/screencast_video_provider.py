@@ -85,9 +85,9 @@ class ScreencastVideoProvider:
             # 노치 / 카메라 아일랜드
             draw.rounded_rectangle([420, 204, 660, 238], radius=16, fill=(15, 23, 42))
 
-            # 2. 웹 브라우저 상단 주소창 (https://ktrs.kr/vi)
+            # 2. 웹 브라우저 상단 주소창 (https://ktrs-service.vercel.app/?lang={lang})
             draw.rounded_rectangle([160, 260, 920, 320], radius=16, fill=(241, 245, 249), outline=(226, 232, 240), width=2)
-            draw.text((180, 274), f"🔒 ktrs.kr/{lang} • Official Tax System", fill=(100, 116, 139), font=font_sub)
+            draw.text((180, 274), f"🔒 ktrs-service.vercel.app/?lang={lang} • Official Tax System", fill=(100, 116, 139), font=font_sub)
 
             # 3. EasyTax 서비스 헤더 & 국세청 로고 엠블럼
             draw.text((180, 360), meta["header"], fill=(15, 23, 42), font=font_header)

@@ -13,7 +13,7 @@ import datetime
 import markdown
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, KST, get_now_kst, get_now_kst_str
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, EASYTAX_LANGUAGES, BASE_URLS, KST, get_now_kst, get_now_kst_str
 from core.db_manager import DBManager
 from core.supabase_manager import SupabaseManager
 from core.gemini_easytax import EasyTaxGeminiEngine
@@ -64,7 +64,7 @@ class EasyTaxBlogPublisher:
         today_str = get_now_kst().strftime("%Y%m%d")
         slug = f"{theme_id}-{today_str}"
 
-        ko_landing_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/ko/refund"
+        ko_landing_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/?lang=ko"
         ko_hashtags = self.trend_scraper.format_hashtag_string("easytax", "ko")
 
         # 💰 1단계: 제미나이 1회 호출로 한국어 마스터 칼럼 먼저 집필 + 글 맥락 맞춤 visual_prompt 동시 생성
@@ -94,7 +94,7 @@ class EasyTaxBlogPublisher:
         master_korean_article["content_html"] = markdown.markdown(content_md, extensions=['extra', 'tables', 'nl2br'])
         master_korean_article["thumbnail_url"] = thumb_url
 
-        langs_to_run = target_langs or list(LANGUAGES.keys())[:15]
+        langs_to_run = target_langs or EASYTAX_LANGUAGES
         # ko 제외한 번역 대상 언어
         foreign_langs = [l for l in langs_to_run if l != "ko"]
 
@@ -112,7 +112,7 @@ class EasyTaxBlogPublisher:
         uploaded_count = 0
 
         for idx, lang in enumerate(langs_to_run):
-            landing_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/{lang}/refund"
+            landing_url = f"{BASE_URLS.get('easytax', 'https://ktrs-service.vercel.app')}/?lang={lang}"
             hashtags = self.trend_scraper.format_hashtag_string("easytax", lang)
 
             translated_raw = all_translations.get(lang, master_korean_article)

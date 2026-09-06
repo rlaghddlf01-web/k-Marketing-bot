@@ -200,7 +200,7 @@ User Preferred Language: {lang_code}
 STRICT GUIDELINES:
 1. Answer warmly and concisely in 2~3 sentences in the user's language ({lang_code}).
 2. Explain Korean tax benefits (Article 30 90% income tax reduction for E-9/H-2/E-7, part-time 3.3% refund for D-2 students, 5-year past refund).
-3. Guide them to EasyTax ({et_url}) for a 3-minute free tax simulation with zero upfront fees.
+3. Guide them to EasyTax ({et_url}/?lang={lang_code}) for a 3-minute free tax simulation with zero upfront fees.
 4. Output ONLY the clean response message text."""
         else:
             km_url = BASE_URLS.get("kmarket", "https://ktrs-market.vercel.app")
@@ -213,7 +213,7 @@ User Preferred Language: {lang_code}
 STRICT GUIDELINES:
 1. Answer warmly and concisely in 2~3 sentences in the user's language ({lang_code}).
 2. Guide them on how to claim 0-won free furniture (beds, desks, fridges) and safe secondhand items with auto-translation chat.
-3. Guide them to K-Market ({km_url}).
+3. Guide them to K-Market ({km_url}/{lang_code}).
 4. Output ONLY the clean response message text."""
 
         try:

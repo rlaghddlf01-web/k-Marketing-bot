@@ -27,6 +27,7 @@ from core.auto_publishers.shorts_multi_publisher import ShortsMultiPublisher
 from core.supabase_manager import SupabaseManager
 from core.ui_overlay_easytax import UIOverlayEasyTax
 from core.screencast_video_provider import ScreencastVideoProvider
+from core.trend_scraper import ViralTrendScraper
 
 logger = logging.getLogger("ShortsEasyTax")
 
@@ -47,6 +48,7 @@ class ShortsEasyTax:
         self.supabase = SupabaseManager()
         self.ui_overlay = UIOverlayEasyTax()
         self.screencast_provider = ScreencastVideoProvider()
+        self.trend_scraper = ViralTrendScraper()
 
     def produce_shorts(self, lang: str = "vi", force_run: bool = False, engine_mode: str = "colab_gpu") -> Dict[str, Any]:
         """
@@ -206,7 +208,7 @@ class ShortsEasyTax:
                     "target_lang": lang,
                     "title": hook_title,
                     "content_text": voice_text,
-                    "target_url": f"https://ktrs.kr/{lang if lang != 'ko' else ''}",
+                    "target_url": f"https://ktrs-service.vercel.app/?lang={lang}",
                     "external_id": f"shorts_et_{lang}_{timestamp}",
                     "score": 95
                 }).execute()
@@ -214,13 +216,16 @@ class ShortsEasyTax:
         except Exception as e:
             logger.warning(f"EasyTax Supabase 기록 경고: {e}")
 
-        # 6. 🚀 4대 플랫폼(유튜브/틱톡/릴스/페북) EasyTax 공식 채널 배포
-        landing_url = f"https://ktrs.kr/{lang if lang != 'ko' else ''}"
+        # 6. 🚀 4대 플랫폼(유튜브/틱톡/릴스/페북) EasyTax 공식 채널 배포 (나라별 고유 해시태그 100% 자동 주입)
+        landing_url = f"https://ktrs-service.vercel.app/?lang={lang}"
+        country_hashtags = self.trend_scraper.format_hashtag_string("easytax", lang, count=10)
+        country_tags_list = [t.lstrip('#') for t in self.trend_scraper.get_viral_hashtags("easytax", lang, count=10)]
+
         video_description = (
             f"{hook_title}\n\n"
             f"Official Article 30 Expat Tax Refund in South Korea.\n"
             f"Check your estimated refund online: {landing_url}\n\n"
-            f"#KoreaTaxRefund #EasyTax #ExpatKorea #KTRS #TaxRelief"
+            f"{country_hashtags}"
         )
 
         publish_results = {}
@@ -231,7 +236,7 @@ class ShortsEasyTax:
                 "title": hook_title,
                 "description": video_description,
                 "video_path": str(mp4_path),
-                "tags": ["KoreaTaxRefund", "EasyTax", "ExpatKorea", "KTRS"]
+                "tags": country_tags_list or ["KoreaTaxRefund", "EasyTax", "ExpatKorea", "KTRS"]
             })
             logger.info(f"[{lang.upper()}] 🚀 EasyTax 4대 플랫폼 배포 완료: {publish_results}")
         except Exception as e:

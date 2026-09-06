@@ -70,15 +70,25 @@ class GeminiMediaGenerator:
         action = scenario_plan.get("action_prompt", "looking at smartphone with happy genuine smile")
         
         # ★ [대표님 절대 지침] 세계 최고의 바이럴 사진작가 실사 헌법 & 100% 무결점 사진 렌더링
-        human_centric_mandate = (
-            ", [CRITICAL DIRECTING MANDATE: WORLD-CLASS VIRAL PHOTOGRAPHY - 100% ERROR-FREE AUTHENTIC PORTRAIT]: "
-            "You are the world's greatest viral documentary portrait photographer. "
-            "The human protagonist is the absolute primary focal subject of this photo. "
-            "The person's expressive face, eyes, genuine smile, and upper body MUST occupy at least 70-80% of the frame. "
-            "The photo MUST look 100% like a real live photograph with zero anatomical errors, natural skin textures, and genuine human emotions. "
-            "Sharp portrait focus on the person's face and eyes. Any smartphone prop must be held upright in normal vertical orientation, small, and NEVER cover or block the person's face. "
-            "Do NOT draw fake unreadable text or inverted numbers on smartphone screens; keep screen display clean or blank."
-        )
+        is_two_shot = any(k in action.lower() for k in ["two-shot", "two diverse", "two people", "exchanging", "facing each other"])
+        if is_two_shot:
+            human_centric_mandate = (
+                ", [CRITICAL DIRECTING MANDATE: AUTHENTIC TWO-SHOT COMMUNITY PHOTOGRAPHY]: "
+                "You are a master documentary photographer. Both foreign resident protagonists are completely visible "
+                "from the waist up, standing facing each other in 3/4 profile. Both of their expressive, smiling faces "
+                "and warm eye contact MUST be fully visible and uncropped. The clean item/box being handed over and exchanged between them is clearly held. "
+                "Zero anatomical errors, authentic skin textures, genuine warm human interaction, natural Korean street lighting, 8k masterpiece."
+            )
+        else:
+            human_centric_mandate = (
+                ", [CRITICAL DIRECTING MANDATE: WORLD-CLASS VIRAL PHOTOGRAPHY - 100% ERROR-FREE AUTHENTIC PORTRAIT]: "
+                "You are the world's greatest viral documentary portrait photographer. "
+                "The human protagonist is the absolute primary focal subject of this photo. "
+                "The person's expressive face, eyes, genuine smile, and upper body MUST occupy at least 70-80% of the frame. "
+                "The photo MUST look 100% like a real live photograph with zero anatomical errors, natural skin textures, and genuine human emotions. "
+                "Sharp portrait focus on the person's face and eyes. Any smartphone prop must be held upright in normal vertical orientation, small, and NEVER cover or block the person's face. "
+                "Do NOT draw fake unreadable text or inverted numbers on smartphone screens; keep screen display clean or blank."
+            )
 
         continuity_prefix = ""
         ref_image = None

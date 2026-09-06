@@ -19,6 +19,7 @@ from typing import Dict, Any, List, Optional
 from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
 from core.scenario_director_shorts_kmarket import ScenarioDirectorShortsKMarket
 from core.kmarket_iframe_composer import KMarketIframeComposer
+from core.kmarket_screencast_provider import KMarketScreencastProvider
 from core.local_gpu_media_generator_kmarket import LocalGPUMediaGeneratorKMarket
 from core.gemini_media_generator import GeminiMediaGenerator
 from core.media_quality_verifier import MediaQualityVerifier
@@ -26,6 +27,7 @@ from core.motion_video_composer import MotionVideoComposer
 from core.tts_engine import TTSEngine
 from core.auto_publishers.shorts_multi_publisher import ShortsMultiPublisher
 from core.supabase_manager import SupabaseManager
+from core.trend_scraper import ViralTrendScraper
 
 logger = logging.getLogger("ShortsKMarket")
 
@@ -39,12 +41,14 @@ class ShortsKMarket:
 
         self.scenario_director = ScenarioDirectorShortsKMarket()
         self.iframe_composer = KMarketIframeComposer()
+        self.screencast_provider = KMarketScreencastProvider()
         self.gemini_media_gen = LocalGPUMediaGeneratorKMarket()
         self.quality_verifier = MediaQualityVerifier(service_id=self.service_id)
         self.motion_composer = MotionVideoComposer(output_dir=self.output_dir)
         self.tts_engine = TTSEngine()
         self.publisher = ShortsMultiPublisher()
         self.supabase = SupabaseManager()
+        self.trend_scraper = ViralTrendScraper()
 
     def produce_shorts(self, lang: str = "vi", force_mode: Optional[str] = None, engine_mode: str = "colab_gpu") -> Dict[str, Any]:
         """
@@ -88,16 +92,57 @@ class ShortsKMarket:
                 duration_sec=20.0
             )
 
-        # 3-B. 🎭 [Mode B (50%)]: 5단계 헐리웃 감동 자취/0원 나눔 드라마 렌더러
+        # 3-B. 🎭 [Mode B (50%)]: 5단계 헐리웃 감동 자취/0원 나눔 하이브리드 드라마 렌더러
         else:
             scene_images = []
-            for scene in scenario.get("scenes", []):
-                current_prompt = scene["image_prompt"]
-                current_neg = scene["negative_prompt"]
-                final_img_path = None
+            town_target = scenario.get("town", "신촌 연세대")
+            item_name = scenario.get("item", "원목 공부책상")
 
-                # 🛡️ 1회 생성 모드 (비용 1/3 통제 1-Shot 모드)
-                theme_id = f"{scenario['theme_id']}_s{scene['scene_idx']}"
+            for scene in scenario.get("scenes", []):
+                s_idx = scene["scene_idx"]
+                current_prompt = scene.get("image_prompt")
+                current_neg = scene.get("negative_prompt", "")
+                final_img_path = None
+                video_clip_path = None
+
+                # 📱 씬 3: 스마트폰 케이마켓 0원 매물 피드 스크롤 실물 비디오 클립 결합
+                if s_idx == 3:
+                    feed_clip = self.screencast_provider.get_or_render_feed_clip(
+                        lang=lang,
+                        target_area=town_target,
+                        item_name=item_name,
+                        duration_sec=scene.get("duration_sec", 3.5)
+                    )
+                    scene_images.append({
+                        "scene_idx": s_idx,
+                        "duration_sec": scene["duration_sec"],
+                        "image_path": None,
+                        "video_path": str(feed_clip) if feed_clip else None,
+                        "name": scene["name"]
+                    })
+                    logger.info(f"[{lang.upper()}] 📱 K-Market 씬 3/5 실물 모바일 0원 피드 클립 결합 완료!")
+                    continue
+
+                # 📱 씬 4: 매물 상세 팝업 + 17개 언어 실시간 1:1 자동번역 채팅 실물 비디오 클립 결합
+                elif s_idx == 4:
+                    detail_clip = self.screencast_provider.get_or_render_detail_clip(
+                        lang=lang,
+                        item_name=item_name,
+                        target_area=town_target,
+                        duration_sec=scene.get("duration_sec", 3.5)
+                    )
+                    scene_images.append({
+                        "scene_idx": s_idx,
+                        "duration_sec": scene["duration_sec"],
+                        "image_path": None,
+                        "video_path": str(detail_clip) if detail_clip else None,
+                        "name": scene["name"]
+                    })
+                    logger.info(f"[{lang.upper()}] 📱 K-Market 씬 4/5 실시간 1:1 자동번역 채팅 클립 결합 완료!")
+                    continue
+
+                # 🖼️ 씬 1, 2, 5: 고화질 인물 실사 이미지 생성 (비용 40% 절감 단 3장만 생성)
+                theme_id = f"{scenario['theme_id']}_s{s_idx}"
                 img_path = active_media_gen.generate_theme_image(
                     lang=lang,
                     theme_id=theme_id,
@@ -112,20 +157,20 @@ class ShortsKMarket:
 
                 final_img_path = img_path if img_path and Path(img_path).exists() else None
 
-                # AI 비전 품질 검사관 (로깅 및 품질 측정 전용 - 유료 재촬영 차단)
+                # AI 비전 품질 검사관
                 if final_img_path:
                     passed, q_score, reason, _ = self.quality_verifier.verify_scene_image(
                         final_img_path,
-                        scene_name=f"K-Market Scene {scene['scene_idx']} ({scene['name']})",
+                        scene_name=f"K-Market Scene {s_idx} ({scene['name']})",
                         lang=lang
                     )
-                    logger.info(f"[{lang.upper()}] 🖼 K-Market 씬 {scene['scene_idx']}/5 AI 품질 점수: {q_score}점 ({reason})")
-
+                    logger.info(f"[{lang.upper()}] 🖼 K-Market 씬 {s_idx}/5 AI 품질 점수: {q_score}점 ({reason})")
 
                 scene_images.append({
-                    "scene_idx": scene["scene_idx"],
+                    "scene_idx": s_idx,
                     "duration_sec": scene["duration_sec"],
                     "image_path": final_img_path,
+                    "video_path": None,
                     "name": scene["name"]
                 })
 
@@ -184,13 +229,16 @@ class ShortsKMarket:
         except Exception as e:
             logger.warning(f"K-Market Supabase 기록 경고: {e}")
 
-        # 5. 🚀 4대 플랫폼(유튜브/틱톡/릴스/페북) K-Market 공식 채널 배포
+        # 5. 🚀 4대 플랫폼(유튜브/틱톡/릴스/페북) K-Market 공식 채널 배포 (나라별 고유 해시태그 100% 자동 주입)
         landing_url = f"https://ktrs-market.vercel.app/{lang if lang != 'ko' else ''}"
+        country_hashtags = self.trend_scraper.format_hashtag_string("kmarket", lang, count=10)
+        country_tags_list = [t.lstrip('#') for t in self.trend_scraper.get_viral_hashtags("kmarket", lang, count=10)]
+
         video_description = (
             f"{hook_title}\n\n"
             f"Free 0 Won Giveaways & Safe Second-Hand Campus Trades in South Korea!\n"
             f"Download/Visit: {landing_url}\n\n"
-            f"#KMarket #KoreaExpat #FreeStuffKorea #KoreaLife #0WonGiveaway"
+            f"{country_hashtags}"
         )
 
         publish_results = {}
@@ -201,7 +249,7 @@ class ShortsKMarket:
                 "title": hook_title,
                 "description": video_description,
                 "video_path": str(mp4_path),
-                "tags": ["KMarket", "KoreaExpat", "FreeStuffKorea", "KoreaLife"]
+                "tags": country_tags_list or ["KMarket", "KoreaExpat", "FreeStuffKorea", "KoreaLife"]
             })
             logger.info(f"[{lang.upper()}] 🚀 K-Market 4대 플랫폼 배포 완료: {publish_results}")
         except Exception as e:

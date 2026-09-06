@@ -176,14 +176,32 @@ class ViralTrendScraper:
                 "easytax": ["#韓国年末調整", "#韓国還付金", "#在韓税金手続き", "#韓国所得税還付", "#easytaxjp"],
                 "hot_districts": ["#sinchon_japan", "#ichon_seoul", "#hongdae_japan"]
             },
-            "tl": {
-                "name": "Filipino / Tagalog (필리핀)",
-                "flag": "🇵🇭",
-                "target_group": "혜화동 필리핀 마켓, 원어민 강사, 전국 대학 유학생/근로자",
-                "in_korea_common": ["#pinoysakorea", "#ofwkorea", "#buhaykorea", "#filipinoinkorea", "#seoulpinoy", "#fyp"],
-                "kmarket": ["#gamitsakorea", "#freeitemsseoul", "#kmarketpinoy", "#secondhandkorea"],
-                "easytax": ["#koreataxrefundpinoy", "#easytaxph", "#withholdingtaxkorea", "#insuranceseoul"],
-                "hot_districts": ["#hyehwa_pinoy", "#itaewon_filipino", "#pyeongtaek_pinoy"]
+            "si": {
+                "name": "සිංහල (스리랑카)",
+                "flag": "🇱🇰",
+                "target_group": "김포, 안산, 대구, 포천 등 스리랑카 E-9 근로자 및 유학생",
+                "in_korea_common": ["#srilankaninkorea", "#korealife_sl", "#koreyaweda", "#koreyasinghala", "#sinhalainkorea", "#fyp"],
+                "kmarket": ["#srilankakmarket", "#koreabadu", "#koreafreeitems", "#koreasecondhand", "#kmarketsl"],
+                "easytax": ["#koreatax_sl", "#koreasoliq_sl", "#srilankataxrefund", "#easytaxsl", "#koreataxrelief"],
+                "hot_districts": ["#gimpo_sl", "#ansan_srilanka", "#daegu_sl"]
+            },
+            "kk": {
+                "name": "Қазақша (카자흐스탄)",
+                "flag": "🇰🇿",
+                "target_group": "안산 땟골마을, 인천, 동대문 등 카자흐스탄 유학생 및 중앙아시아 근로자",
+                "in_korea_common": ["#кореядағықазақтар", "#кореядағыөмір", "#кореядажұмыс", "#қазақтаркореяда", "#кореястуденттері", "#fyp"],
+                "kmarket": ["#кореяарзанзаттар", "#кореятегінзаттар", "#kmarketkz", "#кореябұйымдар", "#kmarketkazakh"],
+                "easytax": ["#кореясалыққайтару", "#салыққайтарукорея", "#easytaxkz", "#салықжеңілдігі90"],
+                "hot_districts": ["#ansan_kazakh", "#dongdaemun_kz", "#incheon_kz"]
+            },
+            "ur": {
+                "name": "اردو (파키스탄)",
+                "flag": "🇵🇰",
+                "target_group": "이태원, 안산, 시흥, 인천 등 파키스탄 기술인력 및 유학생/근로자",
+                "in_korea_common": ["#pakistaniinkorea", "#korealifepk", "#pakistanisinseoul", "#koreaworkpk", "#pakistanikorea", "#fyp"],
+                "kmarket": ["#kmarketpakistan", "#koreafreestuffpk", "#pakistanikoreamarket", "#kmarketpk"],
+                "easytax": ["#koreataxrefundpk", "#incometaxkoreapk", "#easytaxpk", "#taxrelief90"],
+                "hot_districts": ["#itaewon_pak", "#ansan_pakistan", "#incheon_pak"]
             },
             "bn": {
                 "name": "বাংলা (방글라데시)",
@@ -193,24 +211,6 @@ class ViralTrendScraper:
                 "kmarket": ["#koreasecondhandbd", "#freeinkoreabd", "#kmarketbd"],
                 "easytax": ["#taxrefundkoreabd", "#easytaxbd", "#koreataxreturn"],
                 "hot_districts": ["#itaewon_bd", "#ansan_bd", "#daejeon_research"]
-            },
-            "ar": {
-                "name": "العربية (아랍/중동)",
-                "flag": "🇸🇦",
-                "target_group": "이태원 모스크 인근, 서울 주요 대학 의학/공학 유학생",
-                "in_korea_common": ["#العرب_في_كوريا", "#الدراسة_في_كوريا", "#الحياة_في_كوريا", "#كوريا_الجنوبية", "#fyp"],
-                "kmarket": ["#مستعمل_كوريا", "#مجاني_كوريا", "#سوق_كوريا", "#kmarketar"],
-                "easytax": ["#استرداد_الضرائب_كوريا", "#ضرائب_كوريا", "#easytaxar"],
-                "hot_districts": ["#itaewon_arab", "#seoul_arab_students", "#gangnam_medical"]
-            },
-            "es": {
-                "name": "Español (스페인/남미)",
-                "flag": "🇪🇸",
-                "target_group": "고려대/연세대/서울대 교환학생, 중남미 유학생 커뮤니티",
-                "in_korea_common": ["#latinosenkorea", "#estudiarencorea", "#vidaencorea", "#espanolesencorea", "#seoulvida", "#fyp"],
-                "kmarket": ["#segundamanocorea", "#gratiscorea", "#mueblesseoul", "#kmarketes"],
-                "easytax": ["#devolucionimpuestoscorea", "#impuestoscorea", "#easytaxes"],
-                "hot_districts": ["#hongdae_latinos", "#sinchon_expats", "#korea_univ_exchange"]
             },
             "ko": {
                 "name": "한국어 (국내)",

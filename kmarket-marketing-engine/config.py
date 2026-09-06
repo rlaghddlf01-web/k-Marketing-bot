@@ -37,19 +37,24 @@ FONTS_DIR.mkdir(parents=True, exist_ok=True)
 # Load environment variables
 load_dotenv(BASE_DIR / ".env")
 
-# 17 Languages & Edge-TTS Voice Mapping
+# 🎯 공식 17개국(K-Market) 및 15개국(EasyTax) 언어 표준 정의
+KMARKET_LANGUAGES = [
+    "ko", "vi", "zh", "en", "ja", "ru", "th", "uz", 
+    "km", "mn", "ne", "id", "my", "si", "kk", "bn", "ur"
+]
+
+EASYTAX_LANGUAGES = [
+    "ko", "vi", "zh", "km", "ne", "uz", "my", "id", 
+    "th", "en", "si", "mn", "bn", "kk", "ur"
+]
+
+# 17 Languages & Edge-TTS Voice Mapping (실제 K-Market 및 EasyTax 서비스 100% 동기화)
 LANGUAGES = {
     "ko": {
         "name": "Korean",
         "native_name": "한국어",
         "voice": "ko-KR-SunHiNeural",
         "target": "국내 거주 다문화 및 외국인 공통"
-    },
-    "en": {
-        "name": "English",
-        "native_name": "English",
-        "voice": "en-US-JennyNeural",
-        "target": "교환학생, 원어민 강사, 주한미군, 글로벌 IT 직장인"
     },
     "vi": {
         "name": "Vietnamese",
@@ -63,23 +68,23 @@ LANGUAGES = {
         "voice": "zh-CN-XiaoxiaoNeural",
         "target": "국내 유학생, 어학당, 체류 교민"
     },
-    "mn": {
-        "name": "Mongolian",
-        "native_name": "Монгол",
-        "voice": "mn-MN-YesuiNeural",
-        "target": "안산, 수원, 동대문 거주 몽골인 커뮤니티"
+    "en": {
+        "name": "English",
+        "native_name": "English",
+        "voice": "en-US-JennyNeural",
+        "target": "교환학생, 원어민 강사, 주한미군, 글로벌 IT 직장인 및 필리핀 커뮤니티"
     },
-    "uz": {
-        "name": "Uzbek",
-        "native_name": "O'zbek",
-        "voice": "uz-UZ-MadinaNeural",
-        "target": "이태원, 광주, 평택 등 우즈벡 유학생/근로자"
+    "ja": {
+        "name": "Japanese",
+        "native_name": "日本語",
+        "voice": "ja-JP-NanamiNeural",
+        "target": "교환학생 및 국내 거주 일본인 (케이마켓 전용)"
     },
     "ru": {
         "name": "Russian",
         "native_name": "Русский",
         "voice": "ru-RU-SvetlanaNeural",
-        "target": "중앙아시아 고려인 및 러시아어권 체류자"
+        "target": "중앙아시아 고려인 및 러시아어권 체류자 (케이마켓 전용)"
     },
     "th": {
         "name": "Thai",
@@ -87,11 +92,11 @@ LANGUAGES = {
         "voice": "th-TH-PremwadeeNeural",
         "target": "전국 산업 단지 및 문화 교류자"
     },
-    "id": {
-        "name": "Indonesian",
-        "native_name": "Bahasa Indonesia",
-        "voice": "id-ID-GadisNeural",
-        "target": "해양/제조업 근로자 및 유학생"
+    "uz": {
+        "name": "Uzbek",
+        "native_name": "O'zbek",
+        "voice": "uz-UZ-MadinaNeural",
+        "target": "이태원, 광주, 평택 등 우즈벡 유학생/근로자"
     },
     "km": {
         "name": "Khmer",
@@ -99,11 +104,23 @@ LANGUAGES = {
         "voice": "km-KH-SreymomNeural",
         "target": "제조업/농축산업 근로자"
     },
+    "mn": {
+        "name": "Mongolian",
+        "native_name": "Монгол",
+        "voice": "mn-MN-YesuiNeural",
+        "target": "안산, 수원, 동대문 거주 몽골인 커뮤니티"
+    },
     "ne": {
         "name": "Nepali",
         "native_name": "नेपाली",
         "voice": "ne-NP-HemkalaNeural",
         "target": "유학생 및 외국인 근로자"
+    },
+    "id": {
+        "name": "Indonesian",
+        "native_name": "Bahasa Indonesia",
+        "voice": "id-ID-GadisNeural",
+        "target": "해양/제조업 근로자 및 유학생"
     },
     "my": {
         "name": "Burmese",
@@ -111,78 +128,70 @@ LANGUAGES = {
         "voice": "my-MM-NilarNeural",
         "target": "어학당 및 유학생"
     },
-    "ja": {
-        "name": "Japanese",
-        "native_name": "日本語",
-        "voice": "ja-JP-NanamiNeural",
-        "target": "교환학생 및 국내 거주 일본인"
+    "si": {
+        "name": "Sinhala",
+        "native_name": "සිංහල",
+        "voice": "si-LK-ThiliniNeural",
+        "target": "스리랑카 근로자 및 유학생"
     },
-    "tl": {
-        "name": "Tagalog",
-        "native_name": "Filipino",
-        "voice": "fil-PH-BlessicaNeural",
-        "target": "영어 강사 및 유학생"
+    "kk": {
+        "name": "Kazakh",
+        "native_name": "Қазақша",
+        "voice": "kk-KZ-AigulNeural",
+        "target": "카자흐스탄 유학생 및 중앙아시아 근로자"
     },
     "bn": {
         "name": "Bengali",
         "native_name": "বাংলা",
         "voice": "bn-BD-NabanitaNeural",
-        "target": "방글라데시 유학생/연구원"
+        "target": "방글라데시 유학생/연구원/근로자"
     },
-    "ar": {
-        "name": "Arabic",
-        "native_name": "العربية",
-        "voice": "ar-SA-ZariyahNeural",
-        "target": "중동 유학생 및 의료 관광객",
-        "rtl": True
-    },
-    "es": {
-        "name": "Spanish",
-        "native_name": "Español",
-        "voice": "es-ES-ElviraNeural",
-        "target": "남미/스페인 교환학생"
+    "ur": {
+        "name": "Urdu",
+        "native_name": "اردو",
+        "voice": "ur-PK-UzmaNeural",
+        "target": "파키스탄 기술인력 및 유학생/근로자"
     }
 }
 
-# 🎯 17개국 인구통계 & 비자 유형 기반 맞춤 가중치 (총합 100%)
+# 🎯 K-Market 17개국 인구통계 & 비자 유형 기반 맞춤 가중치 (총합 100%)
 KMARKET_LANGUAGE_WEIGHTS = {
-    "zh": 25.0,  # 중국/중화권 (85만 유학생/거주자)
+    "zh": 23.0,  # 중국/중화권 (85만 유학생/거주자)
     "vi": 22.0,  # 베트남 (유학생 1위, 0원 나눔 최다 수요)
-    "en": 15.0,  # 글로벌 영어 (대학가 유학생/원어민)
+    "en": 14.0,  # 글로벌 영어 (대학가 유학생/원어민)
     "uz": 8.0,   # 우즈베키스탄 (공단/대학가 밀집)
-    "mn": 7.0,   # 몽골 (수도권 대학가 0원 나눔 높은 반응)
+    "mn": 6.0,   # 몽골 (수도권 대학가 0원 나눔)
     "ru": 5.0,   # 러시아/CIS (고려인 밀집촌)
     "th": 3.0,   # 태국
     "id": 3.0,   # 인도네시아
-    "ja": 2.0,   # 일본
-    "tl": 2.0,   # 필리핀
+    "ja": 3.0,   # 일본 (교환학생/거주민)
     "ne": 2.0,   # 네팔
     "km": 2.0,   # 캄보디아
-    "my": 1.0,   # 미얀마
-    "bn": 1.0,   # 방글라데시
-    "es": 1.0,   # 스페인어권
-    "ar": 0.5,   # 아랍권
-    "ko": 0.5    # 한국어/다문화
+    "my": 2.0,   # 미얀마
+    "si": 2.0,   # 스리랑카
+    "kk": 1.5,   # 카자흐스탄
+    "bn": 1.5,   # 방글라데시
+    "ur": 1.0,   # 파키스탄
+    "ko": 1.0    # 한국어/다문화
 }
 
+# 🎯 EasyTax 15개국 E-9 고용허가제 및 세무환급 특화 가중치 (총합 100%)
 EASYTAX_LANGUAGE_WEIGHTS = {
-    "vi": 25.0,  # 베트남 (E-9 근로자 1위 + 유학생 알바 1위, 최다 환급액)
-    "uz": 14.0,  # 우즈베키스탄 (E-9 제조업 90% 소득세 감면 핵심)
-    "zh": 12.0,  # 중국/중화권 (F-4/H-2 및 유학생)
-    "en": 8.0,   # 글로벌 영어 (원어민 강사/IT 전문직 5개년 경정청구)
+    "vi": 26.0,  # 베트남 (E-9 근로자 1위 + 알바 1위, 최다 환급액)
+    "uz": 15.0,  # 우즈베키스탄 (E-9 제조업 90% 소득세 감면 핵심)
+    "zh": 13.0,  # 중국/중화권 (F-4/H-2 및 유학생)
+    "en": 8.0,   # 글로벌 영어 (원어민/IT/필리핀 E-9)
     "th": 8.0,   # 태국 (E-9 근로자 퇴직금/소득세 환급)
-    "ru": 7.0,   # 러시아/CIS (고려인 및 공단 근로자)
     "id": 6.0,   # 인도네시아 (E-9 제조업/선원 환급)
     "ne": 5.0,   # 네팔 (E-9 성실 근로자)
-    "tl": 3.0,   # 필리핀 (E-9 및 전문인력)
-    "km": 3.0,   # 캄보디아 (E-9 농축산/제조업)
+    "km": 4.0,   # 캄보디아 (E-9 농축산/제조업)
     "mn": 4.0,   # 몽골 (유학생 알바 소득세 환급)
-    "my": 2.0,   # 미얀마 (E-9 근로자)
-    "bn": 1.0,   # 방글라데시 (E-9 근로자)
-    "ja": 0.5,   # 일본
-    "es": 0.5,   # 스페인어권
-    "ar": 0.5,   # 아랍권
-    "ko": 0.5    # 한국어/다문화
+    "my": 3.0,   # 미얀마 (E-9 근로자)
+    "si": 2.5,   # 스리랑카 (E-9 근로자)
+    "bn": 2.0,   # 방글라데시 (E-9 근로자)
+    "kk": 1.5,   # 카자흐스탄 (근로자/유학생)
+    "ur": 1.0,   # 파키스탄 (E-9 기술근로자)
+    "ko": 1.0    # 한국어/다문화
 }
 
 def get_weighted_language(brand: str = "kmarket") -> str:

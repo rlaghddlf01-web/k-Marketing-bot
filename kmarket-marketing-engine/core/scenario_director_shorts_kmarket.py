@@ -155,7 +155,7 @@ KMARKET_PERSONA_ANCHORS = [
     }
 ]
 
-# 🎯 17개국 20초 나레이션 대본 템플릿 생성 엔진
+# 🎯 17개국 20초 나레이션 대본 템플릿 생성 엔진 (카드뉴스 감동 첫 만남 공식 동기화)
 def get_i18n_script(lang: str, theme: Dict[str, Any]) -> Dict[str, Any]:
     name = theme["name"]
     target = theme["target"]
@@ -164,121 +164,121 @@ def get_i18n_script(lang: str, theme: Dict[str, Any]) -> Dict[str, Any]:
     scripts = {
         "vi": {
             "title": f"K-Market 0 Won: {name}",
-            "voice_text": f"Bạn đang ở khu vực {target}? Đừng mua đồ nội thất đắt đỏ! Trên app K-Market hôm nay đang tặng miễn phí {item} và hàng trăm đồ dùng 0 Won từ sinh viên và người chuyển nhà. Tải K-Market nhận ngay hôm nay!",
+            "voice_text": f"Đừng mua đồ nội thất đắt đỏ tại {target}! Hôm nay tôi đã nhận miễn phí {item} từ người hàng xóm tốt bụng, tiết kiệm hơn 1,5 triệu Won. Bí quyết là ứng dụng K-Market! Hàng trăm đồ dùng 0 Won được tặng mỗi ngày với dịch tự động 17 ngôn ngữ. Nhấp vào link bio nhận ngay hôm nay!",
             "captions": ["🎁 0 Won MIỄN PHÍ!", f"📍 {target}"],
-            "s1_badge": "PHÒNG TRỌ MỚI TẠI HÀN",
-            "s1_main": f"Phòng Trống Tại {target}",
-            "s1_sub": f"Mua {item} mới quá đắt đỏ",
-            "s2_badge": "ÁP LỰC CHI PHÍ",
-            "s2_main": f"Giá {item} Quá Cao?",
-            "s2_sub": f"Tốn hàng trăm nghìn Won...",
-            "s3_badge": "KHÁM PHÁ K-MARKET",
-            "s3_main": f"Tặng {item} 0 Won!",
-            "s3_sub": "Đồ dùng còn rất mới từ người tốt nghiệp",
-            "s4_badge": "GIAO DỊCH ẤM ÁP",
-            "s4_main": "Giao Dịch 1:1 An Toàn",
-            "s4_sub": "Chat tự động dịch 17 ngôn ngữ",
-            "s5_badge": "CĂN PHÒNG HOÀN HẢO",
-            "s5_main": "Nhấp Vào Link Bio",
+            "s1_badge": "GIAO DỊCH ẤM ÁP",
+            "s1_main": f"Nhận {item} 0 Won Tại {target}",
+            "s1_sub": "Được hàng xóm tốt bụng tặng miễn phí",
+            "s2_badge": "CĂN PHÒNG HOÀN HẢO",
+            "s2_main": "Tiết Kiệm 1.500.000 Won!",
+            "s2_sub": "Căn phòng trở nên ấm cúng và đầy đủ",
+            "s3_badge": "BÍ QUYẾT Ở ĐÂU?",
+            "s3_main": "Ứng Dụng K-Market 0 Won",
+            "s3_sub": "Hàng trăm món đồ 0 Won từ người chuyển nhà",
+            "s4_badge": "AN TÂM 1:1",
+            "s4_main": "Tự Động Dịch 17 Ngôn Ngữ",
+            "s4_sub": "Chat và hẹn gặp an toàn chỉ trong 10 phút",
+            "s5_badge": "NHẬN 0 WON NGAY",
+            "s5_main": "Nhấp Vào Link Trong Bio",
             "s5_sub": f"Nhận ngay {item} 0 Won hôm nay!"
         },
         "uz": {
             "title": f"K-Market 0 Von: {name}",
-            "voice_text": f"Siz {target} atrofida yashaysizmi? Qimmat mebel sotib olmang! Bugun K-Market ilovasida {item} va yuzlab buyumlar 0 von bepul berilmoqda. 17 tildagi avtomatik tarjima bilan hoziroq bepul oling!",
+            "voice_text": f"{target}da qimmat mebel sotib olmang! Bugun saxiy qo'shnimdan {item}ni 0 vonga bepul olib, 1.5 million von tejab qoldim. Sirri K-Market ilovasida! Har kuni yuzlab 0 vonlik buyumlar berilmoqda. 17 tildagi avtomatik tarjima bilan profil havolasidan hoziroq bepul oling!",
             "captions": ["🎁 0 Von BEPUL!", f"📍 {target}"],
-            "s1_badge": "YANGI XONA KOREYADA",
-            "s1_main": f"{target} Bo'm-bo'sh Xona",
-            "s1_sub": f"Yangi {item} juda qimmat",
-            "s2_badge": "XARAJAT TASHVISHI",
-            "s2_main": f"{item} Narxi Qimmatmi?",
-            "s2_sub": "Yuz minglab von turadi...",
-            "s3_badge": "K-MARKETNI TOPDIK",
-            "s3_main": f"0 Vonlik Bepul {item}!",
-            "s3_sub": "Yangi holatdagi tekin mebellar",
-            "s4_badge": "SAMIMIY UCHRASHUV",
-            "s4_main": "Xavfsiz 1:1 Qabul Qilish",
-            "s4_sub": "17 tildagi avtomatik tarjima",
-            "s5_badge": "SHINNAM XONA TAYYOR",
+            "s1_badge": "SAMIMIY UCHRASHUV",
+            "s1_main": f"{target}da 0 Vonga {item} Oldim",
+            "s1_sub": "Mehribon qo'shnidan tekinga sovg'a",
+            "s2_badge": "SHINNAM XONA TAYYOR",
+            "s2_main": "1.500.000 Von Tejandi!",
+            "s2_sub": "Xonam bir kunda shinam holga keldi",
+            "s3_badge": "SIRRI NIMADA?",
+            "s3_main": "K-Market 0 Von Ilovasi",
+            "s3_sub": "Ko'chib ketuvchilardan bepul buyumlar",
+            "s4_badge": "XAVFSIZ 1:1 CHAT",
+            "s4_main": "17 Tildagi Avtomatik Tarjima",
+            "s4_sub": "10 daqiqada xavfsiz uchrashuv belgilandi",
+            "s5_badge": "BEPUL OLING",
             "s5_main": "Profil Havolasini Bosing",
-            "s5_sub": f"Bugun {item}ni bepul oling!"
+            "s5_sub": f"Bugun {item}ni bepul olib keting!"
         },
         "ru": {
             "title": f"K-Market 0 Вон: {name}",
-            "voice_text": f"Живете в районе {target}? Не тратьте деньги на дорогую мебель! В приложении K-Market прямо сейчас бесплатно отдают {item} и сотни других вещей за 0 вон. Скачайте K-Market и заберите даром!",
+            "voice_text": f"Не тратьте деньги на дорогую мебель в {target}! Сегодня я бесплатно забрал отличный {item} у доброго соседа, сэкономив 1.5 миллиона вон. Секрет в приложении K-Market! Сотни бесплатных вещей отдают каждый день с автопереводом на 17 языков. Жмите ссылку в профиле и забирайте даром!",
             "captions": ["🎁 0 Вон БЕСПЛАТНО!", f"📍 {target}"],
-            "s1_badge": "НОВАЯ КОМНАТА В КОРЕЕ",
-            "s1_main": f"Пустая Комната в {target}",
-            "s1_sub": f"Новая {item} стоит дорого",
-            "s2_badge": "ДОРОГИЕ РАСХОДЫ",
-            "s2_main": f"Где Взять {item}?",
-            "s2_sub": "Тратить сотни тысяч вон...",
-            "s3_badge": "ОТКРЫТИЕ K-MARKET",
-            "s3_main": f"Бесплатная {item} За 0 Вон!",
-            "s3_sub": "Отличные вещи отдают даром",
-            "s4_badge": "ТЕПЛАЯ ВСТРЕЧА",
-            "s4_main": "Безопасная 1:1 Сделка",
-            "s4_sub": "Авто-переводчик на 17 языков",
-            "s5_badge": "УЮТНЫЙ ДОМ ГОТОВ",
-            "s5_main": "Жми На Ссылку В Профиле",
-            "s5_sub": f"Забирай {item} за 0 вон прямо сейчас!"
+            "s1_badge": "ТЕПЛАЯ ВСТРЕЧА",
+            "s1_main": f"Забрал {item} За 0 Вон в {target}",
+            "s1_sub": "Подарок от доброго соседа по району",
+            "s2_badge": "УЮТНЫЙ ДОМ ГОТОВ",
+            "s2_main": "Сэкономил 1.500.000 Вон!",
+            "s2_sub": "Комната преобразилась всего за один день",
+            "s3_badge": "В ЧЕМ СЕКРЕТ?",
+            "s3_main": "Приложение K-Market 0 Вон",
+            "s3_sub": "Сотни вещей за 0 вон от выпускников",
+            "s4_badge": "БЕЗОПАСНАЯ СДЕЛКА",
+            "s4_main": "Авто-Переводчик На 17 Языков",
+            "s4_sub": "Встреча возле дома за 10 минут",
+            "s5_badge": "ЗАБИРАЙТЕ ДАРОМ",
+            "s5_main": "Жми Ссылку В Профиле",
+            "s5_sub": f"Заберите {item} за 0 вон прямо сейчас!"
         },
         "en": {
             "title": f"K-Market $0 Free: {name}",
-            "voice_text": f"Living near {target}? Don't waste money on expensive furniture! On K-Market app today, clean {item} and hundreds of items are given away 100% free. Download K-Market and grab yours now!",
+            "voice_text": f"Don't waste money on expensive furniture in {target}! Today I got a clean {item} 100% free from a kind neighbor, saving over 1.5 million Won. The secret is K-Market app! Hundreds of $0 free items posted daily with instant 17-language chat translation. Check the link in bio to grab your $0 free items today!",
             "captions": ["🎁 $0 Won 100% FREE!", f"📍 {target}"],
-            "s1_badge": "FIRST STUDIO IN KOREA",
-            "s1_main": f"Empty Room in {target}",
-            "s1_sub": f"Brand new {item} is too expensive",
-            "s2_badge": "BUDGET OVERLOAD",
-            "s2_main": f"Where To Get {item}?",
-            "s2_sub": "Costs hundreds of thousands of Won...",
-            "s3_badge": "DISCOVERED K-MARKET",
-            "s3_main": f"$0 Free {item} Giveaways!",
-            "s3_sub": "Graduating seniors giving away neat items",
-            "s4_badge": "HEARTWARMING MEETUP",
-            "s4_main": "Safe 1:1 Direct Meetup",
-            "s4_sub": "Instant auto-translated chat in 17 languages",
-            "s5_badge": "DREAM COZY ROOM",
+            "s1_badge": "HEARTWARMING MEETUP",
+            "s1_main": f"Claimed Free {item} in {target}",
+            "s1_sub": "Gifted by a wonderful local neighbor",
+            "s2_badge": "DREAM COZY ROOM",
+            "s2_main": "Saved 1,500,000 KRW!",
+            "s2_sub": "Turned empty studio into cozy sweet home",
+            "s3_badge": "HOW TO GET IT?",
+            "s3_main": "K-Market $0 Free App Feed",
+            "s3_sub": "Hundreds of $0 free giveaways from moving expats",
+            "s4_badge": "SAFE 1:1 TRADING",
+            "s4_main": "17 Languages Instant Auto-Chat",
+            "s4_sub": "Coordinated meetup outside within 10 minutes",
+            "s5_badge": "CLAIM $0 FREE TODAY",
             "s5_main": "Click Link In Bio Now",
-            "s5_sub": f"Claim your $0 free {item} today!"
+            "s5_sub": f"Get your $0 free {item} today!"
         },
         "zh": {
             "title": f"K-Market 0韩元好物: {name}",
-            "voice_text": f"住在 {target} 附近吗？千万别花大钱买家具！今天在 K-Market App 上，有毕业前辈免费赠送九成新 {item} 和海量 0元好物。支持 17 种语言自动翻译，快来免费领取吧！",
+            "voice_text": f"在 {target} 千万别花大钱买家具！今天我在好心邻居那免费领到了九成新 {item}，立省 150万韩元。秘诀就是 K-Market App！毕业前辈每天发布海量 0元好物，支持 17 种语言自动翻译。快点击主页链接免费领取吧！",
             "captions": ["🎁 0 韩元免费赠送!", f"📍 {target}"],
-            "s1_badge": "韩国租房第一天",
-            "s1_main": f"{target} 空荡荡的房间",
-            "s1_sub": f"买全新 {item} 实在太贵",
-            "s2_badge": "沉重开销压力",
-            "s2_main": f"买不起 {item} 怎么办？",
-            "s2_sub": f"到处都要花几十万韩元...",
-            "s3_badge": "发现K-MARKET",
-            "s3_main": f"海量 0元免费赠送 {item}！",
-            "s3_sub": "毕业回国前辈免费赠送九成新好物",
-            "s4_badge": "温馨安全直交易",
-            "s4_main": "校门口 1:1 当面安全交接",
-            "s4_sub": "17国语言实时自动翻译",
-            "s5_badge": "打造温馨小窝",
-            "s5_main": "立即点击主页简介链接",
+            "s1_badge": "温馨暖心直交",
+            "s1_main": f"在 {target} 免费领到 {item}",
+            "s1_sub": "好心邻居前辈免费赠送九成新好物",
+            "s2_badge": "温馨小窝完成",
+            "s2_main": "立省 1,500,000 韩元！",
+            "s2_sub": "空荡荡的房间瞬间变身温馨小窝",
+            "s3_badge": "从哪里找到的？",
+            "s3_main": "K-Market 0韩元好物 App",
+            "s3_sub": "海量毕业回国前辈 0元大方赠送",
+            "s4_badge": "安全 1:1 直交",
+            "s4_main": "17国语言实时自动翻译",
+            "s4_sub": "无语言障碍 10分钟校门口安全交接",
+            "s5_badge": "立即免费领取",
+            "s5_main": "点击主页简介链接",
             "s5_sub": f"马上领取今日 0元 {item}！"
         },
         "ko": {
             "title": f"K-Market 0원 나눔: {name}",
-            "voice_text": f"{target} 근처 자취생·유학생 여러분! 비싼 가구 사지 마세요. 오늘 K-Market 앱에서 깨끗한 {item}을 포함한 수백 개의 0원 무료나눔 매물이 올라왔습니다. 지금 바로 0원에 득템하세요!",
+            "voice_text": f"{target}에서 비싼 가구 사지 마세요! 오늘 이웃에게 깨끗한 {item}을 0원에 무료 나눔받아 가구값 150만 원을 아꼈습니다. 비결은 바로 K-Market 앱! 매일 쏟아지는 0원 매물과 17개 언어 실시간 자동 번역으로 10분 만에 안심 직거래 완료. 지금 프로필 링크에서 0원 매물을 확인하세요!",
             "captions": ["🎁 0원 무료 나눔!", f"📍 {target}"],
-            "s1_badge": "STEP 1: 차가운 방바닥",
-            "s1_main": f"{target} 원룸 입주 첫날",
-            "s1_sub": f"새 {item} 사기엔 너무 비싼 자취 생활",
-            "s2_badge": "STEP 2: 가격 부담",
-            "s2_main": "가구 살 돈이 부족할 때?",
-            "s2_sub": f"{item} 가격만 수십만 원...",
-            "s3_badge": "STEP 3: 0원 득템 발견",
-            "s3_main": f"K-Market 0원 무료나눔!",
-            "s3_sub": f"{target} 이웃이 선물하는 깨끗한 {item}",
-            "s4_badge": "STEP 4: 안심 직거래",
-            "s4_main": "따뜻한 이웃과 1:1 직거래",
-            "s4_sub": "17개 언어 자동번역으로 100% 안심",
-            "s5_badge": "STEP 5: 아늑한 내 방",
+            "s1_badge": "따뜻한 이웃 나눔",
+            "s1_main": f"{target} 0원 직거래 수령",
+            "s1_sub": f"선배와 이웃이 선물하는 깨끗한 {item}",
+            "s2_badge": "아늑한 방 완성",
+            "s2_main": "가구값 150만원 절약 성공!",
+            "s2_sub": "텅 빈 방이 하루 만에 완벽한 스위트룸으로",
+            "s3_badge": "도대체 어디서?",
+            "s3_main": "K-Market 0원 무료나눔 피드",
+            "s3_sub": "매일 쏟아지는 0원 실물 가구·가전 매물",
+            "s4_badge": "안심 1:1 직거래",
+            "s4_main": "17개 언어 실시간 자동번역",
+            "s4_sub": "채팅 10분 만에 집 앞에서 안전하게 약속 완료",
+            "s5_badge": "지금 0원 득템",
             "s5_main": "프로필 링크에서 지금 받기",
             "s5_sub": f"K-Market 앱에서 오늘 0원 {item} 바로 신청하세요!"
         }
@@ -342,75 +342,73 @@ class ScenarioDirectorShortsKMarket:
             }
 
         else:
-            # 🎭 [B타입 (50%)]: 5단계 헐리웃 감동 드라마 모드 (1~5씬 동일 인물 완전 고정)
+            # 🎭 [B타입 (50%)]: 5단계 헐리웃 감동 드라마 모드 (카드뉴스 첫 만남 감동 공식 + 씬 3,4 실물 웹 하이브리드)
             scenes = [
                 {
                     "scene_idx": 1,
-                    "name": "텅 빈 원룸의 막막함",
-                    "duration_sec": 4.5,
+                    "name": "따뜻한 이웃 0원 나눔 만남",
+                    "duration_sec": 3.8,
                     "badge": script_meta["s1_badge"],
                     "main_text": script_meta["s1_main"],
                     "sub_text": script_meta["s1_sub"],
-                    "image_prompt": build_scene_prompt(
-                        scene_idx=1, char=char,
-                        scene_action=f"sitting on the yellow linoleum floor of a real empty Korean studio apartment room surrounded by open cardboard moving boxes and packing tape near {theme['target']}, wiping forehead looking exhausted and overwhelmed by moving costs",
-                        extra_detail="unposed candid shot, natural room lighting through window, looking away at the empty room NOT at camera"
+                    "image_prompt": (
+                        f"cinematic authentic two-shot medium shot of two diverse foreign residents in South Korea "
+                        f"(one friendly Southeast Asian Vietnamese student and one warm Central Asian Uzbek expat neighbor) "
+                        f"standing facing each other outdoors on a clean authentic Korean residential street near {theme['target']}. "
+                        f"Both people are completely visible from the waist up, both faces and warm friendly smiles clearly visible, "
+                        f"making pleasant eye contact as they respectfully hand over and exchange a clean {theme['item']} or neatly wrapped gift box between them. "
+                        f"Natural daytime lighting, real Korean residential neighborhood background with quiet storefronts, authentic heartwarming community meetup, masterpiece 8k"
                     ),
-                    "negative_prompt": build_negative_prompt(lang, "floating furniture, instagram model pose, glamour shoot")
+                    "negative_prompt": (
+                        "disembodied hands, only hands visible, headless person, cropped heads, cropped face, single person portrait, "
+                        "bad anatomy, extra limbs, deformed fingers, floating objects, blurry"
+                    )
                 },
                 {
                     "scene_idx": 2,
-                    "name": "비싼 가구 가격에 좌절",
-                    "duration_sec": 4.5,
+                    "name": "아늑한 방 완성 & 150만원 절약",
+                    "duration_sec": 3.8,
                     "badge": script_meta["s2_badge"],
                     "main_text": script_meta["s2_main"],
                     "sub_text": script_meta["s2_sub"],
                     "image_prompt": build_scene_prompt(
                         scene_idx=2, char=char,
-                        scene_action=f"leaning against the plain wallpaper in the studio apartment room, looking distressed and troubled by high prices of {theme['item']}, open taped cardboard boxes on floor",
-                        extra_detail="authentic candid lifestyle documentary, natural stressed expression, room interior visible"
+                        scene_action=f"cinematic authentic bust-shot portrait, peaceful relieved warm smile relaxing in cozy beautifully furnished Korean studio room with {theme['item']} under warm interior lamp lighting, content happy mood, comfortable home atmosphere",
+                        extra_detail="natural cozy room interior, warm soft lighting, authentic student lifestyle relief"
                     ),
-                    "negative_prompt": build_negative_prompt(lang, "extra fingers, deformed hands, posing for camera")
+                    "negative_prompt": build_negative_prompt(lang, "extra fingers, deformed hands, stressed expression")
                 },
                 {
                     "scene_idx": 3,
-                    "name": "K-Market 0원 나눔 발견",
-                    "duration_sec": 4.5,
+                    "name": "실물 K-Market 0원 피드 탐방",
+                    "duration_sec": 3.5,
                     "badge": script_meta["s3_badge"],
                     "main_text": script_meta["s3_main"],
                     "sub_text": script_meta["s3_sub"],
-                    "image_prompt": build_scene_prompt(
-                        scene_idx=3, char=char,
-                        scene_action=f"sitting on floor next to moving boxes, holding modern smartphone securely with both hands, looking down at the glowing screen discovering 0 KRW free {theme['item']} on K-Market app",
-                        extra_detail="eyes wide with genuine surprise and joy, looking down at phone screen NOT at camera, authentic candid capture"
-                    ),
-                    "negative_prompt": build_negative_prompt(lang, "deformed hands, claw hands, floating phone, creepy smile")
+                    "image_prompt": None,  # 📱 씬 3: 스마트폰 실물 피드 스크롤 비디오 클립 대체
+                    "negative_prompt": ""
                 },
                 {
                     "scene_idx": 4,
-                    "name": "따뜻한 이웃 무료 직거래",
-                    "duration_sec": 5.5,
+                    "name": "실시간 1:1 자동번역 채팅 & 예약",
+                    "duration_sec": 3.5,
                     "badge": script_meta["s4_badge"],
                     "main_text": script_meta["s4_main"],
                     "sub_text": script_meta["s4_sub"],
-                    "image_prompt": build_scene_prompt(
-                        scene_idx=4, char=char,
-                        scene_action=f"standing in a real Korean residential villa alley street near {theme['target']}, receiving clean {theme['item']} from a friendly neighbor, real outdoor street direct trade moment",
-                        extra_detail="candid documentary medium shot, genuine gratitude and warm gentle smile, natural Korean street background"
-                    ),
-                    "negative_prompt": build_negative_prompt(lang, "bad anatomy, distorted hands, fashion model photoshoot")
+                    "image_prompt": None,  # 📱 씬 4: 실시간 1:1 채팅 및 예약 확정 비디오 클립 대체
+                    "negative_prompt": ""
                 },
                 {
                     "scene_idx": 5,
-                    "name": "아늑한 방 완성 & 행복한 미소",
-                    "duration_sec": 5.0,
+                    "name": "자신감 넘치는 최종 추천 & CTA",
+                    "duration_sec": 4.0,
                     "badge": script_meta["s5_badge"],
                     "main_text": script_meta["s5_main"],
                     "sub_text": script_meta["s5_sub"],
                     "image_prompt": build_scene_prompt(
                         scene_idx=5, char=char,
-                        scene_action=f"arranging and wiping clean the newly received {theme['item']} in the cozy Korean studio apartment room, sitting comfortably on floor with a proud relieved happy smile, realistic furnished student room interior",
-                        extra_detail="warm cozy room ambience, authentic candid moment of settled student life, master documentary photography"
+                        scene_action=f"cinematic authentic direct-gaze portrait in the warmly furnished Korean room with {theme['item']}, looking directly into camera with an encouraging and decisive confident smile, pointing forward with friendly inviting gesture motivating viewer to get free items",
+                        extra_detail="high charisma, strong direct eye contact, sharp focus, professional creator lifestyle portrait"
                     ),
                     "negative_prompt": build_negative_prompt(lang, "extra limbs, creepy face, distorted furniture, instagram selfie")
                 }

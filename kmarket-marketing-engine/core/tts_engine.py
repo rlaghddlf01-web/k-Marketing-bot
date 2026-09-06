@@ -78,8 +78,8 @@ VOICE_POOLS: Dict[str, Dict[str, List[str]]] = {
         "m": ["fr-FR-HenriNeural"]
     },
     "ko": {
-        "f": ["ko-KR-SunHiNeural", "ko-KR-JiMinNeural"],
-        "m": ["ko-KR-InJoonNeural", "ko-KR-BongJinNeural"]
+        "f": ["ko-KR-SunHiNeural"],
+        "m": ["ko-KR-InJoonNeural"]
     },
     "bn": {
         "f": ["bn-BD-NabanitaNeural"],
@@ -88,6 +88,14 @@ VOICE_POOLS: Dict[str, Dict[str, List[str]]] = {
     "si": {
         "f": ["si-LK-ThiliniNeural"],
         "m": ["si-LK-SameeraNeural"]
+    },
+    "kk": {
+        "f": ["kk-KZ-AigulNeural"],
+        "m": ["kk-KZ-DauletNeural"]
+    },
+    "ur": {
+        "f": ["ur-PK-UzmaNeural"],
+        "m": ["ur-PK-AsadNeural"]
     }
 }
 

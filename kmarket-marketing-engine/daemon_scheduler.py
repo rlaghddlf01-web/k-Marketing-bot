@@ -21,6 +21,7 @@ from modules.guide_pdf_generator import GuidePDFGenerator
 from modules.social_publisher import SocialPublisher
 from modules.blog_kmarket import KMarketBlogPublisher
 from modules.blog_easytax import EasyTaxBlogPublisher
+from config import KMARKET_LANGUAGES, EASYTAX_LANGUAGES
 
 # 로깅 설정
 logging.basicConfig(
@@ -139,16 +140,16 @@ class AutopilotDaemon:
             except Exception as e:
                 logger.error(f"블로그 정기 발행 실패: {e}")
 
-        # 4. 매일 오후 14시: 듀얼 채널 숏폼 일괄 렌더링 (K-Market 70% + EasyTax 30%)
+        # 4. 매일 오후 14시: 듀얼 채널 다국어 숏폼 자동 제작·배포 (K-Market 17개국어 + EasyTax 15개국어)
         if current_hour == 14 and self.last_shorts_hour != 14:
             try:
-                # K-Market 공식 채널 (5개 핵심 언어 0원 나눔 & 실물 스크롤 숏폼)
-                km_res = [self.shorts_kmarket.produce_shorts(lang=l) for l in ["en", "vi", "zh", "ko", "uz"]]
-                # EasyTax 공식 채널 (3개 핵심 언어 90% 감면 숏폼)
-                tax_res = [self.shorts_easytax.produce_shorts(lang=l) for l in ["vi", "en", "zh"]]
+                # 🛒 K-Market 공식 채널 (17개국어 0원 나눔 & 실물 스크롤 숏폼)
+                km_res = [self.shorts_kmarket.produce_shorts(lang=l) for l in KMARKET_LANGUAGES]
+                # 💰 EasyTax 공식 채널 (15개국어 90% 소득세 감면 숏폼)
+                tax_res = [self.shorts_easytax.produce_shorts(lang=l) for l in EASYTAX_LANGUAGES]
                 
                 self.last_shorts_hour = 14
-                logger.info(f"오후 14시 듀얼 채널 숏폼 무인 렌더링 완료 (K-Market {len(km_res)}건 + EasyTax {len(tax_res)}건)")
+                logger.info(f"오후 14시 듀얼 채널 숏폼 무인 렌더링 완료 (K-Market {len(km_res)}개국 + EasyTax {len(tax_res)}개국)")
             except Exception as e:
                 logger.error(f"숏폼 렌더링 실패: {e}")
 

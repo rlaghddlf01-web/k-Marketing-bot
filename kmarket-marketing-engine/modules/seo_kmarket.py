@@ -186,7 +186,7 @@ class KMarketSEOPusher:
             f.write(xml)
 
     def _ping_googlebot(self, sitemap_path: Path) -> str:
-        sitemap_url = f"https://k-market.app/sitemaps/{sitemap_path.name}"
+        sitemap_url = f"https://ktrs-market.vercel.app/sitemaps/{sitemap_path.name}"
         ping_endpoint = f"https://www.google.com/ping?sitemap={urllib.parse.quote(sitemap_url)}"
         try:
             req = urllib.request.Request(ping_endpoint, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})

@@ -66,7 +66,7 @@ class KMarketThreadsPublisher:
             landing_url = UTMTracker.build_landing_url(
                 base_domain=base_domain,
                 lang=lang,
-                path="welcome",
+                path="",
                 source="threads",
                 medium="viral_story_thread",
                 campaign=campaign

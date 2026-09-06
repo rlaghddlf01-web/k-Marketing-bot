@@ -148,7 +148,26 @@ class LocalGPUMediaGeneratorKMarket:
                 logger.warning(f"K-Market 코랩 GPU 서버 통신 실패 (시도 {attempt}/3, {active_url}): {e}")
                 time.sleep(3 * attempt)
 
-        # ── 2. 안전 Fallback (기본 캔버스) ──
+        # ── 2. 코랩 통신 불가 시 즉시 정식 Gemini Imagen 실사 AI 엔진으로 Fallback ──
+        logger.warning(f"[{lang.upper()}] ⚠️ 코랩 GPU 서버 오프라인 감지 -> Gemini Imagen 실사 엔진으로 즉시 자동 전환")
+        try:
+            from core.gemini_media_generator import GeminiMediaGenerator
+            gemini_gen = GeminiMediaGenerator(service_id="kmarket")
+            res_path = gemini_gen.generate_theme_image(
+                lang=lang,
+                theme_id=theme_id,
+                scenario_plan=scenario_plan,
+                aspect_ratio=aspect_ratio,
+                output_path=output_path,
+                reference_image_path=Path(reference_image_path) if reference_image_path else None
+            )
+            if res_path and res_path.exists() and res_path.stat().st_size > 5000:
+                logger.info(f"🎉 [K-Market Gemini 전환 성공] 고화질 실사 인물 사진 완성: {res_path.name}")
+                return res_path
+        except Exception as e:
+            logger.error(f"Gemini Fallback 이미지 생성 중 예외: {e}")
+
+        # ── 3. 최후의 안전 Fallback (기본 캔버스) ──
         W, H = (1080, 1920) if aspect_ratio == "9:16" else (1080, 1080)
         fallback_img = Image.new("RGB", (W, H), color=(24, 24, 27))
         fallback_img.save(output_path, "JPEG", quality=95)

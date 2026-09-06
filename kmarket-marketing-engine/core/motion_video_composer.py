@@ -691,7 +691,10 @@ class MotionVideoComposer:
 
         cmd_final += [
             "-c:v", "copy",
-            "-c:a", "aac", "-b:a", "128k",
+        ]
+        if has_voice or has_bgm:
+            cmd_final += ["-c:a", "aac", "-b:a", "128k"]
+        cmd_final += [
             "-t", str(total_dur),
             "-movflags", "+faststart",
             str(output_mp4)
@@ -772,14 +775,14 @@ class MotionVideoComposer:
                     draw.text(((W - sw) // 2, sy0 + 9), sub_text, font=font_sub, fill=(203, 213, 225, 255))
 
             elif scene_idx == 2:
-                # ── 2. 가구 가격 부담 카드 (글래스모피즘 다크오렌지/레드) ──
+                # ── 2. 150만원 절약 & 아늑한 자취방 완성 카드 (글래스모피즘 앰버/골드) ──
                 card_w, card_h = 960, 260
                 cx0 = (W - card_w) // 2
                 cy0 = H - 420
-                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=24, fill=(45, 15, 15, 235), outline=(239, 68, 68, 200), width=3)
-                draw.text((cx0 + 40, cy0 + 30), badge_text or "EXPENSE BURDEN", font=font_badge, fill=(252, 165, 165, 255))
-                draw.text((cx0 + 40, cy0 + 80), main_text or "Too Expensive?", font=font_main, fill=(255, 255, 255, 255))
-                draw.text((cx0 + 40, cy0 + 165), sub_text or "Costs hundreds of thousands of Won...", font=font_sub, fill=(254, 202, 202, 255))
+                draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=24, fill=(35, 28, 12, 235), outline=(245, 158, 11, 200), width=3)
+                draw.text((cx0 + 40, cy0 + 30), badge_text or "SAVED 1,500,000 KRW", font=font_badge, fill=(251, 191, 36, 255))
+                draw.text((cx0 + 40, cy0 + 80), main_text or "Cozy Room Complete", font=font_main, fill=(255, 255, 255, 255))
+                draw.text((cx0 + 40, cy0 + 165), sub_text or "Full room furnishing without spending a dime", font=font_sub, fill=(254, 240, 138, 255))
 
             elif scene_idx == 3:
                 # ── 3. K-Market 0원 무료나눔 득템 카드 (에메랄드 민트 그린) ──
@@ -792,15 +795,15 @@ class MotionVideoComposer:
                 draw.text((cx0 + 40, cy0 + 175), f"• {sub_text or '100% Free verified second-hand items'}", font=font_sub, fill=(209, 250, 229, 255))
 
             elif scene_idx == 4:
-                # ── 4. 따뜻한 1:1 직거래 카드 (스카이블루) ──
-                card_w, card_h = 960, 230
+                # ── 4. 따뜻한 1:1 직거래 카드 (스카이블루 - 상단 배치로 하단 채팅 모달 100% 노출) ──
+                card_w, card_h = 960, 200
                 cx0 = (W - card_w) // 2
-                cy0 = H - 360
+                cy0 = 140
                 draw.rounded_rectangle([cx0, cy0, cx0 + card_w, cy0 + card_h], radius=22, fill=(14, 46, 92, 235), outline=(56, 189, 248, 200), width=2)
-                draw.text((cx0 + 40, cy0 + 26), badge_text or "SAFE DIRECT MEETUP", font=font_badge, fill=(186, 230, 253, 255))
-                draw.text((cx0 + 40, cy0 + 82), main_text, font=font_main, fill=(255, 255, 255, 255))
+                draw.text((cx0 + 40, cy0 + 22), badge_text or "SAFE DIRECT MEETUP", font=font_badge, fill=(186, 230, 253, 255))
+                draw.text((cx0 + 40, cy0 + 72), main_text, font=font_main, fill=(255, 255, 255, 255))
                 if sub_text:
-                    draw.text((cx0 + 40, cy0 + 155), sub_text, font=font_sub, fill=(125, 211, 252, 255))
+                    draw.text((cx0 + 40, cy0 + 138), sub_text, font=font_sub, fill=(125, 211, 252, 255))
 
             else:
                 # ── 5. 황금빛 3D CTA 버튼 카드 ──

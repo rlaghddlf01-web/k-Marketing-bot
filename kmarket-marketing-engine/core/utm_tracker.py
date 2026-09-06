@@ -61,7 +61,7 @@ class UTMTracker:
             )
         else:
             # EasyTax (KTRS Service): Query 기반 ?lang={lang}
-            full_base = f"{base}/{subpath}" if subpath else base
+            full_base = f"{base}/{subpath}" if subpath else f"{base}/"
             return cls.build_url(
                 base_url=full_base,
                 source=source,

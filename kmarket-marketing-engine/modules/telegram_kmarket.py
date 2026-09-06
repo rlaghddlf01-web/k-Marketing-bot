@@ -121,7 +121,7 @@ class KMarketTelegramPusher:
                 region = item.get("region", "Korea")
                 text += f"• {title} (📍 {region}) - {tmpl['free_tag']}\n"
 
-            item_url = f"{base_url.rstrip('/')}/?lang={lang}&utm_source=telegram&utm_medium=daily_briefing"
+            item_url = f"{base_url.rstrip('/')}/{lang}?utm_source=telegram&utm_medium=daily_briefing"
             text += f"\n{tmpl['cta']}: {item_url}\n"
             text += f"{tmpl['footer']}"
 

@@ -34,7 +34,7 @@ class FreeStuffNotifier:
 
         free_items = [item for item in self.items if item.get("is_free", False)]
         saved_files = []
-        base_domain = BASE_URLS.get("kmarket", "https://k-market.app")
+        base_domain = BASE_URLS.get("kmarket", "https://ktrs-market.vercel.app")
 
         for lang in target_langs:
             lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
@@ -42,7 +42,7 @@ class FreeStuffNotifier:
             landing_url = UTMTracker.build_landing_url(
                 base_domain=base_domain,
                 lang=lang,
-                path="welcome",
+                path="",
                 source="daily_briefing",
                 medium="push_feed",
                 campaign=campaign

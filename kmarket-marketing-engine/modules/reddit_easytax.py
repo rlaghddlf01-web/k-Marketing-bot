@@ -110,7 +110,7 @@ class EasyTaxRedditHunter:
 
             target_lang = "en"
             base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app").rstrip("/")
-            landing_url = f"{base_domain}/{target_lang}"
+            landing_url = f"{base_domain}/?lang={target_lang}"
 
             # 2단계: Gemini 3단계 간접 홍보 법적 팩트 답변 생성
             logger.info(f"💡 [EasyTax 매칭 성공] r/{subreddit} - '{title}'")

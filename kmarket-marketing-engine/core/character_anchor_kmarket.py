@@ -31,6 +31,9 @@ LANG_ETHNIC_MAP: Dict[str, str] = {
     "es": "Latin American",
     "en": "Southeast Asian",
     "ko": "Korean East Asian",
+    "si": "Sri Lankan South Asian",
+    "kk": "Kazakh Central Asian",
+    "ur": "Pakistani South Asian",
 }
 
 # 언어별 부정 에스닉 프롬프트 (타깃 민족 외 모두 차단)
@@ -52,6 +55,9 @@ LANG_NEGATIVE_ETHNIC: Dict[str, str] = {
     "es": "East Asian, Korean features",
     "en": "Korean, Japanese, Chinese, East Asian, pale fair skin",
     "ko": "Southeast Asian, South Asian, Western features",
+    "si": "East Asian, Korean, Japanese, Chinese features",
+    "kk": "East Asian, Korean, Japanese features",
+    "ur": "East Asian, Korean, Japanese, Chinese features",
 }
 
 # 한국어 나이대 -> 영어 변환 테이블
