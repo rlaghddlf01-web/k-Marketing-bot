@@ -159,6 +159,69 @@ class KMarketFacebookHunter:
                 f"• Tình trạng: Đã kiểm duyệt, còn dùng rất tốt\n\n"
                 f"👉 Xem hướng dẫn nhận đồ miễn phí ở phần bình luận đầu tiên bên dưới nhé!"
             )
+        elif lang == "uz":
+            return (
+                f"🎁 [Koreyada 0 Vonga Bepul Mebel va Maishiy Texnikalar]\n\n"
+                f"Assalomu alaykum, {group_name} guruhi a'zolari!\n"
+                f"O'qishni bitirayotgan yoki ko'chib o'tayotgan talabalar sifatli stol, krovat va mini-muzlatkichlarni 0 vonga tekinga bermoqda.\n"
+                f"• Hududlar: Shinchon, Ansan, Suvon talabalar shaharchalari\n"
+                f"• Holati: Tekshirilgan va a'lo darajada\n\n"
+                f"👉 Bepul buyumlarni bron qilish havolasini birinchi izohda qoldirdim!"
+            )
+        elif lang == "km":
+            return (
+                f"🎁 [គ្រឿងសង្ហារឹម និងបរិក្ខារប្រើប្រាស់ក្នុងផ្ទះឥតគិតថ្លៃ 0 វ៉ុន នៅកូរ៉េ]\n\n"
+                f"សួស្តីបងប្អូនសមាជិកក្រុម {group_name} ទាំងអស់គ្នា!\n"
+                f"រដូវផ្លាស់ប្តូរទីលំនៅ មានការចែកជូនតុ រាន គ្រែ និងទូទឹកកកខ្នាតតូចដោយឥតគិតថ្លៃ (0 វ៉ុន)។\n"
+                f"• តំបន់៖ ស៊ិនឆុន, អានសាន, ស៊ូវ៉ុន\n"
+                f"• គុណភាព៖ នៅល្អស្អាត និងដំណើរការល្អទាំងអស់\n\n"
+                f"👉 ពិនិត្យមើលតំណភ្ជាប់ទទួលយកអីវ៉ាន់ឥតគិតថ្លៃនៅមតិយោបល់ដំបូងខាងក្រោម!"
+            )
+        elif lang == "ne":
+            return (
+                f"🎁 [कोरियामा ० वन (0 KRW) मा नि:शुल्क फर्निचर र घरायसी सामानहरू]\n\n"
+                f"नमस्ते {group_name} समूहका सम्पूर्ण साथीहरू!\n"
+                f"कोठा सर्ने र अध्ययन पूरा गर्ने विद्यार्थीहरूले राम्रो अवस्थाका टेबल, ओछ्यान र फ्रिजहरू ० वनमा दिइरहेका छन्।\n"
+                f"• क्षेत्रहरू: सिन्चोन, आन्सान, सुवोन\n"
+                f"• अवस्था: प्रमाणित र प्रयोगयोग्य\n\n"
+                f"👉 नि:शुल्क सामानहरू दाबी गर्न तलको पहिलो कमेन्ट हेर्नुहोस्!"
+            )
+        elif lang == "th":
+            return (
+                f"🎁 [รวมเฟอร์นิเจอร์และเครื่องใช้ไฟฟ้าฟรี 0 วอนในเกาหลีใต้]\n\n"
+                f"สวัสดีทุกคนในกลุ่ม {group_name} ครับ/ค่ะ!\n"
+                f"ช่วงนี้มีนักศึกษาและคนย้ายหอส่งต่อโต๊ะหนังสือ ฟูกนอน ตู้เย็นมินิสภาพดีฟรี 0 วอนเพียบเลยครับ\n"
+                f"• พิกัด: ชินชน, อันซาน, ซูวอน\n"
+                f"• สภาพ: ตรวจสอบแล้ว ใช้งานได้ดีเยี่ยม\n\n"
+                f"👉 ดูลิงก์เลือกรับของฟรีได้ที่ความคิดเห็นแรกด้านล่างเลยครับ/ค่ะ!"
+            )
+        elif lang == "id":
+            return (
+                f"🎁 [Perabotan & Elektronik Gratis 0 Won di Korea Selatan]\n\n"
+                f"Halo rekan-rekan di grup {group_name}!\n"
+                f"Banyak mahasiswa dan pekerja yang pindahan memberikan meja belajar, kasur, dan kulkas mini secara GRATIS (0 Won).\n"
+                f"• Wilayah: Sinchon, Ansan, Suwon\n"
+                f"• Kondisi: Terverifikasi dan masih sangat bagus\n\n"
+                f"👉 Cek link pengambilan barang gratis di komentar pertama di bawah ini!"
+            )
+        elif lang == "mn":
+            return (
+                f"🎁 [Солонгос дахь 0 воны үнэгүй тавилга болон гэр ахуйн бараа]\n\n"
+                f"{group_name} группийн найзууддаа энэ өдрийн мэнд хүргэе!\n"
+                f"Сургууль төгсөгчид болон нүүж буй оюутнууд бичгийн ширээ, ор, мини хөргөгчөө 0 воноор үнэгүй өгч байна.\n"
+                f"• Байршил: Шинчон, Ансан, Сүвон оюутны хотхонууд\n"
+                f"• Байдал: Шалгагдсан, ашиглахад маш сайн\n\n"
+                f"👉 Үнэгүй бараа авах линкийг эхний сэтгэгдлээс шалгана уу!"
+            )
+        elif lang == "my":
+            return (
+                f"🎁 [ကိုရီးယားရှိ ၀ ဝမ် (0 KRW) အခမဲ့ ပရိဘောဂနှင့် အိမ်သုံးပစ္စည်းများ]\n\n"
+                f"{group_name} မှ မိတ်ဆွေများအားလုံး မင်္ဂလာပါ!\n"
+                f"အဆောင်ပြောင်းသူများနှင့် ကျောင်းပြီးသူများထံမှ စာကြည့်စားပွဲ၊ မွေ့ရာ၊ ရေခဲသေတ္တာအသေးများကို ၀ ဝမ်ဖြင့် အခမဲ့လက်ဆင့်ကမ်းပေးနေပါသည်။\n"
+                f"• နေရာများ - ဆင်ချွန်း၊ အန်ဆန်၊ ဆူဝမ်\n"
+                f"• အခြေအနေ - စစ်ဆေးပြီး အသုံးပြုရန် အလွန်ကောင်းမွန်\n\n"
+                f"👉 အခမဲ့ပစ္စည်းများရယူရန် အောက်ပါ ပထမဆုံး comment ကို ကြည့်ရှုပါ!"
+            )
         elif lang == "ru":
             return (
                 f"🎁 [Бесплатная мебель и техника 0 вон в Корее]\n\n"
@@ -180,6 +243,20 @@ class KMarketFacebookHunter:
         """첫 번째 댓글용 링크 텍스트"""
         if lang == "vi":
             return f"👉 Bấm vào đây để xem danh sách đồ 0 Won & nhắn tin dịch tự động: {url}"
+        elif lang == "uz":
+            return f"👉 0 Vonga bepul narsalarni ko'rish va o'zbekcha tarjima chatida yozish: {url}"
+        elif lang == "km":
+            return f"👉 ចុចទីនេះដើម្បីមើលបញ្ជីអីវ៉ាន់ 0 វ៉ុន និងជជែកជាមួយប្រព័ន្ធបកប្រែស្វ័យប្រវត្តិ៖ {url}"
+        elif lang == "ne":
+            return f"👉 ० वनका नि:शुल्क सामानहरू हेर्न र नेपाली भाषा अनुवाद च्याट प्रयोग गर्न यहाँ थिच्नुहोस्: {url}"
+        elif lang == "th":
+            return f"👉 กดที่นี่เพื่อดูรายการของฟรี 0 วอนพร้อมระบบแชทแปลภาษาไทยอัตโนมัติ: {url}"
+        elif lang == "id":
+            return f"👉 Klaim barang gratis 0 Won & gunakan chat terjemahan otomatis di sini: {url}"
+        elif lang == "mn":
+            return f"👉 0 воны үнэгүй бараануудыг үзэх болон монгол чатаар харилцах: {url}"
+        elif lang == "my":
+            return f"👉 ၀ ဝမ် အခမဲ့ပစ္စည်းများကို ကြည့်ရှုရန်နှင့် မြန်မာဘာသာပြန်ချက်ဖြင့် စကားပြောဆိုရန် ဤနေရာကိုနှိပ်ပါ: {url}"
         elif lang == "ru":
             return f"👉 Забирайте бесплатные вещи здесь (чат с переводом на русский): {url}"
         else:

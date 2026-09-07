@@ -191,11 +191,11 @@ class GeminiCardnewsCopywriter:
 [주인공 페르소나]: {persona.get('name', '외국인 유학생')}
 
 ### 5장 슬라이드 스토리텔링 공식 (반드시 이 순서로 집필):
-- 1장 (실물 직거래 수령 득템): 캠퍼스/길거리에서 1:1로 {item}을 0원에 무료로 직접 건네받은 생생한 실화 후킹!
-- 2장 (내 방 배치 & 아늑한 행복): 텅 비고 차가웠던 원룸/기숙사를 0원 가구로 따뜻하고 아늑하게 풀세팅한 감동
-- 3장 (150만원 절약 & 학비 해결): 가구값 150만 원을 아껴서 대학교 등록금이나 생활비에 보탠 경제적 이득
-- 4장 (K-Market 앱 & 17개국어 번역): "한국어 몰라도 17개 언어 실시간 자동번역 채팅으로 내 동네 0원 매물 1초 확인!"
-- 5장 (행동 촉구 CTA): "오늘 등록된 0원 매물 놓치지 마세요! 지금 프로필 링크(Bio Link)를 눌러 K-Market 앱을 다운로드하세요!"
+- 1장 (★핵심 숏폼형 직거래 훅 - 2인 1:1 현장 교환 만남): 캠퍼스/기숙사 길거리에서 서로 다른 국적의 외국인 둘(예: 베트남 유학생과 네팔 청년, 또는 귀국 선배와 신입 유학생)이 직접 1:1로 만나 웃으며 {item}을 0원에 주고받는 생생한 직거래 실화 후킹! (예: "신촌 연세대 앞, 베트남 유학생과 네팔 친구의 0원 나눔 직거래 현장! 진짜 0원에 가져가도 되나요?")
+- 2장 (내 방 배치 & 150만원 절약): 텅 비고 차가웠던 원룸/기숙사를 0원 가구로 따뜻하고 아늑하게 풀세팅하고 가구값 150만 원을 아낀 감동
+- 3장 (K-Market 실물 0원 무료나눔 매물 피드): "도대체 어디서 구했어? 매일 쏟아지는 K-Market 0원 실물 가구·가전 매물 피드 대공개!"
+- 4장 (안심 1:1 직거래 & 17개국어 번역 채팅): "한국어 몰라도 17개 언어 실시간 자동번역 채팅으로 10분 만에 안전하게 약속 완료!"
+- 5장 (행동 촉구 CTA): "오늘 등록된 0원 매물 놓치지 마세요! 지금 프로필 링크(Bio Link)를 눌러 0원 매물 바로 득템하세요!"
 
 ### 필수 출력 규칙:
 1. 반드시 순수한 [{lang_info['name']}] 언어로만 작성할 것. (한국어가 섞이지 않게 100% 현지어로 번역/창작)
@@ -206,18 +206,18 @@ class GeminiCardnewsCopywriter:
   {{
     "slide_idx": 1,
     "badge": "STEP 1: BADGE IN {lang_info['name']}",
-    "title": "Slide 1 Free {item} Title in {lang_info['name']}",
+    "title": "Slide 1 2-Person 1:1 Direct Exchange Title in {lang_info['name']}",
     "subtitle": "Slide 1 Subtitle in {lang_info['name']}",
     "bullets": [
-      "• Bullet 1 in {lang_info['name']}",
-      "• Bullet 2 in {lang_info['name']}",
-      "• Bullet 3 in {lang_info['name']}"
+      "• Bullet 1 (meeting in person, handing over {item}) in {lang_info['name']}",
+      "• Bullet 2 (genuine 0 Won free handover) in {lang_info['name']}",
+      "• Bullet 3 (connected via K-Market app translation) in {lang_info['name']}"
     ]
   }},
   {{
     "slide_idx": 2,
     "badge": "STEP 2: BADGE IN {lang_info['name']}",
-    "title": "Slide 2 Cozy Room Title in {lang_info['name']}",
+    "title": "Slide 2 Cozy Room & Save 1.5M Title in {lang_info['name']}",
     "subtitle": "Slide 2 Subtitle in {lang_info['name']}",
     "bullets": [
       "• Bullet 1 in {lang_info['name']}",
@@ -228,7 +228,7 @@ class GeminiCardnewsCopywriter:
   {{
     "slide_idx": 3,
     "badge": "STEP 3: BADGE IN {lang_info['name']}",
-    "title": "Slide 3 Save 1.5M KRW Title in {lang_info['name']}",
+    "title": "Slide 3 0 Won Feed Title in {lang_info['name']}",
     "subtitle": "Slide 3 Subtitle in {lang_info['name']}",
     "bullets": [
       "• Bullet 1 in {lang_info['name']}",
@@ -348,56 +348,116 @@ class GeminiCardnewsCopywriter:
 
     def _fallback_kmarket_copy(self, lang: str, theme: Dict[str, Any]) -> List[Dict[str, Any]]:
         """API 장애 시 깨짐 없는 클린 영문/다국어 기본 템플릿"""
-        item = theme.get("item", "Furniture & Appliances")
-        target = theme.get("target", "Campus Area")
+        item = theme.get("item", "가구/가전")
+        target = theme.get("target", "캠퍼스 대학가")
+
+        if lang == "ko":
+            return [
+                {
+                    "slide_idx": 1,
+                    "badge": "STEP 1: 1:1 실물 직거래",
+                    "title": f"{target} 앞, 베트남 유학생과 네팔 친구의 0원 직거래 현장!",
+                    "subtitle": "국적은 달라도 K-Market 앱으로 5분 만에 직거래 약속 완료",
+                    "bullets": [
+                        f"• 귀국하는 선배와 신입생이 직접 만나 웃으며 {item} 전달",
+                        "• '진짜 0원 맞아요?' 눈앞에서 확인한 감동의 무료 나눔",
+                        "• 17개국어 실시간 자동 번역 채팅으로 언어 장벽 해결"
+                    ]
+                },
+                {
+                    "slide_idx": 2,
+                    "badge": "STEP 2: 아늑한 방 완성",
+                    "title": "텅 비었던 내 자취방, 150만원 아끼고 완벽 변신",
+                    "subtitle": "가구 하나로 달라진 따뜻한 한국 자취 생활",
+                    "bullets": [
+                        f"• 썰렁하던 방에 {item} 하나 들어왔을 뿐인데 분위기 반전",
+                        "• 가구값 150만 원 아껴서 등록금과 생활비에 보태기",
+                        "• 한국에서의 자취가 훨씬 더 쾌적하고 편안해졌어요"
+                    ]
+                },
+                {
+                    "slide_idx": 3,
+                    "badge": "STEP 3: 0원 매물 피드",
+                    "title": "도대체 어디서? K-Market 0원 무료나눔 피드",
+                    "subtitle": "매일매일 실시간으로 쏟아지는 깨끗한 가구와 가전",
+                    "bullets": [
+                        "• 침대, 책상, 전자레인지, 냉장고까지 0원에 득템",
+                        "• 내 캠퍼스/기숙사 근처 나눔 정보를 1초 만에 확인",
+                        "• 귀국 선배들이 남긴 깨끗한 생활용품 무료 나눔"
+                    ]
+                },
+                {
+                    "slide_idx": 4,
+                    "badge": "STEP 4: 17개국어 번역",
+                    "title": "한국어 몰라도 괜찮아, 17개국어 자동 번역 채팅",
+                    "subtitle": "채팅 10분 만에 집 앞에서 안전하게 직거래 약속 완료",
+                    "bullets": [
+                        "• 복잡한 한국어 공부 필요 없는 실시간 자동 번역",
+                        "• 사기 0% 외국인등록증(ARC) 인증 안심 직거래",
+                        "• 언어 장벽 없이 모국어로 편하게 직거래 예약"
+                    ]
+                },
+                {
+                    "slide_idx": 5,
+                    "badge": "STEP 5: 지금 바로 득템",
+                    "title": f"지금 {target} 주변 0원 매물을 확인해보세요",
+                    "subtitle": "놓치면 후회할 대박 나눔, 지금 바로 K-Market 앱 다운로드!",
+                    "bullets": [
+                        "• 매일매일 새로운 0원 나눔이 쏟아집니다",
+                        "• 프로필 링크 누르고 지금 바로 앱 설치하기",
+                        "• 더 많은 무료 가전과 가구를 지금 바로 만나보세요"
+                    ]
+                }
+            ]
+
         return [
             {
                 "slide_idx": 1,
-                "badge": "STEP 1: $0 FREE GIVEAWAY",
-                "title": f"Get Free {item} For 0 Won!",
-                "subtitle": f"100% free verified giveaway in {target}",
+                "badge": "STEP 1: 1:1 DIRECT EXCHANGE",
+                "title": f"Expats Meeting in {target}: 0 Won {item} Handover!",
+                "subtitle": "Vietnamese and Nepali students trading in person for $0",
                 "bullets": [
-                    f"• High quality clean {item} left by graduating seniors",
-                    "• Furnish your studio room completely for 0 Won",
-                    "• Direct 1:1 pickup near your campus or station"
+                    f"• Met directly on campus to hand over clean {item} with smiles",
+                    "• Verified 100% free giveaway between international students",
+                    "• Connected in 3 minutes via K-Market 17-language chat"
                 ]
             },
             {
                 "slide_idx": 2,
-                "badge": "STEP 2: COZY BEAUTIFUL ROOM",
-                "title": "Furnish Your Studio Room for 0 Won",
+                "badge": "STEP 2: COZY ROOM COMPLETE",
+                "title": "Furnish Your Studio Room & Save 1,500,000 KRW",
                 "subtitle": "Transform cold empty room into a warm comfortable home",
                 "bullets": [
                     f"• Clean and tested {item} in great condition",
-                    "• Save hundreds of dollars on brand new items",
+                    "• Save 1.5 million won on brand new furniture costs",
                     "• Enjoy a comfortable cozy living space in Korea"
                 ]
             },
             {
                 "slide_idx": 3,
-                "badge": "STEP 3: SAVE 1,500,000 WON",
-                "title": "Save 1,500,000 Won On Room Expenses",
-                "subtitle": "Spend saved money on your tuition and living costs",
+                "badge": "STEP 3: 0 WON FEED",
+                "title": "Where To Get It? K-Market 0 Won Giveaway Feed",
+                "subtitle": "Hundreds of clean furniture and appliances posted daily",
                 "bullets": [
-                    "• Zero expenses for furnishing your entire room",
-                    "• Save money for university tuition and rent",
-                    "• Smart budgeting for international students and expats"
+                    "• Beds, desks, microwaves, and fridges for 0 Won",
+                    "• Fresh listings updated real-time near your campus",
+                    "• Quality items gifted by graduating students and expats"
                 ]
             },
             {
                 "slide_idx": 4,
                 "badge": "STEP 4: 17-LANGUAGE CHAT",
-                "title": "17-Language Auto-Translation Chat",
+                "title": "17-Language Auto-Translation Chat & Safe Meetup",
                 "subtitle": "Trade safely even without speaking fluent Korean",
                 "bullets": [
                     "• Real-time AI auto-translation in 17 native languages",
                     "• Safe direct messaging with verified local students",
-                    "• Find 0 Won items closest to your room in 1 second"
+                    "• Coordinate meetup outside within 10 minutes"
                 ]
             },
             {
                 "slide_idx": 5,
-                "badge": "STEP 5: DOWNLOAD K-MARKET APP",
+                "badge": "STEP 5: CLAIM $0 FREE TODAY",
                 "title": "Click The Link In Bio To Get Free Items",
                 "subtitle": "Check today's freshly posted 0 Won giveaways!",
                 "bullets": [

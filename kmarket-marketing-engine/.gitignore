@@ -21,7 +21,16 @@ outputs/logs/*.log
 
 # 🗄️ 로컬 임시 DB 및 IDE 설정
 data/history.db
+*.db
 .agents/
 .vscode/
 .idea/
 *.log
+
+# 🔐 보안: 구글 클라우드 OAuth 비밀키 및 유튜브 토큰 절대 보호
+client_secrets*.json
+*token*.json
+data/youtube_token*.json
+data/auth_url.txt
+*.session
+*.session-journal

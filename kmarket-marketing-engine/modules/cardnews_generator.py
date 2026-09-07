@@ -31,7 +31,7 @@ class CardnewsGenerator:
         service_id: str = "kmarket",
         lang: str = "vi",
         theme_index: Optional[int] = None,
-        engine_mode: str = "colab_gpu"
+        engine_mode: str = "gemini"
     ) -> List[Path]:
         """서비스 ID에 따라 전담 카드뉴스 공장으로 즉시 분기 위임"""
         service_id = service_id.lower()
@@ -46,7 +46,7 @@ class CardnewsGenerator:
         service_id: str = "kmarket",
         lang: str = "vi",
         theme_index: Optional[int] = None,
-        engine_mode: str = "colab_gpu"
+        engine_mode: str = "gemini"
     ) -> List[Path]:
         """generate_carousel_cardnews의 server.py 호환 별칭"""
         return self.generate_carousel_cardnews(

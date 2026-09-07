@@ -21,7 +21,9 @@ from modules.guide_pdf_generator import GuidePDFGenerator
 from modules.social_publisher import SocialPublisher
 from modules.blog_kmarket import KMarketBlogPublisher
 from modules.blog_easytax import EasyTaxBlogPublisher
-from config import KMARKET_LANGUAGES, EASYTAX_LANGUAGES
+from config import KMARKET_LANGUAGES, EASYTAX_LANGUAGES, get_next_golden_eight_language, GOLDEN_EIGHT_DETAILS, GOLDEN_EIGHT_LANGUAGES
+from core.golden_batch_producer import GoldenBatchProducer
+
 
 # 로깅 설정
 logging.basicConfig(
@@ -37,8 +39,10 @@ class AutopilotDaemon:
     - 하루 3회 정기 블로그 발행 (EasyTax 15개국어 3회 + K-Market 17개국어 3회)
     - 브랜드별 분리 발행 및 상호 교차 멘션 자동화
     """
-    def __init__(self):
-        logger.info("[Universal Expat Growth Engine] 듀얼 채널 무인 데몬 가동 준비 중...")
+    def __init__(self, brand: str = "all"):
+        self.target_brand = brand
+        brand_label = "EasyTax 전용" if brand == "easytax" else "K-Market 전용" if brand == "kmarket" else "듀얼 채널 통합"
+        logger.info(f"[Universal Expat Growth Engine] {brand_label} 무인 데몬 가동 준비 중...")
         self.db_mgr = DBManager()
         self.supabase_mgr = SupabaseManager(self.db_mgr)
         self.router = ServiceRouter()
@@ -59,6 +63,7 @@ class AutopilotDaemon:
         self.publisher = SocialPublisher(self.db_mgr, self.notifier)
         self.km_blog = KMarketBlogPublisher(self.db_mgr, self.supabase_mgr)
         self.tax_blog = EasyTaxBlogPublisher(self.db_mgr, self.supabase_mgr)
+        self.golden_batch_producer = GoldenBatchProducer()
 
         self.last_morning_briefing_date = None
         self.last_evening_briefing_date = None
@@ -66,6 +71,8 @@ class AutopilotDaemon:
         self.last_cardnews_hour = None
         # 하루 3회 블로그 발행 기록 (09시, 14시, 19시)
         self.blog_published_slots = set()
+        # 하루 2회 8대 국가 풀가동 슬롯 (morning, evening)
+        self.golden_slots_done = set()
 
     def run_cycle(self):
         """1회 스케줄 사이클 실행 (듀얼 채널 7:3 자동화 + 하루 3회 정기 블로그)"""
@@ -140,18 +147,30 @@ class AutopilotDaemon:
             except Exception as e:
                 logger.error(f"블로그 정기 발행 실패: {e}")
 
-        # 4. 매일 오후 14시: 듀얼 채널 다국어 숏폼 자동 제작·배포 (K-Market 17개국어 + EasyTax 15개국어)
-        if current_hour == 14 and self.last_shorts_hour != 14:
+        # 4. 하루 2대 골든 슬롯 (아침 11:30 & 저녁 18:30) 8개국 대량 생산 (이지텍스 8+8 / 케이마켓 8+8)
+        # 매 슬롯마다 8개국 숏폼 + 8개국 카드뉴스 완전 무인 렌더링 (일 총 32숏폼 + 32카드뉴스)
+        is_morning_slot = (current_hour == 11 and current_minute >= 30) or (current_hour == 12 and current_minute < 30)
+        is_evening_slot = (current_hour == 18 and current_minute >= 30) or (current_hour == 19 and current_minute < 30)
+
+        slot_to_run = None
+        if is_morning_slot and f"{today_str}_morning" not in self.golden_slots_done:
+            slot_to_run = "morning"
+        elif is_evening_slot and f"{today_str}_evening" not in self.golden_slots_done:
+            slot_to_run = "evening"
+
+        if slot_to_run:
             try:
-                # 🛒 K-Market 공식 채널 (17개국어 0원 나눔 & 실물 스크롤 숏폼)
-                km_res = [self.shorts_kmarket.produce_shorts(lang=l) for l in KMARKET_LANGUAGES]
-                # 💰 EasyTax 공식 채널 (15개국어 90% 소득세 감면 숏폼)
-                tax_res = [self.shorts_easytax.produce_shorts(lang=l) for l in EASYTAX_LANGUAGES]
-                
-                self.last_shorts_hour = 14
-                logger.info(f"오후 14시 듀얼 채널 숏폼 무인 렌더링 완료 (K-Market {len(km_res)}개국 + EasyTax {len(tax_res)}개국)")
+                target_str = "이지텍스" if self.target_brand == "easytax" else "케이마켓" if self.target_brand == "kmarket" else "듀얼 브랜드"
+                logger.info(f"🌟 [{slot_to_run.upper()} 골든 슬롯: {target_str}] 8대 황금 타깃 대량 생산 배치 시작...")
+                slot_res = self.golden_batch_producer.execute_slot(slot_name=slot_to_run, brand=self.target_brand)
+                self.golden_slots_done.add(f"{today_str}_{slot_to_run}")
+                logger.info(
+                    f"🌟 [{slot_to_run.upper()} 골든 슬롯 ({target_str}) 완료] "
+                    f"숏폼: {slot_res.get('shorts_success', 0)}/{slot_res.get('shorts_total', 0)} 성공, "
+                    f"카드뉴스: {slot_res.get('cardnews_success', 0)}/{slot_res.get('cardnews_total', 0)} 성공"
+                )
             except Exception as e:
-                logger.error(f"숏폼 렌더링 실패: {e}")
+                logger.error(f"골든 슬롯 대량 생산 실패 ({slot_to_run}): {e}")
 
         # 5. 매시간: Supabase 클라우드 자가학습 데이터 동기화
         try:
@@ -162,3 +181,23 @@ class AutopilotDaemon:
             logger.error(f"클라우드 동기화 실패: {e}")
 
         logger.info("--- [오토파일럿 루프 완료] ---")
+
+    def start_loop(self, interval_seconds: int = 60):
+        """무한 루프로 스케줄러 실행 (기본 60초 주기 체크)"""
+        logger.info(f"🔄 [Universal Expat Growth Engine] 오토파일럿 데몬 루프 가동 (체크 주기: {interval_seconds}초)")
+        while True:
+            try:
+                self.run_cycle()
+            except Exception as e:
+                logger.error(f"오토파일럿 루프 예외 발생: {e}")
+            time.sleep(interval_seconds)
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Universal Expat Growth Engine Autopilot Daemon")
+    parser.add_argument("--brand", type=str, choices=["easytax", "kmarket", "all"], default="all", help="타깃 브랜드 (easytax / kmarket / all)")
+    args = parser.parse_args()
+    daemon = AutopilotDaemon(brand=args.brand)
+    daemon.start_loop(interval_seconds=60)
+
+

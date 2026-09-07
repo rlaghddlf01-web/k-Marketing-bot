@@ -1,32 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+EasyTaxThreadsPublisher - 💰 [EasyTax (KTRS) 전용 Meta Threads 17개국어 세무/환급 무인 자동화 엔진]
+- 대한민국 표준시(KST) 하루 3회 정시 하이브리드 바이럴 체계:
+  1회차 (11:00 KST): 📸 [공인 세무 카드뉴스 5장 첨부형] (링크 0% 국세청 감면 팩트 + 0.1초 링크 답글 댓글)
+  2회차 (16:30 KST): 📝 [순수 텍스트 환급 실화 썰형] (광고 티 0% 3단 타래: E-9 환급 실화 -> 조특법 30조 팩트 -> 계산기 링크)
+  3회차 (21:30 KST): 📸 [야간 모바일 세무 카드뉴스형] (퇴근 후 여유 시간 탐색 맞춤 + 0.1초 링크 답글 댓글)
+- 제미나이 무료 키(Gemini 3.1 Flash-Lite) 100% 활용 (추가 비용 0원)
+- 바탕화면 카드뉴스 산출물(1080x1350) 자동 탐색 및 재사용 (추가 비용 0원)
+- 17개국어 순환(Rotation) 배포 지원
+"""
+
 import time
 import json
 import logging
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, DATA_DIR
+
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, DATA_DIR, get_now_kst_str
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
-from core.gemini_easytax import EasyTaxGeminiEngine
 from core.supabase_manager import SupabaseManager
 from core.scenario_director_threads_easytax import ScenarioDirectorThreadsEasyTax
+from core.gemini_threads_writer import GeminiThreadsWriter
+from core.auto_publishers.cardnews_multi_publisher import ThreadsCardPublisher
 
 logger = logging.getLogger("EasyTaxThreads")
 
+
 class EasyTaxThreadsPublisher:
-    """
-    💰 [EasyTax (KTRS) 전용 Meta Threads 세무/환급 바이럴 자동화 엔진]
-    - E-9 중소기업 근로자 및 D-2 유학생을 타깃으로 한 합법 세무 권리 타래 포스팅
-    - 1번 본문: 강력한 후킹 ("외국인 근로자 90% 소득세 감면 권리, 모르면 매년 200만원 손해 🧵👇")
-    - 2~3번 타래: 조특법 제30조 요건, D-2 알바비 3.3% 100% 환급, 5개년 소급 경정청구
-    - 마지막 타래: 선입금 0원 국세청 공인 대리 EasyTax 무료 계산기 UTM 링크
-    """
+    """💰 [EasyTax 전용 Meta Threads 세무/환급 무인 자동화 퍼블리셔]"""
+
     def __init__(self, db_mgr: DBManager, supabase_mgr: SupabaseManager):
         self.db_mgr = db_mgr
         self.supabase_mgr = supabase_mgr
-        self.gemini = EasyTaxGeminiEngine(self.supabase_mgr)
+        self.writer = GeminiThreadsWriter(service_id="easytax")
         self.scenario_director = ScenarioDirectorThreadsEasyTax()
         self.output_dir = OUTPUTS_DIR / "threads" / "easytax"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.desktop_cardnews_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\이지텍스")
+
+        creds = self._load_credentials()
+        self.threads_publisher = ThreadsCardPublisher(creds)
+
+    def _load_credentials(self) -> Dict[str, str]:
+        env_path = BASE_DIR / ".env"
+        creds = {}
+        if env_path.exists():
+            try:
+                with open(env_path, "r", encoding="utf-8", errors="ignore") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            creds[k.strip()] = v.strip()
+            except Exception:
+                pass
+        return creds
+
+    def _detect_current_slot(self) -> str:
+        """대한민국 표준시(KST) 기준 하루 3회 정시 슬롯 자동 판별"""
+        kst = timezone(timedelta(hours=9))
+        hour = datetime.now(kst).hour
+        if hour < 14:
+            return "morning"    # 11:00 회차
+        elif hour < 19:
+            return "afternoon"  # 16:30 회차
+        else:
+            return "evening"    # 21:30 회차
 
     def _get_next_rotation_langs(self, count: int = 3) -> List[str]:
         """17개 언어 중 다음 순번의 3개 언어 순환 선택 (도배 방지 로테이션)"""
@@ -54,30 +95,128 @@ class EasyTaxThreadsPublisher:
 
         return selected
 
-    def publish_daily_threads(self, target_langs: Optional[List[str]] = None) -> Dict[str, Any]:
-        """EasyTax 타래형 세무 환급 스레드 생성 및 배포 (3개 언어 순환)"""
+    def _find_cardnews_images(self, lang: str) -> List[str]:
+        """바탕화면 카드뉴스 산출물 폴더에서 5장 이미지 탐색 (추가 비용 0원 재사용)"""
+        images = []
+        if self.desktop_cardnews_dir.exists():
+            # 1. 언어 맞춤 이미지 탐색 (예: easytax_cardnews_vi_s*.jpg)
+            pattern = f"easytax_cardnews_{lang}_s*.jpg"
+            found = sorted(self.desktop_cardnews_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
+            if len(found) >= 5:
+                images = [str(f) for f in found[:5]]
+            elif found:
+                images = [str(f) for f in found]
+
+            # 2. 부족할 경우 다른 언어 고화질 카드뉴스 슬라이드 대체 활용
+            if len(images) < 5:
+                fallback_found = sorted(self.desktop_cardnews_dir.glob("easytax_cardnews_*_s*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
+                if len(fallback_found) >= 5:
+                    images = [str(f) for f in fallback_found[:5]]
+
+        # 3. 프로젝트 내부 outputs/cardnews/easytax 폴백 탐색
+        if len(images) < 5:
+            proj_dir = OUTPUTS_DIR / "cardnews" / "easytax"
+            if proj_dir.exists():
+                proj_found = sorted(proj_dir.glob(f"*{lang}*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
+                if len(proj_found) >= 5:
+                    images = [str(f) for f in proj_found[:5]]
+
+        return images
+
+    def publish_daily_threads(
+        self,
+        target_langs: Optional[List[str]] = None,
+        time_slot: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        EasyTax 타래형 세무 환급 스레드 생성 및 배포
+        - target_langs: 지정 언어 목록 (None일 경우 17개 언어 순환 3개 선택)
+        - time_slot: "morning"(11:00 카드뉴스), "afternoon"(16:30 순수 썰), "evening"(21:30 카드뉴스). None일 경우 자동 감지
+        """
+        if time_slot is None:
+            time_slot = self._detect_current_slot()
+
         if target_langs is None:
             target_langs = self._get_next_rotation_langs(count=3)
+
         published_threads = []
         base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app")
 
+        logger.info(f"🧵 [EasyTax Threads] 하루 3회 스케줄러 가동: time_slot={time_slot}, target_langs={target_langs}")
+
         for lang in target_langs:
-            campaign = UTMTracker.generate_campaign_tag("easytax", f"threads_{lang}", lang)
+            campaign = UTMTracker.generate_campaign_tag("easytax", f"threads_{time_slot}_{lang}", lang)
             landing_url = UTMTracker.build_service_landing_url(
                 service_id="easytax",
                 base_domain=base_domain,
                 lang=lang,
                 path="",
                 source="threads",
-                medium="viral_tax_thread",
+                medium=f"viral_{time_slot}_tax_thread",
                 campaign=campaign
             )
 
-            # 1. 3~4단 세무 타래(Thread) 포스트 생성
-            thread_data = self._generate_easytax_thread(lang, landing_url)
+            # 1. 시나리오 테마 추출
+            scenario = self.scenario_director.get_thread_scenario()
 
-            # 2. 산출물 파일 저장 (JSON & Markdown)
-            filename_base = f"easytax_threads_{lang}_{int(time.time())}"
+            # 2. 제미나이 무료 키 기반 17개국어 맞춤 세무 타래 생성 (추가 비용 0원)
+            thread_data = self.writer.generate_thread_package(
+                lang=lang,
+                time_slot=time_slot,
+                theme=scenario,
+                landing_url=landing_url
+            )
+
+            posts = thread_data.get("posts", [])
+            hook_title = thread_data.get("hook_title", "")
+            post_type = thread_data.get("post_type", "cardnews_attached" if time_slot != "afternoon" else "pure_story")
+
+            # 3. 아침/저녁 슬롯: 카드뉴스 5장 이미지 자동 탐색 및 첨부
+            attached_images = []
+            if time_slot in ["morning", "evening"]:
+                attached_images = self._find_cardnews_images(lang)
+
+            # 4. 종합 마크다운 문서 빌드
+            md_lines = [
+                f"# 💰 EasyTax Meta Threads - [{time_slot.upper()} Slot]",
+                f"- **언어**: {lang.upper()}",
+                f"- **타입**: {post_type} ({'📸 세무 카드뉴스 5장 첨부형' if attached_images else '📝 텍스트 썰형'})",
+                f"- **랜딩 URL**: {landing_url}",
+                f"- **생성 일시**: {get_now_kst_str()}",
+                "",
+                "---",
+                ""
+            ]
+
+            if attached_images:
+                md_lines.append(f"### 📸 첨부된 공인 세무 카드뉴스 이미지 ({len(attached_images)}장):")
+                for img_p in attached_images:
+                    md_lines.append(f"- `{img_p}`")
+                md_lines.append("")
+                md_lines.append("---")
+                md_lines.append("")
+
+            for idx, p in enumerate(posts):
+                if idx == 0:
+                    role_label = "1번 메인 글 (링크 0% 알고리즘 극대화)"
+                elif idx == 1 and time_slot == "afternoon":
+                    role_label = "2번 조특법 팩트/노하우 요약 답글"
+                else:
+                    role_label = f"{idx+1}번 답글 (환급 계산기 링크 안내 댓글)"
+
+                md_lines.append(f"### 🧵 Post #{idx+1} [{role_label}]")
+                md_lines.append(p)
+                md_lines.append("")
+
+            full_md = "\n".join(md_lines)
+            thread_data["full_markdown"] = full_md
+            thread_data["attached_images"] = attached_images
+            thread_data["landing_url"] = landing_url
+            thread_data["created_at"] = get_now_kst_str()
+
+            # 5. 산출물 파일 저장 (JSON & Markdown)
+            timestamp = int(time.time())
+            filename_base = f"easytax_threads_{lang}_{time_slot}_{timestamp}"
             json_path = self.output_dir / f"{filename_base}.json"
             md_path = self.output_dir / f"{filename_base}.md"
 
@@ -85,101 +224,57 @@ class EasyTaxThreadsPublisher:
                 json.dump(thread_data, f, ensure_ascii=False, indent=2)
 
             with open(md_path, "w", encoding="utf-8") as f:
-                f.write(thread_data.get("full_markdown", ""))
+                f.write(full_md)
 
-            # 3. DB 발행 이력 기록
-            self.db_mgr.record_history(
-                content_type="threads_post",
-                service_id="easytax",
-                target_lang=lang,
-                title=thread_data.get("hook_title", ""),
-                content_text=thread_data.get("full_markdown", "")[:500] + "...",
-                target_url=landing_url,
-                external_id=f"tax_threads_{lang}_{int(time.time())}"
-            )
+            # 6. DB 이력 기록
+            try:
+                self.db_mgr.record_history(
+                    content_type="threads_post",
+                    service_id="easytax",
+                    target_lang=lang,
+                    title=hook_title,
+                    content_text=full_md[:500] + "...",
+                    target_url=landing_url,
+                    external_id=f"tax_threads_{lang}_{time_slot}_{timestamp}"
+                )
+            except Exception as e:
+                logger.warning(f"DB 이력 기록 실패: {e}")
+
+            # 7. Meta Threads API 자동 송출 or 스테이징 패키징
+            main_post = posts[0] if posts else ""
+            reply_post = posts[-1] if len(posts) > 1 else landing_url
+            card_payload = {
+                "service_id": "easytax",
+                "lang": lang,
+                "caption": main_post,
+                "landing_url": landing_url,
+                "image_paths": attached_images,
+                "channels": {
+                    "threads": {
+                        "main_post": main_post,
+                        "reply_link": reply_post
+                    }
+                }
+            }
+            pub_res = self.threads_publisher.publish(card_payload)
 
             published_threads.append({
                 "lang": lang,
-                "title": thread_data.get("hook_title", ""),
-                "posts_count": len(thread_data.get("posts", [])),
-                "file": json_path.name
+                "time_slot": time_slot,
+                "title": hook_title,
+                "post_type": post_type,
+                "posts_count": len(posts),
+                "images_count": len(attached_images),
+                "file": json_path.name,
+                "publish_status": pub_res.get("status", "ready_staged")
             })
-            logger.info(f"💰 [EasyTax Threads] {lang.upper()} 세무 타래 포스트 생성 완료: {thread_data.get('hook_title', '')}")
+            logger.info(f"💰 [EasyTax Threads] [{time_slot}] {lang.upper()} 타래 포스트 완료: {hook_title} (이미지 {len(attached_images)}장)")
 
         return {
             "success": True,
             "brand": "easytax",
+            "time_slot": time_slot,
             "count": len(published_threads),
             "threads": published_threads,
-            "message": f"💰 [EasyTax] {len(published_threads)}개 언어 Threads 세무 타래가 성공적으로 배포되었습니다!"
-        }
-
-    def _generate_easytax_thread(self, lang: str, landing_url: str) -> Dict[str, Any]:
-        """언어별 맞춤 50:50 순수 생활/비자 정보 vs 구글 'ktrs tax' 검색 유도 스레드 콘텐츠 생성"""
-        import random
-        # 50:50 확률로 순수 정보 타래(Type 1) vs 구글 검색 유도 타래(Type 2)
-        is_pure_info = (random.random() < 0.50)
-
-        if is_pure_info:
-            # 🌿 TYPE 1: 100% 순수 정보성 타래 + 마지막 링크 안내
-            if lang == "vi":
-                posts = [
-                    "3 điều cực kỳ quan trọng về Visa E-9 và D-2 tại Hàn Quốc bạn nhất định phải nhớ 🧵👇 #KinhNghiemHanQuoc #VisaE9 #DuHocHanQuoc",
-                    "1/ Gia hạn thẻ ARC: Hãy đặt lịch hẹn trên Hikorea trước ngày hết hạn ít nhất 2-3 tháng. Quá hạn dù chỉ 1 ngày bạn sẽ bị phạt hành chính rất nặng.",
-                    "2/ Bảo hiểm y tế quốc dân (NHIS): Tiền bảo hiểm tự động trừ hàng tháng. Nếu đi khám tại phòng khám nội khoa (내과) gần nhà, chi phí chỉ khoảng 5,000 - 10,000 won.",
-                    f"3/ Kiểm tra các quyền lợi thuế và hoàn tiền hợp법: 👉 {landing_url} (hoặc tìm 'KTRS tax' trên Google nhé!)"
-                ]
-                hook = "3 lưu ý sống còn về Visa E-9 & D-2 tại Hàn Quốc (Cập nhật 2026)"
-            elif lang == "en":
-                posts = [
-                    "3 essential survival tips for foreign workers & students living in South Korea 🧵👇 #KoreaTips #ExpatLife #LifeInKorea",
-                    "1/ ARC Renewal: Always book your appointment on HiKorea at least 2 months before expiration. Overstaying by even one day results in heavy fines.",
-                    "2/ National Health Insurance (NHIS): Standard clinic visits (내과/이비인후과) usually cost under 10,000 KRW with insurance. Don't avoid going to the doctor!",
-                    f"3/ Check your official tax benefits & refund estimates: 👉 {landing_url} (or search 'KTRS tax' on Google!)"
-                ]
-                hook = "3 Essential Expat Survival & Bureaucracy Tips in Korea (2026)"
-            else: # ko
-                posts = [
-                    "외국인 유학생(D-2) & 근로자(E-9) 한국 생활 필수 행정 꿀팁 3가지 🧵👇 #외국인생활 #한국생활꿀팁 #비자연장",
-                    "1/ 외국인등록증(ARC) 연장: 만료일 2~3달 전 하이코리아에서 사전 방문예약 필수. 단 하루만 늦어도 과태료가 부과됩니다.",
-                    "2/ 국민건강보험 활용: 동네 내과/이비인후과 진료비는 보험 적용 시 5,000~10,000원 선으로 매우 저렴하니 아플 때 참지 마세요.",
-                    f"3/ 외국인 세무 환급 및 지원 혜택 무료 조회: 👉 {landing_url} (또는 구글에서 'KTRS tax' 검색!)"
-                ]
-                hook = "외국인 유학생 및 근로자 한국 생활 필수 행정 수칙 3가지"
-
-        else:
-            # 🎯 TYPE 2: 80% 세법 팩트 + 공식 웹사이트 직접 링크 & 구글 검색 타래
-            if lang == "vi":
-                posts = [
-                    "Lao động Việt Nam visa E-9, E-7 và du học sinh D-2 tại Hàn Quốc: Quyền nhận lại hàng triệu won tiền thuế thu nhập 🧵👇 #HoanThueHanQuoc #ThueThuNhap #E9Korea",
-                    "1/ Điều 30 Luật Miễn giảm thuế đặc biệt (조특법 제30조): Người lao động nước ngoài làm việc tại doanh nghiệp SME được GIẢM 90% thuế thu nhập trong 5 năm đầu (tối đa 2.000.000 KRW/năm).",
-                    "2/ Du học sinh D-2 làm thêm bị trừ 3.3% thuế hoặc lao động đã về nước từ 2021-2025 đều có quyền nộp đơn yêu cầu hoàn thuế 5 năm (경정청구).",
-                    f"3/ Bấm vào link để kiểm tra số tiền hoàn lại miễn phí trong 3 phút: 👉 {landing_url} (hoặc tìm 'KTRS tax' trên Google)!"
-                ]
-                hook = "Quyền giảm 90% thuế thu nhập (Điều 30) & Hoàn thuế 5 năm cho lao động E-9"
-            elif lang == "en":
-                posts = [
-                    "Foreign workers & international students in Korea: You might be leaving up to 2,000,000 KRW in unclaimed tax refunds every year 🧵👇 #KoreaTax #ExpatFinance #KoreaRefund",
-                    "1/ Under Article 30 of the Restriction of Special Taxation Act, foreign employees in Korean SMEs are entitled to a 90% INCOME TAX REDUCTION for their first 5 years.",
-                    "2/ Worked part-time with 3.3% withholding tax under D-2 visa? Or missed filing between 2021-2025? You can legally claim retroactive refunds for the past 5 years.",
-                    f"3/ Calculate your estimated refund amount for free in 3 minutes: 👉 {landing_url} (or search 'KTRS tax' on Google)!"
-                ]
-                hook = "90% Income Tax Exemption & 5-Year Retroactive Refund Guide for Expats"
-            else: # ko
-                posts = [
-                    "외국인 근로자(E-9/E-7) 및 유학생(D-2) 국세청 소득세 90% 감면 팩트체크 🧵👇 #외국인세금환급 #조특법30조 #경정청구",
-                    "1/ 조특법 제30조(중소기업 취업자 소득세 감면): 중소기업에 취업한 외국인 근로자는 5년간 소득세 90%(연 최대 200만원 한도)를 합법 감면받을 수 있습니다.",
-                    "2/ D-2 유학생 3.3% 원천징수 환급 및 최근 5개년(2021~2025) 누락된 환급금 소급 경정청구 전액 신청 가능.",
-                    f"3/ 내가 돌려받을 수 있는 예상 환급금 무료 계산 바로가기: 👉 {landing_url} (또는 구글에서 'KTRS tax' 검색)!"
-                ]
-                hook = "외국인 근로자 조특법 제30조 90% 소득세 감면 및 5개년 소급 환급"
-
-        full_md = "\n\n---\n\n".join([f"**Post {i+1}**\n{p}" for i, p in enumerate(posts)])
-        return {
-            "hook_title": hook,
-            "is_pure_info": is_pure_info,
-            "posts": posts,
-            "full_markdown": full_md,
-            "landing_url": landing_url,
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            "message": f"💰 [EasyTax] [{time_slot.upper()}] {len(published_threads)}개 언어 Threads 타래가 성공적으로 생성 및 배포되었습니다!"
         }

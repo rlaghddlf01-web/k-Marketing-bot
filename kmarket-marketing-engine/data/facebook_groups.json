@@ -9,6 +9,69 @@
     "approval_type": "post_approval"
   },
   {
+    "group_id": "fb_uzbek_01",
+    "name": "Koreyadagi O'zbeklar (재한 우즈베키스탄 근로자)",
+    "members": "160,000",
+    "country": "Uzbekistan",
+    "lang": "uz",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
+    "group_id": "fb_cambodia_01",
+    "name": "ពលករខ្មែរនៅកូរ៉េ (재한 캄보디아 EPS 근로자 커뮤니티)",
+    "members": "125,000",
+    "country": "Cambodia",
+    "lang": "km",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
+    "group_id": "fb_nepal_01",
+    "name": "कोरियामा नेपालीहरु (재한 네팔인 총연합회 & EPS Nepal)",
+    "members": "110,000",
+    "country": "Nepal",
+    "lang": "ne",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
+    "group_id": "fb_thailand_01",
+    "name": "คนไทยในเกาหลีใต้ (재한 태국인 커뮤니티 & EPS Thai)",
+    "members": "280,000",
+    "country": "Thailand",
+    "lang": "th",
+    "target": "kmarket_and_easytax",
+    "approval_type": "post_approval"
+  },
+  {
+    "group_id": "fb_indonesia_01",
+    "name": "Komunitas Pekerja Indonesia di Korea Selatan (KPIKS / EPS Indonesia)",
+    "members": "150,000",
+    "country": "Indonesia",
+    "lang": "id",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
+    "group_id": "fb_mongolia_01",
+    "name": "Солонгос дахь Монголчууд (재한 몽골인 협회)",
+    "members": "140,000",
+    "country": "Mongolia",
+    "lang": "mn",
+    "target": "kmarket_and_easytax",
+    "approval_type": "post_approval"
+  },
+  {
+    "group_id": "fb_myanmar_01",
+    "name": "မြန်မာနိုင်ငံသားများ ကိုရီးယား (재한 미얀마 근로자 협회 / EPS Myanmar)",
+    "members": "95,000",
+    "country": "Myanmar",
+    "lang": "my",
+    "target": "kmarket_and_easytax",
+    "approval_type": "instant"
+  },
+  {
     "group_id": "fb_vietnam_02",
     "name": "Hội Du học sinh Việt Nam tại Hàn Quốc (VSAK - 유학생회)",
     "members": "180,000",
@@ -27,15 +90,6 @@
     "approval_type": "post_approval"
   },
   {
-    "group_id": "fb_uzbek_01",
-    "name": "Koreyadagi O'zbeklar (재한 우즈베키스탄 근로자)",
-    "members": "160,000",
-    "country": "Uzbekistan",
-    "lang": "uz",
-    "target": "kmarket_and_easytax",
-    "approval_type": "instant"
-  },
-  {
     "group_id": "fb_philippines_01",
     "name": "Filipinos in South Korea / Pinoy EPS (필리핀 근로자)",
     "members": "190,000",
@@ -52,14 +106,5 @@
     "lang": "en",
     "target": "kmarket_and_easytax",
     "approval_type": "instant"
-  },
-  {
-    "group_id": "fb_mongolia_01",
-    "name": "Солонгос дахь Монголчууд (재한 몽골인 협회)",
-    "members": "140,000",
-    "country": "Mongolia",
-    "lang": "mn",
-    "target": "kmarket_and_easytax",
-    "approval_type": "post_approval"
   }
 ]

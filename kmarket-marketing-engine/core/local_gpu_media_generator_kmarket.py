@@ -30,7 +30,6 @@ class LocalGPUMediaGeneratorKMarket:
     """
     def __init__(self, colab_api_url: Optional[str] = None):
         self.service_id = "kmarket"
-        self.colab_api_url = colab_api_url or os.getenv("COLAB_GPU_API_URL", "").rstrip("/")
         self.cache_dir = DATA_DIR / "gemini_generated_media" / "kmarket"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         
@@ -38,10 +37,7 @@ class LocalGPUMediaGeneratorKMarket:
         self._current_episode_seed: Optional[int] = None
         self._last_episode_id: Optional[str] = None
 
-        if self.colab_api_url:
-            logger.info(f"🛒 [K-Market 무료 GPU 연동] RealVisXL 코랩 서버 주소: {self.colab_api_url}")
-        else:
-            logger.info("ℹ️ [K-Market] COLAB_GPU_API_URL 미설정 -> 하이브리드 자동 감지 모드")
+        logger.info("🛒 [K-Market 비주얼 엔진] 🏆 Google Gemini 3.1 Flash-Lite Image 표준 가동")
 
     def set_episode_seed(self, episode_id: str, seed: Optional[int] = None):
         """동일 숏폼 에피소드(1~5씬) 전체에 동일 인물 시드 고정"""
@@ -73,19 +69,28 @@ class LocalGPUMediaGeneratorKMarket:
         
         target_seed = seed if seed is not None else self._current_episode_seed
 
-        action = scenario_plan.get("action_prompt", "authentic documentary portrait")
-        human_centric_mandate = (
-            ", [CRITICAL DIRECTING MANDATE: 100% HUMAN-CENTRIC PORTRAIT]: "
-            "The human protagonist is the absolute primary focal subject of this photo. "
-            "Clear expressive face, genuine eyes, upper body occupying 70% of frame, "
-            "photorealistic human skin texture, authentic lighting, master photography, 8k."
+        action = scenario_plan.get("action_prompt", "authentic documentary photography")
+        # 🎯 가구/물건 나눔 테마에서는 억지 얼굴 클로즈업(upper body occupying 70%)을 원천 배제하고
+        # 물건 실물과 상황 중심의 자연스러운 실사 씬을 그대로 반영
+        # 🧑 얼굴 뭉개짐 방지: 모든 씬에 얼굴 선명도 강화 키워드 자동 주입
+        prompt = (
+            f"{action}, "
+            f"highly detailed facial features, sharp clear eyes, well-defined face, natural skin texture, "
+            f"photorealistic, sharp focus, 8k uhd, professional documentary photography"
         )
-        prompt = f"{action}{human_centric_mandate}"
 
-        negative_prompt = scenario_plan.get("negative_prompt") or (
-            "caucasian, white, blonde hair, blue eyes, deformed fingers, extra limbs, claw hands, "
-            "fused fingers, floating phone, disembodied hands, cartoon, 3d render, plastic skin, ugly, blurry"
+        passed_neg = scenario_plan.get("negative_prompt") or ""
+        safeguard_neg = (
+            "studying, reading books, writing, notebook, pen, pencil, classroom, homework, exams, "
+            "empty hands, handshake without furniture, standing without furniture, people only, no furniture, missing item, "
+            "blurry face, blurred face, melted face, smudged face, undefined facial features, faceless, "
+            "distorted face, deformed eyes, squinting, bad eyes, asymmetric eyes, bad teeth, deformed mouth, "
+            "out of focus face, soft focus face, motion blur on face, foggy face, hazy face, "
+            "deformed fingers, fused fingers, extra fingers, missing fingers, malformed hands, claw hands, "
+            "bad anatomy, grotesque, amputee, caucasian, white, blonde hair, blue eyes, "
+            "floating phone, cartoon, 3d render, plastic skin, ugly, blurry, lowres, jpeg artifacts"
         )
+        negative_prompt = f"{passed_neg}, {safeguard_neg}".strip(", ")
 
         # ── 씬 1 실제 사진 참조(IP-Adapter Face Lock) 준비 ──
         ref_b64 = None
@@ -97,59 +102,7 @@ class LocalGPUMediaGeneratorKMarket:
             except Exception as e:
                 logger.warning(f"참조 이미지 base64 인코딩 실패: {e}")
 
-        # ── 1. 구글 코랩 무료 GPU 서버 호출 (비용 0원 & 3회 자동 재시도 탑재) ──
-        for attempt in range(1, 4):
-            active_url = self.colab_api_url
-            try:
-                from core.supabase_manager import SupabaseManager
-                sb = SupabaseManager()
-                cloud_url = sb.get_active_gpu_url()
-                if cloud_url:
-                    active_url = cloud_url
-            except Exception:
-                pass
-
-            if not active_url:
-                time.sleep(2)
-                continue
-
-            try:
-                logger.info(f"[{lang.upper()}] 🛒 [K-Market 무료 GPU 시도 {attempt}/3] RealVisXL 렌더링 요청 ({active_url}, Seed: {target_seed}, FaceLock: {bool(ref_b64)})...")
-                req_data = {
-                    "prompt": prompt,
-                    "negative_prompt": negative_prompt,
-                    "aspect_ratio": aspect_ratio,
-                    "seed": target_seed,
-                    "guidance_scale": 5.0,
-                    "num_inference_steps": 25
-                }
-                if ref_b64:
-                    req_data["ref_image_base64"] = ref_b64
-
-                payload = json.dumps(req_data).encode("utf-8")
-
-                req = urllib.request.Request(
-                    f"{active_url}/generate",
-                    data=payload,
-                    headers={"Content-Type": "application/json", "User-Agent": "KMarket-Marketing-Bot/1.0"},
-                    method="POST"
-                )
-
-                with urllib.request.urlopen(req, timeout=180) as resp:
-                    if resp.status == 200:
-                        res_data = json.loads(resp.read().decode("utf-8"))
-                        if res_data.get("success") and res_data.get("image_base64"):
-                            img_bytes = base64.b64decode(res_data["image_base64"])
-                            image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-                            image.save(output_path, "JPEG", quality=95)
-                            logger.info(f"🎉 [K-Market 무료 GPU 생성 성공] 동일 인물 실사 완성 (Seed {res_data.get('seed')}): {output_path.name}")
-                            return output_path
-            except Exception as e:
-                logger.warning(f"K-Market 코랩 GPU 서버 통신 실패 (시도 {attempt}/3, {active_url}): {e}")
-                time.sleep(3 * attempt)
-
-        # ── 2. 코랩 통신 불가 시 즉시 정식 Gemini Imagen 실사 AI 엔진으로 Fallback ──
-        logger.warning(f"[{lang.upper()}] ⚠️ 코랩 GPU 서버 오프라인 감지 -> Gemini Imagen 실사 엔진으로 즉시 자동 전환")
+        # ── 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 실사 AI 엔진 직결 ──
         try:
             from core.gemini_media_generator import GeminiMediaGenerator
             gemini_gen = GeminiMediaGenerator(service_id="kmarket")
@@ -162,10 +115,10 @@ class LocalGPUMediaGeneratorKMarket:
                 reference_image_path=Path(reference_image_path) if reference_image_path else None
             )
             if res_path and res_path.exists() and res_path.stat().st_size > 5000:
-                logger.info(f"🎉 [K-Market Gemini 전환 성공] 고화질 실사 인물 사진 완성: {res_path.name}")
+                logger.info(f"🎉 [K-Market Gemini 3.1 Flash-Lite 완성]: {res_path.name}")
                 return res_path
         except Exception as e:
-            logger.error(f"Gemini Fallback 이미지 생성 중 예외: {e}")
+            logger.error(f"Gemini 3.1 Flash-Lite 이미지 생성 예외: {e}")
 
         # ── 3. 최후의 안전 Fallback (기본 캔버스) ──
         W, H = (1080, 1920) if aspect_ratio == "9:16" else (1080, 1080)

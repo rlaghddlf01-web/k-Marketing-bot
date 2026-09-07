@@ -32,7 +32,7 @@ class ShortsVideoFactory:
         lang: str = "vi",
         target_langs: Optional[List[str]] = None,
         force_mode: Optional[str] = None,
-        engine_mode: str = "colab_gpu"
+        engine_mode: str = "gemini"
     ) -> Dict[str, Any]:
         """서비스 ID에 따라 전담 숏폼 공장으로 즉시 분기 위임"""
         service_id = service_id.lower()

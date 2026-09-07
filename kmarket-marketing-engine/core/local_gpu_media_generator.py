@@ -31,7 +31,6 @@ class LocalGPUMediaGenerator:
     """
     def __init__(self, service_id: str = "kmarket", colab_api_url: Optional[str] = None):
         self.service_id = service_id.lower()
-        self.colab_api_url = colab_api_url or os.getenv("COLAB_GPU_API_URL", "").rstrip("/")
         self.cache_dir = DATA_DIR / "gemini_generated_media"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         
@@ -39,10 +38,7 @@ class LocalGPUMediaGenerator:
         self._current_episode_seed: Optional[int] = None
         self._last_episode_id: Optional[str] = None
 
-        if self.colab_api_url:
-            logger.info(f"🚀 [무료 GPU 엔진 연동] 코랩 RealVisXL 서버 주소: {self.colab_api_url}")
-        else:
-            logger.info("ℹ️ COLAB_GPU_API_URL 미설정 -> 하이브리드 자동 감지 모드 가동")
+        logger.info(f"🚀 [{self.service_id.upper()} 비주얼 엔진] 🏆 Google Gemini 3.1 Flash-Lite Image 표준 가동")
 
     def set_episode_seed(self, episode_id: str, seed: Optional[int] = None):
         """동일 숏폼 에피소드(1~5씬) 전체에 동일 인물 시드 고정"""
@@ -89,37 +85,19 @@ class LocalGPUMediaGenerator:
             "fused fingers, floating phone, disembodied hands, cartoon, 3d render, plastic skin, ugly, blurry"
         )
 
-        # ── 1. 구글 코랩 무료 GPU 서버 호출 (비용 0원) ──
-        if self.colab_api_url:
-            try:
-                logger.info(f"[{lang.upper()}] 🎨 [구글 무료 GPU] RealVisXL 렌더링 요청 중 (시드: {target_seed})...")
-                payload = json.dumps({
-                    "prompt": prompt,
-                    "negative_prompt": negative_prompt,
-                    "aspect_ratio": aspect_ratio,
-                    "seed": target_seed,
-                    "guidance_scale": 5.0,
-                    "num_inference_steps": 25
-                }).encode("utf-8")
-
-                req = urllib.request.Request(
-                    f"{self.colab_api_url}/generate",
-                    data=payload,
-                    headers={"Content-Type": "application/json", "User-Agent": "KTRS-Marketing-Bot/1.0"},
-                    method="POST"
-                )
-
-                with urllib.request.urlopen(req, timeout=45) as resp:
-                    if resp.status == 200:
-                        res_data = json.loads(resp.read().decode("utf-8"))
-                        if res_data.get("success") and res_data.get("image_base64"):
-                            img_bytes = base64.b64decode(res_data["image_base64"])
-                            image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-                            image.save(output_path, "JPEG", quality=95)
-                            logger.info(f"🎉 [무료 GPU 생성 성공] 동일 인물 실사 사진 완성 (Seed {res_data.get('seed')}): {output_path.name}")
-                            return output_path
-            except Exception as e:
-                logger.warning(f"구글 코랩 GPU 서버 통신 실패 (Fallback 전환): {e}")
+        # ── 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 실사 AI 엔진 직결 ──
+        try:
+            from core.gemini_media_generator import GeminiMediaGenerator
+            gemini_gen = GeminiMediaGenerator(service_id=self.service_id)
+            return gemini_gen.generate_theme_image(
+                lang=lang,
+                theme_id=theme_id,
+                scenario_plan=scenario_plan,
+                aspect_ratio=aspect_ratio,
+                output_path=output_path
+            )
+        except Exception as e:
+            logger.error(f"Gemini 3.1 Flash-Lite 이미지 생성 예외: {e}")
 
         # ── 2. Fallback: Gemini 유료 API 전환 (코랩 미가동 시) ──
         try:

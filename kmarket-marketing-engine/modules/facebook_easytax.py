@@ -162,6 +162,78 @@ class EasyTaxFacebookHunter:
                 f"🛡️ Hoàn toàn miễn phí tính thử • Không thu phí trước.\n\n"
                 f"👉 Xem công cụ tính thử tiền hoàn thuế miễn phí ở bình luận đầu tiên bên dưới nhé!"
             )
+        elif lang == "uz":
+            return (
+                f"🏛️ [Koreyadagi E-9/H-2 ishchilari va talabalar uchun qonuniy soliq imtiyozlari]\n\n"
+                f"Assalomu alaykum, {group_name} guruhi a'zolari!\n"
+                f"Koreya Milliy Soliq Xizmati Maxsus Soliq Imtiyozlari Qonuni (30-modda)ga binoan:\n"
+                f"• Ishlab chiqarish sohasidagi E-9 ishchilari daromad solig'idan 90% gacha chegirma oladi.\n"
+                f"• So'nggi 5 yil (2020~2025) uchun qaytarib olinmagan soliqlarni to'liq qaytarish mumkin.\n"
+                f"🛡️ 100% bepul hisob-kitob • Hech qanday oldindan to'lov yo'q.\n\n"
+                f"👉 Bepul hisoblash vositasi havolasi birinchi izohda qoldirildi!"
+            )
+        elif lang == "km":
+            return (
+                f"🏛️ [សិទ្ធិទទួលបានការបង្វិលសងពន្ធស្របច្បាប់សម្រាប់ពលករ E-9 និងនិស្សិតនៅកូរ៉េ]\n\n"
+                f"សួស្តីបងប្អូនសមាជិកក្រុម {group_name} ទាំងអស់គ្នា!\n"
+                f"យោងតាមច្បាប់កាត់បន្ថយពន្ធពិសេស (មាត្រា ៣០) របស់អគ្គនាយកដ្ឋានពន្ធដារកូរ៉េ៖\n"
+                f"• ពលករ E-9 ក្នុងវិស័យផលិតកម្ម/កសិកម្ម ទទួលបានការបញ្ចុះពន្ធលើប្រាក់ចំណូលរហូតដល់ 90%។\n"
+                f"• អាចទាមទារប្រាក់បង្វិលសងពន្ធថយក្រោយរហូតដល់ ៥ ឆ្នាំ (២០២០~២០២៥)។\n"
+                f"🛡️ ការគណនាសាកល្បងឥតគិតថ្លៃ ១០០% • គ្មានការគិតថ្លៃសេវាជាមុនឡើយ។\n\n"
+                f"👉 សូមពិនិត្យមើលតំណភ្ជាប់គណនាប្រាក់បង្វិលសងពន្ធឥតគិតថ្លៃនៅមតិយោបល់ដំបូងខាងក្រោម!"
+            )
+        elif lang == "ne":
+            return (
+                f"🏛️ [कोरियामा ई-९ कामदार र विद्यार्थीहरूका लागि कानुनी कर फिर्ता अधिकार]\n\n"
+                f"नमस्ते {group_name} समूहका सम्पूर्ण साथीहरू!\n"
+                f"कोरियाको विशेष कर न्यूनीकरण ऐन (धारा ३०) अनुसार:\n"
+                f"• निर्माण तथा उत्पादन क्षेत्रका E-9 कामदारहरूले ९०% सम्म आयकर छुट पाउँछन्।\n"
+                f"• विगत ५ वर्ष (२०२०~२०२५) को कर फिर्ता (Refund) दाबी गर्न सकिन्छ।\n"
+                f"🛡️ १००% नि:शुल्क अनुमान • कुनै अग्रिम शुल्क लाग्दैन।\n\n"
+                f"👉 आफ्नो कर फिर्ता रकम नि:शुल्क जाँच गर्न पहिलो कमेन्ट हेर्नुहोस्!"
+            )
+        elif lang == "th":
+            return (
+                f"🏛️ [สิทธิขอคืนภาษีอย่างถูกต้องตามกฎหมายสำหรับแรงงาน E-9 และนักศึกษาในเกาหลี]\n\n"
+                f"สวัสดีสมาชิกกลุ่ม {group_name} ทุกคนครับ/ค่ะ!\n"
+                f"ตามพระราชบัญญัติลดหย่อนภาษีพิเศษ (มาตรา 30) ของกรมสรรพากรเกาหลีใต้:\n"
+                f"• แรงงานวีซ่า E-9/H-2 มีสิทธิได้รับการลดหย่อนภาษีเงินได้สูงสุดถึง 90%\n"
+                f"• สามารถยื่นขอคืนภาษีย้อนหลังได้สูงสุดถึง 5 ปี (2020~2025)\n"
+                f"🛡️ คำนวณเบื้องต้นฟรี 100% • ไม่มีค่าบริการล่วงหน้า\n\n"
+                f"👉 ตรวจสอบลิงก์คำนวณยอดเงินภาษีคืนฟรีได้ที่ความคิดเห็นแรกด้านล่างเลยครับ/ค่ะ!"
+            )
+        elif lang == "id":
+            return (
+                f"🏛️ [Hak Pengembalian Pajak Legal bagi Pekerja E-9 & Mahasiswa di Korea]\n\n"
+                f"Halo rekan-rekan grup {group_name}!\n"
+                f"Berdasarkan UU Pengurangan Pajak Khusus (Pasal 30) Badan Pajak Nasional Korea:\n"
+                f"• Pekerja E-9 berhak mendapatkan pemotongan pajak penghasilan hingga 90%.\n"
+                f"• Mahasiswa D-2 & pekerja paruh waktu dapat klaim pengembalian pajak 3.3%.\n"
+                f"• Klaim pengembalian berlaku surut hingga 5 tahun ke belakang (2020~2025).\n"
+                f"🛡️ Simulasi 100% Gratis • Tanpa biaya di muka.\n\n"
+                f"👉 Cek komentar pertama di bawah untuk menghitung perkiraan uang kembali secara gratis!"
+            )
+        elif lang == "mn":
+            return (
+                f"🏛️ [Солонгос дахь E-9 ажилчид болон D-2 оюутнуудын татварын хууль ёсны эрх]\n\n"
+                f"{group_name} группийн нийт гишүүдэд энэ өдрийн мэнд хүргэе!\n"
+                f"БНСУ-ын Татварын тусгай хөнгөлөлтийн хууль (30-р зүйл)-ийн дагуу:\n"
+                f"• Үйлдвэрлэлийн салбарын E-9 ажилчид орлогын албан татвараас 90% хүртэл хөнгөлөлт эдэлнэ.\n"
+                f"• D-2 оюутнууд цагийн ажлын 3.3% татварыг 100% буцаан авах боломжтой.\n"
+                f"• Сүүлийн 5 жилийн (2020~2025) татварыг нөхөн буцаан авах эрхтэй.\n"
+                f"🛡️ 100% үнэ төлбөргүй тооцоолол • Урьдчилгаа төлбөргүй.\n\n"
+                f"👉 Буцаан олголтын хэмжээгээ үнэгүй шалгах линкийг эхний сэтгэгдлээс харна уу!"
+            )
+        elif lang == "my":
+            return (
+                f"🏛️ [ကိုရီးယားရှိ E-9 လုပ်သားများနှင့် ကျောင်းသားများအတွက် တရားဝင် အခွန်ပြန်အမ်းငွေ ရပိုင်ခွင့်]\n\n"
+                f"{group_name} အဖွဲ့ဝင်များအားလုံး မင်္ဂလာပါ!\n"
+                f"ကိုရီးယား အမျိုးသားအခွန်ဦးစီးဌာန အထူးအခွန်လျှော့ပေါ့မှုဥပဒေ (ပုဒ်မ ၃၀) အရ -\n"
+                f"• E-9 ကုန်ထုတ်လုပ်ငန်းလုပ်သားများသည် ဝင်ငွေခွန် ၉၀% အထိ လျှော့ပေါ့ခွင့်ရရှိသည်။\n"
+                f"• လွန်ခဲ့သော ၅ နှစ် (၂၀၂၀~၂၀၂၅) အထိ နောက်ကြောင်းပြန် အခွန်ပြန်အမ်းငွေ တောင်းခံနိုင်သည်။\n"
+                f"🛡️ ၁၀၀% အခမဲ့ တွက်ချက်စစ်ဆေးနိုင်သည် • ကြိုတင်အခကြေးငွေ လုံးဝမရှိပါ။\n\n"
+                f"👉 ပြန်အမ်းငွေပမာဏကို အခမဲ့တွက်ချက်ရန် အောက်ပါ ပထမဆုံး comment ကို ကြည့်ပါ!"
+            )
         elif lang == "ru":
             return (
                 f"🏛️ [Законные налоговые льготы для иностранцев в Корее (E-9, H-2, D-2)]\n\n"
@@ -189,6 +261,20 @@ class EasyTaxFacebookHunter:
         """첫 번째 댓글용 링크 텍스트 (Anti-Ban 면책 포함)"""
         if lang == "vi":
             return f"👉 Bấm vào đây để tính thử số tiền hoàn thuế miễn phí trong 3 phút (Đại lý thuế công nhận): {url}"
+        elif lang == "uz":
+            return f"👉 Qaytariladigan soliq summasini 3 daqiqada bepul hisoblang (Soliq agentligi): {url}"
+        elif lang == "km":
+            return f"👉 ចុចទីនេះដើម្បីគណនាប្រាក់បង្វិលសងពន្ធរបស់អ្នកដោយឥតគិតថ្លៃក្នុងរយៈពេល 3 នាទី៖ {url}"
+        elif lang == "ne":
+            return f"👉 ३ मिनेटमा आफ्नो कर फिर्ता रकम नि:शुल्क गणना गर्नुहोस् (प्रमाणित कर सेवा): {url}"
+        elif lang == "th":
+            return f"👉 คลิกที่นี่เพื่อคำนวณยอดเงินภาษีคืนของคุณได้ฟรีใน 3 นาที (ตัวแทนภาษีรับรอง): {url}"
+        elif lang == "id":
+            return f"👉 Hitung pengembalian pajak Anda secara gratis dalam 3 menit (Agen Pajak Resmi): {url}"
+        elif lang == "mn":
+            return f"👉 Татварын буцаан олголтоо 3 минутад үнэгүй тооцоолж үзэх (Албан ёсны татварын систем): {url}"
+        elif lang == "my":
+            return f"👉 မိမိ၏ အခွန်ပြန်အမ်းငွေကို ၃ မိနစ်အတွင်း အခမဲ့ တွက်ချက်ရန် ဤနေရာကိုနှိပ်ပါ: {url}"
         elif lang == "ru":
             return f"👉 Рассчитайте сумму возврата налога бесплатно за 3 минуты (Сертифицированный сервис): {url}"
         else:

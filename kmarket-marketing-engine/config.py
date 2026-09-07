@@ -48,6 +48,23 @@ EASYTAX_LANGUAGES = [
     "th", "en", "si", "mn", "bn", "kk", "ur"
 ]
 
+# 🎯 8대 황금 타깃 국가 (유료 이미지 생성 채널: shorts, cardnews 선불 최적화 전용)
+# 대한민국 체류 E-9 비자 근로자 84.1% 및 조특법 30조 90% 소득세 감면 환급 잠재 고객 90% 집중
+GOLDEN_EIGHT_LANGUAGES = [
+    "vi", "uz", "km", "ne", "th", "id", "mn", "my"
+]
+
+GOLDEN_EIGHT_DETAILS = {
+    "vi": {"name": "Vietnamese", "native": "Tiếng Việt", "flag": "🇻🇳", "reason": "E-9 1위 & D-2 유학생 1위, 최다 환급액"},
+    "uz": {"name": "Uzbek", "native": "O'zbek", "flag": "🇺🇿", "reason": "E-9 제조업 2위, 결속력 최상위"},
+    "km": {"name": "Khmer", "native": "ភាសាខ្មែរ", "flag": "🇰🇭", "reason": "E-9 농축산/제조업, 미수령 환급 1위"},
+    "ne": {"name": "Nepali", "native": "नेपाली", "flag": "🇳🇵", "reason": "E-9 제조업 4.2만, 페이스북 전파력 1위"},
+    "th": {"name": "Thai", "native": "ไทย", "flag": "🇹🇭", "reason": "체류자 17만, 단체 환급 신청 최다"},
+    "id": {"name": "Indonesian", "native": "Bahasa Indonesia", "flag": "🇮🇩", "reason": "E-9 선원/제조업, 5년 소급 환급 대상 즐비"},
+    "mn": {"name": "Mongolian", "native": "Монгол", "flag": "🇲🇳", "reason": "D-2 유학생 2위, 알바 소득세 100% 환급"},
+    "my": {"name": "Burmese", "native": "မြန်မာ", "flag": "🇲🇲", "reason": "E-9 신규 쿼터 1위, 빠른 유입 증가세"}
+}
+
 # 17 Languages & Edge-TTS Voice Mapping (실제 K-Market 및 EasyTax 서비스 100% 동기화)
 LANGUAGES = {
     "ko": {
@@ -201,6 +218,52 @@ def get_weighted_language(brand: str = "kmarket") -> str:
     langs = list(weights_dict.keys())
     weights = list(weights_dict.values())
     return random.choices(langs, weights=weights, k=1)[0]
+
+def get_next_golden_eight_language(channel_key: str) -> str:
+    """8대 황금 타깃 국가 중 다음 순환 언어 1개 추출 및 상태 영구 저장 (선불 잔액 최적화)"""
+    import json
+    state_file = DATA_DIR / f"golden_rotation_state_{channel_key}.json"
+    curr_idx = 0
+    if state_file.exists():
+        try:
+            with open(state_file, "r", encoding="utf-8") as f:
+                curr_idx = json.load(f).get("index", 0)
+        except Exception:
+            curr_idx = 0
+    selected_lang = GOLDEN_EIGHT_LANGUAGES[curr_idx % len(GOLDEN_EIGHT_LANGUAGES)]
+    next_idx = (curr_idx + 1) % len(GOLDEN_EIGHT_LANGUAGES)
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        with open(state_file, "w", encoding="utf-8") as f:
+            json.dump({
+                "index": next_idx,
+                "current_lang": selected_lang,
+                "channel": channel_key,
+                "updated_at": get_now_kst_str()
+            }, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+    return selected_lang
+
+def get_golden_rotation_info(channel_key: str) -> dict:
+    """해당 채널의 현재 순환 대상 언어 정보 조회 (상태 변경 없음)"""
+    import json
+    state_file = DATA_DIR / f"golden_rotation_state_{channel_key}.json"
+    curr_idx = 0
+    if state_file.exists():
+        try:
+            with open(state_file, "r", encoding="utf-8") as f:
+                curr_idx = json.load(f).get("index", 0)
+        except Exception:
+            curr_idx = 0
+    current_lang = GOLDEN_EIGHT_LANGUAGES[curr_idx % len(GOLDEN_EIGHT_LANGUAGES)]
+    return {
+        "index": curr_idx % len(GOLDEN_EIGHT_LANGUAGES),
+        "total": len(GOLDEN_EIGHT_LANGUAGES),
+        "current_lang": current_lang,
+        "detail": GOLDEN_EIGHT_DETAILS.get(current_lang, {}),
+        "all_targets": GOLDEN_EIGHT_LANGUAGES
+    }
 
 # API Keys and External Services
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")

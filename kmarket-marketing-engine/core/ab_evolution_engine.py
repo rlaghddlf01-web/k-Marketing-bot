@@ -151,47 +151,15 @@ class ABEvolutionEngine:
         )
         return ch_stat
 
-    def get_next_engine(self, channel_key: str, setting_mode: str = "ab_auto") -> str:
+    def get_next_engine(self, channel_key: str, setting_mode: str = "gemini") -> str:
         """
-        현재 설정 모드와 승률 데이터에 기반하여 이번에 사용할 이미지 생성 엔진 결정
+        통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 확정 반환
         """
         self._ensure_channel(channel_key)
         ch_stat = self.stats[channel_key]
-
-        # 1. 수동 고정 모드일 때
-        if setting_mode == "colab_gpu":
-            ch_stat["colab_gpu"]["count"] += 1
-            self._save_stats(self.stats)
-            return "colab_gpu"
-        elif setting_mode == "gemini":
-            ch_stat["gemini"]["count"] += 1
-            self._save_stats(self.stats)
-            return "gemini"
-
-        # 2. 'ab_auto' 자가학습 모드일 때
-        ch_stat["turn_count"] += 1
-        turn = ch_stat["turn_count"]
-        ratio_colab = ch_stat["current_ratio"].get("colab_gpu", 50)
-
-        # 초기 데이터 축적 전(총점 0점)일 때는 정확하게 1번씩 번갈아 생성 (50:50 Alternating)
-        score_colab = ch_stat["colab_gpu"]["score"]
-        score_gemini = ch_stat["gemini"]["score"]
-        
-        if score_colab == 0 and score_gemini == 0:
-            selected = "colab_gpu" if turn % 2 == 1 else "gemini"
-        else:
-            # 점수 기반 가중 확률 분배 (Weighted Random Selection)
-            rand_val = random.randint(1, 100)
-            selected = "colab_gpu" if rand_val <= ratio_colab else "gemini"
-
-        ch_stat[selected]["count"] += 1
+        ch_stat["gemini"]["count"] += 1
         self._save_stats(self.stats)
-
-        logger.info(
-            f"🧬 [A/B 자율 선택] {channel_key} (턴 #{turn}) -> '{selected}' 선정 "
-            f"(가중치: 코랩 {ratio_colab}% : 제미나이 {100-ratio_colab}%)"
-        )
-        return selected
+        return "gemini"
 
     def get_all_stats(self) -> Dict[str, Any]:
         """대시보드 UI 연동용 전체 통계 반환"""

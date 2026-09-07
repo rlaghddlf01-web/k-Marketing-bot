@@ -1,32 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+KMarketThreadsPublisher - 🛒 [K-Market 전용 Meta Threads 17개국어 바이럴 무인 자동화 엔진]
+- 대한민국 표준시(KST) 하루 3회 정시 하이브리드 바이럴 체계:
+  1회차 (11:00 KST): 📸 [카드뉴스 5장 첨부형] (링크 0% 후킹 본문 + 0.1초 링크 답글 댓글)
+  2회차 (16:30 KST): 📝 [순수 텍스트 리얼 썰형] (광고 티 0% 3단 타래: 실화 썰 -> 팩트 요약 -> 링크 안내)
+  3회차 (21:30 KST): 📸 [야간 모바일 카드뉴스형] (여유 시간 탐색 맞춤 + 0.1초 링크 답글 댓글)
+- 제미나이 무료 키(Gemini 3.1 Flash-Lite) 100% 활용 (추가 비용 0원)
+- 바탕화면 카드뉴스 산출물(1080x1350) 자동 탐색 및 재사용 (추가 비용 0원)
+- 17개국어 순환(Rotation) 배포 지원
+"""
+
 import time
 import json
 import logging
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, DATA_DIR
+
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, DATA_DIR, get_now_kst_str
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
-from core.gemini_kmarket import KMarketGeminiEngine
 from core.supabase_manager import SupabaseManager
 from core.scenario_director_threads_kmarket import ScenarioDirectorThreadsKMarket
+from core.gemini_threads_writer import GeminiThreadsWriter
+from core.auto_publishers.cardnews_multi_publisher import ThreadsCardPublisher
 
 logger = logging.getLogger("KMarketThreads")
 
+
 class KMarketThreadsPublisher:
-    """
-    🛒 [K-Market 전용 Meta Threads 바이럴 스레드 무인 자동화 엔진]
-    - 2030 유학생 및 재한 외국인을 타깃으로 한 타래(Thread)형 바이럴 포스팅
-    - 1번 본문: 강력한 후킹 ("한국 졸업생들이 0원에 버리고 가는 가구 득템하는 법 🧵👇")
-    - 2~3번 타래: 신촌/안암/혜화 실물 매물 제보 & 안전 직거래 꿀팁
-    - 마지막 타래: K-Market 17개국어 자동번역 앱 바로가기 UTM 링크
-    """
+    """🛒 [K-Market 전용 Meta Threads 바이럴 무인 자동화 퍼블리셔]"""
+
     def __init__(self, db_mgr: DBManager, supabase_mgr: SupabaseManager):
         self.db_mgr = db_mgr
         self.supabase_mgr = supabase_mgr
-        self.gemini = KMarketGeminiEngine(self.supabase_mgr)
+        self.writer = GeminiThreadsWriter(service_id="kmarket")
         self.scenario_director = ScenarioDirectorThreadsKMarket()
         self.output_dir = OUTPUTS_DIR / "threads" / "kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.desktop_cardnews_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\케이마켓")
+
+        creds = self._load_credentials()
+        self.threads_publisher = ThreadsCardPublisher(creds)
+
+    def _load_credentials(self) -> Dict[str, str]:
+        env_path = BASE_DIR / ".env"
+        creds = {}
+        if env_path.exists():
+            try:
+                with open(env_path, "r", encoding="utf-8", errors="ignore") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            creds[k.strip()] = v.strip()
+            except Exception:
+                pass
+        return creds
+
+    def _detect_current_slot(self) -> str:
+        """대한민국 표준시(KST) 기준 하루 3회 정시 슬롯 자동 판별"""
+        kst = timezone(timedelta(hours=9))
+        hour = datetime.now(kst).hour
+        if hour < 14:
+            return "morning"    # 11:00 회차
+        elif hour < 19:
+            return "afternoon"  # 16:30 회차
+        else:
+            return "evening"    # 21:30 회차
 
     def _get_next_rotation_langs(self, count: int = 3) -> List[str]:
         """17개 언어 중 다음 순번의 3개 언어 순환 선택 (도배 방지 로테이션)"""
@@ -54,29 +95,127 @@ class KMarketThreadsPublisher:
 
         return selected
 
-    def publish_daily_threads(self, target_langs: Optional[List[str]] = None) -> Dict[str, Any]:
-        """K-Market 타래형 바이럴 스레드 생성 및 배포 (3개 언어 순환)"""
+    def _find_cardnews_images(self, lang: str) -> List[str]:
+        """바탕화면 카드뉴스 산출물 폴더에서 5장 이미지 탐색 (추가 비용 0원 재사용)"""
+        images = []
+        if self.desktop_cardnews_dir.exists():
+            # 1. 언어 맞춤 이미지 탐색 (예: kmarket_cardnews_ko_s*.jpg)
+            pattern = f"kmarket_cardnews_{lang}_s*.jpg"
+            found = sorted(self.desktop_cardnews_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
+            if len(found) >= 5:
+                images = [str(f) for f in found[:5]]
+            elif found:
+                images = [str(f) for f in found]
+
+            # 2. 부족할 경우 다른 언어 고화질 카드뉴스 슬라이드 대체 활용
+            if len(images) < 5:
+                fallback_found = sorted(self.desktop_cardnews_dir.glob("kmarket_cardnews_*_s*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
+                if len(fallback_found) >= 5:
+                    images = [str(f) for f in fallback_found[:5]]
+
+        # 3. 프로젝트 내부 outputs/cardnews/kmarket 폴백 탐색
+        if len(images) < 5:
+            proj_dir = OUTPUTS_DIR / "cardnews" / "kmarket"
+            if proj_dir.exists():
+                proj_found = sorted(proj_dir.glob(f"*{lang}*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
+                if len(proj_found) >= 5:
+                    images = [str(f) for f in proj_found[:5]]
+
+        return images
+
+    def publish_daily_threads(
+        self,
+        target_langs: Optional[List[str]] = None,
+        time_slot: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        K-Market 타래형 바이럴 스레드 생성 및 배포
+        - target_langs: 지정 언어 목록 (None일 경우 17개 언어 순환 3개 선택)
+        - time_slot: "morning"(11:00 카드뉴스), "afternoon"(16:30 순수 썰), "evening"(21:30 카드뉴스). None일 경우 자동 감지
+        """
+        if time_slot is None:
+            time_slot = self._detect_current_slot()
+
         if target_langs is None:
             target_langs = self._get_next_rotation_langs(count=3)
+
         published_threads = []
         base_domain = BASE_URLS.get("kmarket", "https://ktrs-market.vercel.app")
 
+        logger.info(f"🧵 [K-Market Threads] 하루 3회 스케줄러 가동: time_slot={time_slot}, target_langs={target_langs}")
+
         for lang in target_langs:
-            campaign = UTMTracker.generate_campaign_tag("kmarket", f"threads_{lang}", lang)
+            campaign = UTMTracker.generate_campaign_tag("kmarket", f"threads_{time_slot}_{lang}", lang)
             landing_url = UTMTracker.build_landing_url(
                 base_domain=base_domain,
                 lang=lang,
                 path="",
                 source="threads",
-                medium="viral_story_thread",
+                medium=f"viral_{time_slot}_thread",
                 campaign=campaign
             )
 
-            # 1. 3~4단 타래(Thread) 포스트 생성
-            thread_data = self._generate_kmarket_thread(lang, landing_url)
+            # 1. 시나리오 테마 추출
+            scenario = self.scenario_director.get_thread_scenario()
 
-            # 2. 산출물 파일 저장 (JSON & Markdown)
-            filename_base = f"kmarket_threads_{lang}_{int(time.time())}"
+            # 2. 제미나이 무료 키 기반 17개국어 맞춤 타래 생성 (추가 비용 0원)
+            thread_data = self.writer.generate_thread_package(
+                lang=lang,
+                time_slot=time_slot,
+                theme=scenario,
+                landing_url=landing_url
+            )
+
+            posts = thread_data.get("posts", [])
+            hook_title = thread_data.get("hook_title", "")
+            post_type = thread_data.get("post_type", "cardnews_attached" if time_slot != "afternoon" else "pure_story")
+
+            # 3. 아침/저녁 슬롯: 카드뉴스 5장 이미지 자동 탐색 및 첨부
+            attached_images = []
+            if time_slot in ["morning", "evening"]:
+                attached_images = self._find_cardnews_images(lang)
+
+            # 4. 종합 마크다운 문서 빌드
+            md_lines = [
+                f"# 🛒 K-Market Meta Threads - [{time_slot.upper()} Slot]",
+                f"- **언어**: {lang.upper()}",
+                f"- **타입**: {post_type} ({'📸 카드뉴스 5장 첨부형' if attached_images else '📝 텍스트 썰형'})",
+                f"- **랜딩 URL**: {landing_url}",
+                f"- **생성 일시**: {get_now_kst_str()}",
+                "",
+                "---",
+                ""
+            ]
+
+            if attached_images:
+                md_lines.append(f"### 📸 첨부된 카드뉴스 이미지 ({len(attached_images)}장):")
+                for img_p in attached_images:
+                    md_lines.append(f"- `{img_p}`")
+                md_lines.append("")
+                md_lines.append("---")
+                md_lines.append("")
+
+            for idx, p in enumerate(posts):
+                if idx == 0:
+                    role_label = "1번 메인 글 (링크 0% 알고리즘 극대화)"
+                elif idx == 1 and time_slot == "afternoon":
+                    role_label = "2번 팩트/노하우 요약 답글"
+                else:
+                    role_label = f"{idx+1}번 답글 (전환 링크 안내 댓글)"
+
+                md_lines.append(f"### 🧵 Post #{idx+1} [{role_label}]")
+                md_lines.append(p)
+                md_lines.append("")
+
+            full_md = "\n".join(md_lines)
+            thread_data["full_markdown"] = full_md
+            thread_data["attached_images"] = attached_images
+            thread_data["landing_url"] = landing_url
+            thread_data["created_at"] = get_now_kst_str()
+
+            # 5. 산출물 파일 저장 (JSON & Markdown)
+            timestamp = int(time.time())
+            filename_base = f"kmarket_threads_{lang}_{time_slot}_{timestamp}"
             json_path = self.output_dir / f"{filename_base}.json"
             md_path = self.output_dir / f"{filename_base}.md"
 
@@ -84,101 +223,57 @@ class KMarketThreadsPublisher:
                 json.dump(thread_data, f, ensure_ascii=False, indent=2)
 
             with open(md_path, "w", encoding="utf-8") as f:
-                f.write(thread_data.get("full_markdown", ""))
+                f.write(full_md)
 
-            # 3. DB 발행 이력 기록
-            self.db_mgr.record_history(
-                content_type="threads_post",
-                service_id="kmarket",
-                target_lang=lang,
-                title=thread_data.get("hook_title", ""),
-                content_text=thread_data.get("full_markdown", "")[:500] + "...",
-                target_url=landing_url,
-                external_id=f"km_threads_{lang}_{int(time.time())}"
-            )
+            # 6. DB 이력 기록
+            try:
+                self.db_mgr.record_history(
+                    content_type="threads_post",
+                    service_id="kmarket",
+                    target_lang=lang,
+                    title=hook_title,
+                    content_text=full_md[:500] + "...",
+                    target_url=landing_url,
+                    external_id=f"km_threads_{lang}_{time_slot}_{timestamp}"
+                )
+            except Exception as e:
+                logger.warning(f"DB 이력 기록 실패: {e}")
+
+            # 7. Meta Threads API 자동 송출 or 스테이징 패키징
+            main_post = posts[0] if posts else ""
+            reply_post = posts[-1] if len(posts) > 1 else landing_url
+            card_payload = {
+                "service_id": "kmarket",
+                "lang": lang,
+                "caption": main_post,
+                "landing_url": landing_url,
+                "image_paths": attached_images,
+                "channels": {
+                    "threads": {
+                        "main_post": main_post,
+                        "reply_link": reply_post
+                    }
+                }
+            }
+            pub_res = self.threads_publisher.publish(card_payload)
 
             published_threads.append({
                 "lang": lang,
-                "title": thread_data.get("hook_title", ""),
-                "posts_count": len(thread_data.get("posts", [])),
-                "file": json_path.name
+                "time_slot": time_slot,
+                "title": hook_title,
+                "post_type": post_type,
+                "posts_count": len(posts),
+                "images_count": len(attached_images),
+                "file": json_path.name,
+                "publish_status": pub_res.get("status", "ready_staged")
             })
-            logger.info(f"🛒 [K-Market Threads] {lang.upper()} 타래 포스트 생성 완료: {thread_data.get('hook_title', '')}")
+            logger.info(f"🛒 [K-Market Threads] [{time_slot}] {lang.upper()} 타래 포스트 완료: {hook_title} (이미지 {len(attached_images)}장)")
 
         return {
             "success": True,
             "brand": "kmarket",
+            "time_slot": time_slot,
             "count": len(published_threads),
             "threads": published_threads,
-            "message": f"🛒 [K-Market] {len(published_threads)}개 언어 Threads 바이럴 타래가 성공적으로 배포되었습니다!"
-        }
-
-    def _generate_kmarket_thread(self, lang: str, landing_url: str) -> Dict[str, Any]:
-        """언어별 맞춤 50:50 순수 원룸/생활 정보 vs 구글 'k-market korea' 검색 유도 스레드 콘텐츠 생성"""
-        import random
-        # 50:50 확률로 순수 정보 타래(Type 1) vs 구글 검색 유도 타래(Type 2)
-        is_pure_info = (random.random() < 0.50)
-
-        if is_pure_info:
-            # 🌿 TYPE 1: 100% 순수 생활 정보성 타래 + 마지막 링크 안내
-            if lang == "vi":
-                posts = [
-                    "3 mẹo tiết kiệm tiền triệu khi thuê phòng trọ và vứt rác tại Hàn Quốc 🧵👇 #DuHocHanQuoc #KinhNghiemSong #SeoulLife",
-                    "1/ Vứt rác cồng kềnh (bàn, ghế, nệm): Đừng bao giờ vứt bừa bãi! Phải ra cửa hàng tiện lợi mua tem dán rác thải lớn (대형폐기물 스티커) hoặc quét mã QR dán lên để tránh bị phạt 100,000 won.",
-                    "2/ Tiền cọc phòng (보증금): Khi ký hợp đồng nhà, nhớ đi làm ngay 'Xác nhận ngày chuyển đến' (확정일자) tại trung tâm 주민센터 để bảo vệ 100% tiền cọc khi trả phòng.",
-                    f"3/ Nhận đồ đạc 0 Won & đồ cũ miễn phí từ cộng đồng: 👉 {landing_url} (hoặc tìm 'k-market korea' trên Google nhé!)"
-                ]
-                hook = "3 mẹo tiết kiệm tiền triệu khi thuê phòng & sinh sống tại Hàn Quốc"
-            elif lang == "en":
-                posts = [
-                    "3 money-saving studio room hacks every foreigner in Korea needs to know 🧵👇 #KoreaLiving #ExpatHacks #SeoulStudio",
-                    "1/ Bulky Waste Disposal: Never dump desks or mattresses on the street! Buy a disposal sticker (대형폐기물 스티커) at any convenience store to avoid a 100,000 KRW fine.",
-                    "2/ Protect Your Deposit: The moment you move in, visit the local 주민센터 to get the official 'Fixed Date' stamp (확정일자). This legally protects your housing deposit.",
-                    f"3/ Find 0 KRW verified furniture & expat moving deals: 👉 {landing_url} (or search 'k-market korea' on Google!)"
-                ]
-                hook = "3 Money-Saving Studio Living & Deposit Protection Hacks in Korea"
-            else: # ko
-                posts = [
-                    "재한 외국인 유학생 & 사회초년생을 위한 원룸 자취 절약 꿀팁 3가지 🧵👇 #자취꿀팁 #원룸생활 #이사팁",
-                    "1/ 대형 폐기물 배출: 가구/가전 버릴 땐 편의점에서 종량제 스티커를 사서 붙이거나 구청 앱으로 신고해야 10만원 과태료를 피할 수 있습니다.",
-                    "2/ 전월세 보증금 보호: 이사 당일 주민센터에서 전입신고와 함께 '확정일자'를 받아야 보증금을 안전하게 법적으로 보호받습니다.",
-                    f"3/ 0원 무료나눔 가전/가구 및 외국인 전용 중고마켓 바로가기: 👉 {landing_url} (또는 구글에서 'k-market korea' 검색!)"
-                ]
-                hook = "외국인 유학생 및 1인 가구 원룸 자취 절약 & 보증금 보호 수칙"
-
-        else:
-            # 🎯 TYPE 2: 80% 나눔 꿀팁 + 공식 웹사이트 직접 링크 & 구글 검색 타래
-            if lang == "vi":
-                posts = [
-                    "Bí quyết sinh tồn cho du học sinh và người lao động Việt Nam: Cách nhận đồ nội thất 0 Won tại Hàn Quốc 🧵👇 #DuHocHanQuoc #KMarket #0wonKorea",
-                    "1/ Mùa tốt nghiệp và chuyển phòng (tháng 2 & 8), sinh viên tại các trường đại học lớn tặng lại 0 Won rất nhiều bàn học, ghế, tủ lạnh mini còn cực kỳ mới.",
-                    "2/ Mẹo nhận đồ an toàn: Luôn hẹn nhận đồ trực tiếp tại cổng trường hoặc ga tàu, kiểm tra tình trạng thực tế và không bao giờ chuyển tiền đặt cọc trước.",
-                    f"3/ Xem danh sách các món đồ 0 Won hôm nay tại đây: 👉 {landing_url} (hoặc tìm 'k-market korea' trên Google nhé!)"
-                ]
-                hook = "Bí quyết nhận đồ nội thất 0 Won & sinh tồn tiết kiệm tại Hàn Quốc"
-            elif lang == "en":
-                posts = [
-                    "Moving to Korea or graduating soon? Here is how international students get 0 KRW verified furniture in Seoul 🧵👇 #KoreaExpat #SeoulLife #ExpatHacks",
-                    "1/ Every semester, graduating expats leave behind barely-used desks, chairs, and mini-fridges in university areas like Sinchon, Anam, and Hongdae for free.",
-                    "2/ Anti-scam tip: Always trade in open campus meetup spots, check seller profiles, and use auto-translated chat to overcome language barriers.",
-                    f"3/ Browse today's live 0 KRW giveaways directly: 👉 {landing_url} (or search 'k-market korea' on Google!)"
-                ]
-                hook = "How international students get 0 KRW verified furniture in Seoul"
-            else: # ko
-                posts = [
-                    "재한 외국인 유학생 & 직장인을 위한 원룸 이사 꿀팁: 0원 무료나눔 가구 득템하는 법 🧵👇 #0원나눔 #무빙세일 #외국인생활",
-                    "1/ 신촌, 안암, 혜화 대학가 졸업 시즌마다 침대, 책상, 소형 가전이 0원에 대량 등록됩니다. 버리는 비용 대신 필요한 이웃에게 무료 나눔하는 문화!",
-                    "2/ 안전 직거래 수칙: 기숙사/지하철역 앞 직거래, 신원 인증 확인, 17개국 자동번역 채팅으로 언어 장벽 해결.",
-                    f"3/ 오늘 실시간 0원 무료나눔 매물 보러가기: 👉 {landing_url} (또는 구글에서 'k-market korea' 검색!)"
-                ]
-                hook = "외국인 유학생 0원 나눔 가구 득템 및 안전 직거래 가이드"
-
-        full_md = "\n\n---\n\n".join([f"**Post {i+1}**\n{p}" for i, p in enumerate(posts)])
-        return {
-            "hook_title": hook,
-            "is_pure_info": is_pure_info,
-            "posts": posts,
-            "full_markdown": full_md,
-            "landing_url": landing_url,
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            "message": f"🛒 [K-Market] [{time_slot.upper()}] {len(published_threads)}개 언어 Threads 타래가 성공적으로 생성 및 배포되었습니다!"
         }

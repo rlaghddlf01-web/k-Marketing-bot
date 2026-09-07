@@ -30,7 +30,6 @@ class LocalGPUMediaGeneratorEasyTax:
     """
     def __init__(self, colab_api_url: Optional[str] = None):
         self.service_id = "easytax"
-        self.colab_api_url = colab_api_url or os.getenv("COLAB_GPU_API_URL", "").rstrip("/")
         self.cache_dir = DATA_DIR / "gemini_generated_media" / "easytax"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         
@@ -38,10 +37,7 @@ class LocalGPUMediaGeneratorEasyTax:
         self._current_episode_seed: Optional[int] = None
         self._last_episode_id: Optional[str] = None
 
-        if self.colab_api_url:
-            logger.info(f"💰 [EasyTax 무료 GPU 연동] RealVisXL 코랩 서버 주소: {self.colab_api_url}")
-        else:
-            logger.info("ℹ️ [EasyTax] COLAB_GPU_API_URL 미설정 -> 하이브리드 자동 감지 모드")
+        logger.info("💰 [EasyTax 비주얼 엔진] 🏆 Google Gemini 3.1 Flash-Lite Image 표준 가동")
 
     def set_episode_seed(self, episode_id: str, seed: Optional[int] = None):
         """동일 숏폼 에피소드(1~5씬) 전체에 동일 인물 시드 고정"""
@@ -103,54 +99,22 @@ class LocalGPUMediaGeneratorEasyTax:
             "fused fingers, floating phone, disembodied hands, cartoon, 3d render, plastic skin, ugly, blurry"
         )
 
-        # ── 1. 구글 코랩 무료 GPU 서버 호출 (비용 0원 & 3회 자동 재시도 탑재) ──
-        for attempt in range(1, 4):
-            active_url = self.colab_api_url
-            try:
-                from core.supabase_manager import SupabaseManager
-                sb = SupabaseManager()
-                cloud_url = sb.get_active_gpu_url()
-                if cloud_url:
-                    active_url = cloud_url
-            except Exception:
-                pass
-
-            if not active_url:
-                time.sleep(2)
-                continue
-
-            try:
-                logger.info(f"[{lang.upper()}] 💰 [EasyTax 무료 GPU 시도 {attempt}/3] RealVisXL 렌더링 요청 ({active_url}, Seed: {target_seed})...")
-                req_data = {
-                    "prompt": prompt,
-                    "negative_prompt": negative_prompt,
-                    "aspect_ratio": aspect_ratio,
-                    "seed": target_seed,
-                    "guidance_scale": 5.0,
-                    "num_inference_steps": 25
-                }
-
-                payload = json.dumps(req_data).encode("utf-8")
-
-                req = urllib.request.Request(
-                    f"{active_url}/generate",
-                    data=payload,
-                    headers={"Content-Type": "application/json", "User-Agent": "EasyTax-Marketing-Bot/1.0"},
-                    method="POST"
-                )
-
-                with urllib.request.urlopen(req, timeout=180) as resp:
-                    if resp.status == 200:
-                        res_data = json.loads(resp.read().decode("utf-8"))
-                        if res_data.get("success") and res_data.get("image_base64"):
-                            img_bytes = base64.b64decode(res_data["image_base64"])
-                            image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-                            image.save(output_path, "JPEG", quality=95)
-                            logger.info(f"🎉 [EasyTax 무료 GPU 생성 성공] 동일 인물 실사 완성 (Seed {res_data.get('seed')}): {output_path.name}")
-                            return output_path
-            except Exception as e:
-                logger.warning(f"EasyTax 코랩 GPU 서버 통신 실패 (시도 {attempt}/3, {active_url}): {e}")
-                time.sleep(3 * attempt)
+        # ── 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 실사 AI 엔진 직결 ──
+        try:
+            from core.gemini_media_generator import GeminiMediaGenerator
+            gemini_gen = GeminiMediaGenerator(service_id="easytax")
+            res_path = gemini_gen.generate_theme_image(
+                lang=lang,
+                theme_id=theme_id,
+                scenario_plan=scenario_plan,
+                aspect_ratio=aspect_ratio,
+                output_path=output_path
+            )
+            if res_path and res_path.exists() and res_path.stat().st_size > 5000:
+                logger.info(f"🎉 [EasyTax Gemini 3.1 Flash-Lite 완성]: {res_path.name}")
+                return res_path
+        except Exception as e:
+            logger.error(f"EasyTax Gemini 3.1 Flash-Lite 이미지 생성 예외: {e}")
 
         # ── 2. 안전 Fallback (기본 캔버스) ──
         W, H = (1080, 1920) if aspect_ratio == "9:16" else (1080, 1080)

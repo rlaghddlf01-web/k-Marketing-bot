@@ -22,7 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR))
 
 
-from config import OUTPUTS_DIR, BASE_DIR as CFG_BASE_DIR, DATA_DIR, KST, get_now_kst, get_now_kst_str
+from config import (
+    OUTPUTS_DIR, BASE_DIR as CFG_BASE_DIR, DATA_DIR, KST, get_now_kst, get_now_kst_str,
+    GOLDEN_EIGHT_LANGUAGES, GOLDEN_EIGHT_DETAILS, get_next_golden_eight_language, get_golden_rotation_info
+)
 from core.db_manager import DBManager
 from core.supabase_manager import SupabaseManager
 from core.service_router import ServiceRouter
@@ -47,6 +50,48 @@ from core.telegram_member_scraper import TelegramMemberScraper
 from core.telegram_outreach_poster import TelegramOutreachPoster
 from core.telegram_stealth_inviter import TelegramStealthInviter
 from modules.telegram_community_publisher import TelegramCommunityPublisher
+from core.golden_batch_producer import GoldenBatchProducer
+
+# 🌟 8대 황금 타깃 듀얼 브랜드 대량 생산 배치 프로듀서
+golden_batch_producer = GoldenBatchProducer()
+
+# 🌟 8대 황금 타깃 1일 2슬롯 24시간 무인 데몬 상태 관리
+golden_batch_daemon_running = {
+    "kmarket": False,
+    "easytax": False,
+    "all": False
+}
+
+def _golden_daemon_loop(brand: str):
+    log_event(f"⏰ [골든 데몬] {brand.upper()} 24시간 무인 예약 데몬이 시작되었습니다 (11:30 & 18:30 감시 중)", "success")
+    executed_today_slots = set()
+    while golden_batch_daemon_running.get(brand, False):
+        try:
+            now = get_now_kst()
+            today_str = now.strftime("%Y-%m-%d")
+            hour = now.hour
+            minute = now.minute
+
+            is_morning_slot = (hour == 11 and minute >= 30) or (hour == 12 and minute < 30)
+            is_evening_slot = (hour == 18 and minute >= 30) or (hour == 19 and minute < 30)
+
+            slot_to_run = None
+            if is_morning_slot and f"{today_str}_morning" not in executed_today_slots:
+                slot_to_run = "morning"
+            elif is_evening_slot and f"{today_str}_evening" not in executed_today_slots:
+                slot_to_run = "evening"
+
+            if slot_to_run:
+                slot_name_kr = "오전 11:30 피크" if slot_to_run == "morning" else "저녁 18:30 피크"
+                log_event(f"⏰ [골든 데몬] {brand.upper()} {slot_name_kr} 정시 도달! 8개국 대량 생산 자동 시작...", "info")
+                golden_batch_producer.execute_slot(slot_name=slot_to_run, brand=brand)
+                executed_today_slots.add(f"{today_str}_{slot_to_run}")
+                log_event(f"🎉 [골든 데몬] {brand.upper()} {slot_name_kr} 8개국 생산 완료! 바탕화면 저장 완료", "success")
+
+            time.sleep(30)
+        except Exception as e:
+            log_event(f"⚠️ [골든 데몬 예외] {e}", "warning")
+            time.sleep(30)
 
 # 📲 텔레그램 24시간 커뮤니티 — 브랜드별 독립 인스턴스 (K-Market / EasyTax 완전 분리)
 telegram_ai_managers = {
@@ -133,45 +178,47 @@ def execute_single_channel_task(module_name: str) -> str:
     engine_settings = get_media_engine_settings()
 
     if module_name == "kmarket_shorts":
-        setting_mode = engine_settings.get("kmarket_shorts", "ab_auto")
-        chosen_engine = ab_evolution_engine.get_next_engine("kmarket_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="kmarket", target_langs=["en", "vi", "zh", "ko", "uz"], engine_mode=chosen_engine)
-        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
-        return f"🔴 K-Market 쇼츠 ({mode_label}) {len(res)}건 렌더링 완료"
+        target_lang = get_next_golden_eight_language("kmarket_shorts")
+        info = GOLDEN_EIGHT_DETAILS.get(target_lang, {})
+        flag, native = info.get("flag", "🌐"), info.get("native", target_lang)
+        res = factory.produce_shorts(service_id="kmarket", lang=target_lang, engine_mode="gemini")
+        return f"🔴 K-Market 8대 황금 타깃 쇼츠 [{flag} {native} ({target_lang})] (🏆 Gemini 3.1 Flash-Lite) 렌더링 완료"
     elif module_name == "easytax_shorts":
-        setting_mode = engine_settings.get("easytax_shorts", "ab_auto")
-        chosen_engine = ab_evolution_engine.get_next_engine("easytax_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="easytax", target_langs=["vi", "en", "zh"], engine_mode=chosen_engine)
-        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
-        return f"🔴 EasyTax 세무 쇼츠 ({mode_label}) {len(res)}건 렌더링 완료"
+        target_lang = get_next_golden_eight_language("easytax_shorts")
+        info = GOLDEN_EIGHT_DETAILS.get(target_lang, {})
+        flag, native = info.get("flag", "🌐"), info.get("native", target_lang)
+        res = factory.produce_shorts(service_id="easytax", lang=target_lang, engine_mode="gemini")
+        return f"🔴 EasyTax 8대 황금 타깃 세무 쇼츠 [{flag} {native} ({target_lang})] (🏆 Gemini 3.1 Flash-Lite) 렌더링 완료"
     elif module_name == "kmarket_tiktok":
-        setting_mode = engine_settings.get("kmarket_shorts", "ab_auto")
-        chosen_engine = ab_evolution_engine.get_next_engine("kmarket_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="kmarket", target_langs=["vi", "uz", "mn", "en"], engine_mode=chosen_engine)
-        return f"🎵 K-Market 틱톡 알고리즘 비디오 ({chosen_engine}) {len(res)}건 렌더링 완료"
+        target_lang = get_next_golden_eight_language("kmarket_tiktok")
+        info = GOLDEN_EIGHT_DETAILS.get(target_lang, {})
+        flag, native = info.get("flag", "🌐"), info.get("native", target_lang)
+        res = factory.produce_shorts(service_id="kmarket", lang=target_lang, engine_mode="gemini")
+        return f"🎵 K-Market 8대 황금 타깃 틱톡 비디오 [{flag} {native} ({target_lang})] (🏆 Gemini 3.1 Flash-Lite) 렌더링 완료"
     elif module_name == "easytax_tiktok":
-        setting_mode = engine_settings.get("easytax_shorts", "ab_auto")
-        chosen_engine = ab_evolution_engine.get_next_engine("easytax_shorts", setting_mode)
         factory = ShortsVideoFactory(db_mgr, router, gemini, tts)
-        res = factory.produce_shorts(service_id="easytax", target_langs=["vi", "uz", "en"], engine_mode=chosen_engine)
-        return f"🎵 EasyTax 틱톡 세무 환급 비디오 ({chosen_engine}) {len(res)}건 렌더링 완료"
+        target_lang = get_next_golden_eight_language("easytax_tiktok")
+        info = GOLDEN_EIGHT_DETAILS.get(target_lang, {})
+        flag, native = info.get("flag", "🌐"), info.get("native", target_lang)
+        res = factory.produce_shorts(service_id="easytax", lang=target_lang, engine_mode="gemini")
+        return f"🎵 EasyTax 8대 황금 타깃 틱톡 비디오 [{flag} {native} ({target_lang})] (🏆 Gemini 3.1 Flash-Lite) 렌더링 완료"
     elif module_name == "kmarket_cardnews":
-        setting_mode = engine_settings.get("kmarket_cardnews", "ab_auto")
-        chosen_engine = ab_evolution_engine.get_next_engine("kmarket_cardnews", setting_mode)
         card = CardnewsGenerator(db_mgr, router)
-        cards = card.generate_carousel(service_id="kmarket", lang="en", engine_mode=chosen_engine)
-        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
-        return f"📸 K-Market 카드뉴스 ({mode_label}) {len(cards)}장 생성 완료"
+        target_lang = get_next_golden_eight_language("kmarket_cardnews")
+        info = GOLDEN_EIGHT_DETAILS.get(target_lang, {})
+        flag, native = info.get("flag", "🌐"), info.get("native", target_lang)
+        cards = card.generate_carousel(service_id="kmarket", lang=target_lang, engine_mode="gemini")
+        return f"📸 K-Market 8대 황금 타깃 카드뉴스 [{flag} {native} ({target_lang})] (🏆 Gemini 3.1 Flash-Lite) {len(cards)}장 생성 완료"
     elif module_name == "easytax_cardnews":
-        setting_mode = engine_settings.get("easytax_cardnews", "ab_auto")
-        chosen_engine = ab_evolution_engine.get_next_engine("easytax_cardnews", setting_mode)
         card = CardnewsGenerator(db_mgr, router)
-        cards = card.generate_carousel(service_id="easytax", lang="en", engine_mode=chosen_engine)
-        mode_label = f"A/B자율({chosen_engine})" if setting_mode == "ab_auto" else ("무료 코랩" if chosen_engine == "colab_gpu" else "제미나이 AI")
-        return f"📸 EasyTax 카드뉴스 ({mode_label}) {len(cards)}장 생성 완료"
+        target_lang = get_next_golden_eight_language("easytax_cardnews")
+        info = GOLDEN_EIGHT_DETAILS.get(target_lang, {})
+        flag, native = info.get("flag", "🌐"), info.get("native", target_lang)
+        cards = card.generate_carousel(service_id="easytax", lang=target_lang, engine_mode="gemini")
+        return f"📸 EasyTax 8대 황금 타깃 카드뉴스 [{flag} {native} ({target_lang})] (🏆 Gemini 3.1 Flash-Lite) {len(cards)}장 생성 완료"
     elif module_name == "kmarket_reddit" or module_name == "reddit":
         import importlib
         import modules.reddit_kmarket
@@ -261,15 +308,15 @@ def execute_single_channel_task(module_name: str) -> str:
         import modules.threads_kmarket
         importlib.reload(modules.threads_kmarket)
         publisher = modules.threads_kmarket.KMarketThreadsPublisher(db_mgr, supabase_mgr)
-        res = publisher.publish_daily_threads(target_langs=["en", "vi", "ko"])
-        return f"🧵 K-Market Threads 바이럴 스레드 {res.get('count', 3)}건 배포 완료"
+        res = publisher.publish_daily_threads()
+        return f"🧵 K-Market Threads 바이럴 스레드 [{res.get('time_slot', 'slot').upper()}] {res.get('count', 3)}건 배포 완료"
     elif module_name == "easytax_threads":
         import importlib
         import modules.threads_easytax
         importlib.reload(modules.threads_easytax)
         publisher = modules.threads_easytax.EasyTaxThreadsPublisher(db_mgr, supabase_mgr)
-        res = publisher.publish_daily_threads(target_langs=["en", "vi", "ko"])
-        return f"🧵 EasyTax Threads 세무 스레드 {res.get('count', 3)}건 배포 완료"
+        res = publisher.publish_daily_threads()
+        return f"🧵 EasyTax Threads 세무 스레드 [{res.get('time_slot', 'slot').upper()}] {res.get('count', 3)}건 배포 완료"
     elif module_name in ["omnichannel_kmarket", "omnichannel_easytax", "omnichannel_all"]:
         from core.omnichannel_campaign_engine import OmnichannelCampaignEngine
         omni = OmnichannelCampaignEngine(db_mgr, supabase_mgr)
@@ -605,6 +652,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif path == "/api/telegram/stats" or path.startswith("/api/telegram/stats"):
             self._handle_get_telegram_stats(parsed)
             return
+        elif path == "/api/golden-targets":
+            self._handle_get_golden_targets()
+            return
+        elif path == "/api/golden-batch/status":
+            self._handle_get_golden_batch_status()
+            return
 
         self._set_headers("text/plain", 404)
         self.wfile.write(b"Not Found")
@@ -655,6 +708,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._handle_generate_scenario(payload)
         elif path == "/api/scenarios/evolve":
             self._handle_evolve_scenario(payload)
+        elif path == "/api/golden-batch/run":
+            self._handle_post_golden_batch_run(payload)
+            return
+        elif path == "/api/golden-batch/daemon/start":
+            self._handle_post_golden_batch_daemon_start(payload)
+            return
+        elif path == "/api/golden-batch/daemon/stop":
+            self._handle_post_golden_batch_daemon_stop(payload)
+            return
         elif path == "/api/google-index/ping":
             self._handle_google_index_ping(payload)
         elif path == "/api/health/run-diagnostic":
@@ -740,10 +802,98 @@ class DashboardHandler(BaseHTTPRequestHandler):
             "easytax_history_count": tax_count,
             "easytax_top_score": tax_score,
             "easytax_seo_count": 5525,
+            "golden_targets": {
+                "kmarket_shorts": get_golden_rotation_info("kmarket_shorts"),
+                "easytax_shorts": get_golden_rotation_info("easytax_shorts"),
+                "kmarket_cardnews": get_golden_rotation_info("kmarket_cardnews"),
+                "easytax_cardnews": get_golden_rotation_info("easytax_cardnews"),
+                "kmarket_tiktok": get_golden_rotation_info("kmarket_tiktok"),
+                "easytax_tiktok": get_golden_rotation_info("easytax_tiktok")
+            },
+            "golden_eight_languages": GOLDEN_EIGHT_LANGUAGES,
+            "golden_eight_details": GOLDEN_EIGHT_DETAILS,
+            "golden_batch_summary": golden_batch_producer.get_today_production_summary(),
             "recent_logs": recent_logs[-10:]
         }
         self._set_headers("application/json")
-        self.wfile.write(json.dumps(data).encode("utf-8"))
+        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_get_golden_targets(self):
+        data = {
+            "channels": {
+                "kmarket_shorts": get_golden_rotation_info("kmarket_shorts"),
+                "easytax_shorts": get_golden_rotation_info("easytax_shorts"),
+                "kmarket_cardnews": get_golden_rotation_info("kmarket_cardnews"),
+                "easytax_cardnews": get_golden_rotation_info("easytax_cardnews"),
+                "kmarket_tiktok": get_golden_rotation_info("kmarket_tiktok"),
+                "easytax_tiktok": get_golden_rotation_info("easytax_tiktok")
+            },
+            "golden_eight": GOLDEN_EIGHT_LANGUAGES,
+            "details": GOLDEN_EIGHT_DETAILS
+        }
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_get_golden_batch_status(self):
+        """8대 황금 타깃 2슬롯 대량 생산 일일 통계 반환"""
+        summary = golden_batch_producer.get_today_production_summary()
+        summary["daemon_running"] = golden_batch_daemon_running
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps(summary, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_post_golden_batch_daemon_start(self, payload):
+        """8대 황금 타깃 24시간 무인 데몬 시작"""
+        brand = payload.get("brand", "all").lower()
+        if not golden_batch_daemon_running.get(brand, False):
+            golden_batch_daemon_running[brand] = True
+            threading.Thread(target=_golden_daemon_loop, args=(brand,), daemon=True).start()
+            msg = f"⏰ [{brand.upper()}] 8대 황금 타깃 24시간 무인 예약 데몬이 가동되었습니다! (11:30 & 18:30 정시 자동 생산)"
+            log_event(msg, "success")
+        else:
+            msg = f"[{brand.upper()}] 이미 8대 황금 타깃 무인 예약 데몬이 가동 중입니다."
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({"success": True, "message": msg, "daemon_running": golden_batch_daemon_running}, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_post_golden_batch_daemon_stop(self, payload):
+        """8대 황금 타깃 24시간 무인 데몬 정지"""
+        brand = payload.get("brand", "all").lower()
+        golden_batch_daemon_running[brand] = False
+        msg = f"⏹️ [{brand.upper()}] 8대 황금 타깃 무인 예약 데몬이 정지되었습니다."
+        log_event(msg, "info")
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({"success": True, "message": msg, "daemon_running": golden_batch_daemon_running}, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_post_golden_batch_run(self, payload):
+        """8대 황금 타깃 대량 생산 즉시 실행 (백그라운드 스레드)"""
+        slot_name = payload.get("slot_name", "manual")
+        brand = payload.get("brand", "all").lower()
+        content_type = payload.get("type", "all").lower()
+
+        def _batch_worker():
+            try:
+                log_event(f"🌟 [골든 배치] {slot_name} ({brand} / {content_type}) 8개국 생산 가동...", "info")
+                if content_type == "shorts":
+                    if brand in ["kmarket", "all"]:
+                        golden_batch_producer.produce_brand_shorts_batch("kmarket", slot_name)
+                    if brand in ["easytax", "all"]:
+                        golden_batch_producer.produce_brand_shorts_batch("easytax", slot_name)
+                elif content_type == "cardnews":
+                    if brand in ["kmarket", "all"]:
+                        golden_batch_producer.produce_brand_cardnews_batch("kmarket", slot_name)
+                    if brand in ["easytax", "all"]:
+                        golden_batch_producer.produce_brand_cardnews_batch("easytax", slot_name)
+                else:
+                    golden_batch_producer.execute_slot(slot_name=slot_name, brand=brand)
+                log_event(f"🎉 [골든 배치] {slot_name} ({brand}) 8개국 생산이 성공적으로 완료되었습니다!", "success")
+            except Exception as e:
+                log_event(f"❌ [골든 배치 실패] {e}", "danger")
+
+        threading.Thread(target=_batch_worker, daemon=True).start()
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({
+            "success": True,
+            "message": f"8대 황금 타깃 골든 배치 생산 백그라운드 가동 시작 (슬롯: {slot_name}, 브랜드: {brand}, 유형: {content_type})"
+        }, ensure_ascii=False).encode("utf-8"))
 
     def _handle_channel_start(self, module_name: str):
         global running_channels
@@ -1166,12 +1316,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
             """, (utm_source, utm_medium, utm_campaign, utm_content, target, ip))
             conn.commit()
 
-        # 🧬 [A/B 자가학습] 링크 클릭 유입 시 5점 적립 (좋아요 1점, 댓글 2점, 클릭 5점)
+        # 🧬 링크 클릭 유입 집계
         try:
             channel_hint = f"{target}_shorts" if "shorts" in utm_content else f"{target}_cardnews"
-            engine_hint = "gemini" if "gemini" in utm_content else "colab_gpu"
+            engine_hint = "gemini"
             ab_evolution_engine.record_engagement(channel_hint, engine_hint, clicks=1)
-            log_event(f"🎯 [A/B 전환 5점 적립] {target.upper()} 링크 클릭 유입 (+5점) -> {engine_hint}", "success")
+            log_event(f"🎯 [유입 클릭] {target.upper()} 링크 유입 -> {engine_hint}", "success")
         except Exception:
             pass
 

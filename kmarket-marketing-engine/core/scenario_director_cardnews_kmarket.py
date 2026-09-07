@@ -14,9 +14,10 @@ from core.scenario_director_shorts_kmarket import (
     KMARKET_PERSONA_ANCHORS
 )
 
-from core.character_anchor_kmarket import (
-    build_kmarket_char_anchor,
-    build_kmarket_scene_prompt,
+from core.character_anchor_cardnews_kmarket import (
+    build_kmarket_cardnews_char_anchor,
+    build_kmarket_cardnews_scene_prompt,
+    build_kmarket_cardnews_negative_prompt,
     LANG_NEGATIVE_ETHNIC
 )
 from core.gemini_cardnews_copywriter import GeminiCardnewsCopywriter
@@ -35,7 +36,6 @@ WORLD_MASTER_CARDNEWS_PROMPT = """
 class ScenarioDirectorCardnewsKMarket:
     """K-Market 60대 전 테마 5장 7:3 카드뉴스 동적 기획 엔진 (제미나이 100% 현지어 직작문)"""
     def __init__(self):
-        self.shorts_director = ScenarioDirectorShortsKMarket()
         self.copywriter = GeminiCardnewsCopywriter(service_id="kmarket")
         self.themes = KMARKET_60_THEMES  # 60대 전체 테마 동기화 (대학가 20 + 품목 15 + 자취에피소드 15 + 산단 10)
         self.personas = KMARKET_PERSONA_ANCHORS  # 7대 타깃별 고정 페르소나 앵커
@@ -71,57 +71,90 @@ class ScenarioDirectorCardnewsKMarket:
             gender_matched = [p for p in self.personas if p["gender"] == target_gender]
             return random.choice(gender_matched) if gender_matched else random.choice(self.personas)
 
-    def get_carousel_scenario(self, lang: str = "uz", theme_index: Optional[int] = None) -> Dict[str, Any]:
-        """60대 0원 나눔 테마 중 1개를 선택하고 제미나이 100% 현지어 카피라이팅으로 5장 카드뉴스 생성"""
-        if theme_index is not None:
-            chosen_theme = self.themes[theme_index % len(self.themes)]
-        else:
-            chosen_theme = random.choice(self.themes)
-
+    def get_carousel_scenario(self, lang: str = "ko", theme_index: Optional[int] = None) -> Dict[str, Any]:
+        """카드뉴스 전용 독립 캐릭터 앵커로 1, 2, 5번 슬라이드 100% 동일 인물 보장 5장 카드뉴스 생성"""
+        chosen_theme = self.themes[theme_index % len(self.themes)] if theme_index is not None else random.choice(self.themes)
         theme_id = chosen_theme["id"]
         theme_name = chosen_theme["name"]
-        target = chosen_theme["target"]
-        item = chosen_theme["item"]
+        target = chosen_theme.get("target", "신촌")
+        item = chosen_theme.get("item", "가구")
+        cat = chosen_theme.get("cat", "campus")
 
-        # 1. 🎯 테마 맞춤형 7대 페르소나 자동 매칭 (남 40% : 여 60%)
+        # 1. 🎯 테마 맞춤형 페르소나 및 독립 캐릭터 앵커 생성
         matched_persona = self._match_persona(chosen_theme)
-        char_anchor = build_kmarket_char_anchor(
+        gender = matched_persona.get("gender", "female")
+        age_group = matched_persona.get("age_group", "20대 중반")
+        anchor_desc = matched_persona.get("anchor_desc", "")
+
+        char_anchor = build_kmarket_cardnews_char_anchor(
             lang=lang,
-            gender=matched_persona["gender"],
-            age_group_ko=matched_persona["age_group"],
-            persona_anchor_desc=matched_persona["anchor_desc"]
+            gender=gender,
+            age_group_ko=age_group,
+            persona_anchor_desc=anchor_desc,
+            persona_cat=cat
         )
 
-        # 2. ✍️ 제미나이 AI 100% 현지어 카드뉴스 카피라이팅 (제목, 부제, 뱃지, 3줄 불릿 실시간 직작문)
+        # 2. ✍️ 제미나이 AI 100% 현지어 카드뉴스 카피라이팅 (제목, 부제, 뱃지, 3줄 불릿)
         generated_copy = self.copywriter.generate_kmarket_copy(
             lang=lang,
             theme=chosen_theme,
             persona=matched_persona
         )
 
-        # 3. 5단계 슬라이드별 헐리웃 감동 시네마틱 프롬프트 (1.실물직거래수령 -> 2.방배치행복 -> 3.150만절약 -> 4.앱17개국번역 -> 5.앱CTA)
-        scene_actions = {
-            1: f"cinematic authentic portrait, receiving neatly packaged box or clean {item} outdoors on Korean campus street near {target}, grateful warm smiling face, polite respectful hand gesture, genuine joyful expression of receiving free gift, beautiful natural daytime lighting",
-            2: f"cinematic authentic bust-shot portrait, peaceful relieved warm smile relaxing in cozy beautifully furnished room with {item} under warm interior lamp lighting, content happy mood, comfortable atmosphere",
-            3: "cinematic authentic close-up portrait, triumphant proud joyful expression, radiant smile of accomplishment and financial relief from saving money on university tuition, pure happiness in eyes",
-            4: f"cinematic authentic bust-shot portrait, holding smartphone upright naturally forward towards camera showing a clear bright K-Market app screen with official 17-language auto-translation chat and $0 free giveaway alert badge, friendly helpful reassuring facial expression, sharp focus on face and upright phone screen, natural hand grip",
-            5: "cinematic authentic direct-gaze portrait, looking directly into camera with an encouraging and decisive confident smile, warm direct eye contact motivating the viewer to download K-Market app"
-        }
-
         cards = []
         for idx in range(1, 6):
             copy_item = generated_copy[idx - 1] if len(generated_copy) >= idx else {}
-            action_desc = scene_actions.get(idx, "relaxing in room")
-            full_prompt = build_kmarket_scene_prompt(scene_idx=idx, char=char_anchor, scene_action=action_desc)
+
+            if idx == 1:
+                # 🎬 1번 슬라이드: 보도블록 2인 실물 인계 (주인공 Person A + 상대방 Person B)
+                image_prompt = build_kmarket_cardnews_scene_prompt(
+                    slide_idx=1,
+                    char=char_anchor,
+                    scene_action=f"meeting outdoors on a clean Korean sidewalk near {target} to receive a free {item}",
+                    item_name=item
+                )
+                negative_prompt = build_kmarket_cardnews_negative_prompt(lang=lang, slide_idx=1)
+                card_type = "real_scene"
+            elif idx == 2:
+                # 🎬 2번 슬라이드: 아늑한 원룸 배치 & 만족 (1번 슬라이드와 동일 주인공 100%)
+                image_prompt = build_kmarket_cardnews_scene_prompt(
+                    slide_idx=2,
+                    char=char_anchor,
+                    scene_action=f"relaxing comfortably in student studio room with {item} placed neatly, feeling so relieved and proud of saving money",
+                    item_name=item
+                )
+                negative_prompt = build_kmarket_cardnews_negative_prompt(lang=lang, slide_idx=2)
+                card_type = "real_scene"
+            elif idx == 3:
+                # 📱 3번: K-Market 실제 0원 피드 스마트폰 목업
+                image_prompt = "mockup_giveaway"
+                negative_prompt = ""
+                card_type = "mockup_giveaway"
+            elif idx == 4:
+                # 📱 4번: K-Market 실제 17개국어 번역 채팅 스마트폰 목업
+                image_prompt = "mockup_translation"
+                negative_prompt = ""
+                card_type = "mockup_translation"
+            else:
+                # 🎬 5번 슬라이드: 자신감 넘치는 최종 추천 & CTA (1번, 2번 슬라이드와 동일 주인공 100%)
+                image_prompt = build_kmarket_cardnews_scene_prompt(
+                    slide_idx=5,
+                    char=char_anchor,
+                    scene_action=f"standing confidently in the furnished studio room with {item}, encouraging viewers to use K-Market 0 KRW giveaway",
+                    item_name=item
+                )
+                negative_prompt = build_kmarket_cardnews_negative_prompt(lang=lang, slide_idx=5)
+                card_type = "real_scene"
 
             cards.append({
                 "slide_idx": idx,
+                "card_type": card_type,
                 "badge": copy_item.get("badge", f"STEP {idx}"),
                 "title": copy_item.get("title", f"Step {idx} Title"),
                 "subtitle": copy_item.get("subtitle", ""),
                 "bullets": copy_item.get("bullets", []),
-                "image_prompt": full_prompt,
-                "negative_prompt": f"upside down phone, inverted smartphone, backwards phone, phone held upside down, deformed hand holding phone, caucasian, white, deformed fingers, extra limbs, claw hands, bad anatomy, ugly, blurry, 3d render, cartoon, {LANG_NEGATIVE_ETHNIC.get(lang, '')}"
+                "image_prompt": image_prompt,
+                "negative_prompt": negative_prompt
             })
 
         return {

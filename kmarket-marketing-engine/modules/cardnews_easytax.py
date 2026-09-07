@@ -49,7 +49,7 @@ class CardnewsEasyTax:
         self,
         lang: str = "vi",
         theme_index: Optional[int] = None,
-        engine_mode: str = "colab_gpu"
+        engine_mode: str = "gemini"
     ) -> Dict[str, Any]:
         """
         EasyTax 전용 5장 7:3 황금 분할 카드뉴스 (1080x1350) 생성 및 저장
@@ -61,19 +61,14 @@ class CardnewsEasyTax:
         # 1~5장 동일 인물 시드 고정 발급
         self.media_gen.set_episode_seed(episode_id)
 
-        # ⚡ 이미지 생성 엔진 동적 선택 (대시보드 스위치 연동)
-        if engine_mode == "gemini":
-            active_media_gen = GeminiMediaGenerator(service_id="easytax")
-            logger.info(f"💰 [EasyTax 카드뉴스] 제미나이 Imagen AI 엔진으로 생성")
-        else:
-            active_media_gen = self.media_gen  # 기존 LocalGPUMediaGeneratorEasyTax
-            logger.info(f"💰 [EasyTax 카드뉴스] 무료 코랩 GPU 엔진으로 생성")
+        # ⚡ 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 엔진
+        active_media_gen = GeminiMediaGenerator(service_id="easytax")
+        logger.info(f"💰 [EasyTax 카드뉴스] 🏆 Gemini 3.1 Flash-Lite Image 엔진으로 생성")
 
         timestamp = int(time.time())
         saved_paths: List[Path] = []
 
-        logger.info(f"💰 [EasyTax 7:3 카드뉴스 생산 시작] {lang.upper()} - {scenario.get('theme_name')} (5장 슬라이드)...")
-
+        hero_image_path = None
         for card in cards:
             s_idx = card.get("slide_idx", 1)
             # 🛡️ 1. 상단 70% (1080x945) 고화질 실사 이미지 1회 생성 (비용 1/3 통제 1-Shot 모드)
@@ -86,12 +81,17 @@ class CardnewsEasyTax:
                 "app_screen_type": card.get("app_screen_type"),
                 "gender": "m"
             }
+            ref_path = hero_image_path if s_idx in [2, 4] else None
             top_img_path = active_media_gen.generate_theme_image(
                 lang=lang,
                 theme_id=theme_id,
                 scenario_plan=img_plan,
-                aspect_ratio="16:9"  # 16:9 가로형을 1080x945로 완벽 센터크롭
+                aspect_ratio="16:9",  # 16:9 가로형을 1080x945로 완벽 센터크롭
+                reference_image_path=ref_path
             )
+            if s_idx == 1 and top_img_path and Path(top_img_path).exists():
+                hero_image_path = top_img_path
+                logger.info(f"[{lang.upper()}] 🔒 [주인공 1번 슬라이드 앵커 등록 완료]: {hero_image_path.name}")
 
             # AI 비전 품질 검사관 (로깅 및 품질 측정 전용 - 유료 재촬영 차단)
             if top_img_path and Path(top_img_path).exists():

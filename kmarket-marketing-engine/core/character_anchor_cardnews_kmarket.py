@@ -1,11 +1,8 @@
 """
-CharacterAnchorKMarket - 🛒 [K-Market 자취/0원나눔 전용 캐릭터 일관성 앵커 모듈]
-- K-Market 시나리오 작가(ScenarioDirectorShortsKMarket) 전용 캐릭터 고정 모듈
-- 전국 20대 대학가 유학생, 원룸 자취생, 산단 청년 등 중고거래/자취 페르소나 최적화
-- 3대 핵심 일관성 보장:
-  1) 한국어 나이대 -> 영어 자동 변환 (Imagen 3 프롬프트 오류 원천 차단)
-  2) 캠퍼스 후드티, 니트, 플리스 등 자취/일상 생활밀착형 의상/외모 초정밀 고정
-  3) 씬 1~5 단계별 연속성 힌트 자동 주입 ("exact same person continuing the story")
+CharacterAnchorCardnewsKMarket - 🛒 [K-Market 카드뉴스 전용 독립 캐릭터 일관성 앵커 모듈]
+- 숏폼 파일과 100% 분리된 카드뉴스 독자 모듈 (숏폼 파일 장애/수정 시 상호 영향 0%)
+- 1, 2, 5번 실사 슬라이드 간 100% 동일 인물 유지 (Gemini 3.1 Flash-Lite 멀티모달 & 텍스트 앵커 이중 락)
+- 3, 4번 슬라이드는 순정 스마트폰 UI 목업 유지
 """
 
 from typing import Dict
@@ -72,17 +69,17 @@ AGE_KO_TO_EN: Dict[str, str] = {
     "40대 초반": "early 40s",
 }
 
-# K-Market 씬 번호별 연속성 힌트 문구
-SCENE_CONTINUITY_HINTS = {
-    1: "",  # 첫 씬: 단독 소개
-    2: "the exact same person as the previous scene,",
-    3: "the exact same protagonist continuing the story,",
-    4: "the same protagonist shown earlier,",
-    5: "the same main character from the beginning,",
+# K-Market 카드뉴스 슬라이드별 연속성 힌트
+CARDNEWS_CONTINUITY_HINTS = {
+    1: "",  # 1번 슬라이드: 주인공 인계 도입
+    2: "the exact same protagonist person as slide 1,",
+    3: "mockup",
+    4: "mockup",
+    5: "the exact same protagonist person from slide 1 and slide 2 continuing the story,",
 }
 
 
-def build_kmarket_char_anchor(
+def build_kmarket_cardnews_char_anchor(
     lang: str,
     gender: str,
     age_group_ko: str,
@@ -90,12 +87,11 @@ def build_kmarket_char_anchor(
     persona_cat: str = "campus"
 ) -> str:
     """
-    K-Market 전용: 언어 코드 + 자취/캠퍼스 페르소나 정보로 완전한 캐릭터 앵커 문자열 생성
+    K-Market 카드뉴스 전용 캐릭터 앵커 생성:
     - 한글 나이 -> 영어 자동 변환
     - 에스닉 외모 자동 주입
     - 성별 영어 변환
-    - 🎨 [핵심 변경] 의상은 동적 풀에서 매번 랜덤 선택 (하드코딩 0%, 봇 자율 결정)
-      → campus/industry/it 카테고리별 10~12벌 풀에서 랜덤 1개 자동 착용
+    - 의상은 동적 풀에서 선택하여 고정 착용
     """
     from core.dynamic_outfit_kmarket import get_dynamic_outfit
 
@@ -103,46 +99,42 @@ def build_kmarket_char_anchor(
     age_en = AGE_KO_TO_EN.get(age_group_ko, age_group_ko)
     gender_en = "man" if gender == "male" else "woman"
 
-    # 물리적 외모만 추출 (anchor_desc에서 의상 제거 완료 → 얼굴/헤어/체형만 남음)
     parts = persona_anchor_desc.split(",")
     physical_details = ", ".join(parts[2:]).strip() if len(parts) >= 3 else persona_anchor_desc
 
-    # 🎨 테마/카테고리에 맞는 의상을 매번 다르게 동적 선택
     dynamic_outfit = get_dynamic_outfit(persona_cat, gender)
 
     char = (
         f"a real {age_en} {ethnic} {gender_en} "
-        f"with consistent appearance throughout the video, "
+        f"with consistent appearance across all cardnews slides, "
         f"{physical_details}, {dynamic_outfit}"
     )
     return char
 
 
-def build_kmarket_scene_prompt(
-    scene_idx: int,
+def build_kmarket_cardnews_scene_prompt(
+    slide_idx: int,
     char: str,
     scene_action: str,
     extra_detail: str = "",
     item_name: str = ""
 ) -> str:
     """
-    K-Market 전용 5단계 자취 생활 다큐멘터리 씬 프롬프트 생성
-    - 씬 1: 🎨 [동적 생성] 실외 보도블록 2인 물건 직접 인계 (의상·아이템 100% 동적)
-    - 씬 2: 원룸 배치 & 룸투어 (동일 인물 유지)
-    - 씬 3: 150만원 절약 환호 (동일 인물 유지)
-    - 씬 4~5: 스마트폰 목업 (별도 렌더러)
+    K-Market 카드뉴스 전용 5장 슬라이드 프롬프트 생성:
+    - Slide 1: 보도블록 2인 실물 인계 (주인공 Person A + 상대방 Person B)
+    - Slide 2: 아늑한 원룸 배치 & 만족 (Slide 1과 동일 주인공)
+    - Slide 3: 0원 나눔 피드 스마트폰 목업 (별도 렌더러)
+    - Slide 4: 17개국어 자동번역 1:1 채팅 스마트폰 목업 (별도 렌더러)
+    - Slide 5: 자신감 넘치는 최종 추천 & CTA (Slide 1, 2와 동일 주인공)
     """
-    continuity = SCENE_CONTINUITY_HINTS.get(scene_idx, "the same protagonist,")
-    if scene_idx == 1:
+    continuity = CARDNEWS_CONTINUITY_HINTS.get(slide_idx, "the same protagonist,")
+
+    if slide_idx == 1:
         from core.dynamic_outfit_kmarket import get_counterpart_outfit
 
-        # 🎨 주인공 의상에서 대비되는 상대방 의상 자동 선택 (색상 겹침 방지)
         counterpart_outfit = get_counterpart_outfit(char)
-
-        # 🛒 테마 아이템 동적 반영 (60대 테마 실물 아이템 자동 삽입)
         item_desc = f"a compact portable {item_name}" if item_name else "a compact portable household item"
 
-        # 📌 Slide 1 전용: 실외 길거리 보도블록, 주인공({char}) + 상대방(대비 의상) = 2인 실물 아이템 직접 인계
         prompt = (
             f"candid documentary eye-level outdoor street photo of strictly two people only on a clean Korean residential sidewalk in broad daylight, "
             f"person A ({char}) on the left is cheerfully receiving {item_desc} with both hands, "
@@ -155,24 +147,19 @@ def build_kmarket_scene_prompt(
             f"highly detailed facial features, sharp clear eyes, well-defined face, natural skin texture, "
             f"unposed authentic photojournalism, 8k uhd, photorealistic, sharp focus"
         )
-    elif scene_idx == 2:
+    elif slide_idx == 2:
         item_desc = f"a clean {item_name}" if item_name else "a clean household item"
         prompt = (
             f"authentic eye-level medium interior documentary shot, {continuity} {char}, {scene_action}, "
             f"peaceful relieved warm smile relaxing in cozy beautifully furnished Korean studio apartment with {item_desc} under warm interior lamp lighting, "
             f"authentic Korean studio apartment interior living environment, "
+            f"same consistent face and clothing as slide 1, "
             f"unposed natural lifestyle photography, warm ambient room lighting, 8k uhd, photorealistic, sharp focus"
         )
-    elif scene_idx == 3:
-        prompt = (
-            f"authentic eye-level medium lifestyle documentary shot, {continuity} {char}, {scene_action}, "
-            f"same consistent character appearance as previous scenes, cozy studio room desk environment, "
-            f"unposed natural documentary photography, 8k uhd, photorealistic"
-        )
-    elif scene_idx == 5:
+    elif slide_idx == 5:
         prompt = (
             f"authentic eye-level medium creator lifestyle documentary portrait, {continuity} {char}, {scene_action}, "
-            f"same consistent character appearance as previous scenes, authentic furnished Korean studio room background, "
+            f"same consistent character appearance, face and clothing as slide 1 and slide 2, authentic furnished Korean studio room background, "
             f"looking directly into camera with an encouraging and decisive confident smile, pointing forward with friendly inviting gesture, "
             f"natural studio interior lighting, unposed direct connection, 8k uhd, photorealistic, sharp focus"
         )
@@ -184,37 +171,39 @@ def build_kmarket_scene_prompt(
     return prompt
 
 
-def build_kmarket_negative_prompt(lang: str, extra: str = "") -> str:
+def build_kmarket_cardnews_negative_prompt(lang: str, slide_idx: int = 1, extra: str = "") -> str:
     """
-    K-Market 전용 부정 프롬프트:
-    - 공부/독서/필기 차단, 얼굴 뭉개짐/기형 손가락/플라스틱 인형 피부 원천 차단
+    K-Market 카드뉴스 전용 부정 프롬프트
     """
     ethnic_neg = LANG_NEGATIVE_ETHNIC.get(lang, "")
-    base_neg = (
-        "three people, 3 people, third person, middle person, extra person, crowd, merged bodies, "
-        "missing legs, no legs, floating torso, cut off legs, amputee, disembodied torso, wooden box, crate, basket, cage, "
-        "studying, reading books, writing, notebook, pen, pencil, classroom, homework, exams, "
-        "empty hands, handshake without furniture, standing without furniture, people only, no furniture, missing item, "
-        "blurry face, blurred face, melted face, smudged face, undefined facial features, faceless, "
-        "distorted face, deformed eyes, squinting, bad eyes, asymmetric eyes, bad teeth, deformed mouth, "
-        "out of focus face, soft focus face, motion blur on face, foggy face, hazy face, "
-        "deformed fingers, fused fingers, extra fingers, missing fingers, malformed hands, claw hands, "
-        "bad anatomy, grotesque, "
-        "close up face portrait, face zoom, macro headshot portrait, head shot, glamour fashion shoot, "
-        "instagram influencer pose, professional fashion photoshoot, posing for camera, looking straight at camera, "
-        "caucasian, white person, blonde hair, blue eyes, floating phone, "
-        "cartoon, 3d render, illustration, painting, CGI, plastic skin, lowres, jpeg artifacts, "
-        "elderly, old person, middle-aged, different person, character change"
-    )
+    if slide_idx == 1:
+        base_neg = (
+            "three people, 3 people, third person, middle person, extra person, crowd, merged bodies, "
+            "missing legs, no legs, floating torso, cut off legs, amputee, disembodied torso, wooden box, crate, basket, cage, "
+            "studying, reading books, writing, notebook, pen, pencil, classroom, homework, exams, "
+            "empty hands, handshake without furniture, standing without furniture, people only, no furniture, missing item, "
+            "blurry face, blurred face, melted face, smudged face, undefined facial features, faceless, "
+            "distorted face, deformed eyes, squinting, bad eyes, asymmetric eyes, bad teeth, deformed mouth, "
+            "out of focus face, soft focus face, motion blur on face, foggy face, hazy face, "
+            "deformed fingers, fused fingers, extra fingers, missing fingers, malformed hands, claw hands, "
+            "bad anatomy, grotesque, caucasian, white person, blonde hair, blue eyes, "
+            "cartoon, 3d render, illustration, painting, CGI, plastic skin, lowres, jpeg artifacts"
+        )
+    else:
+        base_neg = (
+            "two people, multiple people, crowd, extra person, "
+            "blurry face, blurred face, melted face, smudged face, undefined facial features, faceless, "
+            "distorted face, deformed eyes, bad teeth, deformed mouth, "
+            "out of focus face, soft focus face, "
+            "deformed fingers, fused fingers, extra fingers, missing fingers, malformed hands, "
+            "bad anatomy, grotesque, caucasian, white person, blonde hair, blue eyes, "
+            "different person, character change, inconsistent face, "
+            "cartoon, 3d render, illustration, painting, CGI, plastic skin"
+        )
+
     parts = [base_neg]
     if ethnic_neg:
         parts.append(ethnic_neg)
     if extra:
         parts.append(extra)
     return ", ".join(parts)
-
-
-# 하위 호환용 별칭 (Alias)
-build_char_anchor = build_kmarket_char_anchor
-build_scene_prompt = build_kmarket_scene_prompt
-build_negative_prompt = build_kmarket_negative_prompt

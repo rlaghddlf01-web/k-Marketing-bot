@@ -161,6 +161,7 @@ function switchBrand(brand) {
 
     if (typeof fetchStatus === "function") fetchStatus();
     if (typeof renderHubGrid === "function") renderHubGrid();
+    if (typeof updateGoldenBatchPanel === "function") updateGoldenBatchPanel();
     if (typeof loadPlatforms === "function") loadPlatforms();
     if (typeof loadHashtags === "function") loadHashtags();
     if (typeof loadGallery === "function") loadGallery();

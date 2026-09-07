@@ -54,20 +54,16 @@ class ShortsEasyTax:
         self.trend_scraper = ViralTrendScraper()
         self.copywriter = GeminiShortsCopywriter(service_id=self.service_id)
 
-    def produce_shorts(self, lang: str = "vi", force_run: bool = False, engine_mode: str = "colab_gpu") -> Dict[str, Any]:
+    def produce_shorts(self, lang: str = "vi", force_run: bool = False, engine_mode: str = "gemini") -> Dict[str, Any]:
         """
         EasyTax 전용 숏폼 비디오 1편을 기획 ➔ 생성 ➔ 품질검증 ➔ 렌더링 ➔ 배포까지 100% 무인 실행
         """
         logger.info(f"[{lang.upper()}] 💰 [EasyTax 숏폼 공장] 생산 가동 시작... (엔진: {engine_mode})")
         timestamp = int(time.time())
 
-        # ⚡ 이미지 생성 엔진 동적 선택 (대시보드 스위치 연동)
-        if engine_mode == "gemini":
-            active_media_gen = GeminiMediaGenerator(service_id="easytax")
-            logger.info(f"[{lang.upper()}] 💎 [EasyTax 숏폼] 제미나이 Imagen AI 엔진으로 생성")
-        else:
-            active_media_gen = self.gemini_media_gen  # 기존 LocalGPUMediaGeneratorEasyTax
-            logger.info(f"[{lang.upper()}] 🆓 [EasyTax 숏폼] 무료 코랩 GPU 엔진으로 생성")
+        # ⚡ 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 엔진
+        active_media_gen = GeminiMediaGenerator(service_id="easytax")
+        logger.info(f"[{lang.upper()}] 🏆 [EasyTax 숏폼] Gemini 3.1 Flash-Lite Image 엔진 가동")
 
         # 1. 5단계 시네마틱 환급 시나리오 기획
         scenario = self.scenario_director.plan_daily_scenario(lang=lang)

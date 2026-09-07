@@ -24,6 +24,7 @@ from core.media_quality_verifier import MediaQualityVerifier
 from core.supabase_manager import SupabaseManager
 from core.gemini_cardnews_copywriter import GeminiCardnewsCopywriter
 from core.auto_publishers.cardnews_multi_publisher import CardnewsMultiPublisher
+from core.kmarket_phone_mockup_renderer import KMarketPhoneMockupRenderer
 
 logger = logging.getLogger("CardnewsKMarket")
 
@@ -40,6 +41,7 @@ class CardnewsKMarket:
         self.scenario_director = ScenarioDirectorCardnewsKMarket()
         self.media_gen = LocalGPUMediaGeneratorKMarket()
         self.composer = CardnewsComposerKMarket()
+        self.mockup_renderer = KMarketPhoneMockupRenderer()
         self.quality_verifier = MediaQualityVerifier(service_id=self.service_id)
         self.supabase = SupabaseManager()
         self.copywriter = GeminiCardnewsCopywriter(service_id=self.service_id)
@@ -49,7 +51,7 @@ class CardnewsKMarket:
         self,
         lang: str = "uz",
         theme_index: Optional[int] = None,
-        engine_mode: str = "colab_gpu"
+        engine_mode: str = "gemini"
     ) -> Dict[str, Any]:
         """
         K-Market 전용 5장 7:3 황금 분할 카드뉴스 (1080x1350) 생성 및 저장
@@ -60,34 +62,54 @@ class CardnewsKMarket:
 
         self.media_gen.set_episode_seed(episode_id)
 
-        # ⚡ 이미지 생성 엔진 동적 선택 (대시보드 스위치 연동)
-        if engine_mode == "gemini":
-            active_media_gen = GeminiMediaGenerator(service_id="kmarket")
-            logger.info(f"🛒 [K-Market 카드뉴스] 제미나이 Imagen AI 엔진으로 생성")
-        else:
-            active_media_gen = self.media_gen  # 기존 LocalGPUMediaGeneratorKMarket
-            logger.info(f"🛒 [K-Market 카드뉴스] 무료 코랩 GPU 엔진으로 생성")
+        # ⚡ 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 엔진
+        active_media_gen = GeminiMediaGenerator(service_id="kmarket")
+        logger.info(f"🛒 [K-Market 카드뉴스] 🏆 Gemini 3.1 Flash-Lite Image 엔진으로 생성")
 
         timestamp = int(time.time())
         saved_paths: List[Path] = []
 
         logger.info(f"🛒 [K-Market 7:3 카드뉴스 생산 시작] {lang.upper()} - {scenario.get('theme_name')} (5장 슬라이드)...")
 
+        hero_image_path = None
         for card in cards:
             s_idx = card.get("slide_idx", 1)
-            # 🛡️ 1. 상단 70% (1080x945) 고화질 실사 이미지 1회 생성 (비용 1/3 통제 1-Shot 모드)
-            theme_id = f"card_{episode_id}_s{s_idx}"
-            img_plan = {
-                "action_prompt": card.get("image_prompt"),
-                "negative_prompt": card.get("negative_prompt"),
-                "gender": "m"
-            }
-            top_img_path = active_media_gen.generate_theme_image(
-                lang=lang,
-                theme_id=theme_id,
-                scenario_plan=img_plan,
-                aspect_ratio="16:9"
-            )
+            card_type = card.get("card_type", "real_scene")
+
+            # 📱 5단계 하이브리드 구조:
+            # - 1번 씬: 야외 0원 직거래 나눔 만남 (real_scene - 주인공 인물 앵커 시작)
+            # - 2번 씬: 아늑한 방 완성 & 150만원 절약 (real_scene - 1번 주인공 참조 락)
+            # - 3번 씬: K-Market 실물 0원 매물 피드 (mockup_giveaway)
+            # - 4번 씬: K-Market 17개국어 자동번역 1:1 채팅 (mockup_translation)
+            # - 5번 씬: 당당하고 자신감 넘치는 최종 추천 & CTA (real_scene - 1번 주인공 참조 락)
+            if card_type in ["mockup_translation", "mockup_giveaway"] or s_idx in [3, 4]:
+                mockup_mode = "giveaway" if (card_type == "mockup_giveaway" or s_idx == 3) else "translation"
+                mockup_out = self.output_dir / f"kmarket_mockup_{lang}_s{s_idx}_{timestamp}.png"
+                top_img_path = self.mockup_renderer.render_mockup(
+                    mode=mockup_mode,
+                    lang=lang,
+                    output_path=mockup_out
+                )
+                logger.info(f"[{lang.upper()}] 📱 K-Market 카드뉴스 슬라이드 {s_idx}/5 순정 스마트폰 목업 생성 완료: {top_img_path.name} (모드: {mockup_mode})")
+            else:
+                # 🖼️ 1, 2, 5번 실사 슬라이드: (야외 직거래 만남 / 아늑한 방 완성 / 최종 추천 CTA)
+                theme_id = f"card_{episode_id}_s{s_idx}"
+                img_plan = {
+                    "action_prompt": card.get("image_prompt"),
+                    "negative_prompt": card.get("negative_prompt"),
+                    "gender": "f" if ("woman" in card.get("image_prompt", "").lower() or "female" in card.get("image_prompt", "").lower()) else "m"
+                }
+                ref_path = hero_image_path if s_idx in [2, 5] else None
+                top_img_path = active_media_gen.generate_theme_image(
+                    lang=lang,
+                    theme_id=theme_id,
+                    scenario_plan=img_plan,
+                    aspect_ratio="9:16",
+                    reference_image_path=ref_path
+                )
+                if s_idx == 1 and top_img_path and Path(top_img_path).exists():
+                    hero_image_path = top_img_path
+                    logger.info(f"[{lang.upper()}] 🔒 [주인공 1번 슬라이드 앵커 등록 완료]: {hero_image_path.name}")
 
             # AI 비전 품질 검사관 (로깅 및 품질 측정 전용 - 유료 재촬영 차단)
             if top_img_path and Path(top_img_path).exists():

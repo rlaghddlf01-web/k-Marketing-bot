@@ -95,7 +95,7 @@ KMARKET_60_THEMES = [
     {"id": "ind_changwon_national", "cat": "industry", "name": "창원 국가산단 외국인 근로자 따뜻한 0원 나눔", "target": "창원 성산구/마산 원룸", "item": "온수매트 & 수납 행거"}
 ]
 
-# 🎯 7대 외국인 페르소나별 100% 동일 인물 고정 앵커 (외모, 헤어, 의상 완전 고정)
+# 🎯 7대 외국인 페르소나별 100% 동일 인물 고정 앵커 (외모/헤어 고정, 의상은 동적 자율 선택)
 KMARKET_PERSONA_ANCHORS = [
     {
         "persona_id": "sinchon_female_d2",
@@ -103,7 +103,8 @@ KMARKET_PERSONA_ANCHORS = [
         "gender": "female",
         "age_group": "20대 초반",
         "town": "서울 신촌 대학가",
-        "anchor_desc": "a specific 21-year-old Asian female college student with shoulder-length black straight bob haircut, gentle dark brown eyes, fair skin, wearing an oversized pastel beige knit sweater and neat blue denim pants"
+        "cat": "campus",
+        "anchor_desc": "a specific 21-year-old Asian female college student with shoulder-length black straight bob haircut, gentle dark brown eyes, fair skin"
     },
     {
         "persona_id": "anam_male_d2",
@@ -111,7 +112,8 @@ KMARKET_PERSONA_ANCHORS = [
         "gender": "male",
         "age_group": "20대 초반",
         "town": "서울 안암 대학가",
-        "anchor_desc": "a specific 22-year-old Asian male college student with neat short black side-part haircut, clean-shaven face, warm cheerful smile, wearing a dark green university hoodie"
+        "cat": "campus",
+        "anchor_desc": "a specific 22-year-old Asian male college student with neat short black side-part haircut, clean-shaven face, warm cheerful smile"
     },
     {
         "persona_id": "ansan_female_e9",
@@ -119,7 +121,8 @@ KMARKET_PERSONA_ANCHORS = [
         "gender": "female",
         "age_group": "20대 후반",
         "town": "안산 다문화 타운",
-        "anchor_desc": "a specific 27-year-old Asian woman with a clean black ponytail, kind dark eyes, wearing a simple comfortable navy zip-up fleece jacket and grey casual trousers"
+        "cat": "industry",
+        "anchor_desc": "a specific 27-year-old Asian woman with a clean black ponytail, kind dark eyes, warm gentle smile"
     },
     {
         "persona_id": "suwon_male_e9",
@@ -127,7 +130,8 @@ KMARKET_PERSONA_ANCHORS = [
         "gender": "male",
         "age_group": "20대 후반",
         "town": "수원 영통 공단",
-        "anchor_desc": "a specific 28-year-old Asian man with short athletic black haircut, honest friendly facial features, wearing a comfortable heather grey crewneck sweatshirt"
+        "cat": "industry",
+        "anchor_desc": "a specific 28-year-old Asian man with short athletic black haircut, honest friendly facial features"
     },
     {
         "persona_id": "hyehwa_male_d2",
@@ -135,7 +139,8 @@ KMARKET_PERSONA_ANCHORS = [
         "gender": "male",
         "age_group": "20대 후반",
         "town": "서울 혜화 대학가",
-        "anchor_desc": "a specific 26-year-old Asian male graduate researcher wearing modern slim black wire-frame glasses, tidy black hair, wearing an olive brown corduroy button-up shirt"
+        "cat": "campus",
+        "anchor_desc": "a specific 26-year-old Asian male graduate researcher with modern slim black wire-frame glasses, tidy black hair"
     },
     {
         "persona_id": "gangnam_female_e7",
@@ -143,7 +148,8 @@ KMARKET_PERSONA_ANCHORS = [
         "gender": "female",
         "age_group": "30대 초반",
         "town": "서울 강남/역삼",
-        "anchor_desc": "a specific 30-year-old Asian career woman with elegant wavy dark brown hair, bright intelligent eyes, wearing a stylish light blue tailored casual blouse"
+        "cat": "it",
+        "anchor_desc": "a specific 30-year-old Asian career woman with elegant wavy dark brown hair, bright intelligent eyes"
     },
     {
         "persona_id": "guro_male_f4",
@@ -151,7 +157,8 @@ KMARKET_PERSONA_ANCHORS = [
         "gender": "male",
         "age_group": "30대 초반",
         "town": "서울 구로 디지털",
-        "anchor_desc": "a specific 31-year-old Asian man with neatly styled parted dark hair, confident warm smile, wearing a clean black smart casual polo shirt"
+        "cat": "it",
+        "anchor_desc": "a specific 31-year-old Asian man with neatly styled parted dark hair, confident warm smile"
     }
 ]
 
@@ -307,12 +314,13 @@ class ScenarioDirectorShortsKMarket:
         persona = random.choice(self.personas)
         script_meta = get_i18n_script(lang, theme)
 
-        # 🌍 캐릭터 앵커 빌더로 1~5씬 완전 동일 인물 액션 문자열 실시간 조합
+        # 🌍 캐릭터 앵커 빌더로 1~5씬 완전 동일 인물 액션 문자열 실시간 조합 (의상은 동적 자율 선택)
         char = build_char_anchor(
             lang=lang,
             gender=persona["gender"],
             age_group_ko=persona["age_group"],
-            persona_anchor_desc=persona["anchor_desc"]
+            persona_anchor_desc=persona["anchor_desc"],
+            persona_cat=persona.get("cat", "campus")
         )
 
         # 50:50 모드 결정 (force_mode 없으면 50% 랜덤)
@@ -356,11 +364,14 @@ class ScenarioDirectorShortsKMarket:
                         f"(one friendly Southeast Asian Vietnamese student and one warm Central Asian Uzbek expat neighbor) "
                         f"standing facing each other outdoors on a clean authentic Korean residential street near {theme['target']}. "
                         f"Both people are completely visible from the waist up, both faces and warm friendly smiles clearly visible, "
+                        f"highly detailed facial features, sharp clear eyes, well-defined face, natural skin texture, "
                         f"making pleasant eye contact as they respectfully hand over and exchange a clean {theme['item']} or neatly wrapped gift box between them. "
                         f"Natural daytime lighting, real Korean residential neighborhood background with quiet storefronts, authentic heartwarming community meetup, masterpiece 8k"
                     ),
                     "negative_prompt": (
                         "disembodied hands, only hands visible, headless person, cropped heads, cropped face, single person portrait, "
+                        "blurry face, blurred face, melted face, smudged face, undefined facial features, faceless, "
+                        "out of focus face, soft focus face, foggy face, hazy face, "
                         "bad anatomy, extra limbs, deformed fingers, floating objects, blurry"
                     )
                 },
@@ -430,7 +441,7 @@ class ScenarioDirectorShortsKMarket:
                 "age_group": persona["age_group"],
                 "scenes": scenes,
                 "action_prompt": f"cinematic authentic 9:16 story of {char} getting 0 KRW free {theme['item']} in {theme['target']}",
-                "negative_prompt": "caucasian, white person, blonde hair, creepy smile, distorted fingers, non-asian, character change"
+                "negative_prompt": "caucasian, white person, blonde hair, creepy smile, distorted fingers, non-asian, character change, blurry face, melted face, smudged face, out of focus face"
             }
 
     def get_shorts_scenario(self, lang: str = "en") -> Dict[str, Any]:
