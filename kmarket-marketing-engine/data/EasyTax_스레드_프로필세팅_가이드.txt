@@ -1,0 +1,107 @@
+================================================================================
+📢 [EasyTax (KTRS 외국인 세금환급)] 스레드(Threads) 8개국 프로필 세팅 완벽 가이드
+================================================================================
+※ 스레드 프로필 세팅 안내:
+   1. [이름(Name)]: 브랜드 신뢰도 + 현지어 세금환급 (30자 이내 완벽 준수)
+   2. [사용자 이름(Username)]: 영문 소문자 통일 (ktrstax.{cc})
+   3. [소개(Bio)]: 90% 소득세 감면 & 평균 184만원 환급 혜택 명시 (150자 이내)
+   4. [링크(Link) / 관심사 링크]: 해당 국가 언어 3초 무료 환급 계산기 공식 랜딩 URL
+   5. [팟캐스트(Podcast)]: ★비워두기(권장)★ - 팟캐스트가 없으므로 공란으로 두시면 됩니다.
+                          (유튜브 연결을 원하실 경우 각 국가별 유튜브 채널 주소 입력 가능)
+================================================================================
+
+[1. 🇲🇳 몽골 (Mongolia)]
+• 이름 (Name): KTRS Татварын Буцаан Олголт
+• 사용자 이름 (Username): ktrstax.mn
+• 소개 (Bio):
+🇲🇳 БНСУ дахь E-9 ажилчдын 90% татварын буцаан олголт!
+💵 Дундаж буцаан олголт 1.84 сая вон
+⚡ 3 секундэд үнэгүй шалгах 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=mn
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Mongolia
+
+--------------------------------------------------------------------------------
+
+[2. 🇻🇳 베트남 (Vietnam)]
+• 이름 (Name): KTRS Hoàn Thuế E-9 Hàn Quốc
+• 사용자 이름 (Username): ktrstax.vn
+• 소개 (Bio):
+🇻🇳 Hoàn thuế 90% cho lao động E-9 tại Hàn Quốc!
+💵 Nhận lại trung bình 1.84 triệu Won
+⚡ Kiểm tra miễn phí trong 3 giây 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=vi
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Vietnam
+
+--------------------------------------------------------------------------------
+
+[3. 🇺🇿 우즈베키스탄 (Uzbekistan)]
+• 이름 (Name): KTRS Soliq Qaytarish Koreya
+• 사용자 이름 (Username): ktrstax.uz
+• 소개 (Bio):
+🇺🇿 E-9 ishchilari uchun 90% daromad solig‘ini qaytarish!
+💵 O‘rtacha 1.84 mln von qaytarish
+⚡ 3 soniyada bepul tekshirish 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=uz
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Uzbekistan
+
+--------------------------------------------------------------------------------
+
+[4. 🇰🇭 캄보디아 (Cambodia)]
+• 이름 (Name): KTRS បង្វិលសងពន្ធ E-9
+• 사용자 이름 (Username): ktrstax.kh
+• 소개 (Bio):
+🇰🇭 បង្វិលសងពន្ធ 90% សម្រាប់ពលករ E-9 នៅកូរ៉េ!
+💵 ប្រាក់បង្វិលជាមធ្យម ១.៨៤ លានវ៉ុន
+⚡ ពិនិត្យប្រាក់ពន្ធដោយឥតគិតថ្លៃ 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=km
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Cambodia
+
+--------------------------------------------------------------------------------
+
+[5. 🇳🇵 네팔 (Nepal)]
+• 이름 (Name): KTRS कोरिया कर फिर्ता E-9
+• 사용자 이름 (Username): ktrstax.np
+• 소개 (Bio):
+🇳🇵 कोरियामा E-9 कामदारहरूको ९०% आयकर फिर्ता सेवा!
+💵 औसत १.८४ मिलियन वन कर फिर्ता
+⚡ ३ सेкеन्डमा निःशुल्क जाँच गर्नुहोस् 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=ne
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Nepal
+
+--------------------------------------------------------------------------------
+
+[6. 🇹🇭 태국 (Thailand)]
+• 이름 (Name): KTRS ขอคืนภาษี E-9 เกาหลี
+• 사용자 이름 (Username): ktrstax.th
+• 소개 (Bio):
+🇹🇭 บริการขอคืนภาษีเงินได้ 90% สำหรับแรงงาน E-9 เกาหลีใต้!
+💵 ได้รับเงินคืนเฉลี่ย 1.84 ล้านวอน
+⚡ เช็กยอดเงินคืนฟรีใน 3 วินาที 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=th
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Thailand
+
+--------------------------------------------------------------------------------
+
+[7. 🇮🇩 인도네시아 (Indonesia)]
+• 이름 (Name): KTRS Pajak Korea E-9
+• 사용자 이름 (Username): ktrstax.id
+• 소개 (Bio):
+🇮🇩 Pengembalian pajak 90% untuk pekerja E-9 di Korea!
+💵 Rata-rata pengembalian 1.84 juta Won
+⚡ Cek gratis dalam 3 detik 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=id
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Indonesia
+
+--------------------------------------------------------------------------------
+
+[8. 🇲🇾 미얀마 (Myanmar)]
+• 이름 (Name): KTRS E-9 အခွန်ပြန်အမ်းငွေ
+• 사용자 이름 (Username): ktrstax.mm
+• 소개 (Bio):
+🇲🇲 ကိုရီးယား E-9 ဝင်ငွေခွန် ၉၀% တရားဝင် ပြန်အမ်းငွေ!
+💵 ပျမ်းမျှ ၁.၈၄ သန်းဝမ် ပြန်လည်ရရှိ
+⚡ အခမဲ့ စစ်ဆေးလိုက်ပါ 👇
+• 웹사이트 링크: https://ktrs-service.vercel.app/?lang=my
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRS_Myanmar
+
+================================================================================

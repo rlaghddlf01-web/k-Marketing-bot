@@ -94,77 +94,77 @@ Layanan resmi pengembalian pajak 90% untuk pekerja E-9 di Korea Selatan (KTRS). 
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🛒 [구글 계정 2] K-Market 쇼핑몰 채널 (8대 황금 국가)
+🛒 [구글 계정 2] KTRS 마켓 (KTRS Market) 쇼핑몰 채널 (8대 황금 국가)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 [1. 🇻🇳 베트남 (Vietnam)]
-• 채널 이름: K-Market Vietnam - Mua sắm tại Hàn Quốc
-• 채널 핸들: @KMarket_Vietnam
-• 채널 소개글(설명): Mua sắm đặc sản, gia vị và thực phẩm quê hương dễ dàng ngay tại Hàn Quốc cùng K-Market. Giao hàng nhanh chóng tận nơi.
-• 링크 제목: 🛒 Mua sắm K-Market ngay
+• 채널 이름: KTRS Market Vietnam - Mua sắm tại Hàn Quốc
+• 채널 핸들: @KTRSMarket_Vietnam
+• 채널 소개글(설명): Mua sắm đặc sản, gia vị và thực phẩm quê hương dễ dàng ngay tại Hàn Quốc cùng KTRS Market. Giao hàng nhanh chóng tận nơi.
+• 링크 제목: 🛒 Mua sắm KTRS Market ngay
 • 링크 URL: https://ktrs-market.vercel.app/vi
 
 --------------------------------------------------------------------------------
 
 [2. 🇺🇿 우즈베키스탄 (Uzbekistan)]
-• 채널 이름: K-Market Uzbekistan - Koreyadagi Milliy Xaridlar
-• 채널 핸들: @KMarket_Uzbekistan
-• 채널 소개글(설명): Janubiy Koreyadagi vatandoshlar uchun o'zbek milliy taomlari va qulay xarid xizmati (K-Market). Tezkor yetkazib berish.
-• 링크 제목: 🛒 K-Market rasmiy do'koni
+• 채널 이름: KTRS Market Uzbekistan - Koreyadagi Milliy Xaridlar
+• 채널 핸들: @KTRSMarket_Uzbekistan
+• 채널 소개글(설명): Janubiy Koreyadagi vatandoshlar uchun o'zbek milliy taomlari va qulay xarid xizmati (KTRS Market). Tezkor yetkazib berish.
+• 링크 제목: 🛒 KTRS Market rasmiy do'koni
 • 링크 URL: https://ktrs-market.vercel.app/uz
 
 --------------------------------------------------------------------------------
 
 [3. 🇰🇭 캄보디아 (Cambodia)]
-• 채널 이름: K-Market Cambodia - ផ្សារទំនើបខ្មែរនៅកូរ៉េ
-• 채널 핸들: @KMarket_Cambodia
-• 채널 소개글(설명): ទិញទំនិញនិងម្ហូបអាហារប្រពៃណីខ្មែរយ៉ាងងាយស្រួលនៅប្រទេសកូរ៉េជាមួយ K-Market។ ដឹកជញ្ជូនរហ័សទាន់ចិត្ត។
-• 링크 제목: 🛒 ផ្សារទំនើប K-Market ឥឡូវនេះ
+• 채널 이름: KTRS Market Cambodia - ផ្សារទំនើបខ្មែរនៅកូរ៉េ
+• 채널 핸들: @KTRSMarket_Cambodia
+• 채널 소개글(설명): ទិញទំនិញនិងម្ហូបអាហារប្រពៃណីខ្មែរយ៉ាងងាយស្រួលនៅប្រទេសកូរ៉េជាមួយ KTRS Market។ ដឹកជញ្ជូនរហ័សទាន់ចិត្ត។
+• 링크 제목: 🛒 ផ្សារទំនើប KTRS Market ឥឡូវនេះ
 • 링크 URL: https://ktrs-market.vercel.app/km
 
 --------------------------------------------------------------------------------
 
 [4. 🇳🇵 네팔 (Nepal)]
-• 채널 이름: K-Market Nepal - कोरियामा नेपाली सामान अनलाइन
-• 채널 핸들: @KMarket_Nepal
-• 채널 소개글(설명): कोरियामा रहेका नेपालीहरूका लागि अनलाइन किनमेल र स्वदेशी खाद्य सामग्रीहरू (K-Market)। घरमै छिटो डेलिभरी।
-• 링크 제목: 🛒 K-Market अनलाइन किनमेल
+• 채널 이름: KTRS Market Nepal - कोरियामा नेपाली सामान अनलाइन
+• 채널 핸들: @KTRSMarket_Nepal
+• 채널 소개글(설명): कोरियामा रहेका नेपालीहरूका लागि अनलाइन किनमेल र स्वदेशी खाद्य सामग्रीहरू (KTRS Market)। घरमै छिटो डेलिभरी।
+• 링크 제목: 🛒 KTRS Market अनलाइन किनमेल
 • 링크 URL: https://ktrs-market.vercel.app/ne
 
 --------------------------------------------------------------------------------
 
 [5. 🇹🇭 태국 (Thailand)]
-• 채널 이름: K-Market Thailand - ช้อปปิ้งอาหารไทยในเกาหลี
-• 채널 핸들: @KMarket_Thailand
-• 채널 소개글(설명): ซื้อสินค้า เครื่องปรุง และอาหารไทยในเกาหลีใต้ ส่งตรงถึงหน้าบ้านอย่างสะดวกและรวดเร็วกับ K-Market
-• 링크 제목: 🛒 ช้อปสินค้า K-Market ทันที
+• 채널 이름: KTRS Market Thailand - ช้อปปิ้งอาหารไทยในเกาหลี
+• 채널 핸들: @KTRSMarket_Thailand
+• 채널 소개글(설명): ซื้อสินค้า เครื่องปรุง และอาหารไทยในเกาหลีใต้ ส่งตรงถึงหน้าบ้านอย่างสะดวกและรวดเร็วกับ KTRS Market
+• 링크 제목: 🛒 ช้อปสินค้า KTRS Market ทันที
 • 링크 URL: https://ktrs-market.vercel.app/th
 
 --------------------------------------------------------------------------------
 
 [6. 🇮🇩 인도네시아 (Indonesia)]
-• 채널 이름: K-Market Indonesia - Belanja Produk Indo di Korea
-• 채널 핸들: @KMarket_Indonesia
-• 채널 소개글(설명): Belanja kebutuhan sehari-hari, bumbu khas, dan makanan halal Indonesia di Korea Selatan bersama K-Market. Pengiriman cepat.
-• 링크 제목: 🛒 Belanja di K-Market Sekarang
+• 채널 이름: KTRS Market Indonesia - Belanja Produk Indo di Korea
+• 채널 핸들: @KTRSMarket_Indonesia
+• 채널 소개글(설명): Belanja kebutuhan sehari-hari, bumbu khas, dan makanan halal Indonesia di Korea Selatan bersama KTRS Market. Pengiriman cepat.
+• 링크 제목: 🛒 Belanja di KTRS Market Sekarang
 • 링크 URL: https://ktrs-market.vercel.app/id
 
 --------------------------------------------------------------------------------
 
 [7. 🇲🇳 몽골 (Mongolia)]
-• 채널 이름: K-Market Mongolia - Солонгос дахь Монгол Дэлгүүр
-• 채널 핸들: @KMarket_Mongolia
-• 채널 소개글(설명): Солонгост суугаа монголчуудад зориулсан эх орны бараа бүтээгдэхүүн, онлайн худалдаа (K-Market). Түргэн шуурхай хүргэлт.
-• 링크 제목: 🛒 K-Market дэлгүүрээр зочлох
+• 채널 이름: KTRS Market Mongolia - Солонгос дахь Монгол Дэлгүүр
+• 채널 핸들: @KTRSMarket_Mongolia
+• 채널 소개글(설명): Солонгост суугаа монголчуудад зориулсан эх орны бараа бүтээгдэхүүн, онлайн худалдаа (KTRS Market). Түргэн шуурхай хүргэлт.
+• 링크 제목: 🛒 KTRS Market дэлгүүрээр зочлох
 • 링크 URL: https://ktrs-market.vercel.app/mn
 
 --------------------------------------------------------------------------------
 
 [8. 🇲🇾 미얀마 (Myanmar)]
-• 채널 이름: K-Market Myanmar - ကိုရီးယားရောက် မြန်မာ့ကုန်စုံဆိုင်
-• 채널 핸들: @KMarket_Myanmar
-• 채널 소개글(설명): ကိုရီးယားရောက် မြန်မာလူမျိုးများအတွက် အမိမြေအစားအသောက်နှင့် လူသုံးကုန်ပစ္စည်းများကို K-Market တွင် လွယ်ကူစွာ ဝယ်ယူလိုက်ပါ။
-• 링크 제목: 🛒 K-Market တွင် ဈေးဝယ်ရန်
+• 채널 이름: KTRS Market Myanmar - ကိုရီးယားရောက် မြန်မာ့ကုန်စုံဆိုင်
+• 채널 핸들: @KTRSMarket_Myanmar
+• 채널 소개글(설명): ကိုရီးယားရောက် မြန်မာလူမျိုးများအတွက် အမိမြေအစားအသောက်နှင့် လူသုံးကုန်ပစ္စည်းများကို KTRS Market တွင် လွယ်ကူစွာ ဝယ်ယူလိုက်ပါ။
+• 링크 제목: 🛒 KTRS Market တွင် ဈေးဝယ်ရန်
 • 링크 URL: https://ktrs-market.vercel.app/my
 
 ================================================================================

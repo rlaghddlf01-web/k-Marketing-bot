@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, DESKTOP_SHORTS_KMARKET
 from core.scenario_director_shorts_kmarket import ScenarioDirectorShortsKMarket
 from core.kmarket_iframe_composer import KMarketIframeComposer
 from core.kmarket_screencast_provider import KMarketScreencastProvider
@@ -39,7 +39,7 @@ class ShortsKMarket:
         self.service_id = "kmarket"
         self.output_dir = OUTPUTS_DIR / "shorts_kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\KTRS마켓")
+        self.desktop_dir = DESKTOP_SHORTS_KMARKET
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorShortsKMarket()

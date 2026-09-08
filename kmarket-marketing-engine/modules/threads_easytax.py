@@ -17,7 +17,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
 
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, DATA_DIR, get_now_kst_str
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, BASE_URLS, DATA_DIR, get_now_kst_str, DESKTOP_CARDNEWS_EASYTAX, DESKTOP_THREADS_EASYTAX
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.supabase_manager import SupabaseManager
@@ -38,7 +38,9 @@ class EasyTaxThreadsPublisher:
         self.scenario_director = ScenarioDirectorThreadsEasyTax()
         self.output_dir = OUTPUTS_DIR / "threads" / "easytax"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_cardnews_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\이지텍스")
+        self.desktop_cardnews_dir = DESKTOP_CARDNEWS_EASYTAX
+        self.desktop_threads_dir = DESKTOP_THREADS_EASYTAX
+        self.desktop_threads_dir.mkdir(parents=True, exist_ok=True)
 
         creds = self._load_credentials()
         self.threads_publisher = ThreadsCardPublisher(creds)
@@ -225,6 +227,44 @@ class EasyTaxThreadsPublisher:
 
             with open(md_path, "w", encoding="utf-8") as f:
                 f.write(full_md)
+
+            # 5-2. 🖥️ 바탕화면 '스레드_산출물/이지텍스' 복사용 텍스트 & 마크다운 실시간 자동 배출
+            if hasattr(self, "desktop_threads_dir") and self.desktop_threads_dir:
+                try:
+                    desktop_md = self.desktop_threads_dir / f"{filename_base}.md"
+                    with open(desktop_md, "w", encoding="utf-8") as f:
+                        f.write(full_md)
+
+                    desktop_txt = self.desktop_threads_dir / f"{filename_base}_복사용.txt"
+                    topic_tag = thread_data.get("topic_tag", "#E9비자")
+                    txt_lines = [
+                        "==================================================",
+                        f"💰 [EasyTax] 스레드 {time_slot.upper()} 슬롯 ({lang.upper()})",
+                        f"🏷️ [스레드 공식 추천 주제 태그]: {topic_tag}",
+                        f"타입: {post_type} ({'📸 세무 카드뉴스 5장 첨부' if attached_images else '📝 순수 환급 썰'})",
+                        f"랜딩 URL: {landing_url}",
+                        "==================================================\n"
+                    ]
+                    if attached_images:
+                        txt_lines.append("[📸 첨부할 카드뉴스 5장 이미지 경로]:")
+                        for img_p in attached_images:
+                            txt_lines.append(f"  • {img_p}")
+                        txt_lines.append("\n--------------------------------------------------\n")
+
+                    for idx, p in enumerate(posts):
+                        if idx == 0:
+                            lbl = "1번 메인 글 (본문 복사 후 붙여넣기)"
+                        elif idx == 1 and time_slot == "afternoon":
+                            lbl = "2번 조특법 팩트/노하우 요약 답글 (1번 글에 답글 달기)"
+                        else:
+                            lbl = f"{idx+1}번 답글 (환급 계산기 링크 안내 댓글)"
+                        txt_lines.append(f"▼ [{lbl}] ▼\n{p}\n\n--------------------------------------------------\n")
+
+                    with open(desktop_txt, "w", encoding="utf-8") as f:
+                        f.write("\n".join(txt_lines))
+                    logger.info(f"🖥️ [Desktop] 바탕화면 스레드 파일 생성 완료: {desktop_txt.name}")
+                except Exception as e:
+                    logger.warning(f"바탕화면 스레드 파일 저장 실패: {e}")
 
             # 6. DB 이력 기록
             try:

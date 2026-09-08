@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES
+from config import BASE_DIR, OUTPUTS_DIR, LANGUAGES, DESKTOP_SHORTS_EASYTAX
 from core.scenario_director_shorts_easytax import ScenarioDirectorShortsEasyTax
 from core.local_gpu_media_generator_easytax import LocalGPUMediaGeneratorEasyTax
 from core.gemini_media_generator import GeminiMediaGenerator
@@ -39,7 +39,7 @@ class ShortsEasyTax:
         self.service_id = "easytax"
         self.output_dir = OUTPUTS_DIR / "shorts"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\이지텍스")
+        self.desktop_dir = DESKTOP_SHORTS_EASYTAX
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorShortsEasyTax()

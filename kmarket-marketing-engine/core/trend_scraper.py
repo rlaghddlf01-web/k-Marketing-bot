@@ -224,26 +224,33 @@ class ViralTrendScraper:
         }
         return matrix
 
-    def get_viral_hashtags(self, service_id: str = "kmarket", lang: str = "en", count: int = 8) -> List[str]:
+    def get_viral_hashtags(self, service_id: str = "kmarket", lang: str = "en", count: int = 10) -> List[str]:
         """
-        3단 하이브리드 황금 조합 반환:
-        [1] 🇰🇷 대한민국 실시간 급상승 트렌드 (2개) -> 알고리즘 1차 노출 폭발
-        [2] 🎯 해당 언어 '국내 체류 외국인' 타깃 태그 (3개) -> 국내 거주자 정밀 도달
-        [3] 💎 서비스 전용 전환 태그 (3개) -> 환급/0원나눔 클릭 전환
+        4단 하이브리드 황금 조합 반환 (대한민국 체류 외국인 근로자 타깃 집중):
+        [1] 🏭 필수 외국인 근로자 타깃 태그 (#E9비자, #외국인근로자, #E9visa)
+        [2] 🎯 해당 언어 '국내 체류 외국인' 고유 타깃 태그 (국가별 커뮤니티 정밀 도달)
+        [3] 💎 서비스 전용 전환 태그 (환급/0원나눔 클릭 전환)
+        [4] 🇰🇷 대한민국 실시간 급상승 트렌드 -> 알고리즘 추천 노출
         """
         kr_trends = self.hashtag_db.get("korea_live_trends", ["#koreatrend", "#fyp"])
         countries = self.hashtag_db.get("countries", {})
         lang_data = countries.get(lang, countries.get("en", {}))
 
-        live_tags = kr_trends[:2]
+        # 1. 대한민국 외국인 근로자 필수 초타깃 태그
+        if service_id == "easytax":
+            worker_tags = ["#E9비자", "#외국인근로자", "#세금환급", "#소득세감면", "#E9visa", "#TaxRefundKorea"]
+        else:
+            worker_tags = ["#0원나눔", "#외국인근로자", "#E9비자", "#한국생활", "#무료나눔", "#FreeGiveaway"]
+
         in_korea_tags = lang_data.get("in_korea_common", ["#lifeinkorea", "#expatsinkorea"])[:3]
         service_tags = lang_data.get(service_id, ["#kmarket", "#koreatips"])[:3]
+        live_tags = kr_trends[:2]
 
-        combined = live_tags + in_korea_tags + service_tags
+        combined = worker_tags[:3] + in_korea_tags + service_tags + worker_tags[3:] + live_tags
         unique_tags = list(dict.fromkeys(combined))
         return unique_tags[:count]
 
-    def format_hashtag_string(self, service_id: str = "kmarket", lang: str = "en", count: int = 8) -> str:
+    def format_hashtag_string(self, service_id: str = "kmarket", lang: str = "en", count: int = 10) -> str:
         """SNS 본문/설명란에 바로 붙일 수 있는 문자열 형식 반환"""
         tags = self.get_viral_hashtags(service_id, lang, count)
         return " ".join(tags)

@@ -4,7 +4,7 @@ import logging
 import random
 from pathlib import Path
 from typing import List, Dict, Any
-from config import DATA_DIR, OUTPUTS_DIR, BASE_URLS
+from config import DATA_DIR, OUTPUTS_DIR, BASE_URLS, DESKTOP_CARDNEWS_EASYTAX
 from core.db_manager import DBManager
 from core.utm_tracker import UTMTracker
 from core.gemini_easytax import EasyTaxGeminiEngine
@@ -72,7 +72,7 @@ class EasyTaxFacebookHunter:
         deployed_group_names = []
 
         # 실물 카드뉴스 5장 이미지 경로 확인
-        desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\이지텍스")
+        desktop_dir = DESKTOP_CARDNEWS_EASYTAX
         cardnews_files = sorted(list(desktop_dir.glob("*.jpg")), key=lambda p: p.stat().st_mtime, reverse=True)[:5]
         if not cardnews_files:
             cardnews_files = sorted(list((OUTPUTS_DIR / "cardnews").glob("*.png")), key=lambda p: p.stat().st_mtime, reverse=True)[:5]

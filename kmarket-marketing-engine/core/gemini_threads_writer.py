@@ -65,38 +65,56 @@ class GeminiThreadsWriter:
         if not self.client:
             return self._fallback_thread(lang, time_slot, theme_name, item_or_refund, landing_url)
 
+        if self.service_id == "easytax":
+            service_title = "EasyTax (한국 국세청 외국인 소득세 90% 감면 및 환급)"
+            hashtag_guide = f"""
+[★ 필수 해시태그 규칙 (한국 체류 외국인 근로자·유학생 초타깃)]:
+- 한국에서 일하는 E-9/E-7 근로자 및 D-2 유학생들이 인스타/스레드에서 실제 검색하는 핵심 해시태그 4~5개를 1번 본문 맨 끝에 무조건 포함할 것!
+- 필수 포함 키워드: #E9비자 #외국인근로자 #세금환급 #소득세감면 #E9visa #TaxRefundKorea 중 3~4개 + 해당 언어권 현지어 해시태그 1개 (예: 베트남 #HoànThuế, 우즈벡 #Soliq, 몽골 #Татвар, 캄보디아 #ពន្ធ 등)
+"""
+            default_topic = "#E9비자"
+        else:
+            service_title = "KTRS 마켓 (재한 외국인 0원 무료나눔 중고마켓)"
+            hashtag_guide = f"""
+[★ 필수 해시태그 규칙 (한국 체류 외국인 근로자·유학생 초타깃)]:
+- 한국에 사는 외국인 근로자(E-9) 및 유학생(D-2)들이 중고/생활용품 구할 때 실제 검색하는 핵심 해시태그 4~5개를 1번 본문 맨 끝에 무조건 포함할 것!
+- 필수 포함 키워드: #0원나눔 #외국인근로자 #E9비자 #한국생활 #중고마켓 #무빙세일 #FreeGiveaway #KoreaLife 중 3~4개 + 해당 언어권 현지어 해시태그 1개 (예: 베트남 #ĐồMiễnPhí, 우즈벡 #TekinBuyum, 몽골 #Үнэгүй 등)
+"""
+            default_topic = "#0원나눔"
+
         if time_slot == "afternoon":
             # ☕ [2회차 - 오후]: 순수 텍스트 리얼 썰형 (3단 타래, 광고 티 0%)
             prompt = f"""
 너는 세계 최고의 메타 스레드(Threads) 바이럴 스토리텔러야.
-스레드 피드에서 한국에 사는 외국인들이 읽자마자 1초 만에 "미쳤다 대박"하며 공감하고 리포스트(공유)하게 만드는 [순수 텍스트 썰 3단 타래]를 창작해라.
+스레드 피드에서 한국에 사는 외국인 근로자·유학생들이 읽자마자 1초 만에 "미쳤다 대박"하며 공감하고 리포스트(공유)하게 만드는 [순수 텍스트 썰 3단 타래]를 창작해라.
 
-[서비스]: {'KTRS 마켓 (재한 외국인 0원 무료나눔 중고마켓)' if self.service_id == 'kmarket' else 'EasyTax (한국 국세청 소득세 90% 감면 및 환급)'}
+[서비스]: {service_title}
 [타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
 [주제/지역]: {theme_name} ({target})
 [{'주요 품목' if self.service_id == 'kmarket' else '환급 금액'}]: {item_or_refund}
 [랜딩 링크]: {landing_url}
 
+{hashtag_guide}
+
 ### 📝 [오후 3단 텍스트 썰 작성 수칙 (광고 느낌 0%)]:
 1. post_1 (1번 메인 썰): 
    - 절대 광고처럼 쓰지 말고, 한국에 사는 외국인이 직접 겪은 생생한 경험담/썰로 시작! (본문에 링크 절대 금지!)
    - 시작 문구에 '🧵👇'를 넣어 아래 답글이 있음을 자연스럽게 유도.
-   - 예시(KTRS 마켓): "나 한국 와서 원룸 이사할 때 150만원 아낀 썰 푼다ㅋㅋ 신촌 자취방 가구 0원으로 맞춘 비결 🧵👇"
-   - 예시(이지텍스): "한국 공장에서 일하는 형들 주목! 나 이번에 세금 380만원 통장에 꽂힌 실화 푼다 🧵👇"
+   - 메인 썰 본문 끝에 반드시 위 [필수 해시태그 규칙]의 태그 4~5개를 붙일 것!
+   - 예시(KTRS 마켓): "나 한국 와서 원룸 이사할 때 150만원 아낀 썰 푼다ㅋㅋ 신촌 자취방 가구 0원으로 맞춘 비결 🧵👇 #0원나눔 #E9비자 #외국인근로자 #한국생활"
+   - 예시(이지텍스): "한국 공장에서 일하는 형들 주목! 나 이번에 세금 380만원 통장에 꽂힌 실화 푼다 🧵👇 #E9비자 #외국인근로자 #세금환급 #소득세감면 #E9visa"
 2. post_2 (2번 팩트/꿀팁 답글): 
    - 1번 썰을 뒷받침하는 구체적인 실전 노하우 팩트 2~3줄 요약.
-   - 예시(KTRS 마켓): "1/ 졸업 시즌 대학가에 멀쩡한 침대, 책상 0원에 엄청 쏟아짐. 2/ 버리는 스티커비 아끼려고 무료 나눔하는 문화임."
-   - 예시(이지텍스): "1/ 조특법 30조 중소기업 근로자는 소득세 90% 감면임. 2/ 회사 눈치 볼 필요 없이 지난 5년 치도 소급해서 전액 돌려받음."
 3. post_3 (3번 링크 투척 답글): 
    - 친절하고 자연스럽게 "물어보는 사람들 있어서 남겨둠" 뉘앙스로 {landing_url} 링크 안내.
-   - 예시: "👉 어디서 보냐고 물어봐서 링크 남겨둠! 실시간 확인: {landing_url}"
 
 반드시 아래 JSON 형식으로만 엄격하게 출력해라 (한국어나 영어 설명 금지, 순수 JSON):
 {{
   "hook_title": "타래 전체 제목 ({lang_info['name']})",
   "post_type": "pure_story",
+  "topic_tag": "스레드 공식 주제 태그 1개 (예: {default_topic})",
   "posts": [
-    "1번 메인 썰 내용 (링크 금지, 해시태그 포함) ({lang_info['name']})",
+    "1번 메인 썰 내용 (링크 금지, 외국인 근로자 필수 해시태그 4~5개 포함) ({lang_info['name']})",
     "2번 핵심 팩트 및 꿀팁 요약 ({lang_info['name']})",
     "3번 링크 안내 답글 ({landing_url} 포함) ({lang_info['name']})"
   ]
@@ -109,18 +127,21 @@ class GeminiThreadsWriter:
 너는 세계 최고의 메타 스레드(Threads) 카드뉴스 바이럴 마케터야.
 카드뉴스 5장 이미지와 함께 스레드에 업로드할 [후킹 본문 + 0.1초 링크 답글] 2단 세트를 창작해라.
 
-[서비스]: {'KTRS 마켓 (0원 무료나눔)' if self.service_id == 'kmarket' else 'EasyTax (국세청 세무 환급)'}
+[서비스]: {service_title}
 [타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
 [주제]: {theme_name} ({target})
 [{'품목' if self.service_id == 'kmarket' else '환급액'}]: {item_or_refund}
 [랜딩 링크]: {landing_url}
 [시간대 분위기]: {slot_mood}
 
+{hashtag_guide}
+
 ### 📸 [카드뉴스 첨부형 작성 수칙]:
 1. post_1 (1번 메인 타래):
    - 카드뉴스 5장 사진을 함께 올릴 본문입니다.
    - 본문에 외부 링크를 넣으면 알고리즘이 노출을 90% 차단하므로, **본문에는 링크를 절대 넣지 마십시오!**
-   - 사진 속 내용을 궁금하게 만드는 강력한 후킹 문구 + "👇 링크는 첫 번째 답글 확인!" 안내 + 바이럴 해시태그 3~4개.
+   - 사진 속 내용을 궁금하게 만드는 강력한 후킹 문구 + "👇 링크는 첫 번째 답글 확인!" 안내.
+   - 본문 끝에 반드시 위 [필수 해시태그 규칙]의 외국인 근로자 타깃 해시태그 4~5개 포함!
 2. post_2 (2번 답글 타래):
    - 1번 글이 올라간 직후 봇이 달아줄 링크 댓글.
    - 친절하고 명확한 전환 문구 + {landing_url} 포함.
@@ -129,8 +150,9 @@ class GeminiThreadsWriter:
 {{
   "hook_title": "스레드 제목 ({lang_info['name']})",
   "post_type": "cardnews_attached",
+  "topic_tag": "스레드 공식 주제 태그 1개 (예: {default_topic})",
   "posts": [
-    "1번 메인 포스트 본문 (링크 금지, 카드뉴스 안내 및 해시태그 포함) ({lang_info['name']})",
+    "1번 메인 포스트 본문 (링크 금지, 카드뉴스 안내 및 외국인 근로자 필수 해시태그 4~5개 포함) ({lang_info['name']})",
     "2번 답글 타래 링크 댓글 ({landing_url} 포함) ({lang_info['name']})"
   ]
 }}
@@ -155,6 +177,7 @@ class GeminiThreadsWriter:
                 "lang": lang,
                 "time_slot": time_slot,
                 "post_type": parsed.get("post_type", "cardnews_attached" if time_slot != "afternoon" else "pure_story"),
+                "topic_tag": self._clean_text(parsed.get("topic_tag", default_topic)),
                 "hook_title": self._clean_text(parsed.get("hook_title", f"{self.service_id.upper()} Threads")),
                 "posts": posts,
                 "landing_url": landing_url
@@ -174,30 +197,32 @@ class GeminiThreadsWriter:
     ) -> Dict[str, Any]:
         """무중단 폴백 스레드 템플릿"""
         if self.service_id == "kmarket":
+            default_topic = "#0원나눔"
             if time_slot == "afternoon":
                 posts = [
-                    f"한국 원룸 이사할 때 가구 사지 마세요! 0원에 방 꾸민 썰 푼다 🧵👇 #{lang} #KTRSMarket #SeoulLife",
+                    f"한국 원룸 이사할 때 가구 사지 마세요! 0원에 방 꾸민 썰 푼다 🧵👇 #0원나눔 #E9비자 #외국인근로자 #한국생활 #KTRSMarket",
                     f"신촌/안암 대학가에서 졸업 선배들이 깨끗한 {item_or_refund}를 0원에 다 넘겨주고 갑니다. 17개 언어로 언어 장벽 없이 직거래 가능!",
                     f"👉 오늘 실시간 0원 나눔 매물 확인하기: {landing_url}"
                 ]
                 p_type = "pure_story"
             else:
                 posts = [
-                    f"신촌 대학가 자취방 필수 가구 0원 나눔 현장 포착! 📸 (사진 5장 확인)\n놓치면 후회할 0원 나눔, 링크는 아래 첫 댓글 확인! 🧵👇 #KTRSMarket #0won",
+                    f"신촌 대학가 자취방 필수 가구 0원 나눔 현장 포착! 📸 (사진 5장 확인)\n놓치면 후회할 0원 나눔, 링크는 아래 첫 댓글 확인! 🧵👇 #0원나눔 #외국인근로자 #E9비자 #KTRSMarket",
                     f"👉 지금 내 주변 0원 나눔 매물 바로 득템하기: {landing_url}"
                 ]
                 p_type = "cardnews_attached"
         else:
+            default_topic = "#E9비자"
             if time_slot == "afternoon":
                 posts = [
-                    f"한국에서 일하는 외국인 형들 주목! 세금 {item_or_refund} 돌려받은 실화 푼다 🧵👇 #VisaE9 #HoanThue #KoreaTax",
+                    f"한국에서 일하는 외국인 형들 주목! 세금 {item_or_refund} 돌려받은 실화 푼다 🧵👇 #E9비자 #외국인근로자 #세금환급 #소득세감면 #E9visa",
                     f"조특법 제30조로 5년간 소득세 90% 감면받을 수 있습니다. 회사에 눈치 볼 필요 없이 지난 5년 치도 소급 환급 가능!",
                     f"👉 내 환급금 1분 무료 조회하기: {landing_url}"
                 ]
                 p_type = "pure_story"
             else:
                 posts = [
-                    f"외국인 근로자 국세청 소득세 90% 감면 실화! 📸 (세무 카드뉴스 5장 확인)\n신청 안 하면 못 받는 환급금, 링크는 아래 첫 댓글 확인! 🧵👇 #EasyTax #KTRS",
+                    f"외국인 근로자 국세청 소득세 90% 감면 실화! 📸 (세무 카드뉴스 5장 확인)\n신청 안 하면 못 받는 환급금, 링크는 아래 첫 댓글 확인! 🧵👇 #E9비자 #외국인근로자 #세금환급 #소득세감면 #EasyTax",
                     f"👉 내 숨은 환급금 1분 무료 계산하기: {landing_url}"
                 ]
                 p_type = "cardnews_attached"
@@ -207,6 +232,7 @@ class GeminiThreadsWriter:
             "lang": lang,
             "time_slot": time_slot,
             "post_type": p_type,
+            "topic_tag": default_topic,
             "hook_title": f"{self.service_id.upper()} {theme_name}",
             "posts": posts,
             "landing_url": landing_url

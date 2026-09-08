@@ -15,7 +15,7 @@ import shutil
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_URLS
+from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_URLS, DESKTOP_CARDNEWS_EASYTAX
 from core.scenario_director_cardnews_easytax import ScenarioDirectorCardnewsEasyTax
 from core.local_gpu_media_generator_easytax import LocalGPUMediaGeneratorEasyTax
 from core.gemini_media_generator import GeminiMediaGenerator
@@ -34,7 +34,7 @@ class CardnewsEasyTax:
         self.service_id = "easytax"
         self.output_dir = OUTPUTS_DIR / "cardnews" / "easytax"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\이지텍스")
+        self.desktop_dir = DESKTOP_CARDNEWS_EASYTAX
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorCardnewsEasyTax()

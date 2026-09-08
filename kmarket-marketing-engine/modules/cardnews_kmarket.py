@@ -15,7 +15,7 @@ import shutil
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_URLS
+from config import OUTPUTS_DIR, DATA_DIR, LANGUAGES, BASE_URLS, DESKTOP_CARDNEWS_KMARKET
 from core.scenario_director_cardnews_kmarket import ScenarioDirectorCardnewsKMarket
 from core.local_gpu_media_generator_kmarket import LocalGPUMediaGeneratorKMarket
 from core.gemini_media_generator import GeminiMediaGenerator
@@ -35,7 +35,7 @@ class CardnewsKMarket:
         self.service_id = "kmarket"
         self.output_dir = OUTPUTS_DIR / "cardnews" / "kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\KTRS 마켓")
+        self.desktop_dir = DESKTOP_CARDNEWS_KMARKET
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorCardnewsKMarket()

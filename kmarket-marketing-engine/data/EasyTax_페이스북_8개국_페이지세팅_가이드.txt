@@ -1,0 +1,96 @@
+================================================================================
+📢 [EasyTax / KTRS 외국인 세금환급] 페이스북 8대 황금 국가 공식 비즈니스 페이지 완벽 세팅 가이드
+================================================================================
+※ 페이스북 개인 계정 1개 안에서
+   [페이지 만들기(https://www.facebook.com/pages/create)]를 통해 8개 국가 페이지를 모두 개설/관리할 수 있습니다.
+   (또는 기존 생성된 페이지의 [설정] 및 [프로필 수정]에서 아래 정보를 복사/붙여넣기 하시면 됩니다.)
+
+※ 아래 각 국가별 정보를 그대로 복사(Ctrl+C)하여 붙여넣기(Ctrl+V) 하시면 됩니다.
+※ 공통 카테고리: [금융 서비스 (Financial Service)] 또는 [세무 서비스 (Tax Preparation Service)]
+※ 공통 버튼: [자세히 알아보기 (Learn More / 웹사이트 방문)] 또는 [지금 신청하기 (Apply Now)]
+================================================================================
+
+[1. 🇲🇳 몽골 (Mongolia)]
+• 페이지 이름: EasyTax Mongolia - Солонгос Татварын Буцаан Олголт (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): БНСУ-д ажиллаж буй E-9 гэрээт ажилчид болон гадаад иргэдийн 90% орлогын албан татварын буцаан олголтын албан ёсны үйлчилгээ (EasyTax / KTRS). Хурдан, найдвартай!
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=mn
+• 버튼 설정: Дэлгэрэнгүй үзэх (Learn More) -> 웹사이트 연결
+
+--------------------------------------------------------------------------------
+
+[2. 🇻🇳 베트남 (Vietnam)]
+• 페이지 이름: EasyTax Vietnam - Hoàn Thuế Thu Nhập E-9 Hàn Quốc (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): Dịch vụ hỗ trợ hoàn thuế thu nhập 90% chính thức cho người lao động E-9, E-7 tại Hàn Quốc cùng EasyTax (KTRS). Uy tín, an toàn và nhận tiền nhanh chóng!
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=vi
+• 버튼 설정: Tìm hiểu thêm (Learn More) -> 웹사이트 연결
+
+--------------------------------------------------------------------------------
+
+[3. 🇺🇿 우즈베키스탄 (Uzbekistan)]
+• 페이지 이름: EasyTax Uzbekistan - Soliq Qaytarish Koreya E-9 (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): Janubiy Koreyadagi E-9 vatandoshlar uchun 90% daromad solig'ini qaytarish rasmiy xizmati (EasyTax / KTRS). Qonuniy, ishonchli va tezkor!
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=uz
+• 버튼 설정: Batafsil ma'lumot (Learn More) -> 웹사이트 연결
+
+--------------------------------------------------------------------------------
+
+[4. 🇰🇭 캄보디아 (Cambodia)]
+• 페이지 이름: EasyTax Cambodia - បង្វិលសងពន្ធកូរ៉េ E-9 (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): សេវាកម្មផ្លូវការបង្វិលសងពន្ធ 90% សម្រាប់ពលករ E-9 នៅកូរ៉េជាមួយ EasyTax (KTRS)។ ពិនិត្យប្រាក់ពន្ធដោយឥតគិតថ្លៃ សុវត្ថិភាព និងរហ័សបំផុត!
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=km
+• 버튼 설정: ស្វែងយល់បន្ថែម (Learn More) -> 웹사이트 연결
+
+--------------------------------------------------------------------------------
+
+[5. 🇳🇵 네팔 (Nepal)]
+• 페이지 이름: EasyTax Nepal - कोरिया कर फिर्ता E-9 (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): कोरियामा रहेका E-9 कामदारहरूका लागि आधिकारिक ९०% आयकर फिर्ता सेवा (EasyTax / KTRS)। सजिलै र सुरक्षित रूपमा आफ्नो कर फिर्ता प्राप्त गर्नुहोस्!
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=ne
+• 버튼 설정: थप जान्नुहोस् (Learn More) -> 웹사이트 연결
+
+--------------------------------------------------------------------------------
+
+[6. 🇹🇭 태국 (Thailand)]
+• 페이지 이름: EasyTax Thailand - ขอคืนภาษีเกาหลีใต้ E-9 (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): บริการทางการขอคืนภาษีเงินได้ 90% สำหรับแรงงานไทย E-9 ในเกาหลีใต้กับ EasyTax (KTRS) ตรวจสอบยอดเงินคืนฟรี รวดเร็ว ปลอดภัย และถูกกฎหมาย!
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=th
+• 버튼 설정: ดูข้อมูลเพิ่มเติม (Learn More) -> 웹사이트 연결
+
+--------------------------------------------------------------------------------
+
+[7. 🇮🇩 인도네시아 (Indonesia)]
+• 페이지 이름: EasyTax Indonesia - Pengembalian Pajak Korea E-9 (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): Layanan resmi pengembalian pajak 90% untuk pekerja Indonesia E-9 di Korea Selatan bersama EasyTax (KTRS). Cepat, mudah, dan terpercaya!
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=id
+• 버튼 설정: Pelajari Lebih Lanjut (Learn More) -> 웹사이트 연결
+
+--------------------------------------------------------------------------------
+
+[8. 🇲🇾 미얀마 (Myanmar)]
+• 페이지 이름: EasyTax Myanmar - ကိုရီးယား အခွန်ပြန်အမ်းငွေ E-9 (KTRS)
+• 카테고리: 금융 서비스 (Financial Service) 또는 세무 서비스
+• 소개 (Bio): ကိုရီးယားရောက် E-9 မြန်မာလုပ်သားများအတွက် တရားဝင် ဝင်ငွေခွန် ၉၀% ပြန်အမ်းငွေ ဝန်ဆောင်မှု (EasyTax / KTRS)။ စိတ်ချလက်ချ အခမဲ့ စစ်ဆေးလိုက်ပါ။
+• 웹사이트 URL: https://ktrs-service.vercel.app/?lang=my
+• 버튼 설정: ပိုမိုလေ့လာရန် (Learn More) -> 웹사이트 연결
+
+================================================================================
+💡 페이스북 페이지 등록 및 세팅 순서:
+1. 신규 페이지 개설 시:
+   - https://www.facebook.com/pages/create 접속
+   - 위 가이드의 [페이지 이름], [카테고리], [소개(Bio)] 복사 후 붙여넣고 [페이지 만들기] 클릭
+2. 기존 페이지 수정 시:
+   - 해당 페이지 접속 ➔ 메인 화면 [✏️ 수정] 클릭
+   - [소개(Bio)] 섹션 ➔ 위 가이드의 [소개 (Bio)] 복사 후 붙여넣기
+   - [정보 수정] ➔ [웹사이트]에 해당 국가 URL(?lang={코드}) 붙여넣기
+   - 페이지 이름 수정: 좌측 하단 [⚙️ 설정] ➔ [이름] 옆 '수정' ➔ 'EasyTax [국가명]...'으로 변경
+3. 작업 버튼(CTA) 추가:
+   - 메인 화면 점 3개(•••) ➔ [작업 버튼 수정] 또는 [작업 버튼 추가] 클릭
+   - [자세히 알아보기 (Learn More)] 또는 [신청하기 (Apply Now)] 선택 후 웹사이트 URL 입력
+================================================================================

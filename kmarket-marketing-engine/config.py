@@ -29,10 +29,35 @@ FONTS_DIR.mkdir(parents=True, exist_ok=True)
 
 (OUTPUTS_DIR / "shorts").mkdir(exist_ok=True)
 (OUTPUTS_DIR / "cardnews").mkdir(exist_ok=True)
+(OUTPUTS_DIR / "threads").mkdir(exist_ok=True)
 (OUTPUTS_DIR / "pdf_guides").mkdir(exist_ok=True)
 (OUTPUTS_DIR / "briefings").mkdir(exist_ok=True)
 (OUTPUTS_DIR / "logs").mkdir(exist_ok=True)
 (OUTPUTS_DIR / "seo_pages").mkdir(exist_ok=True)
+
+# 🖥️ 바탕화면 3대 산출물 공식 통합 표준 경로 (Single Source of Truth)
+DESKTOP_DIR = Path(os.environ.get("USERPROFILE", r"C:\Users\zkfnt")) / "Desktop"
+
+DESKTOP_CARDNEWS_DIR = DESKTOP_DIR / "카드뉴스_산출물"
+DESKTOP_SHORTS_DIR = DESKTOP_DIR / "숏폼_산출물"
+DESKTOP_THREADS_DIR = DESKTOP_DIR / "스레드_산출물"
+
+DESKTOP_CARDNEWS_KMARKET = DESKTOP_CARDNEWS_DIR / "KTRS마켓"
+DESKTOP_CARDNEWS_EASYTAX = DESKTOP_CARDNEWS_DIR / "이지텍스"
+
+DESKTOP_SHORTS_KMARKET = DESKTOP_SHORTS_DIR / "KTRS마켓"
+DESKTOP_SHORTS_EASYTAX = DESKTOP_SHORTS_DIR / "이지텍스"
+
+DESKTOP_THREADS_KMARKET = DESKTOP_THREADS_DIR / "KTRS마켓"
+DESKTOP_THREADS_EASYTAX = DESKTOP_THREADS_DIR / "이지텍스"
+
+for d in [
+    DESKTOP_CARDNEWS_DIR, DESKTOP_SHORTS_DIR, DESKTOP_THREADS_DIR,
+    DESKTOP_CARDNEWS_KMARKET, DESKTOP_CARDNEWS_EASYTAX,
+    DESKTOP_SHORTS_KMARKET, DESKTOP_SHORTS_EASYTAX,
+    DESKTOP_THREADS_KMARKET, DESKTOP_THREADS_EASYTAX
+]:
+    d.mkdir(parents=True, exist_ok=True)
 
 # Load environment variables
 load_dotenv(BASE_DIR / ".env")
