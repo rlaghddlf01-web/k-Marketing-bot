@@ -137,7 +137,7 @@ Write your comment now:"""
     def _contains_brand(self, text: str) -> bool:
         """텍스트에 금지 브랜드명이 포함되어 있는지 확인"""
         banned_terms = [
-            "k-market", "kmarket", "케이마켓", "k market",
+            "ktrs market", "ktrs 마켓", "k-market", "kmarket", "케이마켓", "k market",
             "easytax", "이지텍스", "easy tax", "easy-tax",
             "ktrs", "k-trs",
         ]

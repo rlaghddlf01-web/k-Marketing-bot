@@ -6,7 +6,7 @@ KMarketIframeComposer - 📱 [첫 0.00초부터 매물 즉시 노출 + 무여백
 - 20초 동안 부드러운 스무스 스크롤 다운
 - ffmpeg를 통해 1080x1920 H.264 고화질 숏폼 표준 규격으로 100% 꽉 차게 렌더링
 - 17개국 원어민 TTS 음성 + 경쾌한 BGM 결합
-- 바탕화면 '숏폼_산출물_케이마켓' 폴더 실시간 자동 저장
+- 바탕화면 '숏폼_산출물_KTRS마켓' 폴더 실시간 자동 저장
 """
 
 import os
@@ -29,7 +29,7 @@ class KMarketIframeComposer:
     def __init__(self):
         self.output_dir = OUTPUTS_DIR / "shorts_kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\케이마켓")
+        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\KTRS마켓")
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
         self.bgm_manager = BGMManager()
         try:
@@ -92,7 +92,7 @@ class KMarketIframeComposer:
                 time.sleep(0.5)
                 t_loaded = time.time()
                 load_duration = max(1.0, t_loaded - t_start)
-                logger.info(f"[{lang.upper()}] 📱 케이마켓 매물 렌더링 완료 감지 (로딩 소요: {load_duration:.2f}초)")
+                logger.info(f"[{lang.upper()}] 📱 KTRS 마켓 매물 렌더링 완료 감지 (로딩 소요: {load_duration:.2f}초)")
 
                 # 🎯 2. 매물이 완전히 뜬 상태에서 정확히 20.5초 동안 부드럽게 스크롤
                 scroll_steps = int((duration_sec + 0.5) * 8.0)

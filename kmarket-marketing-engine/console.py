@@ -30,7 +30,7 @@ def run_cli():
         console.clear()
         console.print(Panel.fit(
             "[bold cyan]🛸 Universal Expat Growth Engine (Dual Autonomous Micro-Bots)[/bold cyan]\n"
-            "[bold green]🛒 K-Market 100% 라이프 봇[/bold green]  &  [bold yellow]💰 EasyTax 100% 세무환급 봇[/bold yellow]",
+            "[bold green]🛒 KTRS 마켓 100% 라이프 봇[/bold green]  &  [bold yellow]💰 EasyTax 100% 세무환급 봇[/bold yellow]",
             border_style="cyan"
         ))
 
@@ -39,9 +39,9 @@ def run_cli():
         table.add_column("브랜드 및 작업", style="bold")
         table.add_column("설명", style="cyan")
 
-        table.add_row("1", "🛒 K-Market 봇 사이클 즉시 실행", "270개 실물 매물 숏폼, 4장 카드뉴스, 가구 레딧, 0원 나눔 브리핑")
+        table.add_row("1", "🛒 KTRS 마켓 봇 사이클 즉시 실행", "270개 실물 매물 숏폼, 4장 카드뉴스, 가구 레딧, 0원 나눔 브리핑")
         table.add_row("2", "💰 EasyTax 봇 사이클 즉시 실행", "E-9 90%감면 숏폼, Anti-Ban 세무 카드뉴스, 조특법 레딧, 세무 브리핑")
-        table.add_row("3", "🛒 K-Market 구글 SEO 1,105개 색인 핑", "전국 65개 캠퍼스/공단 URL 및 사이트맵 빌드")
+        table.add_row("3", "🛒 KTRS 마켓 구글 SEO 1,105개 색인 핑", "전국 65개 캠퍼스/공단 URL 및 사이트맵 빌드")
         table.add_row("4", "💰 EasyTax 구글 SEO 1,105개 색인 핑", "전국 65개 공단/비자 세무 URL 및 사이트맵 빌드")
         table.add_row("q", "종료", "CLI 콘솔 종료")
 
@@ -49,7 +49,7 @@ def run_cli():
         choice = Prompt.ask("\n실행할 메뉴 번호를 입력하세요", choices=["1", "2", "3", "4", "q"], default="1")
 
         if choice == "1":
-            console.print("\n[bold green]🛒 K-Market 봇 사이클 가동 중...[/bold green]")
+            console.print("\n[bold green]🛒 KTRS 마켓 봇 사이클 가동 중...[/bold green]")
             res = kmarket_bot.run_kmarket_cycle()
             console.print(f"[bold green]결과:[/bold green] {res}")
             Prompt.ask("\n계속하려면 Enter를 누르세요")

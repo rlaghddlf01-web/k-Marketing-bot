@@ -104,7 +104,7 @@ class TelegramConnector:
                     "success": True,
                     "platform": "kmarket_briefing",
                     "brand": "kmarket",
-                    "message": f"🛒 [K-Market 텔레그램] 5개 언어 토픽 0원 나눔 브리핑 실시간 발송 완료! ({res.get('sent_count', 5)}건 발송, https://t.me/kmarket_official)",
+                    "message": f"🛒 [KTRS 마켓 텔레그램] 5개 언어 토픽 0원 나눔 브리핑 실시간 발송 완료! ({res.get('sent_count', 5)}건 발송, https://t.me/kmarket_official)",
                     "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
                 }
             else:

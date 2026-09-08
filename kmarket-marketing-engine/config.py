@@ -95,13 +95,13 @@ LANGUAGES = {
         "name": "Japanese",
         "native_name": "日本語",
         "voice": "ja-JP-NanamiNeural",
-        "target": "교환학생 및 국내 거주 일본인 (케이마켓 전용)"
+        "target": "교환학생 및 국내 거주 일본인 (KTRS 마켓 전용)"
     },
     "ru": {
         "name": "Russian",
         "native_name": "Русский",
         "voice": "ru-RU-SvetlanaNeural",
-        "target": "중앙아시아 고려인 및 러시아어권 체류자 (케이마켓 전용)"
+        "target": "중앙아시아 고려인 및 러시아어권 체류자 (KTRS 마켓 전용)"
     },
     "th": {
         "name": "Thai",

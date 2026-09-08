@@ -48,8 +48,8 @@ def run_once(producer: GoldenBatchProducer, brand: str, slot_name: str = "manual
         print(r"  - 숏폼: C:\Users\zkfnt\Desktop\숏폼_산출물\이지텍스")
         print(r"  - 카드뉴스: C:\Users\zkfnt\Desktop\카드뉴스_산출물\이지텍스")
     else:
-        print(r"  - 숏폼: C:\Users\zkfnt\Desktop\숏폼_산출물\케이마켓")
-        print(r"  - 카드뉴스: C:\Users\zkfnt\Desktop\카드뉴스_산출물\케이마켓")
+        print(r"  - 숏폼: C:\Users\zkfnt\Desktop\숏폼_산출물\KTRS마켓")
+        print(r"  - 카드뉴스: C:\Users\zkfnt\Desktop\카드뉴스_산출물\KTRS마켓")
     print("=" * 62 + "\n")
 
 def run_daemon(producer: GoldenBatchProducer, brand: str):

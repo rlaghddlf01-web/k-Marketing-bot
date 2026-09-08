@@ -4,7 +4,7 @@ CardnewsKMarket - 🛒 [K-Market 전담 5장 7:3 황금 분할 0원 나눔 카�
 - 상단 70% (1080x945): LocalGPUMediaGeneratorKMarket (구글 무료 GPU RealVisXL V4.0)
 - 하단 30% (1080x405): CardnewsComposerKMarket (다크차콜 & 네온오렌지 룩앤필)
 - 1~5장 전체 동일 인물 시드 고정 관리
-- 바탕화면 '카드뉴스_산출물/케이마켓' 자동 저장
+- 바탕화면 '카드뉴스_산출물/KTRS 마켓' 자동 저장
 """
 
 import os
@@ -35,7 +35,7 @@ class CardnewsKMarket:
         self.service_id = "kmarket"
         self.output_dir = OUTPUTS_DIR / "cardnews" / "kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\케이마켓")
+        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\KTRS 마켓")
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorCardnewsKMarket()

@@ -147,7 +147,7 @@ class AutopilotDaemon:
             except Exception as e:
                 logger.error(f"블로그 정기 발행 실패: {e}")
 
-        # 4. 하루 2대 골든 슬롯 (아침 11:30 & 저녁 18:30) 8개국 대량 생산 (이지텍스 8+8 / 케이마켓 8+8)
+        # 4. 하루 2대 골든 슬롯 (아침 11:30 & 저녁 18:30) 8개국 대량 생산 (이지텍스 8+8 / KTRS 마켓 8+8)
         # 매 슬롯마다 8개국 숏폼 + 8개국 카드뉴스 완전 무인 렌더링 (일 총 32숏폼 + 32카드뉴스)
         is_morning_slot = (current_hour == 11 and current_minute >= 30) or (current_hour == 12 and current_minute < 30)
         is_evening_slot = (current_hour == 18 and current_minute >= 30) or (current_hour == 19 and current_minute < 30)
@@ -160,7 +160,7 @@ class AutopilotDaemon:
 
         if slot_to_run:
             try:
-                target_str = "이지텍스" if self.target_brand == "easytax" else "케이마켓" if self.target_brand == "kmarket" else "듀얼 브랜드"
+                target_str = "이지텍스" if self.target_brand == "easytax" else "KTRS 마켓" if self.target_brand == "kmarket" else "듀얼 브랜드"
                 logger.info(f"🌟 [{slot_to_run.upper()} 골든 슬롯: {target_str}] 8대 황금 타깃 대량 생산 배치 시작...")
                 slot_res = self.golden_batch_producer.execute_slot(slot_name=slot_to_run, brand=self.target_brand)
                 self.golden_slots_done.add(f"{today_str}_{slot_to_run}")

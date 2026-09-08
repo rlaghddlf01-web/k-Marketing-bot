@@ -239,7 +239,7 @@ class KMarketPhoneMockupRenderer:
         # 앱 헤더 바
         header_y = sy1 + 45
         draw.rectangle([(sx1, header_y), (sx2, header_y + 55)], fill=(255, 255, 255))
-        title_text = "K-MARKET" if lang != "ko" else "케이마켓 (K-MARKET)"
+        title_text = "KTRS MARKET" if lang != "ko" else "KTRS 마켓 (KTRS MARKET)"
         draw.text((sx1 + 18, header_y + 14), title_text, font=font_bold, fill=(24, 24, 27))
 
         content_y = header_y + 65

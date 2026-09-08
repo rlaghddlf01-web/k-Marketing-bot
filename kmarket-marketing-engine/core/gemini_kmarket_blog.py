@@ -1,5 +1,5 @@
 """
-KMarketGeminiBlog - 🛒 K-Market 17개국어 공식 블로그 2,000자 실전 마스터 칼럼 생성 전담 AI 엔진
+KMarketGeminiBlog - 🛒 KTRS Market 17개국어 공식 블로그 2,000자 실전 마스터 칼럼 생성 전담 AI 엔진
 - 시나리오 디렉터의 안전장치 & 테마 지시 수령
 - 100% 동양인/한국 로컬 실사 사진 2장 본문 자연스러운 배치 (상단 1장 + 본문 중간 1장)
 - 한국어 마스터 1회 생성 ➔ BlogTranslator 다국어 초고속 전개 연동
@@ -15,7 +15,7 @@ from core.supabase_manager import SupabaseManager
 logger = logging.getLogger("KMarketGeminiBlog")
 
 class KMarketGeminiBlog:
-    """K-Market 전용 2,000자 실전 라이프스타일 마스터 블로그 집필기"""
+    """KTRS Market 전용 2,000자 실전 라이프스타일 마스터 블로그 집필기"""
     def __init__(self, supabase_mgr: Optional[SupabaseManager] = None):
         self.supabase_mgr = supabase_mgr or SupabaseManager()
         self.client = None
@@ -27,9 +27,9 @@ class KMarketGeminiBlog:
             try:
                 from google import genai
                 self.client = genai.Client(api_key=api_key)
-                logger.info("K-Market 블로그 전용 Gemini Client 초기화 완료")
+                logger.info("KTRS Market 블로그 전용 Gemini Client 초기화 완료")
             except Exception as e:
-                logger.warning(f"K-Market 블로그 Gemini 초기화 실패: {e}")
+                logger.warning(f"KTRS Market 블로그 Gemini 초기화 실패: {e}")
                 self.client = None
 
     def write_master_korean_article(self, directive_pkg: Dict[str, Any], landing_url: str = "", hashtags: str = "", thumb_url: str = "", thumb_url_1: str = "", thumb_url_2: str = "") -> Dict[str, str]:
@@ -45,7 +45,7 @@ class KMarketGeminiBlog:
         fallback_visual = d.get("visual_prompt", "Asian student smiling in cozy neat Korean studio apartment with arranged furniture")
 
         prompt = f"""
-당신은 대한민국 거주 250만 외국인의 필수 라이프 플랫폼 'K-Market'의 수석 에디터입니다.
+당신은 대한민국 거주 250만 외국인의 필수 라이프 플랫폼 'KTRS Market'의 수석 에디터입니다.
 외국인 유학생, 근로자, 다문화 가정이 읽고 낯선 한국 생활에 큰 용기와 실질적인 절약 도움을 얻을 수 있도록,
 워드프레스 최고급 칼럼 수준의 유려하고 전문적인 2,000자 한국어 마스터 칼럼을 집필해 주십시오.
 
@@ -63,7 +63,7 @@ class KMarketGeminiBlog:
 2. 본문 상단 대표 사진 (단 1장): `![{topic_title}]({img_url})`
 3. 서론: 신학기 원룸 이사, 가구 장만 비용 부담과 외국인이 겪는 정착 현실
 4. 본론 1: 원룸 이사 & 정착 비용 100만 원 아끼는 핵심 노하우 (대형폐기물 스티커 0원화, 분리배출 과태료 예방)
-5. 본론 2: 신품 구매 vs K-Market 알뜰 직거래 비용 비교표 (매트리스, 전자레인지, 책상, 밥솥 등)
+5. 본론 2: 신품 구매 vs KTRS Market 알뜰 직거래 비용 비교표 (매트리스, 전자레인지, 책상, 밥솥 등)
 6. 본론 3: 외국인을 위한 100% 안전 직거래 3대 수칙 (ARC 인증, 지하철역 대면 거래, 17개국 자동번역 채팅)
 7. 하단 CTA 버튼: `👉 [지금 바로 내 주변 0원 나눔 및 알뜰 매물 확인하기 ({landing_url})]({landing_url})`
 8. 최하단 실시간 바이럴 해시태그
@@ -107,7 +107,7 @@ class KMarketGeminiBlog:
                     "content_html": content_html
                 }
             except Exception as e:
-                logger.warning(f"K-Market Gemini 한국어 마스터 글 생성 에러 (폴백 가동): {e}")
+                logger.warning(f"KTRS Market Gemini 한국어 마스터 글 생성 에러 (폴백 가동): {e}")
 
         # Fallback: 본문 상단 대표 사진 1장 배치
         fallback_dict = self._generate_fallback_master_article(topic_title, key_facts, landing_url, hashtags, img_url)
@@ -115,21 +115,21 @@ class KMarketGeminiBlog:
         return fallback_dict
 
     def _generate_fallback_master_article(self, topic_title: str, key_facts: str, url: str, hashtags: str, thumb_url: str = "", *args) -> Dict[str, str]:
-        """본문 상단 대표 사진 1장 기반 2,000자 최고 품질 K-Market 마스터 칼럼"""
+        """본문 상단 대표 사진 1장 기반 2,000자 최고 품질 KTRS Market 마스터 칼럼"""
         title = f"2026 외국인 한국 생활 꿀팁 가이드: {topic_title}"
         excerpt = f"신학기 원룸 이사부터 대형폐기물 스티커 0원 절약, 분리배출 과태료 예방, 17개국 안심 직거래까지 실전 한국 생활 완벽 마스터."
         md = f"""# {title}
 
-<img src="{thumb_url_1}" alt="K-Market 외국인 생활 꿀팁" style="width:100%;max-width:850px;height:auto;display:block;margin:20px auto;border-radius:12px;">
+<img src="{thumb_url_1}" alt="KTRS Market 외국인 생활 꿀팁" style="width:100%;max-width:850px;height:auto;display:block;margin:20px auto;border-radius:12px;">
 
 한국에 처음 정착하는 유학생, 외국인 근로자, 교환학생 여러분! 원룸 이사, 가구·가전 마련, 분리배출 규정 때문에 큰돈을 쓰거나 당황하셨던 경험이 있으신가요?
 
-K-Market은 전국 270개 이상의 실제 매물과 **0원 무료나눔**, **17개국 실시간 자동번역 채팅**을 통해 외국인이 한국에서 매년 100만 원 이상의 생활비를 아낄 수 있도록 돕고 있습니다.
+KTRS Market은 전국 270개 이상의 실제 매물과 **0원 무료나눔**, **17개국 실시간 자동번역 채팅**을 통해 외국인이 한국에서 매년 100만 원 이상의 생활비를 아낄 수 있도록 돕고 있습니다.
 
 ---
 
 ## 1. 원룸 이사 & 정착 비용 100만 원 아끼는 핵심 노하우
-- **대형폐기물 스티커 비용 0원화**: 졸업이나 이사로 방을 뺄 때 매트리스, 책상, 서랍장을 버리려면 구청 스티커 비용만 10~20만 원이 듭니다. K-Market 0원 나눔에 올리면 1시간 만에 이웃이 직접 수거해 갑니다.
+- **대형폐기물 스티커 비용 0원화**: 졸업이나 이사로 방을 뺄 때 매트리스, 책상, 서랍장을 버리려면 구청 스티커 비용만 10~20만 원이 듭니다. KTRS Market 0원 나눔에 올리면 1시간 만에 이웃이 직접 수거해 갑니다.
 - **종량제 봉투 & 음식물 쓰레기 과태료(10만 원) 완벽 예방**: 일반 쓰레기봉투에 음식물을 섞어 배출하면 무거운 과태료가 부과됩니다. 지정된 요일과 배출 장소를 꼭 확인하세요.
 - **전입신고와 확정일자**: 소중한 원룸 보증금을 지키기 위해 이사 후 14일 이내 관할 주민센터에서 전입신고를 마치고 확정일자를 받아야 합니다.
 
@@ -137,9 +137,9 @@ K-Market은 전국 270개 이상의 실제 매물과 **0원 무료나눔**, **17
 
 ---
 
-## 2. 신품 구매 vs K-Market 알뜰 직거래 비용 비교표
+## 2. 신품 구매 vs KTRS Market 알뜰 직거래 비용 비교표
 
-| 생활 필수 품목 | 일반 매장 신품 가격 | K-Market 중고 / 0원 나눔 가격 | 절약할 수 있는 금액 |
+| 생활 필수 품목 | 일반 매장 신품 가격 | KTRS Market 중고 / 0원 나눔 가격 | 절약할 수 있는 금액 |
 | :--- | :--- | :--- | :--- |
 | **원룸 침대 매트리스 + 프레임** | 250,000 ~ 400,000원 | **0원 (무료 나눔)** | **약 300,000원 절약** |
 | **자취용 미니 전자레인지** | 80,000 ~ 120,000원 | **10,000 ~ 20,000원** | **약 80,000원 절약** |
@@ -156,8 +156,8 @@ K-Market은 전국 270개 이상의 실제 매물과 **0원 무료나눔**, **17
 
 ---
 
-## 4. 지금 바로 K-Market에서 0원 매물 둘러보기
-🛒 **K-Market 외국인 특화 서비스:**
+## 4. 지금 바로 KTRS Market에서 0원 매물 둘러보기
+🛒 **KTRS Market 외국인 특화 서비스:**
 - 17개 언어 실시간 양방향 자동번역
 - 매일 쏟아지는 0원 무료나눔 매물
 - 전국 대학가 & 공단 로컬 GPS 기반 거래

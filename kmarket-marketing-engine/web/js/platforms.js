@@ -9,7 +9,7 @@ async function loadPlatforms(btn) {
     const headerDesc = document.getElementById("platforms-header-desc");
     if (!container) return;
 
-    const brandName = currentBrand === "kmarket" ? "K-Market" : "EasyTax";
+    const brandName = currentBrand === "kmarket" ? "KTRS 마켓" : "EasyTax";
     if (headerTitle) {
         headerTitle.innerText = `🚀 ${brandName} 8대 AI 마케팅 허브 실제 발행 내역 & 실시간 라이브 뷰어`;
     }

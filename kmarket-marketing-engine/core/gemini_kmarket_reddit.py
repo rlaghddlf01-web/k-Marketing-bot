@@ -1,5 +1,5 @@
 """
-KMarketGeminiReddit - 🛒 K-Market 레딧 질문 의도분류 & 3단계 간접 홍보 답변 전담 AI 엔진
+KMarketGeminiReddit - 🛒 KTRS Market 레딧 질문 의도분류 & 3단계 간접 홍보 답변 전담 AI 엔진
 - Level 1 (순수 도움, 40%): 브랜드 언급 0%, 100% 팩트
 - Level 2 (간접 유도, 40%): "내가 쓰는 앱이 있는데" 식 간접 표현
 - Level 3 (브랜드 멘션, 20%): 프로필 체크 유도
@@ -18,7 +18,7 @@ logger = logging.getLogger("KMarketGeminiReddit")
 # 80:20 황금 비율 (구글 검색 유도 80% vs 순수 정보 20%)
 _PROMO_LEVELS = {
     1: 0.20,  # 순수 도움 (브랜드 0%, URL 0개)
-    2: 0.80,  # 자연스러운 구글 'k-market korea' / '케이마켓' 검색 유도 (노링크)
+    2: 0.80,  # 자연스러운 구글 'KTRS Market' / 'KTRS 마켓' 검색 유도 (노링크)
 }
 
 
@@ -28,7 +28,7 @@ def _choose_promo_level() -> int:
 
 
 class KMarketGeminiReddit:
-    """K-Market 전용 레딧 50:50 생활 정보 및 구글 검색 유도 답변기"""
+    """KTRS Market 전용 레딧 50:50 생활 정보 및 구글 검색 유도 답변기"""
     def __init__(self, supabase_mgr: Optional[SupabaseManager] = None):
         self.supabase_mgr = supabase_mgr or SupabaseManager()
         self.client = None
@@ -69,10 +69,10 @@ class KMarketGeminiReddit:
             if k:
                 try:
                     self.client = genai.Client(api_key=k)
-                    logger.info("K-Market 레딧 전용 Gemini Client 초기화 성공")
+                    logger.info("KTRS Market 레딧 전용 Gemini Client 초기화 성공")
                     return
                 except Exception as e:
-                    logger.warning(f"K-Market 레딧 Gemini 초기화 시도 실패: {e}")
+                    logger.warning(f"KTRS Market 레딧 Gemini 초기화 시도 실패: {e}")
         self.client = None
 
 
@@ -96,7 +96,7 @@ class KMarketGeminiReddit:
         return {"category": "general_living", "score": 75, "is_relevant": False}
 
     def generate_reddit_response(self, post_title: str, post_body: str, target_lang: str = "en", landing_url: str = "") -> str:
-        """K-Market 전용 50:50 생활 정보 & 구글 검색 유도 답변 생성"""
+        """KTRS Market 전용 50:50 생활 정보 & 구글 검색 유도 답변 생성"""
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["en"])
         promo_level = _choose_promo_level()
 
@@ -158,10 +158,10 @@ class KMarketGeminiReddit:
                     )
                     if response and response.text:
                         result = self._eradicate_urls(response.text.strip())
-                        logger.info(f"🎯 [K-Market Reddit AI] Level {promo_level} 답변 생성 완료 ({model_name})")
+                        logger.info(f"🎯 [KTRS Market Reddit AI] Level {promo_level} 답변 생성 완료 ({model_name})")
                         return result
                 except Exception as e:
-                    logger.debug(f"K-Market Gemini 모델 {model_name} 실패, 다음 시도: {e}")
+                    logger.debug(f"KTRS Market Gemini 모델 {model_name} 실패, 다음 시도: {e}")
                     continue
 
 

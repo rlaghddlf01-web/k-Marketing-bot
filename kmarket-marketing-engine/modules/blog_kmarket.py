@@ -1,5 +1,5 @@
 """
-KMarketBlogPublisher - 🛒 K-Market 17개국어 공식 서브경로 블로그 무인 자동 퍼블리셔
+KMarketBlogPublisher - 🛒 KTRS 마켓 17개국어 공식 서브경로 블로그 무인 자동 퍼블리셔
 - 🎬 시나리오 디렉터: 40대 실전 라이프 테마 지시 & 100% 동양인/가구 안전장치
 - 🤖 제미나이 1회 집필: 한국어 2,000자 최고급 마스터 글 + 사물/인물 실사 사진 2장 배치
 - ⚡ Gemini 1회 호출로 17개국어 동시 번역 (기존 17번 → 1번, 비용 90% 절감!)
@@ -154,7 +154,7 @@ class KMarketBlogPublisher:
                 "content_md": c_md,
                 "thumbnail_url": final_thumb,
                 "category": category,
-                "author": "K-Market Expat Living Team",
+                "author": "KTRS Market Expat Living Team",
                 "views": initial_views,
                 "likes": initial_likes,
                 "score": initial_score,

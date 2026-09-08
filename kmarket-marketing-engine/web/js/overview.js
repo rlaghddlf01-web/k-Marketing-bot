@@ -79,7 +79,7 @@ function renderHubGrid() {
     if (!container) return;
 
     if (currentBrand === "kmarket") {
-        if (panelTitle) panelTitle.innerText = "🎯 K-Market 7대 AI 마케팅 허브 & 24시간 무인 자율 공장";
+        if (panelTitle) panelTitle.innerText = "🎯 KTRS 마켓 7대 AI 마케팅 허브 & 24시간 무인 자율 공장";
         if (panelDesc) panelDesc.innerText = "270개 실물 매물 0원 나눔 숏폼, 카드뉴스, 레딧 1:1, 50만 페북 그룹, 블로그, 구글 색인 핑, 스레드를 24시간 자율 가동합니다. (텔레그램은 상단 전용 사령부에서 통합 관제)";
 
         const hubs = [
@@ -385,10 +385,10 @@ async function startKMarketDaemon() {
     try {
         const res = await fetch("/api/kmarket/start", { method: "POST" });
         const data = await res.json();
-        showToast(data.message || "K-Market 무인 성장봇 사이클이 가동되었습니다! 🚀", "success");
+        showToast(data.message || "KTRS 마켓 무인 성장봇 사이클이 가동되었습니다! 🚀", "success");
         fetchStatus();
     } catch (e) {
-        showToast("K-Market 가동 통신 오류", "error");
+        showToast("KTRS 마켓 가동 통신 오류", "error");
     }
 }
 
@@ -396,12 +396,12 @@ async function stopKMarketDaemon() {
     try {
         const res = await fetch("/api/kmarket/stop", { method: "POST" });
         const data = await res.json();
-        showToast(data.message || "K-Market 봇이 정지되었습니다.", "info");
+        showToast(data.message || "KTRS 마켓 봇이 정지되었습니다.", "info");
         fetchStatus();
         if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();
         renderHubGrid();
     } catch (e) {
-        showToast("K-Market 정지 통신 오류", "error");
+        showToast("KTRS 마켓 정지 통신 오류", "error");
     }
 }
 
@@ -432,7 +432,7 @@ async function stopEasyTaxDaemon() {
 }
 
 async function startAllBots() {
-    showToast("⚡ K-Market & EasyTax 전체 봇을 동시 가동합니다! 🚀", "success");
+    showToast("⚡ KTRS 마켓 & EasyTax 전체 봇을 동시 가동합니다! 🚀", "success");
     await startKMarketDaemon();
     await startEasyTaxDaemon();
     if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();
@@ -457,12 +457,12 @@ async function fetchStatus() {
         isKMarketRunning = data.kmarket_running;
         isEasyTaxRunning = data.easytax_running;
 
-        // K-Market 사이드바 상태
+        // KTRS 마켓 사이드바 상태
         const kmIndicator = document.getElementById("km-daemon-indicator");
         const kmStatusText = document.getElementById("km-daemon-status-text");
         const kmSub = document.getElementById("km-daemon-sub");
         if (kmStatusText) {
-            kmStatusText.innerText = isKMarketRunning ? "🛒 K-Market 가동 중 🟢" : "🛒 K-Market 대기 ⚪";
+            kmStatusText.innerText = isKMarketRunning ? "🛒 KTRS 마켓 가동 중 🟢" : "🛒 KTRS 마켓 대기 ⚪";
             kmStatusText.style.color = isKMarketRunning ? "#34D399" : "#94A3B8";
         }
         if (kmSub) {
@@ -499,10 +499,10 @@ async function fetchStatus() {
                 document.getElementById("stat-top-score").innerText = `${data.kmarket_top_score || 0} 점`;
             }
             if (document.getElementById("stat-seo-count")) {
-                document.getElementById("stat-seo-count").innerText = `1,105 개 (K-Market)`;
+                document.getElementById("stat-seo-count").innerText = `1,105 개 (KTRS 마켓)`;
             }
             if (document.getElementById("google-index-count")) {
-                document.getElementById("google-index-count").innerText = `1,105개 K-Market 대학/공단 URL`;
+                document.getElementById("google-index-count").innerText = `1,105개 KTRS 마켓 대학/공단 URL`;
             }
         } else {
             if (document.getElementById("stat-total-count")) {
@@ -559,7 +559,7 @@ async function runModule(moduleName) {
 // 8. 구글 실시간 색인 핑
 async function triggerGoogleIndex() {
     const endpoint = currentBrand === "easytax" ? "/api/easytax/google-index" : "/api/kmarket/google-index";
-    const brandName = currentBrand === "easytax" ? "EasyTax" : "K-Market";
+    const brandName = currentBrand === "easytax" ? "EasyTax" : "KTRS 마켓";
     appendLog(`[Google Indexing] Googlebot에게 ${brandName} 6,630개 URL 색인 핑 전송 중...`, "info");
     showToast(`구글 봇에게 [${brandName}] 실시간 색인 핑을 전송합니다...`);
 
@@ -603,7 +603,7 @@ let lastGoldenBatchSummary = null;
 
 async function triggerGoldenBatchRun(contentType = 'all', btnElement = null) {
     const brand = currentBrand || 'kmarket';
-    const brandName = brand === 'easytax' ? 'EasyTax (세무)' : 'K-Market (쇼핑)';
+    const brandName = brand === 'easytax' ? 'EasyTax (세무)' : 'KTRS 마켓 (쇼핑)';
     const typeLabel = contentType === 'shorts' ? '숏폼 8편' : contentType === 'cardnews' ? '5장 카드뉴스 8세트' : '숏폼 8편 + 카드뉴스 8세트 (총 16건)';
     
     appendLog(`[Action] 🌟 [${brandName}] 8대 황금 타깃 국가 ${typeLabel} 일괄 즉시 생산 가동...`, "info");
@@ -648,7 +648,7 @@ async function triggerGoldenBatchRun(contentType = 'all', btnElement = null) {
 
 async function startGoldenBatchDaemon() {
     const brand = currentBrand || 'kmarket';
-    const brandName = brand === 'easytax' ? 'EasyTax (세무)' : 'K-Market (쇼핑)';
+    const brandName = brand === 'easytax' ? 'EasyTax (세무)' : 'KTRS 마켓 (쇼핑)';
     appendLog(`[Daemon] ⏰ [${brandName}] 8대 황금 타깃 24시간 무인 데몬 시작 요청 (11:30 & 18:30)...`, "info");
     showToast(`⏰ [${brandName}] 24시간 무인 예약 데몬이 가동됩니다!`, "success");
 
@@ -671,7 +671,7 @@ async function startGoldenBatchDaemon() {
 
 async function stopGoldenBatchDaemon() {
     const brand = currentBrand || 'kmarket';
-    const brandName = brand === 'easytax' ? 'EasyTax (세무)' : 'K-Market (쇼핑)';
+    const brandName = brand === 'easytax' ? 'EasyTax (세무)' : 'KTRS 마켓 (쇼핑)';
     appendLog(`[Daemon] ⏹️ [${brandName}] 8대 황금 타깃 무인 데몬 정지 요청...`, "info");
     showToast(`⏹️ [${brandName}] 무인 데몬이 정지되었습니다.`, "info");
 

@@ -169,7 +169,7 @@ class GeminiCardnewsCopywriter:
         theme: Dict[str, Any],
         persona: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """K-Market 5단계 감동 카드뉴스 카피라이팅 (100% 타깃 현지어 직작문)"""
+        """KTRS 마켓 5단계 감동 카드뉴스 카피라이팅 (100% 타깃 현지어 직작문)"""
         lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
         theme_name = theme.get("name", "0원 나눔")
         target = theme.get("target", "대학가/원룸")
@@ -183,7 +183,7 @@ class GeminiCardnewsCopywriter:
 네 카피는 인스타그램, 페이스북, 레딧에서 첫 1초 만에 독자의 시선을 멈추고 앱 다운로드로 이끌지.
 
 ### 미션:
-한국에 거주하는 외국인 유학생 및 근로자({target})를 위해, K-Market 0원 무료 나눔 5장 카드뉴스 텍스트를 100% 자연스러운 [{lang_info['name']} ({lang_info['native_name']})] 구어체로 직접 창작해라.
+한국에 거주하는 외국인 유학생 및 근로자({target})를 위해, KTRS 마켓 0원 무료 나눔 5장 카드뉴스 텍스트를 100% 자연스러운 [{lang_info['name']} ({lang_info['native_name']})] 구어체로 직접 창작해라.
 
 [타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
 [주제/지역]: {theme_name} ({target})
@@ -193,7 +193,7 @@ class GeminiCardnewsCopywriter:
 ### 5장 슬라이드 스토리텔링 공식 (반드시 이 순서로 집필):
 - 1장 (★핵심 숏폼형 직거래 훅 - 2인 1:1 현장 교환 만남): 캠퍼스/기숙사 길거리에서 서로 다른 국적의 외국인 둘(예: 베트남 유학생과 네팔 청년, 또는 귀국 선배와 신입 유학생)이 직접 1:1로 만나 웃으며 {item}을 0원에 주고받는 생생한 직거래 실화 후킹! (예: "신촌 연세대 앞, 베트남 유학생과 네팔 친구의 0원 나눔 직거래 현장! 진짜 0원에 가져가도 되나요?")
 - 2장 (내 방 배치 & 150만원 절약): 텅 비고 차가웠던 원룸/기숙사를 0원 가구로 따뜻하고 아늑하게 풀세팅하고 가구값 150만 원을 아낀 감동
-- 3장 (K-Market 실물 0원 무료나눔 매물 피드): "도대체 어디서 구했어? 매일 쏟아지는 K-Market 0원 실물 가구·가전 매물 피드 대공개!"
+- 3장 (KTRS 마켓 실물 0원 무료나눔 매물 피드): "도대체 어디서 구했어? 매일 쏟아지는 K-Market 0원 실물 가구·가전 매물 피드 대공개!"
 - 4장 (안심 1:1 직거래 & 17개국어 번역 채팅): "한국어 몰라도 17개 언어 실시간 자동번역 채팅으로 10분 만에 안전하게 약속 완료!"
 - 5장 (행동 촉구 CTA): "오늘 등록된 0원 매물 놓치지 마세요! 지금 프로필 링크(Bio Link)를 눌러 0원 매물 바로 득템하세요!"
 
@@ -211,7 +211,7 @@ class GeminiCardnewsCopywriter:
     "bullets": [
       "• Bullet 1 (meeting in person, handing over {item}) in {lang_info['name']}",
       "• Bullet 2 (genuine 0 Won free handover) in {lang_info['name']}",
-      "• Bullet 3 (connected via K-Market app translation) in {lang_info['name']}"
+      "• Bullet 3 (connected via KTRS Market app translation) in {lang_info['name']}"
     ]
   }},
   {{
@@ -278,10 +278,10 @@ class GeminiCardnewsCopywriter:
                     c["title"] = self._clean_text(c.get("title", ""))
                     c["subtitle"] = self._clean_text(c.get("subtitle", ""))
                     c["bullets"] = [self._clean_text(b) for b in c.get("bullets", [])]
-                logger.info(f"[{lang.upper()}] 🎉 K-Market 제미나이 100% 현지어 카드뉴스 카피라이팅 성공!")
+                logger.info(f"[{lang.upper()}] 🎉 KTRS 마켓 제미나이 100% 현지어 카드뉴스 카피라이팅 성공!")
                 return cards
         except Exception as e:
-            logger.warning(f"[{lang.upper()}] K-Market 제미나이 카피라이팅 실패, 폴백 사용: {e}")
+            logger.warning(f"[{lang.upper()}] KTRS 마켓 제미나이 카피라이팅 실패, 폴백 사용: {e}")
 
         return self._fallback_kmarket_copy(lang, theme)
 
@@ -357,7 +357,7 @@ class GeminiCardnewsCopywriter:
                     "slide_idx": 1,
                     "badge": "STEP 1: 1:1 실물 직거래",
                     "title": f"{target} 앞, 베트남 유학생과 네팔 친구의 0원 직거래 현장!",
-                    "subtitle": "국적은 달라도 K-Market 앱으로 5분 만에 직거래 약속 완료",
+                    "subtitle": "국적은 달라도 KTRS 마켓 앱으로 5분 만에 직거래 약속 완료",
                     "bullets": [
                         f"• 귀국하는 선배와 신입생이 직접 만나 웃으며 {item} 전달",
                         "• '진짜 0원 맞아요?' 눈앞에서 확인한 감동의 무료 나눔",
@@ -378,7 +378,7 @@ class GeminiCardnewsCopywriter:
                 {
                     "slide_idx": 3,
                     "badge": "STEP 3: 0원 매물 피드",
-                    "title": "도대체 어디서? K-Market 0원 무료나눔 피드",
+                    "title": "도대체 어디서? KTRS 마켓 0원 무료나눔 피드",
                     "subtitle": "매일매일 실시간으로 쏟아지는 깨끗한 가구와 가전",
                     "bullets": [
                         "• 침대, 책상, 전자레인지, 냉장고까지 0원에 득템",
@@ -401,7 +401,7 @@ class GeminiCardnewsCopywriter:
                     "slide_idx": 5,
                     "badge": "STEP 5: 지금 바로 득템",
                     "title": f"지금 {target} 주변 0원 매물을 확인해보세요",
-                    "subtitle": "놓치면 후회할 대박 나눔, 지금 바로 K-Market 앱 다운로드!",
+                    "subtitle": "놓치면 후회할 대박 나눔, 지금 바로 KTRS 마켓 앱 다운로드!",
                     "bullets": [
                         "• 매일매일 새로운 0원 나눔이 쏟아집니다",
                         "• 프로필 링크 누르고 지금 바로 앱 설치하기",
@@ -419,7 +419,7 @@ class GeminiCardnewsCopywriter:
                 "bullets": [
                     f"• Met directly on campus to hand over clean {item} with smiles",
                     "• Verified 100% free giveaway between international students",
-                    "• Connected in 3 minutes via K-Market 17-language chat"
+                    "• Connected in 3 minutes via KTRS Market 17-language chat"
                 ]
             },
             {
@@ -436,7 +436,7 @@ class GeminiCardnewsCopywriter:
             {
                 "slide_idx": 3,
                 "badge": "STEP 3: 0 WON FEED",
-                "title": "Where To Get It? K-Market 0 Won Giveaway Feed",
+                "title": "Where To Get It? KTRS Market 0 Won Giveaway Feed",
                 "subtitle": "Hundreds of clean furniture and appliances posted daily",
                 "bullets": [
                     "• Beds, desks, microwaves, and fridges for 0 Won",
@@ -499,7 +499,7 @@ class GeminiCardnewsCopywriter:
             amount_str = "0 KRW (100% 무료 나눔)"
             item = theme.get("item", "가구/가전")
             service_desc = (
-                f"K-Market 외국인 전용 0원 중고 무료 나눔 & 17개국어 실시간 자동번역 직거래\n"
+                f"KTRS 마켓 외국인 전용 0원 중고 무료 나눔 & 17개국어 실시간 자동번역 직거래\n"
                 f"- 무료 나눔 품목: {item}\n"
                 f"- 혜택: 가구/가전 비용 150만원 절약, 등록금/생활비 절감\n"
                 f"- 한국어 몰라도 17개 언어 실시간 번역 채팅으로 내 동네 0원 매물 1초 확인"
@@ -713,7 +713,7 @@ class GeminiCardnewsCopywriter:
             rd_comment = f"You can check the local 0 Won listings here: {landing_url}"
             th_main = f"Furnish your studio room in Korea for 0 Won! Save 1,500,000 KRW on student living 🧵👇"
             th_reply = f"🔗 Claim free furniture & appliances now: {landing_url}"
-            tg_caption = f"📢 [K-Market] {theme_name}\n• 100% Free Giveaway\n• Save 1.5M KRW"
+            tg_caption = f"📢 [KTRS 마켓] {theme_name}\n• 100% Free Giveaway\n• Save 1.5M KRW"
             tg_btn = "🎁 Claim Free 0 Won Item"
 
         channels = {

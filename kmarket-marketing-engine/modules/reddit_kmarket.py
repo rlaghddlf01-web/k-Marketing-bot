@@ -126,7 +126,7 @@ class KMarketRedditHunter:
             # 2단계: Gemini AI 정밀 시맨틱 인텐트 판별
             intent_res = self.gemini.reddit_engine.classify_kmarket_reddit_intent(title, body)
             if not intent_res.get("is_relevant", False):
-                logger.info(f"⏭️ [AI 필터링] 케이마켓 무관 글 스킵: '{title}'")
+                logger.info(f"⏭️ [AI 필터링] KTRS 마켓 무관 글 스킵: '{title}'")
                 continue
 
             logger.info(f"🎯 [K-Market 타깃 질문 포착!] '{title}' (카테고리: {intent_res.get('category')})")

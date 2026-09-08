@@ -11,61 +11,61 @@ logger = logging.getLogger("KMarketTelegram")
 
 KMARKET_BRIEFING_TEMPLATES = {
     "ko": {
-        "header": "🎁 [K-Market 오늘 하루 0원 무료 나눔 꿀매물]",
+        "header": "🎁 [KTRS 마켓 오늘 하루 0원 무료 나눔 꿀매물]",
         "free_tag": "0원 무료 나눔!",
         "cta": "👉 지금 0원 나눔 꿀매물 잡기",
         "footer": "💬 17개 언어 실시간 자동번역 1:1 채팅 지원"
     },
     "en": {
-        "header": "🎁 [K-Market Today's 0 KRW Free Giveaways]",
+        "header": "🎁 [KTRS Market Today's 0 KRW Free Giveaways]",
         "free_tag": "0 KRW FREE!",
         "cta": "👉 Grab free items now",
         "footer": "💬 17-Language Instant Translation Chat Enabled"
     },
     "vi": {
-        "header": "🎁 [K-Market Đồ Tặng Miễn Phí 0 Won Hôm Nay]",
+        "header": "🎁 [KTRS Market Đồ Tặng Miễn Phí 0 Won Hôm Nay]",
         "free_tag": "0 Won MIỄN PHÍ!",
         "cta": "👉 Nhận đồ miễn phí ngay",
         "footer": "💬 Hỗ trợ nhắn tin dịch tự động 17 ngôn ngữ"
     },
     "uz": {
-        "header": "🎁 [K-Market Bugungi 0 Wonlik Bepul Mebellar]",
+        "header": "🎁 [KTRS Market Bugungi 0 Wonlik Bepul Mebellar]",
         "free_tag": "0 Won BEPUL!",
         "cta": "👉 Bepul mebelni darhol oling",
         "footer": "💬 17 tilda real vaqt avtomatik tarjima mavjud"
     },
     "ru": {
-        "header": "🎁 [K-Market Бесплатная мебель и техника 0 вон на сегодня]",
+        "header": "🎁 [KTRS Market Бесплатная мебель и техника 0 вон на сегодня]",
         "free_tag": "0 вон БЕСПЛАТНО!",
         "cta": "👉 Забрать бесплатные вещи сейчас",
         "footer": "💬 Чат с автопереводом на 17 языков в реальном времени"
     },
     "mn": {
-        "header": "🎁 [K-Market Өнөөдрийн 0 воны үнэгүй тавилга, бараа]",
+        "header": "🎁 [KTRS Market Өнөөдрийн 0 воны үнэгүй тавилга, бараа]",
         "free_tag": "0 вон ҮНЭГҮЙ!",
         "cta": "👉 Үнэгүй барааг одоо авах",
         "footer": "💬 17 хэлний бодит цагийн автомат орчуулгатай чат"
     },
     "zh": {
-        "header": "🎁 [K-Market 今日 0 韩元免费二手家具好物]",
+        "header": "🎁 [KTRS Market 今日 0 韩元免费二手家具好物]",
         "free_tag": "0 韩元免费赠送!",
         "cta": "👉 立即领取 0 元好物",
         "footer": "💬 支持 17 种语言实时自动翻译 1:1 聊天"
     },
     "tl": {
-        "header": "🎁 [K-Market Libreng Gamit Ngayong Araw (0 Won)]",
+        "header": "🎁 [KTRS Market Libreng Gamit Ngayong Araw (0 Won)]",
         "free_tag": "0 Won LIBRE!",
         "cta": "👉 Kunin ang libreng gamit ngayon",
         "footer": "💬 May 17-Language Auto-Translation Chat"
     },
     "th": {
-        "header": "🎁 [K-Market ของแจกฟรี 0 วอน วันนี้]",
+        "header": "🎁 [KTRS Market ของแจกฟรี 0 วอน วันนี้]",
         "free_tag": "0 วอน ฟรี!",
         "cta": "👉 รับของแจกฟรีทันที",
         "footer": "💬 แชทแปลภาษาอัตโนมัติ 17 ภาษาแบบเรียลไทม์"
     },
     "id": {
-        "header": "🎁 [K-Market Barang Gratis 0 Won Hari Ini]",
+        "header": "🎁 [KTRS Market Barang Gratis 0 Won Hari Ini]",
         "free_tag": "0 Won GRATIS!",
         "cta": "👉 Ambil barang gratis sekarang",
         "footer": "💬 Obrolan dengan terjemahan otomatis 17 bahasa"
@@ -75,7 +75,7 @@ KMARKET_BRIEFING_TEMPLATES = {
 
 class KMarketTelegramPusher:
     """
-    🛒 [K-Market 전용 17개국 텔레그램 브로드캐스트 엔진]
+    🛒 [KTRS Market 전용 17개국 텔레그램 브로드캐스트 엔진]
     - 270개 실물 매물 중 0원 무료나눔 & 무빙세일 꿀매물 17개국 다국어 브리핑 발송
     """
     def __init__(self, db_mgr: DBManager):
@@ -151,10 +151,10 @@ class KMarketTelegramPusher:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(text)
 
-        logger.info(f"🛒 [K-Market Telegram] {len(target_langs)}개 언어 100% 현지화 브리핑 발행 완료")
+        logger.info(f"🛒 [KTRS Market Telegram] {len(target_langs)}개 언어 100% 현지화 브리핑 발행 완료")
         return {
             "success": True,
             "brand": "kmarket",
             "sent_count": len(target_langs),
-            "message": f"🛒 [K-Market] {len(target_langs)}개 언어 100% 현지화 0원 나눔 브리핑 발행 완료!"
+            "message": f"🛒 [KTRS 마켓] {len(target_langs)}개 언어 100% 현지화 0원 나눔 브리핑 발행 완료!"
         }

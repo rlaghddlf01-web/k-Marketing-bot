@@ -39,7 +39,7 @@ class ShortsKMarket:
         self.service_id = "kmarket"
         self.output_dir = OUTPUTS_DIR / "shorts_kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\케이마켓")
+        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\KTRS마켓")
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorShortsKMarket()
@@ -105,7 +105,7 @@ class ShortsKMarket:
                 final_img_path = None
                 video_clip_path = None
 
-                # 📱 씬 3: 스마트폰 케이마켓 0원 매물 피드 스크롤 실물 비디오 클립 결합
+                # 📱 씬 3: 스마트폰 KTRS 마켓 0원 매물 피드 스크롤 실물 비디오 클립 결합
                 if s_idx == 3:
                     feed_clip = self.screencast_provider.get_or_render_feed_clip(
                         lang=lang,

@@ -38,7 +38,7 @@ class KMarketThreadsPublisher:
         self.scenario_director = ScenarioDirectorThreadsKMarket()
         self.output_dir = OUTPUTS_DIR / "threads" / "kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_cardnews_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\케이마켓")
+        self.desktop_cardnews_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\KTRS마켓")
 
         creds = self._load_credentials()
         self.threads_publisher = ThreadsCardPublisher(creds)

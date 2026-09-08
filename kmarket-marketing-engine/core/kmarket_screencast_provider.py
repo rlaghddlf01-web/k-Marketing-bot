@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-KMarketScreencastProvider - 📱 [케이마켓 순정 아이프레임(웹) 실물 스크린캐스트 프로바이더]
+KMarketScreencastProvider - 📱 [KTRS 마켓 순정 아이프레임(웹) 실물 스크린캐스트 프로바이더]
 - 가짜 목업 그래픽 100% 폐기 ❌
-- 실제 케이마켓 모바일 웹(http://127.0.0.1:8000/api/kmarket/clean_view?lang={lang}) 100% 순정 화면 녹화 ✅
+- 실제 KTRS 마켓 모바일 웹(http://127.0.0.1:8000/api/kmarket/clean_view?lang={lang}) 100% 순정 화면 녹화 ✅
 - 씬 3: 초기 흰 화면 컷팅(-ss 1.5) ➔ 첫 프레임부터 실물 0원 매물 피드가 촤르륵 스크롤되는 실제 앱 영상 (1080x1920)
-- 씬 4: 실제 케이마켓 앱 화면 위 17개 언어 실시간 자동번역 1:1 직거래 채팅 실물 영상 (1080x1920)
+- 씬 4: 실제 KTRS 마켓 앱 화면 위 17개 언어 실시간 자동번역 1:1 직거래 채팅 실물 영상 (1080x1920)
 - 언어별 고속 캐싱 지원 (초고속 재사용)
 """
 
@@ -29,7 +29,7 @@ except Exception:
 
 class KMarketScreencastProvider:
     """
-    🎬 실제 케이마켓 웹(아이프레임) 순정 화면 1080x1920 고화질 비디오 클립 생성 및 공급자
+    🎬 실제 KTRS 마켓 웹(아이프레임) 순정 화면 1080x1920 고화질 비디오 클립 생성 및 공급자
     """
     def __init__(self, output_dir: Optional[Path] = None):
         self.output_dir = output_dir or (OUTPUTS_DIR / "shorts" / "kmarket_screencasts")
@@ -49,14 +49,14 @@ class KMarketScreencastProvider:
         duration_sec: float = 3.5
     ) -> Optional[Path]:
         """
-        📱 [씬 3 전용] 실제 케이마켓 0원 매물 피드가 스크롤되는 순정 아이프레임 영상 생성 (1080x1920)
+        📱 [씬 3 전용] 실제 KTRS 마켓 0원 매물 피드가 스크롤되는 순정 아이프레임 영상 생성 (1080x1920)
         """
         out_mp4 = self.output_dir / f"kmarket_real_feed_{lang}_{duration_sec}s.mp4"
         if out_mp4.exists() and out_mp4.stat().st_size > 50000:
             return out_mp4
 
         url = self._get_target_url(lang)
-        logger.info(f"[{lang.upper()}] 📱 씬 3: 실제 케이마켓 피드 스크롤 Playwright 순정 녹화 시작 ({url})...")
+        logger.info(f"[{lang.upper()}] 📱 씬 3: 실제 KTRS 마켓 피드 스크롤 Playwright 순정 녹화 시작 ({url})...")
 
         recorded_webm = None
         try:
@@ -107,7 +107,7 @@ class KMarketScreencastProvider:
         try:
             res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
             if res.returncode == 0 and out_mp4.exists():
-                logger.info(f"✅ [씬 3 실물 완성] 케이마켓 0원 순정 피드 클립: {out_mp4.name} ({out_mp4.stat().st_size} bytes)")
+                logger.info(f"✅ [씬 3 실물 완성] KTRS 마켓 0원 순정 피드 클립: {out_mp4.name} ({out_mp4.stat().st_size} bytes)")
                 return out_mp4
             else:
                 logger.error(f"씬 3 MP4 인코딩 실패: {res.stderr.decode('utf-8', errors='ignore')[-300:]}")
@@ -124,21 +124,21 @@ class KMarketScreencastProvider:
         duration_sec: float = 3.5
     ) -> Optional[Path]:
         """
-        📱 [씬 4 전용] 실제 케이마켓 웹 화면 위 17개 언어 실시간 자동번역 1:1 직거래 채팅 순정 영상 (1080x1920)
+        📱 [씬 4 전용] 실제 KTRS 마켓 웹 화면 위 17개 언어 실시간 자동번역 1:1 직거래 채팅 순정 영상 (1080x1920)
         """
         out_mp4 = self.output_dir / f"kmarket_real_detail_{lang}_{duration_sec}s.mp4"
         if out_mp4.exists() and out_mp4.stat().st_size > 50000:
             return out_mp4
 
         url = self._get_target_url(lang)
-        logger.info(f"[{lang.upper()}] 📱 씬 4: 실제 케이마켓 1:1 자동번역 채팅 순정 녹화 시작 ({url})...")
+        logger.info(f"[{lang.upper()}] 📱 씬 4: 실제 KTRS 마켓 1:1 자동번역 채팅 순정 녹화 시작 ({url})...")
 
         chat_dialogs = {
             "ko": {
                 "title": f"{item_name} • 0원 무료나눔",
                 "seller": f"이웃 주민 ({target_area})",
                 "badge": "17개국어 실시간 1:1 자동번역 작동 중",
-                "m1": "안녕하세요! 케이마켓 보고 연락드렸어요. 오늘 0원 나눔 받을 수 있을까요? 🎁",
+                "m1": "안녕하세요! KTRS 마켓 보고 연락드렸어요. 오늘 0원 나눔 받을 수 있을까요? 🎁",
                 "m2": "네 반갑습니다! 방금 포장 마쳤으니 와서 가져가세요. 신촌역 3번 출구 앞입니다 😊",
                 "m3": "정말 감사합니다! 10분 뒤에 바로 도착합니다!",
                 "cta": "0원 안심 직거래 완료 (나눔온도 37.5℃ 🔥)"
@@ -147,7 +147,7 @@ class KMarketScreencastProvider:
                 "title": f"{item_name} • Tặng miễn phí 0 Won",
                 "seller": f"Hàng xóm thân thiện ({target_area})",
                 "badge": "Dịch tự động 1:1 thời gian thực 17 ngôn ngữ",
-                "m1": "Xin chào! Tôi thấy tin trên K-Market. Hôm nay tôi có thể nhận đồ 0 Won được không? 🎁",
+                "m1": "Xin chào! Tôi thấy tin trên KTRS Market. Hôm nay tôi có thể nhận đồ 0 Won được không? 🎁",
                 "m2": "Chào bạn! Tôi đã đóng gói cẩn thận rồi. Gặp nhau ở cửa số 3 ga Sinchon nhé 😊",
                 "m3": "Tuyệt vời quá, cảm ơn bạn rất nhiều! Tôi sẽ tới sau 10 phút!",
                 "cta": "Đã nhận đồ 0 Won an toàn (Nhiệt độ 37.5℃ 🔥)"
@@ -156,7 +156,7 @@ class KMarketScreencastProvider:
                 "title": f"{item_name} • 0 Von Bepul Buyum",
                 "seller": f"Yaqin qo'shni ({target_area})",
                 "badge": "17 tilda real vaqtda 1:1 avto-tarjima",
-                "m1": "Salom! K-Marketda ko'rdim. Bugun 0 vonli sovg'ani olsam bo'ladimi? 🎁",
+                "m1": "Salom! KTRS Marketda ko'rdim. Bugun 0 vonli sovg'ani olsam bo'ladimi? 🎁",
                 "m2": "Salom! Buyum tayyor, Sinchon bekati 3-chiqish oldida ko'rishamiz 😊",
                 "m3": "Katta rahmat! 10 daqiqada yetib boraman!",
                 "cta": "Xavfsiz 0 Vonli Bitim Yakunlandi (37.5℃ 🔥)"
@@ -165,7 +165,7 @@ class KMarketScreencastProvider:
                 "title": f"{item_name} • Free 0 KRW Giveaway",
                 "seller": f"Campus Neighbor ({target_area})",
                 "badge": "Real-time 1:1 Auto-Translation Active (17 Languages)",
-                "m1": "Hi! Found this on K-Market. Can I pick up the 0 Won item today? 🎁",
+                "m1": "Hi! Found this on KTRS Market. Can I pick up the 0 Won item today? 🎁",
                 "m2": "Yes, welcome! All packed and ready. Meet me in front of Sinchon Station Exit 3 😊",
                 "m3": "Thank you so much! Arriving in 10 minutes!",
                 "cta": "Safe 0 Won Direct Meetup Completed (37.5℃ 🔥)"
@@ -191,7 +191,7 @@ class KMarketScreencastProvider:
 
                 page.wait_for_timeout(1800)
 
-                # 실제 웹 화면 위 순정 당근/케이마켓 스타일 1:1 실시간 번역 채팅 팝업 모달 주입
+                # 실제 웹 화면 위 순정 당근/KTRS 마켓 스타일 1:1 실시간 번역 채팅 팝업 모달 주입
                 page.evaluate("""(dlg) => {
                     const modal = document.createElement('div');
                     modal.id = 'kmarket-chat-modal-injected';
@@ -270,7 +270,7 @@ class KMarketScreencastProvider:
         try:
             res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
             if res.returncode == 0 and out_mp4.exists():
-                logger.info(f"✅ [씬 4 실물 완성] 케이마켓 1:1 자동번역 채팅 클립: {out_mp4.name} ({out_mp4.stat().st_size} bytes)")
+                logger.info(f"✅ [씬 4 실물 완성] KTRS 마켓 1:1 자동번역 채팅 클립: {out_mp4.name} ({out_mp4.stat().st_size} bytes)")
                 return out_mp4
             else:
                 logger.error(f"씬 4 MP4 인코딩 실패: {res.stderr.decode('utf-8', errors='ignore')[-300:]}")

@@ -15,10 +15,10 @@ logger = logging.getLogger("KMarketFacebook")
 
 class KMarketFacebookHunter:
     """
-    🛒 [K-Market 전용 Facebook 대형 그룹 스텔스 침투기]
+    🛒 [KTRS Market 전용 Facebook 대형 그룹 스텔스 침투기]
     - 재한 베트남/러시아/필리핀 등 100만 명 규모 페이스북 외국인 그룹 침투
     - 1단계: 본문에는 270개 실물 매물 기반 0원 나눔 꿀팁 & 카드뉴스만 게시 (관리자 100% 승인)
-    - 2단계: '첫 번째 댓글(First-Comment)'에 K-Market 17개국 0원 나눔 링크 자동 부착 (알고리즘 회피)
+    - 2단계: '첫 번째 댓글(First-Comment)'에 KTRS Market 17개국 0원 나눔 링크 자동 부착 (알고리즘 회피)
     - 3단계: '승인 대기(Pending)' 그룹은 백그라운드 큐에 저장 후 승인 즉시 첫 댓글 등록
     - 4단계: Playwright 무인 브라우저(FacebookBrowserDriver)를 통한 실제 그룹 포스팅 및 첫 댓글 자동 입력 지원
     """
@@ -65,14 +65,14 @@ class KMarketFacebookHunter:
         return selected
 
     def deploy_to_groups(self, limit: int = 2, browser_mode: bool = False, headless: bool = True) -> Dict[str, Any]:
-        """K-Market 0원 나눔 카드뉴스 + 스텔스 첫댓글 페이스북 그룹 순환 배포 (실제 무인 브라우저 모드 지원)"""
+        """KTRS Market 0원 나눔 카드뉴스 + 스텔스 첫댓글 페이스북 그룹 순환 배포 (실제 무인 브라우저 모드 지원)"""
         posted_count = 0
         pending_count = 0
         target_groups = self._get_next_rotation_groups(count=limit)
         deployed_group_names = []
 
         # 실물 카드뉴스 5장 이미지 경로 확인
-        desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\케이마켓")
+        desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\KTRS 마켓")
         cardnews_files = sorted(list(desktop_dir.glob("*.jpg")), key=lambda p: p.stat().st_mtime, reverse=True)[:5]
         if not cardnews_files:
             cardnews_files = sorted(list((OUTPUTS_DIR / "cardnews").glob("*.png")), key=lambda p: p.stat().st_mtime, reverse=True)[:5]
@@ -116,16 +116,16 @@ class KMarketFacebookHunter:
                 )
                 if browser_res.get("success"):
                     posted_count += 1
-                    logger.info(f"🚀 [FacebookBrowserDriver] '{group_name}' K-Market 실제 그룹 포스팅 & 첫 댓글 자동 완성 성공!")
+                    logger.info(f"🚀 [FacebookBrowserDriver] '{group_name}' KTRS Market 실제 그룹 포스팅 & 첫 댓글 자동 완성 성공!")
                 else:
                     logger.warning(f"⚠️ [FacebookBrowserDriver] '{group_name}' 브라우저 게시 대기/실패: {browser_res.get('message')}")
             else:
                 if approval_type == "instant":
                     posted_count += 1
-                    logger.info(f"🛒 [K-Market FB] '{group_name}' {cardnews_summary} 즉시 게시 & 첫 댓글 링크 패키징 완료 (대기 모드)")
+                    logger.info(f"🛒 [KTRS Market FB] '{group_name}' {cardnews_summary} 즉시 게시 & 첫 댓글 링크 패키징 완료 (대기 모드)")
                 else:
                     pending_count += 1
-                    logger.info(f"🛒 [K-Market FB] '{group_name}' {cardnews_summary} 본문 승인 요청 대기")
+                    logger.info(f"🛒 [KTRS Market FB] '{group_name}' {cardnews_summary} 본문 승인 요청 대기")
 
             # DB 기록
             self.db_mgr.record_history(
@@ -145,7 +145,7 @@ class KMarketFacebookHunter:
             "posted_count": posted_count,
             "pending_count": pending_count,
             "browser_mode": browser_mode,
-            "message": f"🛒 K-Market 5장 카드뉴스 페이스북 [{groups_str}] {len(target_groups)}개 그룹 배포 파이프라인 처리 완료!"
+            "message": f"🛒 KTRS Market 5장 카드뉴스 페이스북 [{groups_str}] {len(target_groups)}개 그룹 배포 파이프라인 처리 완료!"
         }
 
     def _generate_clean_post(self, lang: str, group_name: str) -> str:

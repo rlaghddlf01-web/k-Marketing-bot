@@ -54,14 +54,14 @@
             <div class="sidebar-status-card" style="border-left: 4px solid #FF6B35; margin-bottom: 10px;">
                 <div class="status-header">
                     <span class="status-dot" id="km-daemon-indicator"></span>
-                    <span class="status-text" id="km-daemon-status-text" style="font-weight:700;font-size:12px;color:#FF6B35;">🛒 K-Market 대기 중 ⚪</span>
+                    <span class="status-text" id="km-daemon-status-text" style="font-weight:700;font-size:12px;color:#FF6B35;">🛒 KTRS 마켓 대기 중 ⚪</span>
                 </div>
                 <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;" id="km-daemon-sub">실물 숏폼/0원나눔/레딧</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-                    <button class="btn btn-primary" style="font-size:11.5px;padding:8px 4px;margin-top:0;" id="btn-start-km" onclick="startKMarketDaemon()" title="K-Market 무인 성장봇 사이클 가동">
+                    <button class="btn btn-primary" style="font-size:11.5px;padding:8px 4px;margin-top:0;" id="btn-start-km" onclick="startKMarketDaemon()" title="KTRS 마켓 무인 성장봇 사이클 가동">
                         🚀 시작
                     </button>
-                    <button class="btn btn-stop" style="font-size:11.5px;padding:8px 4px;margin-top:0;" id="btn-stop-km" onclick="stopKMarketDaemon()" title="K-Market 봇 정지">
+                    <button class="btn btn-stop" style="font-size:11.5px;padding:8px 4px;margin-top:0;" id="btn-stop-km" onclick="stopKMarketDaemon()" title="KTRS 마켓 봇 정지">
                         ⏹️ 정지
                     </button>
                 </div>
@@ -90,7 +90,7 @@
                     <span style="font-size:10px;color:#64748b;">듀얼 동시</span>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-                    <button class="btn btn-master-start" style="font-size:11px;padding:7px 2px;margin-top:0;" onclick="startAllBots()" title="K-Market 및 EasyTax 봇 모두 동시 가동">
+                    <button class="btn btn-master-start" style="font-size:11px;padding:7px 2px;margin-top:0;" onclick="startAllBots()" title="KTRS 마켓 및 EasyTax 봇 모두 동시 가동">
                         ⚡ 전체 시작
                     </button>
                     <button class="btn btn-master-stop" style="font-size:11px;padding:7px 2px;margin-top:0;" onclick="stopAllBots()" title="모든 봇 즉시 정지">
@@ -107,13 +107,13 @@
                 <div class="header-left">
                     <div class="brand-switcher-group" style="display:flex;gap:8px;margin-bottom:10px;">
                         <button class="brand-tab-btn active" id="brand-tab-km" onclick="switchBrand('kmarket')" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:none;background:#7C3AED;color:#FFFFFF;font-weight:800;font-size:13.5px;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,0.4);">
-                            🛒 K-Market 라이프 관제
+                            🛒 KTRS 마켓 라이프 관제
                         </button>
                         <button class="brand-tab-btn" id="brand-tab-tax" onclick="switchBrand('easytax')" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:1px solid #22294E;background:#13172E;color:#94A3B8;font-weight:700;font-size:13.5px;cursor:pointer;">
                             💰 EasyTax 국세청 환급 관제
                         </button>
                     </div>
-                    <h2 class="page-title" id="page-title">📊 K-Market 마케팅 통합 제어 센터</h2>
+                    <h2 class="page-title" id="page-title">📊 KTRS 마켓 마케팅 통합 제어 센터</h2>
                     <p class="page-desc" id="page-desc">270개 실물 매물 0원 나눔, 무빙세일, 17개국 양방향 번역 채팅을 실시간 제어합니다.</p>
                 </div>
                 <div class="header-right" style="display:flex;gap:8px;align-items:center;">
@@ -301,7 +301,7 @@
                     <div class="gallery-header">
                         <div>
                             <h3 class="section-title" id="ir-visitors-title">👥 실제 웹사이트 방문자(UTM 유입) 실시간 추적 (오늘 24H)</h3>
-                            <p class="section-subtitle" id="ir-visitors-subtitle">배포된 링크를 클릭하고 EasyTax 및 K-Market에 실제로 접속한 방문자(실제 사람)의 오늘 실시간 기록입니다.</p>
+                            <p class="section-subtitle" id="ir-visitors-subtitle">배포된 링크를 클릭하고 EasyTax 및 KTRS 마켓에 실제로 접속한 방문자(실제 사람)의 오늘 실시간 기록입니다.</p>
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
                             <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981;">🟢 실시간 추적기 가동 중</span>
@@ -319,7 +319,7 @@
             <section id="tab-iframe_viewer" class="tab-content">
                 <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div>
-                        <h2>📱 케이마켓 9:16 세로형 모바일 클린 뷰어</h2>
+                        <h2>📱 KTRS 마켓 9:16 세로형 모바일 클린 뷰어</h2>
                         <p style="color:var(--text-secondary);">나라별 팝업 모달과 하단 PWA 배너를 100% 자동 제거하여 실제 매물 화면만 깨끗하게 표시합니다.</p>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
@@ -540,21 +540,21 @@
                             </div>
                         </div>
 
-                        <h4 style="font-size:14px;color:#10b981;margin:18px 0 12px 0;">🛒 1. K-Market 공식 계정 (70% 라이프/나눔 채널)</h4>
+                        <h4 style="font-size:14px;color:#10b981;margin:18px 0 12px 0;">🛒 1. KTRS 마켓 공식 계정 (70% 라이프/나눔 채널)</h4>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>K-Market YouTube Data API Key</label>
-                                <input type="password" id="cfg-km-youtube" class="form-control" placeholder="K-Market 전용 YouTube API 키">
+                                <label>KTRS 마켓 YouTube Data API Key</label>
+                                <input type="password" id="cfg-km-youtube" class="form-control" placeholder="KTRS 마켓 전용 YouTube API 키">
                             </div>
                             <div class="form-group">
-                                <label>K-Market Instagram/Meta Token</label>
-                                <input type="password" id="cfg-km-meta" class="form-control" placeholder="K-Market 전용 Meta Graph Token">
+                                <label>KTRS 마켓 Instagram/Meta Token</label>
+                                <input type="password" id="cfg-km-meta" class="form-control" placeholder="KTRS 마켓 전용 Meta Graph Token">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>K-Market TikTok Creator Token</label>
-                                <input type="password" id="cfg-km-tiktok" class="form-control" placeholder="K-Market 전용 TikTok Posting Token">
+                                <label>KTRS 마켓 TikTok Creator Token</label>
+                                <input type="password" id="cfg-km-tiktok" class="form-control" placeholder="KTRS 마켓 전용 TikTok Posting Token">
                             </div>
                         </div>
 

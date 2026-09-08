@@ -1356,7 +1356,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
     def _handle_kmarket_clean_view(self, parsed_url):
         """
-        🛡️ 케이마켓 클린 모바일 뷰어 프록시:
+        🛡️ KTRS 마켓 클린 모바일 뷰어 프록시:
         - 나라별 팝업/모달 및 하단 PWA 앱 설치 배너를 완벽히 제거
         - 깨끗한 실제 매물 화면만 9:16 모바일로 전달
         """
@@ -1381,7 +1381,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 raw_html = resp.read().decode("utf-8")
         except Exception as e:
             self._set_headers("text/html; charset=utf-8", 500)
-            self.wfile.write(f"<h3>케이마켓 로딩 실패 ({target_url}): {e}</h3>".encode("utf-8"))
+            self.wfile.write(f"<h3>KTRS 마켓 로딩 실패 ({target_url}): {e}</h3>".encode("utf-8"))
             return
 
         # 1. Base URL 주입 및 상대 경로 절대 경로 변환 (CSS, JS, 이미지 완벽 로딩)
@@ -1453,7 +1453,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 padding-top: 10px !important;
             }}
 
-            /* 🥕 당근마켓 / 케이마켓 순정 모바일 1열 리스트 스타일 */
+            /* 🥕 당근마켓 / KTRS 마켓 순정 모바일 1열 리스트 스타일 */
             .kmarket-injected-list {{
                 display: flex;
                 flex-direction: column;
@@ -1732,7 +1732,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
     def _handle_get_kmarket_items(self):
         """
         🛒 270개 실물 매물 JSON API 서빙 (/api/kmarket/items)
-        - 케이마켓 프론트엔드가 페이지 로드 시 호출하는 핵심 API
+        - KTRS 마켓 프론트엔드가 페이지 로드 시 호출하는 핵심 API
         """
         items_file = DATA_DIR / "kmarket_items.json"
         if items_file.exists():

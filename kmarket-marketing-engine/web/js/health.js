@@ -12,11 +12,11 @@ async function loadHealthStatus(btn) {
         const panelTitle = document.getElementById("health-panel-title");
         const panelDesc = document.getElementById("health-panel-desc");
         if (panelTitle) {
-            panelTitle.innerText = isKM ? "🩺 [K-Market 전담] 실시간 헬스케어 & 맥박 관제 센터" : "🩺 [EasyTax 전담] 국세청 세무 헬스케어 & 맥박 관제 센터";
+            panelTitle.innerText = isKM ? "🩺 [KTRS 마켓 전담] 실시간 헬스케어 & 맥박 관제 센터" : "🩺 [EasyTax 전담] 국세청 세무 헬스케어 & 맥박 관제 센터";
         }
         if (panelDesc) {
             panelDesc.innerText = isKM
-                ? "270개 실물 매물 0원 나눔 숏폼, 17개국 텔레그램, 페이스북 50만 그룹 등 K-Market 8대 전용 채널의 맥박을 실시간 감시합니다."
+                ? "270개 실물 매물 0원 나눔 숏폼, 17개국 텔레그램, 페이스북 50만 그룹 등 KTRS 마켓 8대 전용 채널의 맥박을 실시간 감시합니다."
                 : "조특법 90% 소득세 감면, D-2 알바 3.3% 환급, Anti-Ban 공인 세무 등 EasyTax 8대 전용 채널의 맥박을 실시간 감시합니다.";
         }
 
@@ -30,25 +30,25 @@ async function loadHealthStatus(btn) {
         if (brainGrid && data.brain) {
             const brainItems = [
                 {
-                    name: isKM ? "K-Market Gemini 생성 엔진" : "EasyTax 조특법 법률 AI 엔진",
+                    name: isKM ? "KTRS 마켓 Gemini 생성 엔진" : "EasyTax 조특법 법률 AI 엔진",
                     icon: "🧠",
                     status: data.brain.gemini_ai?.status || "ok",
                     message: isKM ? "0원 나눔 실물 매물 카피 생성 엔진 가동" : "국세청 팩트 법률 & 세무 카피 엔진 가동",
                     ping: data.brain.gemini_ai?.ping_ms || 120
                 },
                 {
-                    name: isKM ? "K-Market 무인 자율주행 봇" : "EasyTax 세금환급 무인 전담 봇",
+                    name: isKM ? "KTRS 마켓 무인 자율주행 봇" : "EasyTax 세금환급 무인 전담 봇",
                     icon: "🐍",
                     status: isKM ? (isKMarketRunning ? "ok" : "idle") : (isEasyTaxRunning ? "ok" : "idle"),
                     message: isKM 
-                        ? (isKMarketRunning ? "24시간 0원 나눔 봇 회전 중 🟢" : "K-Market 봇 대기 중")
+                        ? (isKMarketRunning ? "24시간 0원 나눔 봇 회전 중 🟢" : "KTRS 마켓 봇 대기 중")
                         : (isEasyTaxRunning ? "24시간 세무 환급 봇 회전 중 🟢" : "EasyTax 봇 대기 중")
                 },
                 {
                     name: isKM ? "Supabase (kmarket_golden_copies)" : "Supabase (easytax_golden_copies)",
                     icon: "🗄️",
                     status: data.brain.supabase_db?.status || "ok",
-                    message: isKM ? "K-Market S등급 골든카피 테이블 연동" : "EasyTax S등급 세무카피 테이블 연동"
+                    message: isKM ? "KTRS 마켓 S등급 골든카피 테이블 연동" : "EasyTax S등급 세무카피 테이블 연동"
                 }
             ];
 

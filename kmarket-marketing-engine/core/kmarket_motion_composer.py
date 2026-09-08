@@ -1,5 +1,5 @@
 """
-KMarketMotionComposer - 케이마켓 전용 9:16 세로형 숏폼 모션 비디오 합성 엔진
+KMarketMotionComposer - KTRS 마켓 전용 9:16 세로형 숏폼 모션 비디오 합성 엔진
 - [A타입 (50%)]: 실제 270개 매물 당근마켓 피드 부드러운 스크롤 애니메이션 + 0원 나눔 득템 뱃지
 - [B타입 (50%)]: 1인칭 외국인 직거래/원룸 방빼기 일상 비디오 + 상단 1:1 번역 채팅 푸시 알림
 - 100% 현지어(17개국) 자막 바 & 프로필 링크 CTA 배너 합성
@@ -46,7 +46,7 @@ class KMarketMotionComposer:
         duration_sec: float = 4.0
     ) -> Path:
         """
-        9:16 (1080x1920) 케이마켓 전용 고화질 MP4 숏폼 비디오 생성 (imageio 기반 무결점 렌더러)
+        9:16 (1080x1920) KTRS 마켓 전용 고화질 MP4 숏폼 비디오 생성 (imageio 기반 무결점 렌더러)
         """
         content_type = scenario_plan.get("content_mix_type", "A_feed_scroll")
         timestamp = int(os.times().system * 100)
@@ -55,7 +55,7 @@ class KMarketMotionComposer:
         W, H = 1080, 1920
         total_frames = int(fps * duration_sec)
 
-        logger.info(f"[{lang.upper()}] 🎬 케이마켓 숏폼 비디오 렌더링 시작 (타입: {content_type}, {total_frames}프레임)")
+        logger.info(f"[{lang.upper()}] 🎬 KTRS 마켓 숏폼 비디오 렌더링 시작 (타입: {content_type}, {total_frames}프레임)")
 
         frames = []
         for frame_idx in range(total_frames):
@@ -78,7 +78,7 @@ class KMarketMotionComposer:
             output_mp4 = self.output_dir / f"kmarket_frame_{lang}_{timestamp}.png"
             pil_img.save(output_mp4)
 
-        logger.info(f"[{lang.upper()}] ✅ 케이마켓 숏폼 렌더링 완료: {output_mp4.name}")
+        logger.info(f"[{lang.upper()}] ✅ KTRS 마켓 숏폼 렌더링 완료: {output_mp4.name}")
         return output_mp4
 
     def _render_feed_scroll_frame(

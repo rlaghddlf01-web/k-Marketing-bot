@@ -173,12 +173,12 @@ class GoldenBatchProducer:
         """
         정기 골든 타임 슬롯 (오전 11:30 또는 저녁 18:30) 독립/통합 배치 실행
         - brand="easytax": 이지텍스 8개국 숏폼 8편 + 8개국 카드뉴스 8세트 (16건)
-        - brand="kmarket": 케이마켓 8개국 숏폼 8편 + 8개국 카드뉴스 8세트 (16건)
+        - brand="kmarket": KTRS 마켓 8개국 숏폼 8편 + 8개국 카드뉴스 8세트 (16건)
         - brand="all": 양대 브랜드 모두 실행 (총 32건)
         """
         start_time = time.time()
         slot_title = "오전 11:30 피크 슬롯" if slot_name == "morning" else "저녁 18:30 피크 슬롯" if slot_name == "evening" else f"수동 실행 ({slot_name})"
-        target_name = "이지텍스 전용" if brand == "easytax" else "케이마켓 전용" if brand == "kmarket" else "듀얼 채널 통합"
+        target_name = "이지텍스 전용" if brand == "easytax" else "KTRS 마켓 전용" if brand == "kmarket" else "듀얼 채널 통합"
         logger.info(f"🚀 [골든 타임 배치 가동: {target_name}] {slot_title} - 8대 국가 대량 생산 돌입!")
         
         tax_shorts = {"success_count": 0}

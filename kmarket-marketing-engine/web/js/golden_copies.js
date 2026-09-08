@@ -20,7 +20,7 @@ async function loadGoldenCopies(btn) {
         tbody.innerHTML = copies.map((c, idx) => {
             const isKM = c.service_id === "kmarket";
             const brandBadge = isKM
-                ? `<span style="background:rgba(16,185,129,0.15);color:#34d399;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">K-Market</span>`
+                ? `<span style="background:rgba(16,185,129,0.15);color:#34d399;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">KTRS 마켓</span>`
                 : `<span style="background:rgba(245,158,11,0.15);color:#fbbf24;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">EasyTax</span>`;
             
             const gradeBadge = c.score >= 85

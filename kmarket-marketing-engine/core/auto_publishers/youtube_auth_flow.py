@@ -148,7 +148,7 @@ def upload_test_short(creds: Credentials, video_path: str = None, brand: str = "
             # K-Market 베트남 숏폼 샘플 찾기
             km_candidates = [
                 BASE_DIR / "outputs" / "shorts_kmarket" / "kmarket_story5_vi_ind_ulsan_onsan_1788242706.mp4",
-                Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\케이마켓\kmarket_story5_ko_ind_ansan_wongok_1788679301.mp4"),
+                Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\KTRS마켓\kmarket_story5_ko_ind_ansan_wongok_1788679301.mp4"),
             ]
             for c in km_candidates:
                 if c.exists():

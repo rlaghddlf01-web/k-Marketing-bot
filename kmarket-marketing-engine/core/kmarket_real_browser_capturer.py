@@ -1,7 +1,7 @@
 """
-KMarketRealBrowserCapturer - [실제 케이마켓 웹사이트 9:16 모바일 스크린샷 캡처기]
+KMarketRealBrowserCapturer - [실제 KTRS 마켓 웹사이트 9:16 모바일 스크린샷 캡처기]
 - Playwright Chromium 브라우저를 백그라운드(Headless)로 가동
-- 실제 케이마켓(https://ktrs-market.vercel.app/?lang=vi 등)에 접속
+- 실제 KTRS 마켓(https://ktrs-market.vercel.app/?lang=vi 등)에 접속
 - 1080x1920 세로형 모바일 뷰포트로 100% 실제 웹 화면을 스크린샷 캡처
 - 카드뉴스 및 숏폼 비디오의 배경으로 100% 실제 UI 제공
 """
@@ -19,7 +19,7 @@ logger = logging.getLogger("KMarketCapturer")
 
 class KMarketRealBrowserCapturer:
     """
-    🌐 실제 케이마켓 웹사이트 모바일 스크린샷 전담 캡처기
+    🌐 실제 KTRS 마켓 웹사이트 모바일 스크린샷 전담 캡처기
     """
     def __init__(self, output_dir: Optional[Path] = None):
         self.output_dir = output_dir or (OUTPUTS_DIR / "cardnews")
@@ -28,11 +28,11 @@ class KMarketRealBrowserCapturer:
 
     def capture_real_kmarket_slides(self, lang: str = "vi") -> List[Path]:
         """
-        실제 케이마켓 클린 뷰어에 접속하여 9:16 (1080x1920) 모바일 스크린샷 4장 캡처
+        실제 KTRS 마켓 클린 뷰어에 접속하여 9:16 (1080x1920) 모바일 스크린샷 4장 캡처
         """
         captured_paths = []
         target_url = f"http://127.0.0.1:8000/api/kmarket/clean_view?lang={lang}"
-        logger.info(f"🌐 [{lang.upper()}] 케이마켓 클린 모바일 뷰 캡처 시작: {target_url}")
+        logger.info(f"🌐 [{lang.upper()}] KTRS 마켓 클린 모바일 뷰 캡처 시작: {target_url}")
 
         with sync_playwright() as p:
             # iPhone 14 Pro Max 뷰포트 비율 (1080x1920)
@@ -107,5 +107,5 @@ class KMarketRealBrowserCapturer:
 
             browser.close()
 
-        logger.info(f"🎉 [{lang.upper()}] 실제 케이마켓 웹사이트 9:16 스크린샷 4장 캡처 성공!")
+        logger.info(f"🎉 [{lang.upper()}] 실제 KTRS 마켓 웹사이트 9:16 스크린샷 4장 캡처 성공!")
         return captured_paths

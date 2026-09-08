@@ -71,7 +71,7 @@ class GeminiThreadsWriter:
 너는 세계 최고의 메타 스레드(Threads) 바이럴 스토리텔러야.
 스레드 피드에서 한국에 사는 외국인들이 읽자마자 1초 만에 "미쳤다 대박"하며 공감하고 리포스트(공유)하게 만드는 [순수 텍스트 썰 3단 타래]를 창작해라.
 
-[서비스]: {'K-Market (재한 외국인 0원 무료나눔 중고마켓)' if self.service_id == 'kmarket' else 'EasyTax (한국 국세청 소득세 90% 감면 및 환급)'}
+[서비스]: {'KTRS 마켓 (재한 외국인 0원 무료나눔 중고마켓)' if self.service_id == 'kmarket' else 'EasyTax (한국 국세청 소득세 90% 감면 및 환급)'}
 [타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
 [주제/지역]: {theme_name} ({target})
 [{'주요 품목' if self.service_id == 'kmarket' else '환급 금액'}]: {item_or_refund}
@@ -81,11 +81,11 @@ class GeminiThreadsWriter:
 1. post_1 (1번 메인 썰): 
    - 절대 광고처럼 쓰지 말고, 한국에 사는 외국인이 직접 겪은 생생한 경험담/썰로 시작! (본문에 링크 절대 금지!)
    - 시작 문구에 '🧵👇'를 넣어 아래 답글이 있음을 자연스럽게 유도.
-   - 예시(케이마켓): "나 한국 와서 원룸 이사할 때 150만원 아낀 썰 푼다ㅋㅋ 신촌 자취방 가구 0원으로 맞춘 비결 🧵👇"
+   - 예시(KTRS 마켓): "나 한국 와서 원룸 이사할 때 150만원 아낀 썰 푼다ㅋㅋ 신촌 자취방 가구 0원으로 맞춘 비결 🧵👇"
    - 예시(이지텍스): "한국 공장에서 일하는 형들 주목! 나 이번에 세금 380만원 통장에 꽂힌 실화 푼다 🧵👇"
 2. post_2 (2번 팩트/꿀팁 답글): 
    - 1번 썰을 뒷받침하는 구체적인 실전 노하우 팩트 2~3줄 요약.
-   - 예시(케이마켓): "1/ 졸업 시즌 대학가에 멀쩡한 침대, 책상 0원에 엄청 쏟아짐. 2/ 버리는 스티커비 아끼려고 무료 나눔하는 문화임."
+   - 예시(KTRS 마켓): "1/ 졸업 시즌 대학가에 멀쩡한 침대, 책상 0원에 엄청 쏟아짐. 2/ 버리는 스티커비 아끼려고 무료 나눔하는 문화임."
    - 예시(이지텍스): "1/ 조특법 30조 중소기업 근로자는 소득세 90% 감면임. 2/ 회사 눈치 볼 필요 없이 지난 5년 치도 소급해서 전액 돌려받음."
 3. post_3 (3번 링크 투척 답글): 
    - 친절하고 자연스럽게 "물어보는 사람들 있어서 남겨둠" 뉘앙스로 {landing_url} 링크 안내.
@@ -109,7 +109,7 @@ class GeminiThreadsWriter:
 너는 세계 최고의 메타 스레드(Threads) 카드뉴스 바이럴 마케터야.
 카드뉴스 5장 이미지와 함께 스레드에 업로드할 [후킹 본문 + 0.1초 링크 답글] 2단 세트를 창작해라.
 
-[서비스]: {'K-Market (0원 무료나눔)' if self.service_id == 'kmarket' else 'EasyTax (국세청 세무 환급)'}
+[서비스]: {'KTRS 마켓 (0원 무료나눔)' if self.service_id == 'kmarket' else 'EasyTax (국세청 세무 환급)'}
 [타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
 [주제]: {theme_name} ({target})
 [{'품목' if self.service_id == 'kmarket' else '환급액'}]: {item_or_refund}
@@ -176,14 +176,14 @@ class GeminiThreadsWriter:
         if self.service_id == "kmarket":
             if time_slot == "afternoon":
                 posts = [
-                    f"한국 원룸 이사할 때 가구 사지 마세요! 0원에 방 꾸민 썰 푼다 🧵👇 #{lang} #KMarket #SeoulLife",
+                    f"한국 원룸 이사할 때 가구 사지 마세요! 0원에 방 꾸민 썰 푼다 🧵👇 #{lang} #KTRSMarket #SeoulLife",
                     f"신촌/안암 대학가에서 졸업 선배들이 깨끗한 {item_or_refund}를 0원에 다 넘겨주고 갑니다. 17개 언어로 언어 장벽 없이 직거래 가능!",
                     f"👉 오늘 실시간 0원 나눔 매물 확인하기: {landing_url}"
                 ]
                 p_type = "pure_story"
             else:
                 posts = [
-                    f"신촌 대학가 자취방 필수 가구 0원 나눔 현장 포착! 📸 (사진 5장 확인)\n놓치면 후회할 0원 나눔, 링크는 아래 첫 댓글 확인! 🧵👇 #KMarket #0won",
+                    f"신촌 대학가 자취방 필수 가구 0원 나눔 현장 포착! 📸 (사진 5장 확인)\n놓치면 후회할 0원 나눔, 링크는 아래 첫 댓글 확인! 🧵👇 #KTRSMarket #0won",
                     f"👉 지금 내 주변 0원 나눔 매물 바로 득템하기: {landing_url}"
                 ]
                 p_type = "cardnews_attached"

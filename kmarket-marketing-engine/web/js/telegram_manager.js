@@ -30,7 +30,7 @@ function renderTelegramCommunityPanel(stats, outreach) {
     const isKm       = brand === 'kmarket';
     const brandTitle = isKm ? '🛒 K-Market' : '💰 EasyTax';
     const brandColor = isKm ? '#10B981' : '#F59E0B';
-    const groupName  = isKm ? 'K-Market Korea (t.me/kmarket_official)' : 'EasyTax Korea (t.me/easytax_official)';
+    const groupName  = isKm ? 'KTRS Market Korea (t.me/kmarket_official)' : 'EasyTax Korea (t.me/easytax_official)';
     const brandDesc  = isKm
         ? '270개 0원 무료나눔 매물 헌팅 · 17개국어 AI 실시간 응대 · 하루 2회(08:40/20:00) 정기 브리핑'
         : 'E-9 90% 소득세 감면 & D-2 3.3% 환급 팁 · 17개국어 실시간 세무 상담 · 하루 2회 정기 브리핑';

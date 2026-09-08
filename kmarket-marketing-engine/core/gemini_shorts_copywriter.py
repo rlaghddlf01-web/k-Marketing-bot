@@ -75,7 +75,7 @@ class GeminiShortsCopywriter:
             amount_str = "0 KRW (100% 무료 나눔)"
             item = scenario.get("item", "가구/가전")
             service_desc = (
-                f"K-Market 외국인 전용 0원 중고 무료 나눔 & 17개국어 실시간 자동번역 직거래\n"
+                f"KTRS Market 외국인 전용 0원 중고 무료 나눔 & 17개국어 실시간 자동번역 직거래\n"
                 f"- 무료 나눔 품목: {item}\n"
                 f"- 혜택: 150만원 생활비 절약, 한국어 몰라도 17개 언어 실시간 번역 채팅"
             )
@@ -238,7 +238,7 @@ class GeminiShortsCopywriter:
             )
             yt_pin = f"👉 Browse 0 Won free giveaways near you: {landing_url}"
             tt_cap = f"Get free furniture in Korea for 0 Won! ✨ Check the link in our bio! #fyp #korea"
-            ig_cap = f"{hook_title}\n\nSave 1,500,000 KRW on room expenses with K-Market!\n\n🔗 Link in Bio! (@kmarket_official)"
+            ig_cap = f"{hook_title}\n\nSave 1,500,000 KRW on room expenses with KTRS Market!\n\n🔗 Link in Bio! (@kmarket_official)"
             fb_post = f"{hook_title}\n\nGraduating students are giving away clean appliances for 0 Won!\n\n👇 Check the first comment to claim today's free items!"
             fb_comm = f"👉 Grab today's free 0 Won items here: {landing_url}"
 

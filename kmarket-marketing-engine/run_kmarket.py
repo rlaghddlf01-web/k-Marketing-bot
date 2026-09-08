@@ -19,12 +19,12 @@ from core.kmarket_bot import KMarketGrowthBot
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="K-Market Bot Executor")
+    parser = argparse.ArgumentParser(description="KTRS Market Bot Executor")
     parser.add_argument("--loop", action="store_true", help="10분 간격 무한 반복 모드 (기본: 1회 실행 후 즉시 종료)")
     args = parser.parse_args()
 
     print("\n========================================================")
-    print("🛒 [K-Market] 외국인 전용 중고거래/무료나눔 100% 전담 봇")
+    print("🛒 [KTRS 마켓] 외국인 전용 중고거래/무료나눔 100% 전담 봇")
     print("========================================================")
     print("• 모드: 100% K-Market 전력 질주 모드 (270개 실매물 직결)")
     print("• 콘텐츠: 0원 무료나눔 카드뉴스 + 매물 직거래 숏폼 + 레딧/페이스북 홍보")

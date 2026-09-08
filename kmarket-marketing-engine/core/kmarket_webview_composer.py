@@ -1,6 +1,6 @@
 """
 KMarketWebviewComposer - [9:16 세로형 모바일 웹뷰(iFrame 스타일) 렌더러]
-- 실제 케이마켓(https://ktrs-market.vercel.app/)의 세련된 모바일 앱 인터페이스를 1080x1920 해상도로 100% 렌더링
+- 실제 KTRS 마켓(https://ktrs-market.vercel.app/)의 세련된 모바일 앱 인터페이스를 1080x1920 해상도로 100% 렌더링
 - 4대 핵심 모바일 화면 (0원 나눔 / 무빙세일 80% / 17개국 실시간 번역채팅 / ARC 안심인증)
 - 17개국어(몽골어, 베트남어, 우즈벡어, 중국어, 영어 등) 100% 현지어 UI 지원
 """
@@ -30,10 +30,10 @@ def get_font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont:
                 pass
     return ImageFont.load_default()
 
-# 🎯 17개국 케이마켓 모바일 UI 번역 딕셔너리
+# 🎯 17개국 KTRS 마켓 모바일 UI 번역 딕셔너리
 KMARKET_I18N: Dict[str, Dict[str, Any]] = {
     "vi": {
-        "app_title": "K-Market • Chợ Đồ Cũ Expat Hàn Quốc",
+        "app_title": "KTRS Market • Chợ Đồ Cũ Expat Hàn Quốc",
         "search_ph": "🔍 Tìm đồ gia dụng, đồ 0 won gần bạn...",
         "s1_badge": "🎁 TẶNG MIỄN PHÍ 0 WON",
         "s1_title": "Nhượng Lại Đồ Đạc / Đồ Gia Dụng 0 Won",
@@ -52,7 +52,7 @@ KMARKET_I18N: Dict[str, Dict[str, Any]] = {
         "cta_sub": "Xem 270+ đồ 0 won & đồ giảm giá hôm nay!"
     },
     "mn": {
-        "app_title": "K-Market • Солонгос дахь Гадаад Иргэдийн Зах",
+        "app_title": "KTRS Market • Солонгос дахь Гадаад Иргэдийн Зах",
         "search_ph": "🔍 0 воны үнэгүй бараа, тавилга хайх...",
         "s1_badge": "🎁 0 ВОНЫ ҮНЭГҮЙ БЭЛЭГ (FREE)",
         "s1_title": "Ор, Ширээ, Богино Долгионы Зуух 0 Төгрөг",
@@ -71,7 +71,7 @@ KMARKET_I18N: Dict[str, Dict[str, Any]] = {
         "cta_sub": "Өнөөдрийн 0 воны шинэ зар харах!"
     },
     "uz": {
-        "app_title": "K-Market • Koreyadagi Expat Bozor",
+        "app_title": "KTRS Market • Koreyadagi Expat Bozor",
         "search_ph": "🔍 0 vonlik tekin buyumlar, mebel qidirish...",
         "s1_badge": "🎁 0 VON TEKIN BUYUMLAR (FREE)",
         "s1_title": "Mebel va Maishiy Texnika 0 Vonga",
@@ -90,7 +90,7 @@ KMARKET_I18N: Dict[str, Dict[str, Any]] = {
         "cta_sub": "Bugungi 270+ yangi e'lonlarni ko'ring!"
     },
     "en": {
-        "app_title": "K-Market • Korea's #1 Verified Expat Marketplace",
+        "app_title": "KTRS Market • Korea's #1 Verified Expat Marketplace",
         "search_ph": "🔍 Search free 0-KRW items, furniture, electronics...",
         "s1_badge": "🎁 0 KRW FREE GIVEAWAYS (FREE)",
         "s1_title": "Free Furniture & Appliances Near You",
@@ -109,7 +109,7 @@ KMARKET_I18N: Dict[str, Dict[str, Any]] = {
         "cta_sub": "Explore 270+ free & moving sale listings today!"
     },
     "zh": {
-        "app_title": "K-Market • 韩国在华人员专属二手直易平台",
+        "app_title": "KTRS Market • 韩国在华人员专属二手直易平台",
         "search_ph": "🔍 搜索 0韩元免费赠送、家具家电...",
         "s1_badge": "🎁 0韩元免费赠送 (FREE)",
         "s1_title": "毕业归国留学生家具家电 0元免费送",
@@ -124,7 +124,7 @@ KMARKET_I18N: Dict[str, Dict[str, Any]] = {
         "s4_badge": "🛡️ 100% 外国人登录证实名认证",
         "s4_title": "大学城及工业园区 安全直面交易",
         "s4_desc": "杜绝诈骗，大学城步行5分钟放心交易",
-        "cta_btn": "👉 立即打开 K-Market 平台",
+        "cta_btn": "👉 立即打开 KTRS Market 平台",
         "cta_sub": "查看今日 270+ 真实在售与免费好物！"
     }
 }
@@ -132,7 +132,7 @@ KMARKET_I18N: Dict[str, Dict[str, Any]] = {
 
 class KMarketWebviewComposer:
     """
-    🎨 9:16 (1080x1920) 세로형 프리미엄 케이마켓 모바일 웹뷰 화면 생성기
+    🎨 9:16 (1080x1920) 세로형 프리미엄 KTRS 마켓 모바일 웹뷰 화면 생성기
     """
     def __init__(self, output_dir: Optional[Path] = None):
         self.output_dir = output_dir or (OUTPUTS_DIR / "cardnews")
@@ -172,7 +172,7 @@ class KMarketWebviewComposer:
         draw.text((80, 35), "09:41", fill=(30, 41, 59), font=f_status)
         draw.text((920, 35), "5G  100%", fill=(30, 41, 59), font=f_status)
 
-        # ── 2. 케이마켓 모바일 앱 헤더 (App Header) ──
+        # ── 2. KTRS 마켓 모바일 앱 헤더 (App Header) ──
         draw.rectangle([(0, 80), (W, 190)], fill=(255, 255, 255))
         draw.line([(0, 190), (W, 190)], fill=(226, 232, 240), width=2)
         # 당근마켓/쿠팡 스타일 핫 오렌지 로고
@@ -263,11 +263,11 @@ class KMarketWebviewComposer:
         draw.text((120, cta_y + 125), i18n["cta_sub"][:42], fill=(254, 215, 170), font=f_desc)
 
         # ── 6. 최하단 법적 안내 및 홈 바 ──
-        draw.text((120, 1780), "K-Market • 대한민국 No.1 외국인 전용 안심 직거래 플랫폼", fill=(148, 163, 184), font=f_footer)
+        draw.text((120, 1780), "KTRS 마켓 • 대한민국 No.1 외국인 전용 안심 직거래 플랫폼", fill=(148, 163, 184), font=f_footer)
         # 아이폰 하단 홈 인디케이터 바
         draw.rounded_rectangle([(390, 1870), (690, 1885)], radius=8, fill=(30, 41, 59))
 
         out_path = self.output_dir / f"kmarket_webview_{lang}_slide_{slide_idx}.png"
         img.save(out_path, "PNG")
-        logger.info(f"[{lang.upper()}] 📱 케이마켓 9:16 모바일 웹뷰 렌더링 완료: {out_path.name}")
+        logger.info(f"[{lang.upper()}] 📱 KTRS 마켓 9:16 모바일 웹뷰 렌더링 완료: {out_path.name}")
         return out_path
