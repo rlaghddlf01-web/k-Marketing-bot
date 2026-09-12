@@ -1,0 +1,128 @@
+================================================================================
+📢 [KTRS-Market (케이마켓 외국인 0원 무료나눔 & 중고거래)] 틱톡(TikTok) 8개국 프로필 세팅 완벽 가이드
+================================================================================
+※ 틱톡(TikTok) 엄격 프로필 규격 사전 검증 100% 완료:
+   1. [아이디]: 영문 소문자/숫자/마침표만 가능 (최대 24자) ➔ ktrsmarket.{국가코드}
+   2. [이름]: 화면에 크게 표시되는 현지어 닉네임 (30자 이내 모바일 최적화)
+   3. [자기소개]: ★틱톡 80자 제한 엄격 준수★ (62~75자 이모지 줄바꿈 최적화)
+   4. [웹사이트 링크]: Next.js 정규 서브경로 랜딩 URL (https://ktrs-market.vercel.app/{lang})
+   5. [소셜 연동]: 인스타그램(ktrsmarket.{cc}) 및 유튜브 공식 연동 가능
+================================================================================
+
+[1. 🇲🇳 몽골 (Mongolia)]
+• 아이디: ktrsmarket.mn
+• 이름: KTRS-Market 0 Вон Худалдаа
+• 자기소개:
+🇲🇳 0 воны үнэгүй бараа ба зах
+🎁 Тавилга, цахилгаан бараа
+👇 Үнэгүй авах
+• 웹사이트 링크: https://ktrs-market.vercel.app/mn
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.mn
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Mongolia
+
+--------------------------------------------------------------------------------
+
+[2. 🇻🇳 베트남 (Vietnam)]
+• 아이디: ktrsmarket.vn
+• 이름: KTRS-Market Đồ Cũ 0 Won
+• 자기소개:
+🇻🇳 Đồ 0 Won & Chợ cũ Hàn Quốc
+🎁 Miễn phí đồ gia dụng 0 Won
+👇 Nhận đồ ngay
+• 웹사이트 링크: https://ktrs-market.vercel.app/vi
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.vn
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Vietnam
+
+--------------------------------------------------------------------------------
+
+[3. 🇺🇿 우즈베키스탄 (Uzbekistan)]
+• 아이디: ktrsmarket.uz
+• 이름: KTRS-Market 0 Won Xaridlar
+• 자기소개:
+🇺🇿 Bepul 0 von buyumlar bozori
+🎁 0 von mebel va texnika
+👇 Bepul olish
+• 웹사이트 링크: https://ktrs-market.vercel.app/uz
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.uz
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Uzbekistan
+
+--------------------------------------------------------------------------------
+
+[4. 🇰🇭 캄보디아 (Cambodia)]
+• 아이디: ktrsmarket.kh
+• 이름: KTRS-Market ផ្សារទំនើប 0 Won
+• 자기소개:
+🇰🇭 របស់ឥតគិតថ្លៃ 0 វ៉ុននៅកូរ៉េ
+🎁 របស់របរប្រើប្រាស់ 0 វ៉ុន
+👇 ទទួលឥឡូវនេះ
+• 웹사이트 링크: https://ktrs-market.vercel.app/km
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.kh
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Cambodia
+
+--------------------------------------------------------------------------------
+
+[5. 🇳🇵 네팔 (Nepal)]
+• 아이디: ktrsmarket.np
+• 이름: KTRS-Market ० वन किनमेल
+• 자기소개:
+🇳🇵 ० वन निःशुल्क सामान
+🎁 फर्निचर, इलेक्ट्रोनिक्स ० वन
+👇 लिनुहोस्
+• 웹사이트 링크: https://ktrs-market.vercel.app/ne
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.np
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Nepal
+
+--------------------------------------------------------------------------------
+
+[6. 🇹🇭 태국 (Thailand)]
+• 아이디: ktrsmarket.th
+• 이름: KTRS-Market ช้อปปิ้ง 0 วอน
+• 자기소개:
+🇹🇭 แจกฟรี 0 วอนในเกาหลี
+🎁 เครื่องใช้ไฟฟ้า เฟอร์นิเจอร์ 0 วอน
+👇 รับฟรีที่นี่
+• 웹사이트 링크: https://ktrs-market.vercel.app/th
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.th
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Thailand
+
+--------------------------------------------------------------------------------
+
+[7. 🇮🇩 인도네시아 (Indonesia)]
+• 아이디: ktrsmarket.id
+• 이름: KTRS-Market Belanja 0 Won
+• 자기소개:
+🇮🇩 Barang gratis 0 Won Korea
+🎁 Perabotan 0 Won
+👇 Klaim di sini
+• 웹사이트 링크: https://ktrs-market.vercel.app/id
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.id
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Indonesia
+
+--------------------------------------------------------------------------------
+
+[8. 🇲🇾 미얀마 (Myanmar)]
+• 아이디: ktrsmarket.mm
+• 이름: KTRS-Market ၀ ဝမ် ဈေးဝယ်
+• 자기소개:
+🇲🇲 ၀ ဝမ် အခမဲ့ပစ္စည်း ဈေးဝယ်
+🎁 ပရိဘောဂ၊ လျှပ်စစ် ၀ ဝမ်
+👇 အခမဲ့ ရယူပါ
+• 웹사이트 링크: https://ktrs-market.vercel.app/my
+• 소셜 연동:
+  - 인스타그램: ktrsmarket.mm
+  - 유튜브: https://www.youtube.com/@KTRSMarket_Myanmar
+
+================================================================================
+💡 틱톡 가입 및 연동 꿀팁:
+1. [계정 가입 이메일 매핑 추천]:
+   - 몽골: 구글 로그인 (또는 전용 지메일)
+   - 나머지 7개국: 아웃룩(Outlook) 별칭 (예: xknife.mkt.vi@outlook.com 등) 활용
+2. [소셜 연동]: 틱톡 [프로필 편집] 맨 아래 [소셜] 메뉴에서 케이마켓 인스타그램과 유튜브를 연결하시면 3대 플랫폼이 서로 구독자를 교차 유입시킵니다.
+================================================================================

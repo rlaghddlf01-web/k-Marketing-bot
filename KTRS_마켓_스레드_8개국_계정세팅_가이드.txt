@@ -1,0 +1,115 @@
+================================================================================
+📢 [KTRS-Market (외국인 0원 무료나눔 & 중고마켓)] 스레드(Threads) 8개국 프로필 세팅 완벽 가이드
+================================================================================
+※ 스레드 프로필 세팅 안내:
+   1. [이름(Name)]: 브랜드 신뢰도 + 현지어 0원 마켓 키워드 (30자 이내 완벽 준수)
+   2. [사용자 이름(Username)]: 인스타그램/스레드 표준 통일 (ktrsmarket.{cc})
+   3. [소개(Bio)]: 귀국 선배 0원 무료나눔 & 17개국어 번역 지원 (150자 이내)
+   4. [웹사이트 링크]: Next.js 정규 서브경로 다국어 공식 랜딩 URL (https://ktrs-market.vercel.app/{lang})
+   5. [팟캐스트 링크]: ★비워두기(권장)★ - 팟캐스트가 없으므로 공란으로 두시면 됩니다.
+                          (유튜브 연결을 원하실 경우 각 국가별 유튜브 채널 주소 입력 가능)
+================================================================================
+
+[1. 🇲🇳 몽골 (Mongolia)]
+• 이름 (Name): KTRS-Market 0 Вон Худалдаа
+• 사용자 이름 (Username): ktrsmarket.mn
+• 소개 (Bio):
+🇲🇳 БНСУ дахь 0 воны үнэгүй бараа & хямд худалдааны платформ!
+🎁 0 воны үнэгүй тавилга, цахилгаан бараа
+💬 17 хэлний шууд орчуулга
+👇 0 воны бараа авах
+• 웹사이트 링크: https://ktrs-market.vercel.app/mn
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Mongolia
+
+--------------------------------------------------------------------------------
+
+[2. 🇻🇳 베트남 (Vietnam)]
+• 이름 (Name): KTRS-Market Đồ Cũ 0 Won
+• 사용자 이름 (Username): ktrsmarket.vn
+• 소개 (Bio):
+🇻🇳 Chợ đồ cũ & đồ 0 Won miễn phí tại Hàn Quốc!
+🎁 Nhận miễn phí đồ gia dụng, bàn ghế 0 Won
+💬 Trò chuyện dịch tự động 17 ngôn ngữ
+👇 Nhận đồ 0 Won ngay
+• 웹사이트 링크: https://ktrs-market.vercel.app/vi
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Vietnam
+
+--------------------------------------------------------------------------------
+
+[3. 🇺🇿 우즈베키스탄 (Uzbekistan)]
+• 이름 (Name): KTRS-Market 0 Won Xaridlar
+• 사용자 이름 (Username): ktrsmarket.uz
+• 소개 (Bio):
+🇺🇿 Koreyadagi bepul 0 von buyumlar va arzon xaridlar!
+🎁 0 von mebel va maishiy texnika
+💬 17 tildagi real vaqt tarjima
+👇 Bepul buyumlar olish
+• 웹사이트 링크: https://ktrs-market.vercel.app/uz
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Uzbekistan
+
+--------------------------------------------------------------------------------
+
+[4. 🇰🇭 캄보디아 (Cambodia)]
+• 이름 (Name): KTRS-Market ផ្សារទំនើប 0 Won
+• 사용자 이름 (Username): ktrsmarket.kh
+• 소개 (Bio):
+🇰🇭 ផ្សារទំនិញឥតគិតថ្លៃ 0 វ៉ុនសម្រាប់ពលករខ្មែរនៅកូរ៉េ!
+🎁 របស់របរប្រើប្រាស់ 0 វ៉ុនឥតគិតថ្លៃ
+💬 ជជែកបកប្រែស្វ័យប្រវត្តិ ១៧ ភាសា
+👇 ចូលមើលទំនិញនៅទីនេះ
+• 웹사이트 링크: https://ktrs-market.vercel.app/km
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Cambodia
+
+--------------------------------------------------------------------------------
+
+[5. 🇳🇵 네팔 (Nepal)]
+• 이름 (Name): KTRS-Market ० वन किनमेल
+• 사용자 이름 (Username): ktrsmarket.np
+• 소개 (Bio):
+🇳🇵 कोरियामा निःशुल्क ० वन सामान र सुरक्षित किनमेल!
+🎁 फर्निचर, इलेक्ट्रोनिक्स ० वन निःशुल्क
+💬 १७ भाषामा तत्काल अनुवाद च्याट
+👇 ० वन सामान लिनुहोस्
+• 웹사이트 링크: https://ktrs-market.vercel.app/ne
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Nepal
+
+--------------------------------------------------------------------------------
+
+[6. 🇹🇭 태국 (Thailand)]
+• 이름 (Name): KTRS-Market ช้อปปิ้ง 0 วอน
+• 사용자 이름 (Username): ktrsmarket.th
+• 소개 (Bio):
+🇹🇭 แพลตฟอร์มแจกของฟรี 0 วอนในเกาหลีใต้!
+🎁 เฟอร์นิเจอร์ เครื่องใช้ไฟฟ้าฟรี 0 วอน
+💬 แชทแปลภาษาอัตโนมัติ 17 ภาษา
+👇 รับของฟรี 0 วอนที่นี่
+• 웹사이트 링크: https://ktrs-market.vercel.app/th
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Thailand
+
+--------------------------------------------------------------------------------
+
+[7. 🇮🇩 인도네시아 (Indonesia)]
+• 이름 (Name): KTRS-Market Belanja 0 Won
+• 사용자 이름 (Username): ktrsmarket.id
+• 소개 (Bio):
+🇮🇩 Belanja & barang gratis 0 Won di Korea Selatan!
+🎁 Perabotan & elektronik 0 Won
+💬 Chat terjemahan otomatis 17 bahasa
+👇 Klaim barang 0 Won di sini
+• 웹사이트 링크: https://ktrs-market.vercel.app/id
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Indonesia
+
+--------------------------------------------------------------------------------
+
+[8. 🇲🇾 미얀마 (Myanmar)]
+• 이름 (Name): KTRS-Market ၀ ဝမ် ဈေးဝယ်
+• 사용자 이름 (Username): ktrsmarket.mm
+• 소개 (Bio):
+🇲🇲 ကိုရီးယားရောက် ၀ ဝမ် အခမဲ့ပစ္စည်းများနှင့် အွန်လိုင်းဈေးဝယ်!
+🎁 ပရိဘောဂ၊ လျှပ်စစ်ပစ္စည်း ၀ ဝမ်
+💬 ၁၇ မျိုးသော ဘာသာပြန်စနစ်
+👇 ၀ ဝမ် ပစ္စည်းရယူရန်
+• 웹사이트 링크: https://ktrs-market.vercel.app/my
+• 팟캐스트 링크: (비워두기 - 공란 권장) ※ 유튜브 연결 시: https://www.youtube.com/@KTRSMarket_Myanmar
+
+================================================================================

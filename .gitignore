@@ -42,3 +42,16 @@ outputs/
 *.json.json
 *.session
 *.session-journal
+
+# 🔐 계정 로그인 정보 및 비밀번호 텍스트 파일 유출 방지
+*로그인*.txt
+*login*.txt
+*password*.txt
+
+# 🤖 로컬 GPU 모델 가중치 및 대용량 바이너리 (GitHub 100MB 초과 방지)
+**/models/
+gfpgan/
+*.onnx
+*.safetensors
+*.bin
+*.pth

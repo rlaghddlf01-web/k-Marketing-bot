@@ -61,6 +61,7 @@ class ShortsEasyTax:
         logger.info(f"[{lang.upper()}] 💰 [EasyTax 숏폼 공장] 생산 가동 시작... (엔진: {engine_mode})")
         timestamp = int(time.time())
 
+
         # ⚡ 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image 엔진
         active_media_gen = GeminiMediaGenerator(service_id="easytax")
         logger.info(f"[{lang.upper()}] 🏆 [EasyTax 숏폼] Gemini 3.1 Flash-Lite Image 엔진 가동")

@@ -34,3 +34,11 @@ data/youtube_token*.json
 data/auth_url.txt
 *.session
 *.session-journal
+
+# 🤖 로컬 GPU 모델 가중치 및 대용량 캐시 (GitHub 100MB 제한 보호)
+local_gpu_pipeline/models/
+gfpgan/
+*.onnx
+*.safetensors
+*.bin
+*.pth
