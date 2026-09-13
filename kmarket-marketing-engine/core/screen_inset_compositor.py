@@ -121,15 +121,18 @@ class ScreenInsetCompositor:
         target_h = int(phone_device.height * scale)
         resized_phone = phone_device.resize((target_w, target_h), Image.Resampling.LANCZOS)
 
-        # 3. 위치 계산 (center: 정중앙 배치, right: 우측 배치)
-        if position == "center":
+        # 3. 위치 계산 (left_floating: 좌측 3D 플로팅, center: 정중앙, right: 우측)
+        if position == "left_floating" or position == "left":
+            paste_x = int(base_photo.width * 0.08)   # 약 85~90px (인물 얼굴 가림 0%)
+            paste_y = int(base_photo.height * 0.12)  # 약 110~130px
+        elif position == "right":
+            paste_x = int(base_photo.width * 0.58)
+            paste_y = int(base_photo.height * 0.15)
+        else:
             paste_x = (base_photo.width - target_w) // 2
             paste_y = (base_photo.height - target_h) // 2
-        else:
-            paste_x = int(base_photo.width * 0.60)
-            paste_y = int(base_photo.height * 0.18)
 
-        # 4. 프리미엄 3D 드롭 섀도우
+        # 4. 프리미엄 3D 드롭 섀도우 (토스/애플 스타일 핀테크 입체 분리감)
         shadow_canvas = Image.new("RGBA", (base_photo.width, base_photo.height), (0, 0, 0, 0))
         shadow_box = Image.new("RGBA", (target_w + 50, target_h + 50), (0, 0, 0, 0))
         phone_alpha = resized_phone.split()[3]
@@ -144,4 +147,77 @@ class ScreenInsetCompositor:
 
         logger.info(f"📱 [ScreenInsetCompositor] 이지텍스 실제 앱 화면 인셋 완료 (위치={position}, x={paste_x}, y={paste_y})")
         return result_photo.convert("RGB")
+
+    def composite_custom_ui_onto_photo(
+        self,
+        base_photo: Image.Image,
+        ui_image: Image.Image,
+        position: str = "left_floating",
+        scale: float = 0.58,
+        custom_coords: Optional[Tuple[int, int]] = None
+    ) -> Image.Image:
+        """
+        [대표님 특별 지침 완벽 반영]
+        국세청 환급 영수증 UI 이미지를 최신 플래그십 스마트폰 베젤 + 3D 드롭 섀도우로 래핑하여
+        인물 얼굴을 전혀 가리지 않는 좌측 여백(x=80~120px) 공중에 자연스럽게 둥둥 띄우는 핀테크 플로팅 합성기.
+        - 얼굴 가림 0%
+        - AI 손가락 기괴함/뒤틀림 위험 100% 원천 차단
+        - 가독성 100% 보장
+        """
+        # 1. UI 이미지에 슬림 베젤 + 라운드 글래스 스마트폰 프레임 입히기
+        w, h = 480, 960
+        ui_resized = ui_image.resize((w, h), Image.Resampling.LANCZOS).convert("RGBA")
+
+        # 둥근 모서리 마스킹 (아이폰/갤럭시 스타일 라운딩)
+        corner_mask = Image.new("L", (w, h), 0)
+        cm_draw = ImageDraw.Draw(corner_mask)
+        cm_draw.rounded_rectangle([0, 0, w, h], radius=int(w * 0.08), fill=255)
+        ui_resized.putalpha(corner_mask)
+
+        # 고급 메탈 베젤 생성
+        phone_device = Image.new("RGBA", (w + 16, h + 16), (0, 0, 0, 0))
+        pd_draw = ImageDraw.Draw(phone_device)
+        pd_draw.rounded_rectangle(
+            [0, 0, w + 16, h + 16],
+            radius=int(w * 0.09) + 4,
+            fill=(20, 24, 32, 255),
+            outline=(90, 105, 125, 255),
+            width=3
+        )
+        phone_device.paste(ui_resized, (8, 8), ui_resized)
+
+        # 2. 크기 리사이즈
+        target_w = int(phone_device.width * scale)
+        target_h = int(phone_device.height * scale)
+        resized_phone = phone_device.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+        # 3. 위치 계산 (인물 반대편 좌측 여백에 단정하게 플로팅)
+        if custom_coords:
+            paste_x, paste_y = custom_coords
+        elif position in ["left_floating", "left"]:
+            paste_x = int(base_photo.width * 0.08)   # 약 85~90px
+            paste_y = int(base_photo.height * 0.16)  # 약 180~200px
+        elif position == "right":
+            paste_x = int(base_photo.width * 0.58)
+            paste_y = int(base_photo.height * 0.16)
+        else:
+            paste_x = (base_photo.width - target_w) // 2
+            paste_y = (base_photo.height - target_h) // 2
+
+        # 4. 부드러운 3D 입체 드롭 섀도우 (토스/애플 스타일 깊이감)
+        shadow_canvas = Image.new("RGBA", (base_photo.width, base_photo.height), (0, 0, 0, 0))
+        shadow_box = Image.new("RGBA", (target_w + 50, target_h + 50), (0, 0, 0, 0))
+        phone_alpha = resized_phone.split()[3]
+        shadow_box.paste((0, 0, 0, 160), (25, 25), phone_alpha)
+        shadow_box = shadow_box.filter(ImageFilter.GaussianBlur(24))
+        shadow_canvas.paste(shadow_box, (paste_x - 12, paste_y + 12), shadow_box)
+
+        # 5. 순차 합성 (인물 사진 -> 3D 그림자 -> 최신 스마트폰 디바이스)
+        result_photo = base_photo.convert("RGBA")
+        result_photo.paste(shadow_canvas, (0, 0), shadow_canvas)
+        result_photo.paste(resized_phone, (paste_x, paste_y), resized_phone)
+
+        logger.info(f"📱 [ScreenInsetCompositor] 좌측 3D 플로팅 스마트폰 인셋 성공 (x={paste_x}, y={paste_y}, w={target_w}, h={target_h})")
+        return result_photo.convert("RGB")
+
 

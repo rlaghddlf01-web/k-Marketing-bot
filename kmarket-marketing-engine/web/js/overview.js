@@ -94,22 +94,6 @@ function renderHubGrid() {
 
         container.innerHTML = hubs.map((h, idx) => {
             const isMediaHub = (h.key === "shorts" || h.key === "cardnews");
-            const engineSwitchHtml = isMediaHub ? `
-                <!-- ⚡ 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image -->
-                <div style="background:#090C19;padding:9px 12px;border-radius:8px;border:1px solid #1E2442;margin-bottom:8px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:11px;color:#38BDF8;font-weight:700;">⚡ 비주얼 엔진:</span>
-                        <span style="font-size:10.5px;color:#10B981;font-weight:800;background:rgba(16,185,129,0.12);padding:2px 7px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);">
-                            🏆 Gemini 3.1 Flash-Lite
-                        </span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:9.5px;color:#94A3B8;">
-                        <span>초고속 렌더링 (3.5초)</span>
-                        <span style="color:#334155;">│</span>
-                        <span style="color:#38BDF8;font-weight:600;">장당 ~7원 · 무결점 실사</span>
-                    </div>
-                </div>
-            ` : "";
 
             return `
             <div class="action-card" id="card-kmarket-${h.key}" style="background:#13172E;border:1px solid #22294E;border-top:3px solid #10B981;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,0.3);">
@@ -123,7 +107,6 @@ function renderHubGrid() {
                     </div>
                     <p style="font-size:11.5px;color:#94A3B8;margin:0 0 10px 0;line-height:1.4;">${h.desc}</p>
                     
-                    ${engineSwitchHtml}
                     ${renderDualTrackBadge(h, 'kmarket')}
 
                     <!-- 실시간 24시간 가동 상태 바 -->
@@ -137,6 +120,20 @@ function renderHubGrid() {
 
                 <div>
                     ${isMediaHub ? `
+                    <!-- 🚀 [원클릭 즉시 생성] Wan 2.2 & 서브픽셀 매립 팩토리 -->
+                    <div style="background:#090C19;padding:8px 10px;border-radius:10px;border:1px solid rgba(16,185,129,0.35);margin-bottom:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <span style="font-size:11px;font-weight:800;color:#10B981;">⚡ 원클릭 즉시 제작:</span>
+                            <select id="select-lang-kmarket-${h.key}" style="background:#13172E;color:#FFFFFF;border:1px solid #22294E;border-radius:6px;font-size:11px;padding:2px 6px;cursor:pointer;">
+                                <option value="vi" selected>🇻🇳 베트남 (vi)</option>
+                                <option value="uz">🇺🇿 우즈베크 (uz)</option>
+                                <option value="ko">🇰🇷 한국 (ko)</option>
+                            </select>
+                        </div>
+                        <button class="btn" id="btn-factory-kmarket-${h.key}" onclick="triggerOneClickProduce('kmarket', '${h.key}', this)" style="width:100%;font-size:12px;padding:8px 0;background:linear-gradient(135deg, #10B981 0%, #059669 100%);border:none;color:#FFFFFF;font-weight:900;border-radius:8px;box-shadow:0 4px 12px rgba(16,185,129,0.4);cursor:pointer;" title="케이마켓 모바일 UI 매립 원클릭 즉시 제작">
+                            ${h.key === 'shorts' ? '🎬 5초 립싱크 숏폼 원클릭 제작' : '📸 0원 나눔 카드뉴스 원클릭 제작'}
+                        </button>
+                    </div>
                     <!-- 🌟 8대 황금 타깃 1일 2슬롯 24시간 무인 가동 및 정지 -->
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
                         <button class="btn btn-primary" id="btn-daemon-gb-kmarket-${h.key}" onclick="startGoldenBatchDaemon()" style="font-size:11.5px;padding:7px 4px;font-weight:800;background:linear-gradient(135deg, #10B981, #059669);color:#FFFFFF;" title="오전 11:30 & 저녁 18:30 8대 국가 자동 대량 생산 무인 가동">
@@ -184,22 +181,6 @@ function renderHubGrid() {
 
         container.innerHTML = hubs.map((h, idx) => {
             const isMediaHub = (h.key === "shorts" || h.key === "cardnews");
-            const engineSwitchHtml = isMediaHub ? `
-                <!-- ⚡ 100% 통합 단일 표준: Google Gemini 3.1 Flash-Lite Image -->
-                <div style="background:#090C19;padding:9px 12px;border-radius:8px;border:1px solid #1E2442;margin-bottom:8px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:11px;color:#38BDF8;font-weight:700;">⚡ 비주얼 엔진:</span>
-                        <span style="font-size:10.5px;color:#F59E0B;font-weight:800;background:rgba(245,158,11,0.12);padding:2px 7px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);">
-                            🏆 Gemini 3.1 Flash-Lite
-                        </span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:9.5px;color:#94A3B8;">
-                        <span>초고속 렌더링 (3.5초)</span>
-                        <span style="color:#334155;">│</span>
-                        <span style="color:#F59E0B;font-weight:600;">장당 ~7원 · 무결점 실사</span>
-                    </div>
-                </div>
-            ` : "";
 
             return `
             <div class="action-card" id="card-easytax-${h.key}" style="background:#13172E;border:1px solid #22294E;border-top:3px solid #F59E0B;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,0.3);">
@@ -213,7 +194,6 @@ function renderHubGrid() {
                     </div>
                     <p style="font-size:11.5px;color:#94A3B8;margin:0 0 10px 0;line-height:1.4;">${h.desc}</p>
                     
-                    ${engineSwitchHtml}
                     ${renderDualTrackBadge(h, 'easytax')}
 
                     <!-- 실시간 24시간 가동 상태 바 -->
@@ -227,6 +207,26 @@ function renderHubGrid() {
 
                 <div>
                     ${isMediaHub ? `
+                    <!-- 🚀 [원클릭 즉시 생성] Wan 2.2 & 서브픽셀 매립 팩토리 -->
+                    <div style="background:#090C19;padding:8px 10px;border-radius:10px;border:1px solid rgba(212,175,55,0.4);margin-bottom:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px;">
+                            <select id="select-lang-easytax-${h.key}" style="flex:1;background:#13172E;color:#FFFFFF;border:1px solid #22294E;border-radius:6px;font-size:11px;padding:3px 4px;cursor:pointer;" title="타깃 국가/언어">
+                                <option value="vi" selected>🇻🇳 베트남 (vi)</option>
+                                <option value="uz">🇺🇿 우즈베크 (uz)</option>
+                                <option value="ko">🇰🇷 한국 (ko)</option>
+                            </select>
+                            <select id="select-amount-easytax-${h.key}" style="flex:1.2;background:#13172E;color:#F59E0B;border:1px solid #D4AF37;border-radius:6px;font-size:11px;padding:3px 4px;cursor:pointer;font-weight:700;" title="환급 금액 선택">
+                                <option value="random" selected>🎲 실사 랜덤 (180~430만)</option>
+                                <option value="3100000">₩3,100,000 (평균)</option>
+                                <option value="1850000">₩1,850,000 (1~2년차)</option>
+                                <option value="2600000">₩2,600,000 (3년차)</option>
+                                <option value="4250000">₩4,250,000 (5년 만기)</option>
+                            </select>
+                        </div>
+                        <button class="btn" id="btn-factory-easytax-${h.key}" onclick="triggerOneClickProduce('easytax', '${h.key}', this)" style="width:100%;font-size:12px;padding:8px 0;background:linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);border:none;color:#0B132B;font-weight:900;border-radius:8px;box-shadow:0 4px 12px rgba(212,175,55,0.4);cursor:pointer;" title="국세청 세금 환급 영수증 매립 원클릭 즉시 제작">
+                            ${h.key === 'shorts' ? '🎬 5초 세금 환급 숏폼 원클릭 제작' : '📸 국세청 환급 카드뉴스 원클릭 제작'}
+                        </button>
+                    </div>
                     <!-- 🌟 8대 황금 타깃 1일 2슬롯 24시간 무인 가동 및 정지 -->
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
                         <button class="btn btn-gold" id="btn-daemon-gb-easytax-${h.key}" onclick="startGoldenBatchDaemon()" style="font-size:11.5px;padding:7px 4px;font-weight:800;background:linear-gradient(135deg, #10B981, #059669);color:#FFFFFF;" title="오전 11:30 & 저녁 18:30 8대 국가 세무 자동 대량 생산 무인 가동">
@@ -577,18 +577,15 @@ async function triggerGoogleIndex() {
     }
 }
 
-// 9. 이미지 생성 엔진 단일 표준 (Google Gemini 3.1 Flash-Lite Image)
-async function setMediaEngine(channelKey, engineMode = "gemini") {
-    appendLog(`[Engine] ${channelKey} 비주얼 엔진: 🏆 Gemini 3.1 Flash-Lite Image 가동 중`, "info");
-    showToast(`[${channelKey}] 비주얼 엔진이 Gemini 3.1 Flash-Lite Image로 확정되었습니다.`);
+// 9. 비주얼 미디어 엔진 관리
+async function setMediaEngine(channelKey, engineMode = "wan") {
+    appendLog(`[Engine] ${channelKey} 비주얼 엔진 준비 완료`, "info");
 }
 
 async function loadMediaEngineSettings() {
-    // 100% Gemini 3.1 Flash-Lite Image 단일 표준 가동
 }
 
 function updateMediaEngineUI(settings = {}, stats = {}) {
-    // 단일 표준 엔진 UI
 }
 
 function refreshOverview(btn) {
@@ -600,6 +597,61 @@ function refreshOverview(btn) {
 
 // 🌟 10. 8대 황금 타깃 국가 1일 2슬롯 풀가동 제어 모듈
 let lastGoldenBatchSummary = null;
+
+// 🚀 [원클릭 즉시 제작] 대시보드 버튼 하나로 즉시 카드뉴스/숏폼 생산 및 바탕화면 출력
+async function triggerOneClickProduce(brand, mode, btnElement = null) {
+    const langSelect = document.getElementById(`select-lang-${brand}-${mode}`);
+    const lang = langSelect ? langSelect.value : "vi";
+    const amountSelect = document.getElementById(`select-amount-${brand}-${mode}`);
+    const amount = amountSelect ? amountSelect.value : "random";
+
+    const brandName = brand === "easytax" ? "EasyTax (세금 환급)" : "K-Market (생활 커뮤니티)";
+    const modeName = mode === "shorts" ? "5초 립싱크 숏폼" : "1080x1350 카드뉴스";
+    const amtLabel = brand === "easytax" ? (amount === "random" ? "🎲 실사 랜덤 금액" : `₩${Number(amount).toLocaleString()}원`) : "";
+    
+    appendLog(`[Action] 🚀 [${brandName}] ${modeName} (${lang.toUpperCase()}${amtLabel ? ' | ' + amtLabel : ''}) 원클릭 제작 요청...`, "info");
+    showToast(`🚀 [${brandName}] ${modeName} 제작을 시작합니다!`, "info");
+
+    const originalText = btnElement ? btnElement.innerHTML : "";
+    if (btnElement) {
+        btnElement.disabled = true;
+        btnElement.style.opacity = "0.7";
+        btnElement.innerHTML = `<span>⏳</span> 제작 진행 중...`;
+    }
+
+    try {
+        const res = await fetch("/api/factory/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                brand: brand,
+                mode: mode,
+                lang: lang,
+                amount: amount
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            appendLog(`[Success] 🎉 ${data.message}`, "success");
+            showToast(`🎉 제작이 시작되었습니다. 완성 후 바탕화면에 저장됩니다.`, "success");
+        } else {
+            appendLog(`[Error] ⚠️ ${data.message}`, "error");
+            showToast(data.message, "error");
+        }
+    } catch (e) {
+        appendLog(`[Error] ❌ 팩토리 통신 오류: ${e}`, "error");
+        showToast("팩토리 통신 오류", "error");
+    } finally {
+        setTimeout(() => {
+            if (btnElement) {
+                btnElement.disabled = false;
+                btnElement.style.opacity = "1";
+                btnElement.innerHTML = originalText;
+            }
+            fetchStatus();
+        }, 3000);
+    }
+}
 
 async function triggerGoldenBatchRun(contentType = 'all', btnElement = null) {
     const brand = currentBrand || 'kmarket';

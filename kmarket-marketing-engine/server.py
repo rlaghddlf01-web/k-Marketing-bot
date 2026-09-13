@@ -168,6 +168,10 @@ def log_event(text: str, log_type: str = "info"):
     if len(recent_logs) > 50:
         recent_logs.pop(0)
 
+# 🏭 원클릭 마케팅 콘텐츠 팩토리 서비스 인스턴스
+from core.engine.factory_service import FactoryService
+factory_service = FactoryService(log_callback=log_event)
+
 # 단일 채널 실물 실행기
 def execute_single_channel_task(module_name: str) -> str:
     db_mgr = DBManager()
@@ -712,6 +716,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif path == "/api/golden-batch/run":
             self._handle_post_golden_batch_run(payload)
             return
+        elif path == "/api/factory/run":
+            self._handle_factory_run(payload)
+            return
         elif path == "/api/golden-batch/daemon/start":
             self._handle_post_golden_batch_daemon_start(payload)
             return
@@ -895,6 +902,27 @@ class DashboardHandler(BaseHTTPRequestHandler):
             "success": True,
             "message": f"8대 황금 타깃 골든 배치 생산 백그라운드 가동 시작 (슬롯: {slot_name}, 브랜드: {brand}, 유형: {content_type})"
         }, ensure_ascii=False).encode("utf-8"))
+
+    def _handle_factory_run(self, payload: dict):
+        """웹 대시보드 원클릭 팩토리 콘텐츠 제작 처리"""
+        brand = payload.get("brand", "easytax")
+        mode = payload.get("mode", "cardnews")
+        lang = payload.get("lang", "vi")
+        amount = payload.get("amount", "random")
+        if str(amount).lower() != "random":
+            try:
+                amount = int(amount)
+            except Exception:
+                amount = "random"
+
+        res = factory_service.run_factory_task(
+            brand=brand,
+            mode=mode,
+            lang=lang,
+            amount=amount
+        )
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps(res, ensure_ascii=False).encode("utf-8"))
 
     def _handle_channel_start(self, module_name: str):
         global running_channels

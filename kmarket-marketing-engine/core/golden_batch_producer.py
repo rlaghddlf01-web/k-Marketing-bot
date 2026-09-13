@@ -28,7 +28,7 @@ from config import (
 )
 from modules.shorts_easytax import ShortsEasyTax
 from modules.shorts_kmarket import ShortsKMarket
-from modules.cardnews_easytax import CardnewsEasyTax
+from core.engine.cardnews_batch_producer import CardNewsBatchProducer
 from modules.cardnews_kmarket import CardnewsKMarket
 from core.db_manager import DBManager
 from core.supabase_manager import SupabaseManager
@@ -44,10 +44,10 @@ class GoldenBatchProducer:
         self.db_mgr = DBManager()
         self.supabase_mgr = SupabaseManager(self.db_mgr)
         
-        # 4대 생산 공장 인스턴스화
+        # 4대 생산 공장 인스턴스화 (이지텍스: 신형 5장 풀사이즈 카드뉴스 파이프라인 연동)
         self.shorts_easytax = ShortsEasyTax()
         self.shorts_kmarket = ShortsKMarket()
-        self.cardnews_easytax = CardnewsEasyTax()
+        self.cardnews_easytax = CardNewsBatchProducer()
         self.cardnews_kmarket = CardnewsKMarket()
         
         self.stats_file = DATA_DIR / "golden_batch_stats.json"

@@ -34,10 +34,8 @@ class ShortsKMarketLocalGPU:
         self.output_dir = OUTPUTS_DIR / "shorts_kmarket_local_gpu"
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        # 바탕화면 전용 출력 경로 (OneDrive 및 로컬 바탕화면 양방향 보장)
-        self.desktop_onedrive = Path(r"C:\Users\zkfnt\OneDrive\Desktop\숏폼_산출물\KTRS마켓_로컬GPU")
+        # 로컬 바탕화면 전용 출력 경로
         self.desktop_local = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\KTRS마켓_로컬GPU")
-        self.desktop_onedrive.mkdir(parents=True, exist_ok=True)
         self.desktop_local.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorShortsKMarket()
@@ -146,13 +144,11 @@ class ShortsKMarketLocalGPU:
             print("❌ 렌더링 실패")
             return {"success": False, "error": "mp4 rendering failed"}
 
-        # 5. 바탕화면으로 직접 복사 (모니터 즉시 확인용)
+        # 5. 로컬 바탕화면으로 직접 복사 (모니터 즉시 확인용)
         out_name = f"KTRS마켓_정품5단계_완제품쇼츠_{timestamp}.mp4"
-        dest_onedrive = self.desktop_onedrive / out_name
         dest_local = self.desktop_local / out_name
-        direct_desktop = Path(r"C:\Users\zkfnt\OneDrive\Desktop") / "KTRS마켓_정품5단계_완제품쇼츠.mp4"
+        direct_desktop = Path(r"C:\Users\zkfnt\Desktop") / "KTRS마켓_정품5단계_완제품쇼츠.mp4"
 
-        shutil.copy(mp4_path, dest_onedrive)
         shutil.copy(mp4_path, dest_local)
         shutil.copy(mp4_path, direct_desktop)
 

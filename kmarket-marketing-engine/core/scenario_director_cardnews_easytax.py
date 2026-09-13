@@ -260,6 +260,8 @@ class ScenarioDirectorCardnewsEasyTax:
             "lang": lang,
             "theme_name": theme_id,
             "theme_title": theme_name,
+            "refund_est": refund_est,
+            "refund_formatted": refund_formatted,
             "character_anchor": char_anchor,
             "episode_id": f"cardnews_easytax_{lang}_{theme_id}_{random.randint(1000, 9999)}",
             "cards": cards

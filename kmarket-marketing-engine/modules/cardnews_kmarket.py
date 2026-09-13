@@ -35,7 +35,8 @@ class CardnewsKMarket:
         self.service_id = "kmarket"
         self.output_dir = OUTPUTS_DIR / "cardnews" / "kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = DESKTOP_CARDNEWS_KMARKET
+        # 로컬 바탕화면 전용 저장 경로
+        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\카드뉴스_산출물\케이마켓")
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
 
         self.scenario_director = ScenarioDirectorCardnewsKMarket()
@@ -67,6 +68,13 @@ class CardnewsKMarket:
         logger.info(f"🛒 [K-Market 카드뉴스] 🏆 Gemini 3.1 Flash-Lite Image 엔진으로 생성")
 
         timestamp = int(time.time())
+        dt_str = time.strftime("%Y%m%d_%H%M")
+        theme_slug = scenario.get("theme_name", "general")
+        batch_folder_name = f"케이마켓_{lang.upper()}_{theme_slug}_{dt_str}"
+        batch_out_dir = self.desktop_dir / batch_folder_name
+        batch_out_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"📁 [케이마켓 카드뉴스 세트 폴더 생성]: {batch_out_dir}")
+
         saved_paths: List[Path] = []
 
         logger.info(f"🛒 [K-Market 7:3 카드뉴스 생산 시작] {lang.upper()} - {scenario.get('theme_name')} (5장 슬라이드)...")
@@ -122,28 +130,28 @@ class CardnewsKMarket:
 
 
             # 2. 7:3 분할 캔버스 합성 (1080x1350)
-            out_filename = f"kmarket_cardnews_{lang}_s{s_idx}_{timestamp}.jpg"
-            out_path = self.output_dir / out_filename
+            out_filename = f"slide_{s_idx}.jpg"
+            desktop_path = batch_out_dir / out_filename
 
             composed_path = self.composer.compose_slide(
                 top_image_path=top_img_path,
                 card_data=card,
                 slide_idx=s_idx,
                 total_slides=len(cards),
-                output_path=out_path,
+                output_path=desktop_path,
                 lang=lang
             )
 
-            # 3. 바탕화면 자동 복사
-            desktop_path = self.desktop_dir / out_filename
+            # outputs 내부 백업 보관
             try:
-                shutil.copy(composed_path, desktop_path)
-            except Exception as e:
-                logger.warning(f"바탕화면 복사 에러: {e}")
+                backup_path = self.output_dir / f"kmarket_cardnews_{lang}_s{s_idx}_{timestamp}.jpg"
+                shutil.copy(desktop_path, backup_path)
+            except Exception:
+                pass
 
-            saved_paths.append(desktop_path if desktop_path.exists() else composed_path)
+            saved_paths.append(desktop_path)
 
-        logger.info(f"🎉 [K-Market 5장 카드뉴스 완성] 총 {len(saved_paths)}장 바탕화면 저장 완료!")
+        logger.info(f"🎉 [K-Market 5장 카드뉴스 완성] 총 {len(saved_paths)}장 세트 폴더 저장 완료: {batch_out_dir}")
 
         # 4. 📢 SNS 공식 포스팅 패키지 생성 (제미나이 맞춤 제목·본문 캡션·해시태그 결합)
         char_anchor = scenario.get("character_anchor", "")
@@ -176,9 +184,9 @@ class CardnewsKMarket:
         th = channels.get("threads", {})
         tg = channels.get("telegram", {})
 
-        # 5. 📝 바탕화면 5대 SNS 채널별 알고리즘 맞춤 원클릭 메모장 파일 생성
-        caption_txt_filename = f"kmarket_cardnews_{lang}_caption_{timestamp}.txt"
-        desktop_caption_path = self.desktop_dir / caption_txt_filename
+        # 5. 📝 바탕화면 세트 폴더 내 5대 SNS 채널별 알고리즘 맞춤 원클릭 메모장 파일 생성
+        caption_txt_filename = f"SNS_포스팅_가이드_{lang.upper()}.txt"
+        desktop_caption_path = batch_out_dir / caption_txt_filename
 
         caption_content = (
             f"================================================================================\n"
@@ -241,8 +249,8 @@ class CardnewsKMarket:
             logger.warning(f"캡션 텍스트 파일 저장 실패: {e}")
 
         # 6. 🤖 자동 배포용 metadata.json 생성 (5대 채널 구조화 데이터 적재)
-        meta_json_filename = f"kmarket_cardnews_{lang}_metadata_{timestamp}.json"
-        desktop_meta_path = self.desktop_dir / meta_json_filename
+        meta_json_filename = "metadata.json"
+        desktop_meta_path = batch_out_dir / meta_json_filename
         metadata_payload = {
             "service_id": "kmarket",
             "lang": lang,
@@ -261,7 +269,7 @@ class CardnewsKMarket:
         try:
             with open(desktop_meta_path, "w", encoding="utf-8") as f:
                 json.dump(metadata_payload, f, ensure_ascii=False, indent=2)
-            logger.info(f"🤖 [자동 배포용 메타데이터] 5대 채널 JSON 저장 완료: {meta_json_filename}")
+            logger.info(f"🤖 [자동 배포용 메타데이터] 세트 폴더 JSON 저장 완료: {meta_json_filename}")
         except Exception as e:
             logger.warning(f"메타데이터 JSON 저장 실패: {e}")
 
@@ -283,6 +291,6 @@ class CardnewsKMarket:
             "caption_file": str(desktop_caption_path),
             "metadata_file": str(desktop_meta_path),
             "publish_results": publish_results,
-            "desktop_dir": str(self.desktop_dir)
+            "desktop_dir": str(batch_out_dir)
         }
 
