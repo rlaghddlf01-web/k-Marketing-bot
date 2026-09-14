@@ -226,11 +226,19 @@ def execute_single_channel_task(module_name: str) -> str:
         return f"📸 EasyTax 8대 황금 타깃 카드뉴스 [{flag} {native} ({target_lang})] (🏆 Gemini 3.1 Flash-Lite) {len(cards)}장 생성 완료"
     elif module_name == "kmarket_reddit" or module_name == "reddit":
         import importlib
+        import core.gemini_kmarket_reddit
+        import core.reddit_browser_driver
+        import core.reddit_safety_orchestrator
         import modules.reddit_kmarket
+        importlib.reload(core.gemini_kmarket_reddit)
+        importlib.reload(core.reddit_browser_driver)
+        importlib.reload(core.reddit_safety_orchestrator)
         importlib.reload(modules.reddit_kmarket)
         hunter = modules.reddit_kmarket.KMarketRedditHunter(db_mgr, supabase_mgr)
         res = hunter.run_safe_cycle()
-        if res.get("skipped_reason") == "warmup_phase":
+        if res.get("skipped_reason") == "session_expired":
+            return "🚨 K-Market 레딧 세션 만료: 브라우저 로그아웃 감지됨 (python login_kmarket_session.py 재로그인 필요)"
+        elif res.get("skipped_reason") == "warmup_phase":
             return f"🌱 K-Market 레딧 워밍업 완료: 업보트 {res.get('upvotes')}건, 비홍보 도움답변 {res.get('organic_comments')}건 (카르마 축적 중, 홍보 0건 강제 차단)"
         elif res.get("promo_comments", 0) > 0:
             return f"🎯 K-Market 레딧 안전 사이클 완료: 홍보 {res.get('promo_comments')}건, 비홍보 {res.get('organic_comments')}건, 업보트 {res.get('upvotes')}건"
@@ -238,11 +246,19 @@ def execute_single_channel_task(module_name: str) -> str:
             return f"🛡️ K-Market 레딧 안전 사이클 완료: 업보트 {res.get('upvotes')}건, 비홍보 {res.get('organic_comments')}건 (홍보 대기)"
     elif module_name == "easytax_reddit":
         import importlib
+        import core.gemini_easytax_reddit
+        import core.reddit_browser_driver
+        import core.reddit_safety_orchestrator
         import modules.reddit_easytax
+        importlib.reload(core.gemini_easytax_reddit)
+        importlib.reload(core.reddit_browser_driver)
+        importlib.reload(core.reddit_safety_orchestrator)
         importlib.reload(modules.reddit_easytax)
         hunter = modules.reddit_easytax.EasyTaxRedditHunter(db_mgr, supabase_mgr)
         res = hunter.run_safe_cycle()
-        if res.get("skipped_reason") == "warmup_phase":
+        if res.get("skipped_reason") == "session_expired":
+            return "🚨 EasyTax 레딧 세션 만료: 브라우저 로그아웃 감지됨 (python login_easytax_session.py 재로그인 필요)"
+        elif res.get("skipped_reason") == "warmup_phase":
             return f"🌱 EasyTax 레딧 워밍업 완료: 업보트 {res.get('upvotes')}건, 비홍보 도움답변 {res.get('organic_comments')}건 (카르마 축적 중, 홍보 0건 강제 차단)"
         elif res.get("promo_comments", 0) > 0:
             return f"🎯 EasyTax 레딧 안전 사이클 완료: 팩트안내 {res.get('promo_comments')}건, 비홍보 {res.get('organic_comments')}건, 업보트 {res.get('upvotes')}건"

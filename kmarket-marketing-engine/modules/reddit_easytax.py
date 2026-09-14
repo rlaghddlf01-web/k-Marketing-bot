@@ -1,7 +1,9 @@
 import os
+import re
 import sys
 import json
 import time
+
 import random
 import logging
 from pathlib import Path
@@ -47,11 +49,17 @@ class EasyTaxRedditHunter:
             supabase_mgr=self.supabase_mgr
         )
         self.orchestrator.set_promo_handler(self._execute_single_promo)
-        self.tax_keywords = [
-            "tax", "taxes", "tax refund", "year-end", "year end", "3.3%",
-            "withholding", "income tax", "e-9", "e-2", "e-1", "e-7", "d-2", "d-4", "d-10",
-            "salary deduction", "article 30", "hometax", "overpaid tax", "pension refund",
-            "national pension", "severance", "exemption", "paystub", "nts"
+        self.strong_tax_phrases = [
+            "tax refund", "tax return", "income tax", "withholding tax",
+            "year-end", "year end", "article 30", "hometax", "pension refund",
+            "national pension", "salary deduction", "paystub", "nts", "3.3%",
+            "종합소득세", "연말정산", "경정청구", "세무서", "overpaid tax"
+        ]
+        self.negative_patterns = [
+            r"\btaxi\b", r"\btaxicab\b", r"\bsyntax\b", r"\btaxidermy\b", r"\btaxonomy\b"
+        ]
+        self.tax_regex_patterns = [
+            r"\btax\b", r"\btaxes\b", r"\b3\.3%?\b"
         ]
         self.target_subreddits = [
             "Living_in_Korea", "korea", "teachinginkorea", "StudyinKorea",
@@ -102,24 +110,38 @@ class EasyTaxRedditHunter:
                 logger.info(f"[{subreddit}] EasyTax 채널 안전 한도 초과로 스킵")
                 continue
 
-            # 세무 키워드 1차 매칭 검사
+            # 1단계: 세무 키워드 1차 매칭 검사 (단어 경계 \b 및 네거티브 필터링 적용)
             combined_text = f"{title} {body}".lower()
-            has_keyword_match = any(kw.lower() in combined_text for kw in self.tax_keywords)
-            if not has_keyword_match:
+            has_strong_tax = any(p in combined_text for p in self.strong_tax_phrases)
+            if not has_strong_tax:
+                # 확실한 세무 복합어가 없는 상태에서 taxi, cab, syntax 등 네거티브 단어가 있으면 즉시 스킵
+                if any(re.search(neg, combined_text, re.IGNORECASE) for neg in self.negative_patterns):
+                    continue
+                # 단독 tax/taxes 단어 경계 검사
+                has_tax_token = any(re.search(pat, combined_text, re.IGNORECASE) for pat in self.tax_regex_patterns)
+                if not has_tax_token:
+                    continue
+
+            # 2단계: Gemini AI 정밀 시맨틱 인텐트 판별 (영화/생활 질문 오인 방지)
+            intent_res = self.gemini.reddit_engine.classify_easytax_reddit_intent(title, body)
+            if not intent_res.get("is_relevant", False):
+                logger.info(f"⏭️ [AI 필터링] EasyTax 세무 무관 글 스킵: '{title}' (사유: {intent_res.get('reason', '무관')})")
                 continue
+
+            logger.info(f"🎯 [EasyTax 세무 타깃 질문 포착!] r/{subreddit} - '{title}' (카테고리: {intent_res.get('category')})")
 
             target_lang = "en"
             base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app").rstrip("/")
             landing_url = f"{base_domain}/?lang={target_lang}"
 
-            # 2단계: Gemini 3단계 간접 홍보 법적 팩트 답변 생성
-            logger.info(f"💡 [EasyTax 매칭 성공] r/{subreddit} - '{title}'")
+            # 3단계: Gemini 3단계 간접 홍보 법적 팩트 답변 생성
             reply_content = self.gemini.reddit_engine.generate_reddit_response(
                 post_title=title,
                 post_body=body,
                 target_lang=target_lang,
                 landing_url=landing_url
             )
+
 
             # 3단계: 영구 프로필 브라우저 드라이버를 통한 무인 댓글 작성
             post_success = False

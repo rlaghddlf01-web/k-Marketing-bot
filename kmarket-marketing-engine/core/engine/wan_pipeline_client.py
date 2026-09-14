@@ -15,6 +15,7 @@ import urllib.request
 import urllib.parse
 import subprocess
 from typing import Dict, Any, List, Optional
+from PIL import Image
 import imageio_ffmpeg
 
 
@@ -113,7 +114,7 @@ class WanPipelineClient:
                 "class_type": "KSampler",
                 "inputs": {
                     "model": ["2", 0], "positive": ["7", 0], "negative": ["7", 1],
-                    "latent_image": ["7", 2], "seed": seed, "steps": 20, "cfg": 5.0,
+                    "latent_image": ["7", 2], "seed": seed, "steps": 25, "cfg": 3.8,
                     "sampler_name": "uni_pc", "scheduler": "simple", "denoise": 1.0
                 }
             },
@@ -192,7 +193,7 @@ class WanPipelineClient:
                     "positive":     ["7", 0],
                     "negative":     ["7", 1],
                     "latent_image": ["13", 0],  # T2I noise latent 대신 레퍼런스 VAE latent
-                    "seed": seed, "steps": 20, "cfg": 5.0,
+                    "seed": seed, "steps": 25, "cfg": 3.8,
                     "sampler_name": "uni_pc", "scheduler": "simple",
                     "denoise": denoise
                 }
@@ -204,6 +205,67 @@ class WanPipelineClient:
         frames = self.submit_and_wait(workflow, prefix=prefix)
         if not frames:
             raise RuntimeError("WAN img2img 동일 인물 씬 전환 생성 실패")
+        return frames[0]
+
+    def generate_face_inpaint_photo(
+        self,
+        reference_image: Image.Image,
+        positive_prompt: str,
+        negative_prompt: Optional[str] = None,
+        width: int = 832,
+        height: int = 1216,
+        seed: Optional[int] = None,
+        prefix: str = "wan_face_inpaint"
+    ) -> str:
+        """
+        알리바바 Wan 2.1 공식 논문 기반 얼굴 100% 보존 인페인팅:
+        - 얼굴/헤어는 1번 사진 100% 고정 (Denoise 0)
+        - 몸통(옷/포즈)과 배경은 새 프롬프트대로 100% 재창조 (Denoise 1.0)
+        """
+        from core.engine.wan_face_mask_inpaint_service import WanFaceMaskInpaintService
+        service = WanFaceMaskInpaintService(comfy_input_dir=self.comfy_input_dir)
+
+        if seed is None:
+            seed = int(time.time()) % 100000000
+
+        neg = negative_prompt or (
+            "bobblehead, big head, oversized head, disproportionate body, "
+            "extreme close-up, macro shot, cropped head, zoomed-in face, face taking up entire frame, "
+            "blurry, out of focus, cartoon, drawing, anime, 3d render, illustration, "
+            "bad lighting, pale white skin, deformed hands, extra fingers"
+        )
+
+        ref_filename = f"ref_{prefix}.png"
+        mask_filename = f"mask_{prefix}.png"
+
+        # 1. 마스크 생성 및 ComfyUI input 저장
+        ref_resized, mask_img, _ = service.create_face_mask(
+            ref_image=reference_image,
+            target_width=width,
+            target_height=height
+        )
+        ref_dest = os.path.join(self.comfy_input_dir, ref_filename)
+        mask_dest = os.path.join(self.comfy_input_dir, mask_filename)
+
+        ref_resized.save(ref_dest, "PNG")
+        mask_img.save(mask_dest, "PNG")
+
+        # 2. 워크플로우 구성
+        workflow = service.build_inpaint_workflow(
+            ref_filename=ref_filename,
+            mask_filename=mask_filename,
+            positive_prompt=positive_prompt,
+            negative_prompt=neg,
+            seed=seed,
+            prefix=prefix,
+            width=width,
+            height=height
+        )
+
+        # 3. 제출 및 대기
+        frames = self.submit_and_wait(workflow, prefix=prefix)
+        if not frames:
+            raise RuntimeError("WAN 얼굴 보존 인페인팅 생성 실패")
         return frames[0]
 
     def generate_s2v_video(

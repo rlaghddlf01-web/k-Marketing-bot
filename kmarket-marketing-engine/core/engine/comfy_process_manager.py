@@ -37,7 +37,7 @@ class ComfyProcessManager:
             return False
 
     @classmethod
-    def ensure_running(cls, wait_timeout: int = 50, log_callback=None) -> bool:
+    def ensure_running(cls, wait_timeout: int = 90, log_callback=None) -> bool:
         """
         ComfyUI가 이미 켜져 있으면 즉시 True 반환.
         꺼져 있으면 백그라운드로 조용히 자동 기동하고 준비될 때까지 대기.

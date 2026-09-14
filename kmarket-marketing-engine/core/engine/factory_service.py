@@ -84,7 +84,15 @@ class FactoryService:
                         from core.engine.comfy_process_manager import ComfyProcessManager
                         ComfyProcessManager.ensure_running(log_callback=self._log)
 
-                        # 2. 신형 5장 풀사이즈 카드뉴스 세트 일괄 제작
+                        # 2. 신형 5장 풀사이즈 카드뉴스 세트 일괄 제작 (모듈 실시간 리로드 보장)
+                        import importlib
+                        import core.character_anchor_cardnews_easytax
+                        import core.scenario_director_cardnews_easytax
+                        import core.engine.cardnews_batch_producer
+                        importlib.reload(core.character_anchor_cardnews_easytax)
+                        importlib.reload(core.scenario_director_cardnews_easytax)
+                        importlib.reload(core.engine.cardnews_batch_producer)
+
                         from core.engine.cardnews_batch_producer import CardNewsBatchProducer
                         producer = CardNewsBatchProducer()
                         res = producer.produce_full_set(lang=lang, amount=resolved_amount)

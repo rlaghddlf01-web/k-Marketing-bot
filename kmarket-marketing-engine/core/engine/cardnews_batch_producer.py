@@ -124,16 +124,33 @@ class CardNewsBatchProducer:
         else:
             logger.warning("⚠️ [WanPipelineClient] ComfyUI 미실행 - 기존 샘플 사진 Fallback 모드")
 
+    def generate_carousel_cardnews(
+        self,
+        lang: str = "vi",
+        theme_index: Optional[int] = None,
+        amount: int = 3100000,
+        preferred_gender: Optional[str] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """GoldenBatchProducer 등 배치 봇 엔진 호환용 alias"""
+        return self.produce_full_set(lang=lang, theme_index=theme_index, amount=amount, preferred_gender=preferred_gender, **kwargs)
+
     def produce_full_set(
         self,
         lang: str = "vi",
         theme_index: Optional[int] = None,
         amount: int = 3100000,
-        custom_hero_image: Optional[Image.Image] = None
+        custom_hero_image: Optional[Image.Image] = None,
+        preferred_gender: Optional[str] = None,
+        master_seed: Optional[int] = None
     ) -> Dict[str, Any]:
         """5장 카드뉴스 세트 및 SNS 가이드 일괄 생산"""
         # 1. 시나리오 기획 로드 (60대 테마)
-        scenario = self.scenario_director.get_carousel_scenario(lang=lang, theme_index=theme_index)
+        scenario = self.scenario_director.get_carousel_scenario(
+            lang=lang,
+            theme_index=theme_index,
+            preferred_gender=preferred_gender
+        )
         theme_id = scenario.get("theme_name", "general")
         theme_title = scenario.get("theme_title", "EasyTax Tax Refund")
         cards = scenario.get("cards", [])
@@ -157,41 +174,37 @@ class CardNewsBatchProducer:
         out_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"📂 산출물 폴더 생성: {out_dir}")
 
-        # 3. Fallback용 인물 사진 준비 (ComfyUI 미실행 시에만 사용, 로컈 바탕화면에서만 탐색)
+        # 3. Fallback용 인물 사진 준비 (ComfyUI 미실행 시에만 사용)
         if custom_hero_image is not None:
             fallback_img = custom_hero_image
         else:
-            fallback_candidate = self.desktop / "vietnamese_deep_focus_presenter.png"
-            if fallback_candidate.exists():
-                fallback_img = Image.open(str(fallback_candidate))
-            else:
-                # 최후 fallback: 딥네이비 단색 캔버스
-                fallback_img = Image.new("RGB", (1080, 1350), (11, 19, 43))
+            # ComfyUI 미실행 시 기본 캔버스
+            fallback_img = Image.new("RGB", (1080, 1350), (11, 19, 43))
 
-        # 4. [1단계] 5장 베이스 사진 순차 생성 (Slide 1: T2I → Slide 2,4: img2img 동일인물 → Slide 3,5: T2I 데스크씬)
-        logger.info("🎨 [Phase 1] 슬라이드 베이스 사진 WAN 생성 시작 (1→2→3→4→5)...")
+        # 4. [1단계] 5장 베이스 사진 순차 생성 (1번 T2I 마스터 ➔ 2, 3, 4, 5번 전 슬라이드 동일 인물 img2img)
+        logger.info("🎨 [Phase 1] 1~5번 전 슬라이드 동일 인물 WAN 사진 생성 시작...")
         base_photos: Dict[int, Image.Image] = {}
         slide1_ref_path: Optional[str] = None
+        
+        # 5장 세트 전체 캐릭터 얼굴 100% 일치를 위한 마스터 시드 발급
+        import random
+        if master_seed is None:
+            master_seed = random.randint(1000000, 99999999)
+        logger.info(f"🔒 [캐릭터 일치 마스터 시드 확정]: {master_seed}")
 
         for card in sorted(cards, key=lambda c: c.get("slide_idx", 1)):
             s_idx = card.get("slide_idx", 1)
-            base_photo = self._generate_slide_photo(
-                s_idx=s_idx,
-                card_data=card,
-                fallback_img=fallback_img,
-                reference_image_path=slide1_ref_path  # 1번 생성 완료 후 2,4번에 전달
-            )
+            if s_idx == 1 and custom_hero_image is not None:
+                base_photo = custom_hero_image
+                logger.info("🌟 [Slide 1] 검증 승인된 마스터 주인공 인물 사진(custom_hero_image) 직접 적용!")
+            else:
+                base_photo = self._generate_slide_photo(
+                    s_idx=s_idx,
+                    card_data=card,
+                    fallback_img=fallback_img,
+                    master_seed=master_seed
+                )
             base_photos[s_idx] = base_photo
-
-            # 1번 사진 생성 직후 → img2img 레퍼런스로 임시 저장 (손/폰 오버레이 전 순수 사진)
-            if s_idx == 1 and self._wan_available:
-                try:
-                    ref_temp = out_dir / "slide1_base_reference.png"
-                    base_photo.save(str(ref_temp), "PNG")
-                    slide1_ref_path = str(ref_temp)
-                    logger.info(f"📌 [Slide 1] img2img 레퍼런스 저장 완료: {ref_temp.name}")
-                except Exception as e:
-                    logger.warning(f"레퍼런스 저장 실패: {e}")
 
         # 5. [2단계] 합성 + 텍스트 오버레이 + 저장
         logger.info("🖌️ [Phase 2] 합성 및 텍스트 오버레이...")
@@ -239,13 +252,12 @@ class CardNewsBatchProducer:
         s_idx: int,
         card_data: Dict[str, Any],
         fallback_img: Image.Image,
-        reference_image_path: Optional[str] = None
+        master_seed: int = 2026
     ) -> Image.Image:
         """
-        슬라이드별 전용 사진을 WAN으로 생성.
-        - Slide 1, 3, 5: 순수 T2I (generate_t2i_master)
-        - Slide 2, 4: img2img (generate_t2i_img2img) → Slide 1 레퍼런스로 동일 인물 유지
-        - ComfyUI 미실행 시: fallback_img 반환
+        슬라이드별 씬 사진을 WAN T2I로 독립 생성 (동일 캐릭터 앵커 + 동일 마스터 시드):
+        - Slide 1~5: 전 슬라이드 독립 T2I (generate_t2i_master, seed=master_seed)
+        - 60% 황금비율 미디엄 샷 적용 + 씬별 100% 다른 의상/배경/포즈 연출
         """
         if not self._wan_available:
             logger.warning(f"[Slide {s_idx}] ComfyUI 미실행 → Fallback 사용")
@@ -262,28 +274,19 @@ class CardNewsBatchProducer:
         prefix = f"cardnews_easytax_slide{s_idx}_{int(time.time())}"
 
         try:
-            # 슬라이드 2번(공장현장), 4번(귀국/감동): img2img로 동일 인물 유지
-            if s_idx in [2, 4] and reference_image_path and os.path.exists(reference_image_path):
-                logger.info(f"🎨 [Slide {s_idx}] WAN img2img 생성 (Slide 1 동일 인물 유지) → {prefix}")
-                generated_path = self.wan_client.generate_t2i_img2img(
-                    positive_prompt=positive_prompt,
-                    reference_image_path=reference_image_path,
-                    negative_prompt=negative_prompt,
-                    denoise=0.70,
-                    width=width,
-                    height=height,
-                    prefix=prefix
-                )
-            else:
-                # 슬라이드 1번(T2I 마스터컷), 3번(데스크씬), 5번(데스크씬): 순수 T2I
-                logger.info(f"🎨 [Slide {s_idx}] WAN T2I 생성 시작 → {prefix}")
-                generated_path = self.wan_client.generate_t2i_master(
-                    positive_prompt=positive_prompt,
-                    negative_prompt=negative_prompt,
-                    width=width,
-                    height=height,
-                    prefix=prefix
-                )
+            # 🎯 [전 슬라이드 독립 T2I + 마스터 시드 동기화]
+            # - 이전 슬라이드의 옷/배경/포즈가 잔상으로 남는 img2img 전면 폐기
+            # - 슬라이드별 100% 다른 의상/포즈/배경을 완벽한 60% 미디엄 샷으로 독립 생성
+            # - 동일 캐릭터 앵커 프롬프트 + 동일 master_seed로 동일 인물 정체성 보존
+            logger.info(f"🎨 [Slide {s_idx}] WAN T2I 씬 사진 생성 (seed={master_seed}) → {prefix}")
+            generated_path = self.wan_client.generate_t2i_master(
+                positive_prompt=positive_prompt,
+                negative_prompt=negative_prompt,
+                width=width,
+                height=height,
+                seed=master_seed,
+                prefix=prefix
+            )
 
             generated_img = Image.open(generated_path).convert("RGB")
             logger.info(f"✅ [Slide {s_idx}] WAN 생성 완료: {generated_path}")
@@ -304,33 +307,38 @@ class CardNewsBatchProducer:
 
         # A. 슬라이드 번호에 따라 스마트폰 화면 인셋 합성 (이미 WAN으로 생성된 base_photo 사용)
         if s_idx == 1:
-            # 1번: WAN 생성 인물 사진 위에 국세청 입금 영수증 스마트폰 좌측 3D 플로팅
             ui_img = self.ui_template.render(amount=amount)
-            composite_photo = self.inset_compositor.composite_custom_ui_onto_photo(
-                base_photo=base_photo,
-                ui_image=ui_img,
-                position="left_floating",
-                scale=0.56
-            )
+            # 1. 인물이 손에 쥔 스마트폰 액정 영역에 직접 정밀 광학 매립 시도
+            try:
+                composite_photo = self.embedder.embed_screen(base_image=base_photo, ui_image=ui_img)
+                logger.info("📱 [Slide 1] 인물 스마트폰 액정에 환급 영수증 정밀 매립 성공!")
+            except Exception as e:
+                logger.info(f"📱 [Slide 1] 액정 직접 매립 불가 ({e}) -> 좌측 안전 여백 3D 플로팅 적용")
+                composite_photo = self.inset_compositor.composite_custom_ui_onto_photo(
+                    base_photo=base_photo,
+                    ui_image=ui_img,
+                    position="left_floating",
+                    scale=0.50
+                )
         elif s_idx == 3:
-            # 3번: WAN 생성 데스크 씬 사진 위에 이지택스 앱 0단계 모의조회 화면 좌측 플로팅
+            # 3번: 1번 동일 주인공 인물 사진 위에 이지택스 앱 0단계 모의조회 화면 좌측 플로팅
             screen_path = self.app_capturer.get_screen_path(lang=lang, screen_type="step0")
             composite_photo = self.inset_compositor.composite_easytax_screen_onto_photo(
                 base_photo=base_photo,
                 screen_img_path=screen_path,
                 lang=lang,
                 position="left_floating",
-                scale=0.56
+                scale=0.50
             )
         elif s_idx == 5:
-            # 5번: WAN 생성 데스크 씬 사진 위에 이지택스 앱 메인 홈 1분 조회 CTA 화면 좌측 플로팅
+            # 5번: 1번 동일 주인공 인물 사진 위에 이지택스 앱 메인 홈 1분 조회 CTA 화면 좌측 플로팅
             screen_path = self.app_capturer.get_screen_path(lang=lang, screen_type="home_cta")
             composite_photo = self.inset_compositor.composite_easytax_screen_onto_photo(
                 base_photo=base_photo,
                 screen_img_path=screen_path,
                 lang=lang,
                 position="left_floating",
-                scale=0.56
+                scale=0.50
             )
         else:
             # 2번 (공장/노동 현장), 4번 (귀국/감동): img2img로 동일 인물 유지된 사진 그대로 사용
@@ -416,13 +424,55 @@ class CardNewsBatchProducer:
             )
             cur_y += 6  # 불릿 줄 간 여백
 
-        # 하단 CTA 버튼 (언어별 맞춤 버튼 텍스트)
-        if lang == "vi":
-            btn_text = "Kiểm tra tiền hoàn thuế miễn phí ngay  >" if s_idx in [1, 5] else "Xem tiếp nội dung tiếp theo  >"
-        elif lang == "uz":
-            btn_text = "Qaytariladigan pulni bepul tekshirish  >" if s_idx in [1, 5] else "Keyingi qismni ko'rish  >"
-        else:
-            btn_text = "지금 내 환급금 무료 조회하기  >" if s_idx in [1, 5] else "다음 내용 확인하기  >"
+        # 🎯 8개국어 맞춤 CTA 버튼 텍스트 사전 등록 (글자 깨짐 100% 박멸)
+        cta_i18n = {
+            "uz": {
+                "cta": "Qaytariladigan pulni bepul tekshirish  >",
+                "next": "Keyingi qismni ko'rish  >"
+            },
+            "vi": {
+                "cta": "Kiểm tra tiền hoàn thuế miễn phí ngay  >",
+                "next": "Xem tiếp nội dung tiếp theo  >"
+            },
+            "mn": {
+                "cta": "Татварын буцаан олголтоо шалгах  >",
+                "next": "Дараагийн хэсгийг үзэх  >"
+            },
+            "th": {
+                "cta": "ตรวจสอบเงินคืนภาษีฟรีทันที  >",
+                "next": "ดูเนื้อหาถัดไป  >"
+            },
+            "km": {
+                "cta": "ពិនិត្យប្រាក់ពន្ធឥតគិតថ្លៃ  >",
+                "next": "មើលផ្នែកបន្ទាប់  >"
+            },
+            "ne": {
+                "cta": "कर फिर्ता रकम नि:शुल्क हेर्नुहोस्  >",
+                "next": "अर्को भाग हेर्नुहोस्  >"
+            },
+            "id": {
+                "cta": "Cek pengembalian pajak gratis sekarang  >",
+                "next": "Lihat bagian selanjutnya  >"
+            },
+            "my": {
+                "cta": "အခမဲ့ အခွန်ပြန်အမ်းငွေ စစ်ဆေးရန်  >",
+                "next": "နောက်တစ်ပိုင်းကို ကြည့်ပါ  >"
+            },
+            "ru": {
+                "cta": "Проверить возврат налога бесплатно  >",
+                "next": "Смотреть дальше  >"
+            },
+            "ko": {
+                "cta": "지금 내 환급금 무료 조회하기  >",
+                "next": "다음 내용 확인하기  >"
+            },
+            "en": {
+                "cta": "Check your tax refund for free now  >",
+                "next": "See the next slide  >"
+            }
+        }
+        btn_dict = cta_i18n.get(lang, cta_i18n["en"])
+        btn_text = btn_dict["cta"] if s_idx in [1, 5] else btn_dict["next"]
 
         btn_bg = (212, 175, 55) if s_idx in [1, 5] else (30, 41, 59)
         btn_fg = (15, 23, 42)   if s_idx in [1, 5] else (255, 255, 255)
@@ -442,39 +492,59 @@ class CardNewsBatchProducer:
         amount: int,
         cards: List[Dict[str, Any]]
     ):
-        """스레드, 인스타그램, 페이스북, 텔레그램 4대 채널별 포스팅 가이드 텍스트 저장"""
+        """스레드, 인스타그램, 페이스북, 텔레그램 4대 채널별 포스팅 가이드 텍스트 저장 (8개국어 다국어화)"""
         amount_fmt = f"{amount:,} KRW"
         
+        # 언어별 고유 바이럴 해시태그 사전
+        lang_hashtags = {
+            "uz": "#EasyTax #SoliqQaytarish #DaromadSoligi #E9Visa #JanubiyKoreya #OzbeklarKoreyada #KoreyadaHayot #E7Visa #KTRS #SoliqMaslahati",
+            "vi": "#EasyTax #HoànThuế #ThuếThuNhập #E9Visa #LaoĐộngHànQuốc #CuộcSốngHànQuốc #ViệtNamTạiHàn #이지택스 #외국인세금환급 #조특법30조",
+            "mn": "#EasyTax #ТатварБуцаанОлголт #E9Виз #СолонгосДахьМонголчууд #СолонгосынАмьдрал #ТатварынХөнгөлөлт #KTRS",
+            "th": "#EasyTax #ขอคืนภาษีเกาหลี #แรงงานไทยในเกาหลี #วีซ่าE9 #ชีวิตในเกาหลี #คนไทยในเกาหลี #KTRS",
+            "km": "#EasyTax #បង្វិលពន្ធកូរ៉េ #ពលករខ្មែរនៅកូរ៉េ #ទិដ្ឋាការE9 #ជីវិតនៅកូរ៉េ #KTRS",
+            "ne": "#EasyTax #कोरियाकरफिर्ता #नेपालीकोरिया #E9भिसा #कोरियामाजीवन #KTRS",
+            "id": "#EasyTax #RefundPajakKorea #TKIJepangKorea #VisaE9 #PekerjaMigranIndonesia #KTRS",
+            "my": "#EasyTax #ကိုရီးယားအခွန်ပြန်အမ်းငွေ #မြန်မာလုပ်သား #E9ဗီဇာ #KTRS",
+            "ru": "#EasyTax #ВозвратНалогаКорея #РаботаВКорее #ВизаE9 #РусскоязычныеВКорее #KTRS"
+        }
+        hashtags = lang_hashtags.get(lang, "#EasyTax #KoreaTaxRefund #E9Visa #WorkInKorea #ForeignWorker")
+
+        # 1번 및 5번 카드 카피 추출
+        card1_title = cards[0].get("title", "") if len(cards) > 0 else ""
+        card5_title = cards[4].get("title", "") if len(cards) > 4 else ""
+
         content = f"""================================================================================
 📢 [EasyTax 카드뉴스 공식 SNS 포스팅 패키지] ({lang.upper()} / {amount_fmt})
 주제: {theme_title}
+타깃 언어: {lang.upper()}
+공식 웹앱 링크: https://ktrs-service.vercel.app/?lang={lang}
 ================================================================================
 
 1. 🧵 스레드 (Threads) 포스팅 팩
 --------------------------------------------------------------------------------
 [헤드라인 텍스트]:
-한국에서 일하는 외국인 친구들, 작년에 낸 세금 얼마 돌려받았어? 🔥
-국세청 조세특례제한법 30조로 {amount_fmt} 입금 완료된 실제 사례 공유함!
+🔥 {card1_title} ({amount_fmt})
 
 [본문]:
-외국인 근로자는 최대 90%까지 세금 감면받을 수 있는데 대부분 몰라서 안 찾아감 😭
-5년 지나면 국가로 귀속돼서 영영 못 받으니까 지금 바로 확인해봐.
-착수금 0원이고 국세청에서 돈 먼저 들어온 다음에 정산하는 거라 사기 걱정 전혀 없음!
+대한민국 국세청(NTS) 조세특례제한법 제30조 외국인 소득세 최대 90% 감면 혜택 안내.
+지난 5년 동안 성실히 일하며 납부한 세금을 단 1분 만에 무료로 모의 계산해보세요.
+착수금/선결제 0원, 국세청에서 환급금이 먼저 입금된 후 정산하는 100% 안전 후불제입니다.
 
-프로필 링크 누르면 1분 만에 무료로 얼마 나오는지 바로 조회 가능함. 다들 댓글로 얼마 나왔는지 공유해보자 👇
+👉 {card5_title}
+링크: https://ktrs-service.vercel.app/?lang={lang}
 
 [해시태그]:
-#이지택스 #외국인세금환급 #E9비자 #한국생활 #소득세환급 #연말정산
+{hashtags}
 
 
 2. 📸 인스타그램 (Instagram) 포스팅 팩
 --------------------------------------------------------------------------------
 [본문 캡션]:
 🇰🇷 대한민국 국세청 공식 세무 환급 안내
-"한국에서 땀 흘려 열심히 일한 당신, {amount_fmt} 당연히 찾아가세요!"
+"{card1_title} - {amount_fmt} 입금 완료!"
 
 외국인 근로자를 위한 90% 소득세 감면 혜택 (조세특례제한법 제30조)
-신청만 하면 지난 5년 동안 낸 세금이 내 통장으로 전액 입금됩니다 💸
+신청만 하면 지난 5년 동안 낸 세금이 내 통장으로 안전하게 입금됩니다 💸
 
 ✨ 이지택스(EasyTax) 3대 안심 보증:
 1️⃣ 착수금/선결제 0원! (국세청 환급금 먼저 입금 후 후불 정산)
@@ -484,21 +554,21 @@ class CardNewsBatchProducer:
 지금 프로필 링크(Link in Bio)를 누르고 숨어있는 내 환급금을 확인하세요! 🔍
 
 [SEO 바이럴 해시태그]:
-#EasyTax #HoànThuế #ThuếThuNhập #E9Visa #LaoĐộngHànQuốc #CuộcSốngHànQuốc #ViệtNamTạiHàn #이지택스 #외국인세금환급 #조특법30조 #국세청환급 #E9근로자 #E7비자 #유학생환급 #소득세감면 #환급금조회
+{hashtags} #외국인세금환급 #조특법30조 #국세청환급 #E9근로자 #E7비자 #소득세감면 #환급금조회
 
 
 3. 📘 페이스북 (Facebook) 커뮤니티 그룹 포스팅 팩
 --------------------------------------------------------------------------------
 [제목]:
-[필독] 외국인 근로자 소득세 최대 90% 환급 신청 안내 ({amount_fmt} 수령 실사례)
+[필독] {theme_title} - 소득세 최대 90% 환급 신청 안내 ({amount_fmt})
 
 [본문]:
-한국의 공장, 농축산, 건설, 물류 현장에서 정직하게 일하시는 외국인 여러분 안녕하십니까.
+한국의 제조 공장, 농축산, 건설, 물류 현장에서 땀 흘려 일하시는 근로자 여러분 안녕하십니까.
 최근 5년 동안 대한민국 국세청에 납부하신 소득세 중 최대 90%를 합법적으로 돌려받으실 수 있습니다.
 
 📌 핵심 안내 사항:
 - 조세특례제한법 제30조에 따른 중소기업 취업자 소득세 감면 혜택
-- 평균 환급액: 200만 ~ 450만 원 상당 ({amount_fmt} 입금 완료 사례 다수)
+- 평균 환급액: 200만 ~ 450만 원 상당 ({amount_fmt} 실사례 다수)
 - 선결제 수수료 0원 (국세청에서 입금 확인 후 정산하는 안전 후불제)
 
 5년의 법적 소멸시효가 지나면 세금이 국가로 환수되오니, 지금 바로 공식 링크에서 무료 조회를 진행해보시기 바랍니다.
@@ -510,7 +580,7 @@ class CardNewsBatchProducer:
 --------------------------------------------------------------------------------
 ⚡ [공지] 대한민국 국세청 외국인 근로자 세금 환급 안내
 
-💰 예상 환급금: {amount_fmt} (실제 입금 완료)
+💰 예상 환급금: {amount_fmt}
 ✅ 대상 비자: E-9, E-7, H-2, F-4, D-2 등 외국인 근로자
 🛡️ 수수료: 0원 (100% 성공 후불제, 사전 비용 없음)
 
@@ -521,6 +591,7 @@ class CardNewsBatchProducer:
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
+            logger.info(f"📄 [{lang.upper()}] 다국어 SNS 가이드 저장 완료: {file_path.name}")
         except Exception as e:
             logger.warning(f"SNS 가이드 작성 에러: {e}")
 

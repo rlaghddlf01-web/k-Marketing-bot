@@ -43,14 +43,14 @@ class ScenarioDirectorCardnewsEasyTax:
         self.theme_keys = [t["id"] for t in self.themes]
         self._current_index = 0
 
-    def _match_persona(self, theme: Dict[str, Any]) -> Dict[str, Any]:
+    def _match_persona(self, theme: Dict[str, Any], preferred_gender: Optional[str] = None) -> Dict[str, Any]:
         """테마의 비자/타깃에 맞춰 최적의 페르소나를 자동 매칭 (남성 40% : 여성 60% 비율 엄격 유지)"""
         target = theme.get("target", "").lower()
         cat = theme.get("cat", "")
         theme_id = theme.get("id", "")
 
-        # 🎯 [대표님 절대 지침] 남성 4 : 여성 6 황금 성비 가중치 선택
-        target_gender = random.choices(["female", "male"], weights=[60, 40], k=1)[0]
+        # 🎯 [대표님 절대 지침] 남성 4 : 여성 6 황금 성비 가중치 선택 (선호 성별 지정 시 우선 반영)
+        target_gender = preferred_gender if preferred_gender in ["female", "male"] else random.choices(["female", "male"], weights=[60, 40], k=1)[0]
 
         # 1. D-2 유학생 타깃
         if "d-2" in target or "유학" in target or "student" in theme_id:
@@ -75,7 +75,7 @@ class ScenarioDirectorCardnewsEasyTax:
             gender_matched = [p for p in e9_pool if p["gender"] == target_gender]
             return gender_matched[0] if gender_matched else random.choice(e9_pool)
 
-    def get_carousel_scenario(self, lang: str = "vi", theme_index: Optional[int] = None) -> Dict[str, Any]:
+    def get_carousel_scenario(self, lang: str = "vi", theme_index: Optional[int] = None, preferred_gender: Optional[str] = None) -> Dict[str, Any]:
         """카드뉴스 전용 독립 캐릭터 앵커로 1, 2, 4번 슬라이드 100% 동일 인물 보장 5장 카드뉴스 생성"""
         from config import DATA_DIR
         import json
@@ -109,7 +109,7 @@ class ScenarioDirectorCardnewsEasyTax:
         refund_formatted = f"{refund_est:,} KRW"
 
         # 1. 🎯 테마 맞춤형 7대 비자별 페르소나 및 독립 캐릭터 앵커 생성
-        matched_persona = self._match_persona(chosen_theme)
+        matched_persona = self._match_persona(chosen_theme, preferred_gender=preferred_gender)
         char_anchor = build_easytax_cardnews_char_anchor(
             lang=lang,
             gender=matched_persona["gender"],
@@ -138,37 +138,36 @@ class ScenarioDirectorCardnewsEasyTax:
         # 2번: 치열한 작업 현장(공장/농장/물류) 속 작업복을 착용하고 땀 흘리며 일하는 동일 인물 주인공
         if any(w in theme_text_lower for w in ["flight", "vacation", "비행기", "여행", "귀국"]):
             s2_prompt = (
-                f"working diligently amidst busy Korean manufacturing factory assembly line or workshop, "
+                f"working diligently amidst busy industrial manufacturing factory assembly line or workshop, "
                 f"wearing realistic industrial factory work uniform with safety gear, "
                 f"sweat glistening on brow, honest hardworking authentic expression, proud determined eyes"
             )
         elif any(w in theme_text_lower for w in ["parent", "house", "송금", "가족", "효도"]):
             s2_prompt = (
-                f"wearing authentic Korean factory work jacket, taking a brief respectful breath during night shift, "
+                f"wearing authentic industrial factory work jacket, taking a brief respectful breath during shift, "
                 f"gentle sincere thoughtful face, wiping sweat with honest hardworking posture, factory background with machinery"
             )
         elif any(w in theme_text_lower for w in ["tuition", "student", "등록금", "유학", "d-2", "알바"]):
             s2_prompt = (
                 f"wearing convenience store / restaurant work apron or delivery jacket, honest student working evening shift, "
-                f"tired but determined eyes, genuine hardworking student in Korea"
+                f"tired but determined eyes, genuine hardworking student"
             )
         else:
             s2_prompt = (
-                f"wearing industrial work clothes in realistic Korean manufacturing or logistics warehouse, "
+                f"wearing industrial work clothes in realistic manufacturing or logistics warehouse, "
                 f"honest sincere expression of dedicated foreign worker, holding tools, hardworking sweat"
             )
 
-        # 3번: [이지텍스 앱 환급 0단계 모의조회] 모던한 금융 오피스 원목 데스크 실사 배경 (스마트폰 인셋 탑재)
+        # 3번: [이지텍스 앱 환급 0단계 모의조회] 1번과 동일 인물이 스마트폰 없이 아늑한 카페/방에서 안도하는 컷
         s3_prompt = (
-            "clean minimalist modern finance office wooden desk background, smooth warm oak wood grain surface, "
-            "elegant luxury pen, clean glass paperweight, warm ceramic cup of coffee, gentle natural window sunlight, "
-            "clean empty center desk surface ready for smartphone display, 8k commercial still-life photograph"
+            "sitting relaxed in a warm quiet sunlit cafe or cozy room, completely empty natural hands resting on table or gesturing gently towards the left with a peaceful joyful relieved smile, "
+            "radiant proud reassuring expression, clean negative space on the left, sharp focus, NO smartphone in hand"
         )
 
         # 4번: [사연의 절정/꿈의 실현 현장 컷] 동일 주인공이 고향 갈 짐을 싸거나 항공권/가족사진을 보며 활짝 웃는 감동 컷
         if any(w in theme_text_lower for w in ["flight", "vacation", "비행기", "여행", "귀국", "고향"]):
             s4_prompt = (
-                "happily packing travel luggage with Korean gifts and holding flight ticket home, "
+                "happily packing travel luggage with souvenirs and holding flight ticket home, "
                 "radiant proud smile, pure homecoming joy in bright morning sunlight"
             )
         elif any(w in theme_text_lower for w in ["parent", "house", "송금", "가족", "효도"]):
@@ -178,19 +177,19 @@ class ScenarioDirectorCardnewsEasyTax:
             )
         elif any(w in theme_text_lower for w in ["tuition", "student", "등록금", "유학", "d-2", "알바"]):
             s4_prompt = (
-                "standing proud on Korean university campus walkway holding paid tuition receipt, "
+                "standing proud on university campus walkway holding paid tuition receipt, "
                 "bright confident smile, hopeful student looking forward to a bright future"
             )
         else:
             s4_prompt = (
-                "packing travel luggage with Korean gifts and holding flight ticket, "
-                "triumphant proud smile, feeling of achieving dreams in Korea"
+                "packing travel luggage with souvenirs for family and holding flight ticket, "
+                "triumphant proud smile, feeling of achieving dreams"
             )
 
-        # 5번: [이지텍스 앱 1분 조회 CTA] 따뜻한 홈/오피스 데스크 실사 배경 (스마트폰 인셋 탑재)
+        # 5번: [이지텍스 앱 1분 조회 CTA] 1번과 동일 인물이 스마트폰 없이 커피잔 앞 엄지척(👍)으로 "지금 확인해봐!" 권유하는 컷
         s5_prompt = (
-            "modern cozy wooden desk surface with warm ambient lighting, small green potted succulent plant on side, "
-            "inviting ceramic coffee mug, blurred indoor cozy living room background, clean empty center desk ready for smartphone display, 8k commercial photograph"
+            "sitting at a modern stylish cafe table with a warm coffee mug, looking directly at camera with an enthusiastic inviting smile, "
+            "giving a confident thumbs-up sign (thumbs up) or welcoming open hand gesture to the viewer, encouraging them to check their tax refund, clean negative space on the left, sharp focus, NO smartphone in hand"
         )
 
         scene_actions = {
@@ -207,38 +206,50 @@ class ScenarioDirectorCardnewsEasyTax:
             action_desc = scene_actions.get(idx, "working in workplace")
 
             if idx == 1:
-                # 1번: 일상 실내 주인공 (인물 락 + 스마트폰 통지 인셋)
+                # 1번: 일상 실내 주인공 (유일하게 스마트폰 전면 파지 + 영수증 매립)
                 full_prompt = build_easytax_cardnews_scene_prompt(slide_idx=1, char=char_anchor, scene_action=action_desc)
-                neg_prompt = build_easytax_cardnews_negative_prompt(lang=lang, extra="upside down phone, deformed hand holding phone")
+                neg_prompt = build_easytax_cardnews_negative_prompt(lang=lang, extra="upside down phone, deformed hand holding phone, work uniform, factory, workshop, machinery")
                 is_scene_focus = False
                 is_app_screen = False
                 app_screen_type = None
             elif idx == 2:
-                # 2번: 일터 현장의 동일 인물 주인공 (1번 슬라이드와 100% 동일 인물 락)
+                # 2번: 일터 현장의 동일 인물 주인공 (스마트폰 절대 금지!)
                 full_prompt = build_easytax_cardnews_scene_prompt(slide_idx=2, char=char_anchor, scene_action=action_desc)
-                neg_prompt = build_easytax_cardnews_negative_prompt(lang=lang, extra="suit, tie, luxury clothes")
+                neg_prompt = build_easytax_cardnews_negative_prompt(
+                    lang=lang,
+                    extra="suit, tie, luxury clothes, same room, same sofa, same living room, cafe background, cozy room, bookshelf, indoor plants, window sunlight, holding smartphone, phone in hand, smartphone, mobile device, casual clothes, t-shirt, sweater"
+                )
                 is_scene_focus = False
                 is_app_screen = False
                 app_screen_type = None
             elif idx == 3:
-                # 3번: 실제 이지텍스 앱 화면 (환급 0단계 모의 조회)
-                full_prompt = f"{action_desc}, master commercial product photography, 8k"
-                neg_prompt = "human face close-up, people, distorted desk, blurry, 3d render, cartoon, papers with writing, text on paper, handwriting, gibberish letters, messy papers, documents"
-                is_scene_focus = True
+                # 3번: 1번 주인공 동일 인물이 스마트폰 없이 카페/방에서 안도하는 컷 (스마트폰 절대 금지!)
+                full_prompt = build_easytax_cardnews_scene_prompt(slide_idx=3, char=char_anchor, scene_action=action_desc)
+                neg_prompt = build_easytax_cardnews_negative_prompt(
+                    lang=lang,
+                    extra="smartphone, phone, mobile device, holding phone, phone in hand, black screen phone, dead screen, work uniform, factory, workshop, machinery, tools, assembly line, living room sofa"
+                )
+                is_scene_focus = False
                 is_app_screen = True
                 app_screen_type = "step0"
             elif idx == 4:
-                # 4번: 사연의 결실 현장 컷 (1번, 2번 슬라이드와 100% 동일 인물 락)
+                # 4번: 사연의 결실 여행/귀국 현장 컷 (스마트폰 절대 금지!)
                 full_prompt = build_easytax_cardnews_scene_prompt(slide_idx=4, char=char_anchor, scene_action=action_desc)
-                neg_prompt = build_easytax_cardnews_negative_prompt(lang=lang)
+                neg_prompt = build_easytax_cardnews_negative_prompt(
+                    lang=lang,
+                    extra="smartphone, phone, mobile device, holding phone, phone in hand, work uniform, factory, workshop, machinery, assembly line, living room, sofa, plants"
+                )
                 is_scene_focus = False
                 is_app_screen = False
                 app_screen_type = None
             else:
-                # 5번: 실제 이지텍스 앱 메인 화면 (1분 조회 시작 CTA)
-                full_prompt = f"{action_desc}, master commercial product photography, 8k"
-                neg_prompt = "human face close-up, people, ugly, blurry, 3d render, cartoon, laptop screen text, screens with text, papers with writing, messy desk, gibberish letters"
-                is_scene_focus = True
+                # 5번: 1번 주인공 동일 인물이 카페에서 엄지척 권유하는 결말 컷 (스마트폰 절대 금지!)
+                full_prompt = build_easytax_cardnews_scene_prompt(slide_idx=5, char=char_anchor, scene_action=action_desc)
+                neg_prompt = build_easytax_cardnews_negative_prompt(
+                    lang=lang,
+                    extra="smartphone, phone, mobile device, holding phone, phone in hand, black screen phone, dead screen, work uniform, factory, workshop, machinery, airport, luggage, living room sofa"
+                )
+                is_scene_focus = False
                 is_app_screen = True
                 app_screen_type = "home_cta"
 

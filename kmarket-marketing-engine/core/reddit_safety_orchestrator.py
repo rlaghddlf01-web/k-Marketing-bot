@@ -294,9 +294,14 @@ class RedditSafetyOrchestrator:
                 results["skipped_reason"] = f"cooldown_alert_{health_status['alert_level']}"
                 return results
 
-        # 1. 카르마 확인
+        # 1. 카르마 및 로그인 세션 유효성 확인
         try:
             karma_info = self.driver.get_account_karma()
+            if karma_info.get("session_expired") or karma_info.get("logged_in") is False:
+                logger.error(f"🚨 [{self.service_id.upper()}] 레딧 브라우저 세션이 만료되었습니다. 안전을 위해 이번 사이클을 건너뜁니다.")
+                logger.error(f"👉 터미널에서 'python login_{self.service_id}_session.py' 를 실행하여 1회 재로그인해 주세요.")
+                results["skipped_reason"] = "session_expired"
+                return results
             if karma_info.get("karma", 0) > 0 or karma_info.get("username"):
                 self.health.update_karma(karma_info["karma"], karma_info.get("username"))
                 results["karma_checked"] = True

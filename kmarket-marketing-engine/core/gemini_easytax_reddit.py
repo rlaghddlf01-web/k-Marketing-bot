@@ -81,7 +81,102 @@ class EasyTaxGeminiReddit:
                 return json.load(f)
         return {}
 
+    def classify_easytax_reddit_intent(self, post_title: str, post_body: str) -> Dict[str, Any]:
+        """
+        💰 [EasyTax 외국인 세무/비자 질문 정밀 시맨틱 인텐트 판별기]
+        1. 룰 기반 네거티브/포지티브 단어 경계(\b) 사전 필터링 (영화 택시운전사, 교통 택시 등 원천 차단)
+        2. Gemini 3.1 Flash-Lite AI를 통한 실시간 문맥 인텐트 검증
+        3. AI 장애 시 무결성 보장 Fallback 룰 엔진
+        """
+        combined = f"{post_title} {post_body}".lower()
+
+        # 1. 강력한 네거티브 패턴 검사 (영화, 택시, 프로그래밍 문법 등)
+        negative_patterns = [
+            r"\btaxi\b", r"\btaxicab\b", r"\bsyntax\b", r"\btaxidermy\b", r"\btaxonomy\b"
+        ]
+        strong_tax_phrases = [
+            "tax refund", "tax return", "income tax", "withholding tax",
+            "year-end", "year end", "article 30", "hometax", "pension refund",
+            "national pension", "종합소득세", "연말정산", "경정청구", "세무서", "3.3%"
+        ]
+        has_strong_tax = any(p in combined for p in strong_tax_phrases)
+        if not has_strong_tax:
+            for neg in negative_patterns:
+                if re.search(neg, combined, re.IGNORECASE):
+                    return {
+                        "is_relevant": False,
+                        "category": "general_living",
+                        "reason": "영화/교통 택시 또는 문법(syntax) 단어로 세무 무관"
+                    }
+
+        # 2. 제미나이 AI 실시간 문맥 인텐트 판별
+        if self.client:
+            prompt = f"""You are an AI semantic intent classifier for an expat tax advisory service in South Korea.
+Analyze the following Reddit post title and body to determine if the user is genuinely asking about or discussing:
+- Korean taxes, income tax, tax returns, year-end tax settlement (연말정산)
+- 3.3% freelance withholding tax refund (종합소득세)
+- Article 30 / tax treaty exemptions (e.g. E-2, E-1 native teachers)
+- Retroactive 5-year tax refund (경정청구)
+- Korean National Pension lump-sum refund upon leaving Korea
+- Korean salary paystub tax deductions, tax bracket, or Hometax (국세청 홈택스)
+
+CRITICAL NEGATIVE FILTER:
+Do NOT classify posts about movies (e.g., 'Taxi Driver'), taxis/cabs, transportation, general travel, non-tax visa questions (e.g., university admission, finding an apartment, cafes), shopping, or programming syntax as tax-related.
+
+[Post Title]: {post_title}
+[Post Body]: {post_body}
+
+Respond ONLY in valid JSON format:
+{{
+  "is_relevant": true or false,
+  "category": "tax_refund" | "article_30" | "freelance_3_3" | "year_end" | "pension_refund" | "general_living",
+  "reason": "short explanation in Korean"
+}}
+"""
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+                try:
+                    resp = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                    if resp and resp.text:
+                        raw = resp.text.strip()
+                        if raw.startswith("```"):
+                            raw = raw.split("```")[1]
+                            if raw.startswith("json"):
+                                raw = raw[4:]
+                        data = json.loads(raw.strip())
+                        logger.info(f"🧠 [EasyTax AI 인텐트 판별] '{post_title[:40]}' -> is_relevant={data.get('is_relevant')} ({data.get('category')})")
+                        return data
+                except Exception as e:
+                    logger.debug(f"인텐트 판별 Gemini {model_name} 실패: {e}")
+                    continue
+
+        # 3. Fallback: 정규식 단어 경계 기반 규칙 판별
+        tax_patterns = [
+            (r"\barticle\s*30\b", "article_30"),
+            (r"\b3\.3%?\b", "freelance_3_3"),
+            (r"\b(pension\s*refund|national\s*pension)\b", "pension_refund"),
+            (r"\b(year[- ]?end|연말정산)\b", "year_end"),
+            (r"\b(tax\s*refund|tax\s*return|overpaid\s*tax|경정청구|종합소득세|환급)\b", "tax_refund"),
+            (r"\b(income\s*tax|withholding|hometax|paystub|salary\s*deduction)\b", "tax_refund"),
+        ]
+        for pattern, cat in tax_patterns:
+            if re.search(pattern, combined, re.IGNORECASE):
+                return {
+                    "is_relevant": True,
+                    "category": cat,
+                    "reason": f"세무 핵심 키워드 매칭 ({cat})"
+                }
+
+        return {
+            "is_relevant": False,
+            "category": "general_living",
+            "reason": "세무/비자 환급 관련 인텐트 없음"
+        }
+
     def generate_reddit_response(self, post_title: str, post_body: str, target_lang: str = "en", landing_url: str = "") -> str:
+
         """EasyTax 전용 50:50 세무 정보 & 구글 검색 유도 답변 생성"""
         lang_info = LANGUAGES.get(target_lang, LANGUAGES["en"])
         promo_level = _choose_promo_level()

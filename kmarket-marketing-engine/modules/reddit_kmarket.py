@@ -1,11 +1,13 @@
 import os
 import sys
+import re
 import json
 import time
 import random
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+
 
 # Add engine root to sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -117,16 +119,41 @@ class KMarketRedditHunter:
                 logger.info(f"[{subreddit}] 채널 안전 한도 초과로 스킵")
                 continue
 
-            # 1단계: 품목/행위 키워드 1차 매칭 검사
+            # 1단계: 품목/행위 키워드 1차 매칭 검사 (단어 경계 \b 및 네거티브 필터링 적용)
             combined_text = f"{title} {body}".lower()
-            has_keyword_match = any(kw.lower() in combined_text for kw in all_flattened_keywords)
+
+            # 네거티브 패턴 검사 (한국어 문법 struggle, 기호품, 렌터카 등 오인 방지)
+            has_negative = any(re.search(pat, combined_text, re.IGNORECASE) for pat in [
+                r"\b(struggle|struggling|grammar|sentence|korean\s*learners?|topik|conjugation|pronunciation|vocab)\b",
+                r"\b(nicotine|zyn|velo|pablo|vape|car\s*lease|car\s*rental)\b"
+            ])
+            has_strong_kmarket = any(w in combined_text for w in [
+                "moving out", "leaving korea", "moving sale", "secondhand", "free giveaway", "give away", "0 krw", "당근", "중고"
+            ])
+            if has_negative and not has_strong_kmarket:
+                continue
+
+            has_keyword_match = False
+            for kw in all_flattened_keywords:
+                kw_str = kw.strip().lower()
+                if not kw_str:
+                    continue
+                if re.match(r'^[a-zA-Z0-9\s\-]+$', kw_str):
+                    if re.search(r'\b' + re.escape(kw_str) + r'\b', combined_text, re.IGNORECASE):
+                        has_keyword_match = True
+                        break
+                else:
+                    if kw_str in combined_text:
+                        has_keyword_match = True
+                        break
+
             if not has_keyword_match:
                 continue
 
             # 2단계: Gemini AI 정밀 시맨틱 인텐트 판별
             intent_res = self.gemini.reddit_engine.classify_kmarket_reddit_intent(title, body)
             if not intent_res.get("is_relevant", False):
-                logger.info(f"⏭️ [AI 필터링] KTRS 마켓 무관 글 스킵: '{title}'")
+                logger.info(f"⏭️ [AI 필터링] KTRS 마켓 무관 글 스킵: '{title}' ({intent_res.get('reason', '')})")
                 continue
 
             logger.info(f"🎯 [K-Market 타깃 질문 포착!] '{title}' (카테고리: {intent_res.get('category')})")

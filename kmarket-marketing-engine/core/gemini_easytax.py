@@ -33,5 +33,9 @@ class EasyTaxGeminiEngine:
     def generate_reddit_reply(self, post_data: Dict[str, Any]) -> Optional[Dict[str, str]]:
         return self.reddit_engine.generate_reddit_reply(post_data)
 
+    def classify_easytax_reddit_intent(self, post_title: str, post_body: str) -> Dict[str, Any]:
+        return self.reddit_engine.classify_easytax_reddit_intent(post_title, post_body)
+
     def generate_shorts_script(self, *args, **kwargs) -> Dict[str, Any]:
         return self.shorts_engine.generate_shorts_script(*args, **kwargs)
+

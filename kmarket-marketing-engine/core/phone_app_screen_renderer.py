@@ -280,14 +280,20 @@ class PhoneAppScreenRenderer:
         draw.ellipse([width // 2 - 40, 160, width // 2 + 40, 240], fill=(238, 242, 255, 255))
         draw.text((width // 2 - 15, 175), "🛡️", font=_load_font(36))
 
-        # 타이틀 & 설명 (우즈벡어 / 영어 / 한국어 지원)
+        # 타이틀 & 설명 (15개국어 지원)
         i18n_s3 = {
             "uz": ("OLDINDAN TO'LOV 0 SO'M", "Faqat pulingiz tushgandan so'ng xizmat haqi olinadi.\nAgar mablag' chiqmasa, 0 so'm!", "100% ISHONCHLI KAFOLAT"),
             "vi": ("TRẢ TRƯỚC 0 ĐỒNG", "Chỉ thanh toán phí sau khi tiền về tài khoản.\nKhông có tiền hoàn lại = 0 đồng phí!", "BẢO HÀNH 100% AN TÂM"),
             "ko": ("선결제 0원 후불제", "환급금이 개인 통장에 입금된 후에만 정산.\n환급 실패 시 비용 0원 전액 보증!", "100% 안심 후불제"),
             "en": ("0 KRW UPFRONT FEE", "Pay fee ONLY after refund lands in your bank.\nNo refund = Zero fee guaranteed!", "100% SAFE & GUARANTEED"),
+            "mn": ("УРЬДЧИЛГАА ТӨЛБӨР 0 ТӨГРӨГ", "Мөнгө дансанд орсны дараа л хураамж төлнө.\nБуцаан олголт гараагүй бол 0 төгрөг!", "100% НАЙДВАРТАЙ БАТАЛГАА"),
+            "km": ("ការទូទាត់មុន 0 រៀល", "បង់ថ្លៃសេវាបន្ទាប់ពីប្រាក់ចូលគណនីប៉ុណ្ណោះ។\nគ្មានប្រាក់បង្វិលសង = មិនគិតថ្លៃ 0 រៀល!", "ការធានា 100% ទំនុកចិត្ត"),
+            "ne": ("अग्रिम भुक्तानी ० वन", "रकम खातामा जम्मा भएपछि मात्र शुल्क तिर्नुहोस्।\nफिर्ता नआएमा ० वन शुल्क!", "१००% सुरक्षित ग्यारेन्टी"),
+            "th": ("จ่ายล่วงหน้า 0 วอน", "ชำระค่าธรรมเนียมหลังจากเงินเข้าบัญชีเท่านั้น\nไม่มีเงินคืน = ค่าธรรมเนียม 0 วอน!", "รับประกันความปลอดภัย 100%"),
+            "id": ("BIAYA AWAL 0 KRW", "Bayar biaya HANYA setelah uang masuk rekening.\nTidak ada pengembalian = Biaya 0 KRW!", "JAMINAN AMAN 100%"),
+            "my": ("ကြိုတင်ပေးငွေ ၀ ဝမ်", "ငွေစာရင်းထဲရောက်မှသာ ဝန်ဆောင်ခပေးဆောင်ရမည်။\nပြန်အမ်းငွေမရပါက ဝန်ဆောင်ခ ၀ ဝမ်!", "၁၀၀% စိတ်ချရသော အာမခံ"),
         }
-        t_head, t_body, t_badge = i18n_s3.get(lang, i18n_s3["en"])
+        t_head, t_body, t_badge = i18n_s3.get(lang, i18n_s3.get("en", ("0 KRW UPFRONT FEE", "Guaranteed", "SAFE")))
 
         draw.text((width // 2 - int(draw.textlength(t_head, _load_font(24, True)) / 2), 260), t_head, font=_load_font(24, True), fill=(15, 23, 42, 255))
         
@@ -346,8 +352,14 @@ class PhoneAppScreenRenderer:
             "vi": ("KIỂM TRA TIỀN HOÀN\nCHỈ TRONG 1 PHÚT", "Quá hạn 5 năm, tiền sẽ bị nộp vào ngân sách!", "BẮT ĐẦU TRA CỨU NGAY ➔"),
             "ko": ("1분 만에 내 환급금\n조회하기", "5년 지나면 국가 귀속! 놓친 세금을 찾으세요.", "지금 무료 환급 조회 ➔"),
             "en": ("CHECK REFUND\nIN 1 MINUTE", "Claim your money before 5-year expiration!", "START FREE CHECK NOW ➔"),
+            "mn": ("1 МИНУТЫН ДОТОР\nМӨНГӨӨ ШАЛГААРАЙ", "5 жил өнгөрвөл төрийн мэдэлд шилжинэ!", "ОДОО ҮНЭГҮЙ ШАЛГАХ ➔"),
+            "km": ("ពិនិត្យប្រាក់បង្វិល\nត្រឹមតែ 1 នាទី", "លើសពី 5 ឆ្នាំ ប្រាក់នឹងត្រូវបង់ចូលរដ្ឋ!", "ចាប់ផ្តើមពិនិត្យឥឡូវនេះ ➔"),
+            "ne": ("१ मिनेटमा आफ्नो\nफिर्ता रकम जाँच गर्नुहोस्", "५ वर्ष बितेमा रकम राज्यमा जान्छ!", "अहिले नै निःशुल्क जाँच गर्नुहोस् ➔"),
+            "th": ("ตรวจสอบเงินคืนของคุณ\nในเวลาเพียง 1 นาที", "หากเกิน 5 ปี เงินจะตกเป็นของรัฐ!", "เริ่มตรวจสอบฟรีทันที ➔"),
+            "id": ("CEK REFUND ANDA\nDALAM 1 MENIT", "Lewat 5 tahun, uang hangus ke kas negara!", "MULAI CEK GRATIS ➔"),
+            "my": ("၁ မိနစ်အတွင်း သင်၏\nပြန်အမ်းငွေကို စစ်ဆေးပါ", "၅ နှစ်ကျော်ပါက နိုင်ငံတော်ဘဏ္ဍာသို့ ရောက်ရှိသွားမည်!", "ယခုပဲ အခမဲ့ စစ်ဆေးပါ ➔"),
         }
-        t_head, t_sub, t_btn = i18n_s5.get(lang, i18n_s5["en"])
+        t_head, t_sub, t_btn = i18n_s5.get(lang, i18n_s5.get("en", ("CHECK REFUND\nIN 1 MINUTE", "5-year limit", "CHECK NOW ➔")))
 
         # 메인 원형 그래픽 (환급 게이지 / 골드 코인)
         draw.ellipse([width // 2 - 80, 160, width // 2 + 80, 320], outline=(245, 158, 11, 200), width=6)

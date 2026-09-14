@@ -82,18 +82,89 @@ class KMarketGeminiReddit:
                 return json.load(f)
         return {}
 
-    def classify_kmarket_reddit_intent(self, post_title: str, post_body: str) -> Dict[str, Any]:
-        """레딧 질문글의 카테고리/의도 분류"""
-        lower = f"{post_title} {post_body}".lower()
-        if any(w in lower for w in ["moving", "leave korea", "leaving korea", "moving out", "bed", "desk", "sofa", "furniture", "throw away", "recycle"]):
-            return {"category": "moving_sale", "score": 90, "is_relevant": True}
-        elif any(w in lower for w in ["iphone", "galaxy", "macbook", "ipad", "laptop", "sim card", "prepaid sim"]):
-            return {"category": "digital_goods", "score": 85, "is_relevant": True}
-        elif any(w in lower for w in ["free", "giveaway", "cheap", "secondhand", "used"]):
-            return {"category": "free_giveaway", "score": 95, "is_relevant": True}
-        elif any(w in lower for w in ["where to buy", "shopping", "appliance", "rice cooker", "vacuum", "heater", "microwave"]):
-            return {"category": "shopping", "score": 80, "is_relevant": True}
-        return {"category": "general_living", "score": 75, "is_relevant": False}
+    def classify_kmarket_reddit_intent(self, post_title: str, post_body: str = "") -> Dict[str, Any]:
+        """
+        🛒 [K-Market 중고/무빙/0원 나눔 질문 정밀 시맨틱 인텐트 판별기]
+        1. 룰 기반 네거티브/포지티브 단어 경계(\b) 사전 필터링 (한국어 문법 struggle, 담배, 렌트카 등 원천 차단)
+        2. Gemini 3.1 Flash-Lite AI를 통한 실시간 문맥 인텐트 검증
+        3. AI 장애 시 무결성 보장 Fallback 룰 엔진
+        """
+        combined = f"{post_title} {post_body}".lower()
+
+        # 1. 강력한 네거티브 패턴 검사 (문법 질문, 어학당 공부 struggle, 기호품, 렌터카 등)
+        negative_patterns = [
+            r"\b(struggle|struggling|grammar|sentence|korean\s*learners?|topik|conjugation|pronunciation|vocab|hangul)\b",
+            r"\b(nicotine|zyn|velo|pablo|vape|vaping|car\s*lease|car\s*rental|driving\s*license)\b",
+        ]
+        strong_kmarket_phrases = [
+            "moving out", "leaving korea", "moving sale", "secondhand", "second hand",
+            "free giveaway", "give away", "free furniture", "used fridge", "used bed",
+            "used desk", "used appliance", "buy used", "sell used", "0 krw", "당근", "중고"
+        ]
+        has_strong_kmarket = any(p in combined for p in strong_kmarket_phrases)
+        if not has_strong_kmarket:
+            for neg in negative_patterns:
+                if re.search(neg, combined, re.IGNORECASE):
+                    return {
+                        "is_relevant": False,
+                        "category": "general_living",
+                        "reason": "한국어 문법 학습/기호품/차량 리스 등 K-Market 무관 글로 사전 제외"
+                    }
+
+        # 2. 제미나이 AI 실시간 문맥 인텐트 판별
+        if self.client:
+            prompt = f"""You are an AI semantic intent classifier for 'K-Market', an expat community & secondhand/free-giveaway marketplace for foreigners living in South Korea.
+Analyze the following Reddit post title and body to determine if the user is genuinely asking about or discussing:
+- Moving out, leaving Korea, relocating, moving sales (무빙세일, 귀국 정리)
+- Buying or selling secondhand/used furniture, home appliances, or electronics in Korea (중고 가구/가전/전자기기 직거래)
+- Finding or offering 0 KRW free giveaways, furniture passdown, or waste disposal stickers (0원 무료나눔, 대형폐기물 스티커)
+- Where to buy essential studio living goods, secondhand items, or English expat shopping platforms (자취/원룸 살림, 중고 구매처)
+
+CRITICAL NEGATIVE FILTER:
+Do NOT classify posts about Korean language learning/grammar (e.g., 'struggling to make sentences'), language exchanges, travel itineraries, visa law disputes without moving, job hunting, car rentals/leasing, or nicotine pouches as relevant.
+
+[Post Title]: {post_title}
+[Post Body]: {post_body}
+
+Respond ONLY in valid JSON format:
+{{
+  "is_relevant": true or false,
+  "category": "moving_sale" | "free_giveaway" | "secondhand_trade" | "shopping" | "general_living",
+  "reason": "short explanation in Korean"
+}}
+"""
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+                try:
+                    resp = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                    if resp and resp.text:
+                        raw = resp.text.strip()
+                        if raw.startswith("```"):
+                            raw = raw.split("```")[1]
+                            if raw.startswith("json"):
+                                raw = raw[4:]
+                        data = json.loads(raw.strip())
+                        logger.info(f"🧠 [K-Market AI 인텐트 판별] '{post_title[:40]}' -> is_relevant={data.get('is_relevant')} ({data.get('category')})")
+                        return data
+                except Exception as e:
+                    logger.debug(f"K-Market 인텐트 판별 Gemini {model_name} 실패: {e}")
+                    continue
+
+        # 3. Fallback: 정규식 단어 경계(\b) 기반 규칙 판별
+        rules = [
+            (r"\b(moving\s*out|leaving\s*korea|moving\s*sale|leaving\s*seoul|garage\s*sale)\b", "moving_sale"),
+            (r"\b(free\s*(stuff|items?|furniture|appliances?|giveaway)|giving\s*away|0\s*krw)\b", "free_giveaway"),
+            (r"\b(secondhand|second\s*hand|buy\s*used|sell\s*used|used\s*(fridge|bed|desk|sofa|chair|monitor|laptop|phone))\b", "secondhand_trade"),
+            (r"\b(where\s*to\s*buy|where\s*can\s*i\s*buy|looking\s*for\s*(used|cheap|affordable))\b", "shopping"),
+        ]
+        for pattern, cat in rules:
+            if re.search(pattern, combined, re.IGNORECASE):
+                return {"is_relevant": True, "category": cat, "reason": f"Fallback 단어경계 규칙 매칭 ({cat})"}
+
+        return {"is_relevant": False, "category": "general_living", "reason": "K-Market 핵심 중고/무빙/나눔 의도 없음"}
+
 
     def generate_reddit_response(self, post_title: str, post_body: str, target_lang: str = "en", landing_url: str = "") -> str:
         """KTRS Market 전용 50:50 생활 정보 & 구글 검색 유도 답변 생성"""

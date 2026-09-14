@@ -123,8 +123,8 @@ class ScreenInsetCompositor:
 
         # 3. 위치 계산 (left_floating: 좌측 3D 플로팅, center: 정중앙, right: 우측)
         if position == "left_floating" or position == "left":
-            paste_x = int(base_photo.width * 0.08)   # 약 85~90px (인물 얼굴 가림 0%)
-            paste_y = int(base_photo.height * 0.12)  # 약 110~130px
+            paste_x = int(base_photo.width * 0.04)   # 약 33~35px (얼굴 가림 0% 보장)
+            paste_y = int(base_photo.height * 0.20)  # 약 240px (어깨선 아래 배치)
         elif position == "right":
             paste_x = int(base_photo.width * 0.58)
             paste_y = int(base_photo.height * 0.15)
@@ -153,13 +153,13 @@ class ScreenInsetCompositor:
         base_photo: Image.Image,
         ui_image: Image.Image,
         position: str = "left_floating",
-        scale: float = 0.58,
+        scale: float = 0.50,
         custom_coords: Optional[Tuple[int, int]] = None
     ) -> Image.Image:
         """
         [대표님 특별 지침 완벽 반영]
         국세청 환급 영수증 UI 이미지를 최신 플래그십 스마트폰 베젤 + 3D 드롭 섀도우로 래핑하여
-        인물 얼굴을 전혀 가리지 않는 좌측 여백(x=80~120px) 공중에 자연스럽게 둥둥 띄우는 핀테크 플로팅 합성기.
+        인물 얼굴을 전혀 가리지 않는 좌측 여백(x=30~50px) 공중에 자연스럽게 둥둥 띄우는 핀테크 플로팅 합성기.
         - 얼굴 가림 0%
         - AI 손가락 기괴함/뒤틀림 위험 100% 원천 차단
         - 가독성 100% 보장
@@ -195,8 +195,8 @@ class ScreenInsetCompositor:
         if custom_coords:
             paste_x, paste_y = custom_coords
         elif position in ["left_floating", "left"]:
-            paste_x = int(base_photo.width * 0.08)   # 약 85~90px
-            paste_y = int(base_photo.height * 0.16)  # 약 180~200px
+            paste_x = int(base_photo.width * 0.04)   # 약 33~35px (얼굴 가림 0% 보장)
+            paste_y = int(base_photo.height * 0.22)  # 약 260px (어깨선 아래 배치)
         elif position == "right":
             paste_x = int(base_photo.width * 0.58)
             paste_y = int(base_photo.height * 0.16)

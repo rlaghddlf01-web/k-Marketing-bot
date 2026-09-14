@@ -15,16 +15,16 @@ class RedditConnector:
 
     ACCOUNTS = {
         "kmarket": {
-            "username": "u/IdleOn_Boii",
-            "profile_url": "https://www.reddit.com/user/IdleOn_Boii/comments/",
+            "username": "u/LonelyInstruction401",
+            "profile_url": "https://www.reddit.com/user/LonelyInstruction401/comments/",
             "target_content": "전국 26개 외국인 커뮤니티 가구·원룸 질문 실시간 감지 & 80:20 Anti-Ban 솔루션 답변",
-            "diagnostic": "u/IdleOn_Boii 계정 실시간 워밍업 & 26개 서브레딧 감시 정상 가동 중"
+            "diagnostic": "u/LonelyInstruction401 계정 실시간 워밍업 & 26개 서브레딧 감시 정상 가동 중"
         },
         "easytax": {
-            "username": "u/HP_Korea",
-            "profile_url": "https://www.reddit.com/user/HP_Korea/comments/",
+            "username": "u/Plenty_Code6288",
+            "profile_url": "https://www.reddit.com/user/Plenty_Code6288/comments/",
             "target_content": "r/korea, r/Living_in_Korea 세금 환급/3.3% 알바 질문 감지 및 조특법 팩트 답변",
-            "diagnostic": "u/HP_Korea 계정 조특법 30조 팩트 답변 & 26개 서브레딧 감시 정상 가동 중"
+            "diagnostic": "u/Plenty_Code6288 계정 조특법 30조 팩트 답변 & 26개 서브레딧 감시 정상 가동 중"
         }
     }
 

@@ -47,17 +47,15 @@ class AccountHealthMonitor:
         self.state = self._load_state()
 
     def _load_state(self) -> Dict[str, Any]:
-        """건강 상태 파일 로드 (없으면 초기화)"""
-        if self.state_file.exists():
-            try:
-                with open(self.state_file, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.warning(f"건강 상태 로드 실패: {e}")
-        return {
+        """건강 상태 파일 로드 (없으면 초기화 및 비정상 광고주 이름 정화)"""
+        from core.connectors.reddit_connector import RedditConnector
+        default_user = RedditConnector.ACCOUNTS.get(self.service_id, {}).get("username", "").replace("u/", "")
+        blacklist = {"airbnb", "promoted", "sponsored", "reddit", "advertiser", "settings", "login", "unknown"}
+
+        state = {
             "service_id": self.service_id,
             "karma": 0,
-            "username": None,
+            "username": default_user,
             "alert_level": ALERT_NONE,
             "cooldown_until": None,
             "deleted_comments_count": 0,
@@ -74,14 +72,38 @@ class AccountHealthMonitor:
             "karma_history": [],
         }
 
+        if self.state_file.exists():
+            try:
+                with open(self.state_file, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    state.update(loaded)
+            except Exception as e:
+                logger.warning(f"건강 상태 로드 실패: {e}")
+
+        # 광고주나 비정상 유저명이면 기본 계정명으로 원복
+        curr_user = state.get("username")
+        if not curr_user or str(curr_user).lower() in blacklist:
+            state["username"] = default_user
+
+        return state
+
     def _save_state(self):
-        """건강 상태 영구 저장"""
+        """건강 상태 영구 저장 (광고주 이름 오염 원천 방지)"""
         try:
+            from core.connectors.reddit_connector import RedditConnector
+            default_user = RedditConnector.ACCOUNTS.get(self.service_id, {}).get("username", "").replace("u/", "")
+            blacklist = {"airbnb", "promoted", "sponsored", "reddit", "advertiser", "settings", "login", "unknown"}
+
+            curr_user = self.state.get("username")
+            if not curr_user or str(curr_user).lower() in blacklist:
+                self.state["username"] = default_user
+
             self.state_file.parent.mkdir(parents=True, exist_ok=True)
             with open(self.state_file, "w", encoding="utf-8") as f:
                 json.dump(self.state, f, indent=2, ensure_ascii=False)
         except Exception as e:
             logger.error(f"건강 상태 저장 실패: {e}")
+
 
     # ──────────────────────────────────────────
     # 일일 카운터 관리
@@ -126,9 +148,10 @@ class AccountHealthMonitor:
     # ──────────────────────────────────────────
 
     def update_karma(self, karma: int, username: Optional[str] = None):
-        """카르마 수치 업데이트"""
+        """카르마 수치 업데이트 (외부 광고주/비정상 유저명 필터링)"""
         self.state["karma"] = karma
-        if username:
+        blacklist = {"airbnb", "promoted", "sponsored", "reddit", "advertiser", "settings", "login", "unknown"}
+        if username and str(username).lower() not in blacklist:
             self.state["username"] = username
         self.state["last_karma_check"] = get_now_kst_str()
         # 카르마 이력 기록 (최근 30건)
@@ -138,7 +161,8 @@ class AccountHealthMonitor:
         })
         self.state["karma_history"] = self.state["karma_history"][-30:]
         self._save_state()
-        logger.info(f"📊 카르마 업데이트: {karma} (username: {username})")
+        logger.info(f"📊 카르마 업데이트: {karma} (username: {self.state.get('username')})")
+
 
     def is_warmup_phase(self) -> bool:
         """워밍업 단계 여부 (카르마 100 락 해제: 노링크 구글 검색 유도 댓글 허용)"""

@@ -485,6 +485,25 @@ class RedditBrowserDriver:
                 self._human_scroll(page, "down", random.randint(200, 400))
                 time.sleep(random.uniform(3.0, 6.0))
 
+                # 0. 계정 로그인 세션 상태 사전 검증 (로그아웃/익명 게스트 조기 방어)
+                auth_check = page.evaluate("""() => {
+                    const loginBtn = document.querySelector('a[href*="/login"], [aria-label*="Log In"], [aria-label*="log in"]');
+                    const userDrawer = document.querySelector('#user-drawer-button, button[aria-label*="User"], [aria-label*="Account"]');
+                    const hasComposer = !!document.querySelector('shreddit-composer, div[role="textbox"][contenteditable="true"], div[slot="rte"]');
+                    return {
+                        has_login_btn: !!loginBtn,
+                        has_user_drawer: !!userDrawer,
+                        has_composer: hasComposer
+                    };
+                }""")
+                if auth_check.get("has_login_btn") and not auth_check.get("has_user_drawer") and not auth_check.get("has_composer"):
+                    logger.error(f"🚨 [{self.service_id.upper()}] 레딧 브라우저 세션이 만료되었습니다. (익명 게스트 상태)")
+                    logger.error(f"👉 터미널에서 'python login_{self.service_id}_session.py' 를 실행하여 1회 재로그인해 주세요.")
+                    result["error"] = f"{self.service_id} 레딧 로그인 세션 만료 (재로그인 필요)"
+                    result["session_expired"] = True
+                    context.close()
+                    return result
+
                 # 1. 댓글창 활성화 시도
                 reply_activated = page.evaluate("""() => {
                     // 1. shreddit-composer 및 shadow/slot 탐색
@@ -697,9 +716,49 @@ class RedditBrowserDriver:
     # ──────────────────────────────────────────────
 
     def get_account_karma(self) -> Dict[str, Any]:
-        """현재 로그인된 계정의 카르마 수치 조회"""
+        """현재 로그인된 계정의 카르마 수치 및 사용자명 조회 (광고주/외부 유저 오인 원천 방지)"""
         from playwright.sync_api import sync_playwright
-        result = {"karma": 0, "username": None, "error": None}
+        from core.connectors.reddit_connector import RedditConnector
+        
+        default_user = RedditConnector.ACCOUNTS.get(self.service_id, {}).get("username", "").replace("u/", "")
+        result = {"karma": 0, "username": default_user or None, "error": None, "logged_in": True, "session_expired": False}
+        blacklist = {"airbnb", "promoted", "sponsored", "reddit", "advertiser", "settings", "login", "exitlag"}
+
+        # 0. 백업 쿠키의 token_v2를 통한 초고속/초정밀 OAuth 인증 상태 검증
+        cookie_file = self.profile_dir.parent / f"{self.service_id}_cookies.json"
+        if cookie_file.exists():
+            try:
+                import urllib.request
+                with open(cookie_file, "r", encoding="utf-8") as f:
+                    cookies = json.load(f)
+                token_v2 = next((c["value"] for c in cookies if c.get("name") == "token_v2"), None)
+                if token_v2:
+                    req = urllib.request.Request(
+                        "https://oauth.reddit.com/api/v1/me",
+                        headers={
+                            "User-Agent": self._session_ua,
+                            "Authorization": f"Bearer {token_v2}"
+                        }
+                    )
+                    with urllib.request.urlopen(req, timeout=5) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        if data and data.get("name"):
+                            u_name = data["name"].strip()
+                            if u_name.lower() not in blacklist:
+                                total_k = data.get("total_karma", (data.get("comment_karma", 0) + data.get("link_karma", 0)))
+                                result["username"] = u_name
+                                result["karma"] = total_k
+                                result["logged_in"] = True
+                                result["session_expired"] = False
+                                logger.info(f"🔑 [{self.service_id.upper()}] OAuth 인증 확인 성공: u/{u_name} (카르마: {total_k})")
+                                return result
+                        else:
+                            logger.warning(f"⚠️ [{self.service_id.upper()}] 레딧 OAuth 토큰 검증 결과: 비로그인 상태 (name=None)")
+                            result["logged_in"] = False
+                            result["session_expired"] = True
+                            return result
+            except Exception as e:
+                logger.debug(f"OAuth 직접 확인 실패, 브라우저 검증으로 진행: {e}")
 
         try:
             with sync_playwright() as p:
@@ -707,32 +766,72 @@ class RedditBrowserDriver:
                 page = context.pages[0] if context.pages else context.new_page()
 
                 page.goto("https://www.reddit.com/", wait_until="domcontentloaded", timeout=20000)
-                page.wait_for_timeout(random.randint(3000, 5000))
+                page.wait_for_timeout(random.randint(2000, 3500))
 
-                # 로그인 상태 확인 및 카르마 파싱
+                # 1. 내부 세션 API fetch를 통한 무결한 인증 정보 조회 (origin 일치)
+                auth_info = page.evaluate("""async () => {
+                    try {
+                        const res = await fetch('/api/v1/me.json', { credentials: 'include' });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data && data.name) {
+                                const totalKarma = data.total_karma !== undefined ? data.total_karma : ((data.comment_karma || 0) + (data.link_karma || 0));
+                                return { username: data.name, karma: totalKarma };
+                            }
+                        }
+                    } catch (e) {}
+                    return null;
+                }""")
+
+                if auth_info and auth_info.get("username"):
+                    u_name = auth_info["username"].strip()
+                    if u_name.lower() not in blacklist:
+                        result["username"] = u_name
+                        result["karma"] = auth_info.get("karma", 0)
+                        context.close()
+                        return result
+
+                # 2. 헤더 영역(상단 메뉴/드롭다운)에 한정된 안전 DOM 탐색 (피드 본문 및 광고 링크 배제)
                 account_info = page.evaluate("""() => {
-                    // 프로필 메뉴에서 username 추출 시도
-                    const userEl = document.querySelector('faceplate-tracker[source="profile_menu"]') ||
-                                   document.querySelector('a[href*="/user/"]');
+                    const header = document.querySelector('header, reddit-header-large, #header');
                     let username = null;
-                    if (userEl) {
-                        const href = userEl.getAttribute('href') || '';
-                        const match = href.match(/\\/user\\/([^/]+)/);
-                        if (match) username = match[1];
-                    }
-                    // 카르마 수치
-                    const karmaEl = document.querySelector('[id*="karma"]') ||
-                                    document.querySelector('span[class*="karma"]');
                     let karma = 0;
-                    if (karmaEl) {
-                        const text = karmaEl.innerText.replace(/,/g, '').replace(/k/i, '000');
-                        karma = parseInt(text) || 0;
+
+                    if (header) {
+                        const userEl = header.querySelector('faceplate-dropdown-menu a[href*="/user/"]') ||
+                                       header.querySelector('a[slot="profile-link"]') ||
+                                       header.querySelector('a[data-testid="user-profile-link"]');
+                        if (userEl) {
+                            const href = userEl.getAttribute('href') || '';
+                            const match = href.match(/\\/user\\/([^/?#]+)/);
+                            if (match) username = match[1];
+                        }
+                        const karmaEl = header.querySelector('[id*="karma"]') ||
+                                        header.querySelector('span[class*="karma"]');
+                        if (karmaEl) {
+                            const text = karmaEl.innerText.replace(/,/g, '').replace(/k/i, '000');
+                            karma = parseInt(text) || 0;
+                        }
                     }
                     return { username, karma };
                 }""")
 
-                result["username"] = account_info.get("username")
-                result["karma"] = account_info.get("karma", 0)
+                parsed_user = account_info.get("username")
+                if parsed_user and parsed_user.lower() not in blacklist:
+                    result["username"] = parsed_user
+                if account_info.get("karma", 0) > 0:
+                    result["karma"] = account_info.get("karma", 0)
+
+                # 3. 비로그인 상태 명시적 플래그 설정
+                is_logged_out = page.evaluate("""() => {
+                    const loginBtn = document.querySelector('a[href*="/login"], [aria-label*="Log In"], [aria-label*="log in"]');
+                    const userMenu = document.querySelector('#user-drawer-button, button[aria-label*="User"], [aria-label*="Account"]');
+                    return !!loginBtn && !userMenu;
+                }""")
+                if is_logged_out:
+                    logger.warning(f"⚠️ [{self.service_id.upper()}] 레딧 브라우저 세션이 만료/로그아웃되어 있습니다.")
+                    result["logged_in"] = False
+                    result["session_expired"] = True
 
                 context.close()
         except Exception as e:
@@ -740,6 +839,7 @@ class RedditBrowserDriver:
             result["error"] = str(e)
 
         return result
+
 
     # ──────────────────────────────────────────────
     # 🔑 로그인 세션 (기존 유지)
