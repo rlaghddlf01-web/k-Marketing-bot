@@ -114,7 +114,7 @@ class WanPipelineClient:
                 "class_type": "KSampler",
                 "inputs": {
                     "model": ["2", 0], "positive": ["7", 0], "negative": ["7", 1],
-                    "latent_image": ["7", 2], "seed": seed, "steps": 25, "cfg": 3.8,
+                    "latent_image": ["7", 2], "seed": seed, "steps": 25, "cfg": 3.2,
                     "sampler_name": "uni_pc", "scheduler": "simple", "denoise": 1.0
                 }
             },
@@ -193,7 +193,7 @@ class WanPipelineClient:
                     "positive":     ["7", 0],
                     "negative":     ["7", 1],
                     "latent_image": ["13", 0],  # T2I noise latent 대신 레퍼런스 VAE latent
-                    "seed": seed, "steps": 25, "cfg": 3.8,
+                    "seed": seed, "steps": 25, "cfg": 3.2,
                     "sampler_name": "uni_pc", "scheduler": "simple",
                     "denoise": denoise
                 }
