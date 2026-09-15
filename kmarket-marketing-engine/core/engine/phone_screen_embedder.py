@@ -23,8 +23,11 @@ class PhoneScreenEmbedder:
     def detect_screen_quad(self, base_bgr: np.ndarray, search_roi=None):
         """
         검은색 스마트폰 액정의 4개 꼭짓점(좌상, 우상, 우하, 좌하)과 중심/크기/각도를 자동 검출
+        - 특정 ROI(가슴, 배꼽 등)에 국한되지 않고, 인물이 어디에 스마트폰을 쥐고 있든(맨 밑바닥, 가슴 위, 무릎 등)
+          사진 100% 전 영역에서 스마트폰 액정 고유의 기하학적 형태(높은 볼록도 Solidity, 16:9~20:9 종횡비, 강화유리 균일도)를
+          기반으로 자율 정밀 검출.
         :param base_bgr: 원본 BGR 이미지
-        :param search_roi: (ymin, ymax, xmin, xmax) 탐색 영역 (None이면 자동 탐색)
+        :param search_roi: (ymin, ymax, xmin, xmax) 특정 탐색 영역 (None이면 100% 전체 프레임 자율 탐색)
         """
         H, W, _ = base_bgr.shape
         if search_roi is not None:
@@ -32,64 +35,102 @@ class PhoneScreenEmbedder:
             roi = base_bgr[ymin:ymax, xmin:xmax]
             off_x, off_y = xmin, ymin
         else:
-            # 🎯 [인물 사진 최적화] 머리카락/얼굴 그림자 오인 방지: 가슴~복부 영역 집중 탐색
-            ymin, ymax = int(H * 0.48), int(H * 0.92)
-            xmin, xmax = int(W * 0.20), int(W * 0.80)
-            roi = base_bgr[ymin:ymax, xmin:xmax]
-            off_x, off_y = xmin, ymin
+            # 🎯 [100% 전신/바닥 무제한 자율 감지] 사진 전체(0 <= y <= H, 0 <= x <= W) 스캔
+            roi = base_bgr
+            off_x, off_y = 0, 0
 
         gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-        mask = (gray < self.dark_threshold).astype(np.uint8) * 255
 
-        # 미세 노이즈만 정리 (옷깃/소매 그림자와의 연결을 방지하기 위해 열림 연산 사용)
+        # 다중 임계값 자동 스윕 (조명/그림자 차이에 영향받지 않는 견고한 탐색)
+        thresholds = [self.dark_threshold, 25, 30, 35]
+        candidates = []
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-        # 연결된 컴포넌트 분석
-        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask)
-        best_label = 0
-        max_area = 0
+        for thresh in thresholds:
+            mask = (gray < thresh).astype(np.uint8) * 255
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask)
 
-        for i in range(1, num_labels):
-            area = stats[i, cv2.CC_STAT_AREA]
-            cx, cy = centroids[i]
-            w = stats[i, cv2.CC_STAT_WIDTH]
-            h = stats[i, cv2.CC_STAT_HEIGHT]
-            y_rel = stats[i, cv2.CC_STAT_TOP]
-            ratio = h / float(max(1, w))
-            # 🎯 스마트폰 액정 엄격 검출:
-            # 1. 가슴 윗단(옷깃 그림자) 접촉 배제 (y_rel > 15)
-            # 2. 세로 종횡비 (1.35 ~ 2.8)
-            # 3. 화면 너비 (가슴 폭의 12% ~ 38%)
-            # 4. 적정 면적 (8000픽셀 이상)
-            if y_rel > 15 and 1.35 <= ratio <= 2.8 and w <= int(W * 0.38) and area > 8000:
-                if area > max_area:
-                    max_area = area
-                    best_label = i
-
-        if best_label == 0:
-            # 완화 조건 탐색
             for i in range(1, num_labels):
                 area = stats[i, cv2.CC_STAT_AREA]
+                if area < 5000:
+                    continue
+
                 w = stats[i, cv2.CC_STAT_WIDTH]
                 h = stats[i, cv2.CC_STAT_HEIGHT]
-                y_rel = stats[i, cv2.CC_STAT_TOP]
-                ratio = h / float(max(1, w))
-                if y_rel > 10 and 1.25 <= ratio <= 3.0 and area > 6000:
-                    if area > max_area:
-                        max_area = area
-                        best_label = i
+                x = stats[i, cv2.CC_STAT_LEFT]
+                y = stats[i, cv2.CC_STAT_TOP]
 
-        if best_label == 0:
+                # 외곽 테두리 비네팅/경계 그림자 배제
+                is_border = (x <= 2 and w < W * 0.3) or (y <= 2 and h < H * 0.2) or (x + w >= W - 2 and w < W * 0.3)
+                if is_border and search_roi is None:
+                    continue
+
+                comp_mask = (labels == i).astype(np.uint8) * 255
+                cnts, _ = cv2.findContours(comp_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if not cnts:
+                    continue
+                c = max(cnts, key=cv2.contourArea)
+                c_area = cv2.contourArea(c)
+                rect = cv2.minAreaRect(c)
+                rw, rh = rect[1]
+                if rw > rh:
+                    rw, rh = rh, rw
+                if rw < 1:
+                    continue
+
+                aspect = rh / float(rw)
+                solidity = c_area / max(1.0, (rw * rh))
+
+                # 🎯 스마트폰 액정 고유의 물리/기하학적 특성 필터:
+                # 1. 세로 종횡비 (1.35 ~ 2.6, 16:9~20:9 액정)
+                # 2. 직사각형 충실도/볼록도 (solidity >= 0.80, 헝클어진 머리카락이나 옷깃 그림자는 0.3~0.6에 불과)
+                # 3. 화면 너비 (전체 폭의 8% ~ 45%)
+                # 4. 화면 높이 (전체 높이의 15% ~ 60%)
+                if 1.35 <= aspect <= 2.6 and solidity >= 0.80 and (W * 0.08 <= w <= W * 0.45) and (H * 0.15 <= h <= H * 0.60):
+                    score = solidity * 100.0 - abs(aspect - 1.95) * 10.0 + (area / 1000.0)
+                    candidates.append((score, comp_mask, c, rect, (x, y, w, h)))
+
+        if not candidates:
+            # 완화된 조건으로 2차 폴백 탐색
+            for thresh in thresholds:
+                mask = (gray < thresh).astype(np.uint8) * 255
+                mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+                num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask)
+                for i in range(1, num_labels):
+                    area = stats[i, cv2.CC_STAT_AREA]
+                    if area < 4000:
+                        continue
+                    w = stats[i, cv2.CC_STAT_WIDTH]
+                    h = stats[i, cv2.CC_STAT_HEIGHT]
+                    x = stats[i, cv2.CC_STAT_LEFT]
+                    y = stats[i, cv2.CC_STAT_TOP]
+                    comp_mask = (labels == i).astype(np.uint8) * 255
+                    cnts, _ = cv2.findContours(comp_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    if not cnts:
+                        continue
+                    c = max(cnts, key=cv2.contourArea)
+                    c_area = cv2.contourArea(c)
+                    rect = cv2.minAreaRect(c)
+                    rw, rh = rect[1]
+                    if rw > rh:
+                        rw, rh = rh, rw
+                    if rw < 1:
+                        continue
+                    aspect = rh / float(rw)
+                    solidity = c_area / max(1.0, (rw * rh))
+                    if 1.25 <= aspect <= 2.8 and solidity >= 0.75 and (W * 0.07 <= w <= W * 0.50):
+                        score = solidity * 100.0 - abs(aspect - 1.95) * 10.0 + (area / 1000.0)
+                        candidates.append((score, comp_mask, c, rect, (x, y, w, h)))
+
+        if not candidates:
             raise ValueError("스마트폰 액정 영역을 검출할 수 없습니다.")
 
-        screen_mask = (labels == best_label).astype(np.uint8) * 255
-        contours, _ = cv2.findContours(screen_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if not contours:
-            raise ValueError("스마트폰 액정 영역을 검출할 수 없습니다.")
-
-        c = max(contours, key=cv2.contourArea)
-        rect = cv2.minAreaRect(c)
+        # 최적 후보 선택
+        candidates.sort(key=lambda item: item[0], reverse=True)
+        best_candidate = candidates[0]
+        c = best_candidate[2]
+        rect = best_candidate[3]
         box = cv2.boxPoints(rect)
 
         # 전역 좌표 변환

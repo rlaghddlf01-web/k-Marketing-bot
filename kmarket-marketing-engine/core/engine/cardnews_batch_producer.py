@@ -389,10 +389,14 @@ class CardNewsBatchProducer:
         page_badge = f"{s_idx:02d} / 05 >"
         draw.text((930, 916), page_badge, fill=(212, 175, 55), font=font_badge)
 
-        # 좌측 플로팅 배지 라운드렉탄글
-        badge_w = min(460, max(280, int(len(badge_text) * 17)))
+        # 좌측 플로팅 배지 라운드렉탄글 (글자 실측 기반 100% 자동 반응형)
+        b_bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
+        text_w = b_bbox[2] - b_bbox[0]
+        pad_x = 16
+        max_safe_w = 850 - TEXT_X  # 우측 페이지 번호(930px)와의 충돌 방지 안전선
+        badge_w = min(max_safe_w, max(140, text_w + pad_x * 2))
         draw.rounded_rectangle([(TEXT_X, 910), (TEXT_X + badge_w, 956)], radius=8, fill=(30, 80, 160))
-        draw.text((TEXT_X + 14, 918), badge_text, fill=(255, 255, 255), font=font_badge)
+        draw.text((TEXT_X + pad_x, 918), badge_text, fill=(255, 255, 255), font=font_badge)
 
         # 글자 레이아웃 시작 y (배지 아래 12px 여백)
         cur_y = 968
