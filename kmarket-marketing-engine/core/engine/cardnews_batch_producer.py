@@ -496,106 +496,18 @@ class CardNewsBatchProducer:
         amount: int,
         cards: List[Dict[str, Any]]
     ):
-        """스레드, 인스타그램, 페이스북, 텔레그램 4대 채널별 포스팅 가이드 텍스트 저장 (8개국어 다국어화)"""
-        amount_fmt = f"{amount:,} KRW"
-        
-        # 언어별 고유 바이럴 해시태그 사전
-        lang_hashtags = {
-            "uz": "#EasyTax #SoliqQaytarish #DaromadSoligi #E9Visa #JanubiyKoreya #OzbeklarKoreyada #KoreyadaHayot #E7Visa #KTRS #SoliqMaslahati",
-            "vi": "#EasyTax #HoànThuế #ThuếThuNhập #E9Visa #LaoĐộngHànQuốc #CuộcSốngHànQuốc #ViệtNamTạiHàn #이지택스 #외국인세금환급 #조특법30조",
-            "mn": "#EasyTax #ТатварБуцаанОлголт #E9Виз #СолонгосДахьМонголчууд #СолонгосынАмьдрал #ТатварынХөнгөлөлт #KTRS",
-            "th": "#EasyTax #ขอคืนภาษีเกาหลี #แรงงานไทยในเกาหลี #วีซ่าE9 #ชีวิตในเกาหลี #คนไทยในเกาหลี #KTRS",
-            "km": "#EasyTax #បង្វិលពន្ធកូរ៉េ #ពលករខ្មែរនៅកូរ៉េ #ទិដ្ឋាការE9 #ជីវិតនៅកូរ៉េ #KTRS",
-            "ne": "#EasyTax #कोरियाकरफिर्ता #नेपालीकोरिया #E9भिसा #कोरियामाजीवन #KTRS",
-            "id": "#EasyTax #RefundPajakKorea #TKIJepangKorea #VisaE9 #PekerjaMigranIndonesia #KTRS",
-            "my": "#EasyTax #ကိုရီးယားအခွန်ပြန်အမ်းငွေ #မြန်မာလုပ်သား #E9ဗီဇာ #KTRS",
-            "ru": "#EasyTax #ВозвратНалогаКорея #РаботаВКорее #ВизаE9 #РусскоязычныеВКорее #KTRS"
-        }
-        hashtags = lang_hashtags.get(lang, "#EasyTax #KoreaTaxRefund #E9Visa #WorkInKorea #ForeignWorker")
-
-        # 1번 및 5번 카드 카피 추출
-        card1_title = cards[0].get("title", "") if len(cards) > 0 else ""
-        card5_title = cards[4].get("title", "") if len(cards) > 4 else ""
-
-        content = f"""================================================================================
-📢 [EasyTax 카드뉴스 공식 SNS 포스팅 패키지] ({lang.upper()} / {amount_fmt})
-주제: {theme_title}
-타깃 언어: {lang.upper()}
-공식 웹앱 링크: https://ktrs-service.vercel.app/?lang={lang}
-================================================================================
-
-1. 🧵 스레드 (Threads) 포스팅 팩
---------------------------------------------------------------------------------
-[헤드라인 텍스트]:
-🔥 {card1_title} ({amount_fmt})
-
-[본문]:
-대한민국 국세청(NTS) 조세특례제한법 제30조 외국인 소득세 최대 90% 감면 혜택 안내.
-지난 5년 동안 성실히 일하며 납부한 세금을 단 1분 만에 무료로 모의 계산해보세요.
-착수금/선결제 0원, 국세청에서 환급금이 먼저 입금된 후 정산하는 100% 안전 후불제입니다.
-
-👉 {card5_title}
-링크: https://ktrs-service.vercel.app/?lang={lang}
-
-[해시태그]:
-{hashtags}
-
-
-2. 📸 인스타그램 (Instagram) 포스팅 팩
---------------------------------------------------------------------------------
-[본문 캡션]:
-🇰🇷 대한민국 국세청 공식 세무 환급 안내
-"{card1_title} - {amount_fmt} 입금 완료!"
-
-외국인 근로자를 위한 90% 소득세 감면 혜택 (조세특례제한법 제30조)
-신청만 하면 지난 5년 동안 낸 세금이 내 통장으로 안전하게 입금됩니다 💸
-
-✨ 이지택스(EasyTax) 3대 안심 보증:
-1️⃣ 착수금/선결제 0원! (국세청 환급금 먼저 입금 후 후불 정산)
-2️⃣ 공인 세무법인의 100% 합법 국세청 다이렉트 전산 처리
-3️⃣ 스마트폰으로 단 1분 만에 간편 모의 계산 완료!
-
-지금 프로필 링크(Link in Bio)를 누르고 숨어있는 내 환급금을 확인하세요! 🔍
-
-[SEO 바이럴 해시태그]:
-{hashtags} #외국인세금환급 #조특법30조 #국세청환급 #E9근로자 #E7비자 #소득세감면 #환급금조회
-
-
-3. 📘 페이스북 (Facebook) 커뮤니티 그룹 포스팅 팩
---------------------------------------------------------------------------------
-[제목]:
-[필독] {theme_title} - 소득세 최대 90% 환급 신청 안내 ({amount_fmt})
-
-[본문]:
-한국의 제조 공장, 농축산, 건설, 물류 현장에서 땀 흘려 일하시는 근로자 여러분 안녕하십니까.
-최근 5년 동안 대한민국 국세청에 납부하신 소득세 중 최대 90%를 합법적으로 돌려받으실 수 있습니다.
-
-📌 핵심 안내 사항:
-- 조세특례제한법 제30조에 따른 중소기업 취업자 소득세 감면 혜택
-- 평균 환급액: 200만 ~ 450만 원 상당 ({amount_fmt} 실사례 다수)
-- 선결제 수수료 0원 (국세청에서 입금 확인 후 정산하는 안전 후불제)
-
-5년의 법적 소멸시효가 지나면 세금이 국가로 환수되오니, 지금 바로 공식 링크에서 무료 조회를 진행해보시기 바랍니다.
-
-👉 공식 간편 환급 조회: https://ktrs-service.vercel.app/?lang={lang}
-
-
-4. ✈️ 텔레그램 (Telegram) 단톡방 / 채널 팩
---------------------------------------------------------------------------------
-⚡ [공지] 대한민국 국세청 외국인 근로자 세금 환급 안내
-
-💰 예상 환급금: {amount_fmt}
-✅ 대상 비자: E-9, E-7, H-2, F-4, D-2 등 외국인 근로자
-🛡️ 수수료: 0원 (100% 성공 후불제, 사전 비용 없음)
-
-⏱️ 소요 시간: 스마트폰 1분 조회
-🔗 지금 바로 확인하기: https://ktrs-service.vercel.app/?lang={lang}
-================================================================================
-"""
+        """스레드, 인스타그램, 페이스북, 텔레그램 4대 채널별 포스팅 가이드 텍스트 저장 (현지어 원문 + 한국어 해설 2단 세트)"""
         try:
+            from core.engine.sns_guide_generator import SNSGuideGenerator
+            content = SNSGuideGenerator.generate_guide_content(
+                lang=lang,
+                theme_title=theme_title,
+                amount=amount,
+                cards=cards
+            )
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
-            logger.info(f"📄 [{lang.upper()}] 다국어 SNS 가이드 저장 완료: {file_path.name}")
+            logger.info(f"📄 [{lang.upper()}] 다국어 2단 SNS 가이드(현지어+한국어) 저장 완료: {file_path.name}")
         except Exception as e:
             logger.warning(f"SNS 가이드 작성 에러: {e}")
 

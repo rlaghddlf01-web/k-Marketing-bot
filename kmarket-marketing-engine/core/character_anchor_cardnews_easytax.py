@@ -157,7 +157,7 @@ def build_easytax_cardnews_scene_prompt(
             f"Wearing clean comfortable civilian casual clothes, a simple neat casual t-shirt. "
             f"The person is holding a sleek modern smartphone vertically in one hand at waist level, "
             f"with the black vertical display screen turned facing directly forward toward the camera, crisp smartphone screen bezel. "
-            f"Warm genuine friendly natural smile, looking directly into the smartphone camera lens with authentic trustworthy eye contact. "
+            f"Warm genuine friendly natural smile, looking directly into the camera lens with authentic trustworthy eye contact. "
             f"Raw unedited natural human skin texture with subtle real pores and natural imperfections, matte skin finish, "
             f"natural everyday room ambient lighting, realistic mobile phone camera sensor capture, NO beauty filter, authentic candid mobile photo"
         )
@@ -228,6 +228,7 @@ def build_easytax_cardnews_negative_prompt(lang: str, extra: str = "") -> str:
         "wide-angle lens distortion, fisheye lens, perspective distortion, "
         "plastic skin, smooth plastic texture, wax figure, mannequin, doll, airbrushed, beauty filter, smooth skin filter, porcelain skin, oily skin glare, shiny plastic surface, "
         "3d render, CGI, digital painting, digital illustration, octane render, unreal engine, anime, cartoon, artificial look, over-smoothed skin, glossy skin, "
+        "back of phone, rear phone case, back cover of smartphone, phone camera lenses on device, triple camera bump, "
         "handing over phone, offering phone, thrusting forward, outstretched arm, horizontal phone, tilted phone, pointing like remote, "
         "blank background, plain grey wall, solid color backdrop, empty studio wall, "
         "closed eyes, deformed fingers, extra fingers, missing fingers, fused fingers, bad anatomy, "
