@@ -90,8 +90,7 @@ class ScenarioDirectorCardnewsKMarket:
             lang=lang,
             gender=gender,
             age_group_ko=age_group,
-            persona_anchor_desc=anchor_desc,
-            persona_cat=cat
+            persona_anchor_desc=anchor_desc
         )
 
         # 2. ✍️ 제미나이 AI 100% 현지어 카드뉴스 카피라이팅 (제목, 부제, 뱃지, 3줄 불릿)
@@ -106,45 +105,55 @@ class ScenarioDirectorCardnewsKMarket:
             copy_item = generated_copy[idx - 1] if len(generated_copy) >= idx else {}
 
             if idx == 1:
-                # 🎬 1번 슬라이드: 보도블록 2인 실물 인계 (주인공 Person A + 상대방 Person B)
+                # 🎬 1번 슬라이드: 0원 나눔 물품 수령 환희
                 image_prompt = build_kmarket_cardnews_scene_prompt(
                     slide_idx=1,
                     char=char_anchor,
                     scene_action=f"meeting outdoors on a clean Korean sidewalk near {target} to receive a free {item}",
                     item_name=item
                 )
-                negative_prompt = build_kmarket_cardnews_negative_prompt(lang=lang, slide_idx=1)
-                card_type = "real_scene"
             elif idx == 2:
-                # 🎬 2번 슬라이드: 아늑한 원룸 배치 & 만족 (1번 슬라이드와 동일 주인공 100%)
+                # 🎬 2번 슬라이드: 아늑한 원룸 방에 배치 후 뿌듯함
                 image_prompt = build_kmarket_cardnews_scene_prompt(
                     slide_idx=2,
                     char=char_anchor,
-                    scene_action=f"relaxing comfortably in student studio room with {item} placed neatly, feeling so relieved and proud of saving money",
+                    scene_action=f"relaxing comfortably in student studio room with {item} placed neatly, feeling proud of saving money",
                     item_name=item
                 )
-                negative_prompt = build_kmarket_cardnews_negative_prompt(lang=lang, slide_idx=2)
-                card_type = "real_scene"
             elif idx == 3:
-                # 📱 3번: K-Market 실제 0원 피드 스마트폰 목업
-                image_prompt = "mockup_giveaway"
-                negative_prompt = ""
-                card_type = "mockup_giveaway"
+                # 🎬 3번 슬라이드: 생활비 150만원 절약 안도와 휴식
+                image_prompt = build_kmarket_cardnews_scene_prompt(
+                    slide_idx=3,
+                    char=char_anchor,
+                    scene_action=f"relaxing peacefully in the cozy studio room with a warm mug, celebrating saving over 1,500,000 KRW on {item}",
+                    item_name=item
+                )
             elif idx == 4:
-                # 📱 4번: K-Market 실제 17개국어 번역 채팅 스마트폰 목업
-                image_prompt = "mockup_translation"
-                negative_prompt = ""
-                card_type = "mockup_translation"
+                # 🎬 4번 슬라이드: 가족 송금 또는 고향 생각 감동
+                image_prompt = build_kmarket_cardnews_scene_prompt(
+                    slide_idx=4,
+                    char=char_anchor,
+                    scene_action=f"feeling proud and emotional about supporting family back home with living cost savings",
+                    item_name=item
+                )
             else:
-                # 🎬 5번 슬라이드: 자신감 넘치는 최종 추천 & CTA (1번, 2번 슬라이드와 동일 주인공 100%)
+                # 🎬 5번 슬라이드: 시청자에게 케이마켓 나눔 추천 및 엄지척 CTA
                 image_prompt = build_kmarket_cardnews_scene_prompt(
                     slide_idx=5,
                     char=char_anchor,
                     scene_action=f"standing confidently in the furnished studio room with {item}, encouraging viewers to use K-Market 0 KRW giveaway",
                     item_name=item
                 )
-                negative_prompt = build_kmarket_cardnews_negative_prompt(lang=lang, slide_idx=5)
+
+            # 🎯 [K-Market 5장 황금 구조]: 1,2,5번 실사 + 3번 0원피드 앱화면 + 4번 번역채팅 앱화면
+            if idx == 3:
+                card_type = "mockup_giveaway"
+            elif idx == 4:
+                card_type = "mockup_translation"
+            else:
                 card_type = "real_scene"
+
+            negative_prompt = build_kmarket_cardnews_negative_prompt(lang=lang, slide_idx=idx)
 
             cards.append({
                 "slide_idx": idx,
