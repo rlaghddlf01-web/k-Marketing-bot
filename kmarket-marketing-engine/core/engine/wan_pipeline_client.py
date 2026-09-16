@@ -62,9 +62,22 @@ class WanPipelineClient:
         except Exception as e:
             logger.warning(f"ComfyUI VRAM 정리 예외: {e}")
 
-    def submit_and_wait(self, prompt_dict: Dict[str, Any], prefix: str, timeout_sec: int = 1800) -> List[str]:
+    def submit_and_wait(
+        self,
+        prompt_dict: Dict[str, Any],
+        prefix: str,
+        timeout_sec: int = 1800,
+        check_vram_safety: bool = False
+    ) -> List[str]:
         """ComfyUI에 작업을 제출하고 완료될 때까지 대기 후 생성된 이미지 경로 반환"""
+        from core.engine.vram_safety_guard import VRAMSafetyGuard, VRAMSafetyException
+
         self.free_vram()
+
+        # 🛡️ [VRAM 안전 가드레일 1단계: 사전 진입 게이트]
+        if check_vram_safety:
+            VRAMSafetyGuard.assert_vram_headroom(min_free_gb=11.5, host=self.host, auto_free_fn=self.free_vram)
+
         # 이전 프레임 정리
         for f in glob.glob(os.path.join(self.comfy_output_dir, f"{prefix}_*.png")):
             try:
@@ -80,8 +93,40 @@ class WanPipelineClient:
 
         start_time = time.time()
         completed_hist = None
+
+        # 런타임 로그 감시 준비
+        log_path = VRAMSafetyGuard.get_latest_comfyui_log_path() if check_vram_safety else None
+        last_log_pos = os.path.getsize(log_path) if log_path and os.path.exists(log_path) else 0
+
         while time.time() - start_time < timeout_sec:
-            time.sleep(3)
+            time.sleep(2)
+
+            # 🛡️ [VRAM 안전 가드레일 2단계: 실시간 런타임 킬스위치]
+            if check_vram_safety and log_path and os.path.exists(log_path):
+                try:
+                    curr_size = os.path.getsize(log_path)
+                    if curr_size > last_log_pos:
+                        with open(log_path, "r", encoding="utf-8", errors="ignore") as lf:
+                            lf.seek(last_log_pos)
+                            new_lines = lf.readlines()
+                            last_log_pos = curr_size
+                        for line in new_lines:
+                            violation, reason = VRAMSafetyGuard.check_log_line_for_violation(line)
+                            if violation:
+                                VRAMSafetyGuard.trigger_emergency_interrupt(host=self.host)
+                                err_msg = (
+                                    f"🚨 [GPU 과열 방지 안전 차단] {reason}. "
+                                    "텍스트 인코더 잔류 등으로 비디오 모델(12.5GB)이 VRAM에 오르지 못하고 CPU로 튕겨 나갔습니다. "
+                                    "그래픽카드 과열 및 극심한 지연(스텝당 4분, 총 1시간 20분)을 방지하기 위해 "
+                                    "0.1초 만에 연산을 즉각 긴급 중단했습니다."
+                                )
+                                logger.error(err_msg)
+                                raise VRAMSafetyException(err_msg)
+                except VRAMSafetyException:
+                    raise
+                except Exception as e:
+                    logger.debug(f"VRAM 로그 모니터링 예외 (무시): {e}")
+
             try:
                 with urllib.request.urlopen(f"{self.host}/history/{prompt_id}") as resp:
                     hist = json.loads(resp.read().decode('utf-8'))
@@ -351,7 +396,7 @@ class WanPipelineClient:
             "9": {"class_type": "SaveImage", "inputs": {"images": ["8", 0], "filename_prefix": prefix}}
         }
 
-        generated_frames = self.submit_and_wait(workflow, prefix=prefix)
+        generated_frames = self.submit_and_wait(workflow, prefix=prefix, check_vram_safety=True)
         if not generated_frames:
             raise RuntimeError("Wan 2.2 S2V 렌더링 프레임이 생성되지 않았습니다.")
 

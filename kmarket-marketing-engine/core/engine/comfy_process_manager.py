@@ -69,7 +69,8 @@ class ComfyProcessManager:
             str(main_py),
             "--windows-standalone-build",
             "--fast", "fp16_accumulation",
-            "--use-sage-attention"
+            "--use-sage-attention",
+            "--disable-smart-memory"
         ]
 
         msg_start = "🚀 [ComfyUI 자율 매니저] ComfyUI GPU 엔진을 백그라운드에서 자동 기동합니다 (창 없이 조용히 실행)..."
@@ -79,11 +80,13 @@ class ComfyProcessManager:
 
         try:
             creation_flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+            log_path = cls.COMFY_DIR / "comfyui_stdout.log"
+            cls._log_file = open(log_path, "a", encoding="utf-8")
             cls._process = subprocess.Popen(
                 cmd,
                 cwd=str(cls.COMFY_DIR),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=cls._log_file,
+                stderr=cls._log_file,
                 creationflags=creation_flags
             )
         except Exception as e:
