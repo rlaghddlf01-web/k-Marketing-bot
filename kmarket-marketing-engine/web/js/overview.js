@@ -210,10 +210,17 @@ function renderHubGrid() {
                     <!-- 🚀 [원클릭 즉시 생성] Wan 2.2 & 서브픽셀 매립 팩토리 -->
                     <div style="background:#090C19;padding:8px 10px;border-radius:10px;border:1px solid rgba(212,175,55,0.4);margin-bottom:8px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px;">
-                            <select id="select-lang-easytax-${h.key}" style="flex:1;background:#13172E;color:#FFFFFF;border:1px solid #22294E;border-radius:6px;font-size:11px;padding:3px 4px;cursor:pointer;" title="타깃 국가/언어">
-                                <option value="vi" selected>🇻🇳 베트남 (vi)</option>
+                            <select id="select-lang-easytax-${h.key}" style="flex:1.2;background:#13172E;color:#FFFFFF;border:1px solid #22294E;border-radius:6px;font-size:11px;padding:3px 4px;cursor:pointer;" title="타깃 국가/언어">
+                                <option value="auto" selected>🤖 제미나이 추천 (8개국)</option>
+                                <option value="vi">🇻🇳 베트남 (vi)</option>
                                 <option value="uz">🇺🇿 우즈베크 (uz)</option>
-                                <option value="ko">🇰🇷 한국 (ko)</option>
+                                <option value="km">🇰🇭 캄보디아 (km)</option>
+                                <option value="id">🇮🇩 인도네시아 (id)</option>
+                                <option value="th">🇹🇭 태국 (th)</option>
+                                <option value="kk">🇰🇿 카자흐/러시아 (kk)</option>
+                                <option value="tl">🇵🇭 필리핀 (tl)</option>
+                                <option value="my">🇲🇲 미얀마 (my)</option>
+                                <option value="ko">🇰🇷 한국어 (ko)</option>
                             </select>
                             <select id="select-amount-easytax-${h.key}" style="flex:1.2;background:#13172E;color:#F59E0B;border:1px solid #D4AF37;border-radius:6px;font-size:11px;padding:3px 4px;cursor:pointer;font-weight:700;" title="환급 금액 선택">
                                 <option value="random" selected>🎲 실사 랜덤 (180~430만)</option>

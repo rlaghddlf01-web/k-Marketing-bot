@@ -135,10 +135,14 @@ To prevent the actor from speaking too fast like a chatterbox ("수다쟁이"), 
 - If Khmer (km), Thai (th), Burmese (my): STRICT MAXIMUM 16 to 19 WORDS!
 - If Vietnamese (vi), Tagalog (tl), Indonesian (id): STRICT MAXIMUM 20 to 24 WORDS!
 
-[ACTOR PERSONA & VISUAL PROMPT GENERATION (Wan 2.1 T2I)]:
-- gender: "male" or "female" (must match the character and voice naturally)
-- character_desc: English prompt for T2I model (ethnicity matching selected language, age around 24~30, neat workplace outfit matching theme like industrial polo shirt or university hoodie, natural authentic face, closed lips)
-- background_desc: English prompt for background (cozy modern dormitory room, Seoul apartment, or tidy living space with soft indoor lighting matching theme)
+[ACTOR PERSONA & VISUAL PROMPT GENERATION (Wan 2.1 T2I & Wan 2.2 S2V)]:
+- actor_persona_name: Korean & native description of persona (e.g. "투안 (27세, 안산 반월공단 3년차 제조 근로자 / Tuấn)")
+- gender: "male" or "female" (must match character naturally)
+- actor_outfit: neat realistic workplace outfit matching the theme (e.g. "dark navy industrial polo work shirt with company badge", "casual clean collegiate hoodie", etc.)
+- actor_location: authentic living/dormitory space in the target Korean region (e.g. "warm cozy studio room in Ansan", "clean dormitory room near Hwaseong plant")
+- character_desc: English prompt for Wan 2.1 T2I (ethnicity matching selected language, age around 24~30, neat workplace outfit matching actor_outfit, natural authentic face, closed lips)
+- background_desc: English prompt for background (cozy modern dormitory room, studio room in Korea with soft indoor window lighting matching actor_location)
+- s2v_motion_prompt: English prompt for Wan 2.2 S2V (e.g. "a friendly person holding smartphone at chest level, speaking sincerely and calmly to camera with natural gentle expressions, clear lip sync, stable posture")
 
 [OVERLAY BOX TEXTS & COLORS (STRICT ZERO OVERFLOW)]:
 - top_header: Maximum 22 characters in native language (e.g., HOÀN 90% THUẾ • KTRS)
@@ -153,9 +157,14 @@ To prevent the actor from speaking too fast like a chatterbox ("수다쟁이"), 
 Return ONLY valid JSON matching this exact structure:
 {{
   "selected_lang": "vi",
+  "actor_persona_name": "Tuấn (27세, 안산 반월공단 3년차 제조 근로자)",
   "gender": "male",
+  "actor_outfit": "dark navy industrial polo shirt",
+  "actor_location": "cozy dormitory room in Ansan",
   "character_desc": "a friendly 27-year-old Vietnamese male factory worker in neat dark work shirt...",
   "background_desc": "warm cozy modern apartment room in Ansan, soft ambient window daylight...",
+  "s2v_motion_prompt": "a friendly 27-year-old Vietnamese male worker holding smartphone, speaking sincerely to camera, natural gentle expressions, clear lip sync",
+  "speech_hook_kr": "안녕하세요! 안산 반월공단에서 일하는 3년 차 투안입니다...",
   "speech_hook": "...",
   "speech_app": "...",
   "speech_cta": "...",
@@ -196,18 +205,24 @@ Return ONLY valid JSON matching this exact structure:
                     palette = THEME_PALETTES.get(palette_id, THEME_PALETTES["gold_navy"])
 
                     speech_hook = data.get("speech_hook", "").strip()
+                    speech_hook_kr = data.get("speech_hook_kr", "").strip()
                     speech_app = data.get("speech_app", "").strip()
                     speech_cta = data.get("speech_cta", "").strip()
                     full_speech = f"{speech_hook} {speech_app} {speech_cta}".strip()
 
                     gender = data.get("gender", "male").lower()
+                    actor_persona_name = data.get("actor_persona_name", f"{resolved_lang.upper()} 근로자")
+                    actor_outfit = data.get("actor_outfit", "깔끔한 근무복")
+                    actor_location = data.get("actor_location", "한국 거주지")
                     char_desc = data.get("character_desc", "")
                     bg_desc = data.get("background_desc", "")
+                    s2v_motion = data.get("s2v_motion_prompt", f"a friendly person holding smartphone, talking to camera with natural gentle smile, clear lip sync")
 
                     country_meta = GOLDEN_8_COUNTRIES.get(resolved_lang, GOLDEN_8_COUNTRIES["vi"])
                     country_name = country_meta["country"]
 
-                    logger.info(f"✨ [GeminiShortsVisualDirector] 제미나이 디렉팅 성공! 언어: {resolved_lang.upper()} ({country_name}), 성별: {gender}, 팔레트: {palette['name']}")
+                    logger.info(f"✨ [GeminiShortsVisualDirector] 디렉팅 성공! 언어: {resolved_lang.upper()} ({country_name}) | 인물: {actor_persona_name} ({gender}) | 의상: {actor_outfit}")
+                    logger.info(f"🎙️ [인사말 한국어]: {speech_hook_kr[:60]}...")
                     return {
                         "lang": resolved_lang,
                         "country_name": country_name,
@@ -215,8 +230,13 @@ Return ONLY valid JSON matching this exact structure:
                         "amount": refund_krw,
                         "amount_formatted": refund_formatted,
                         "gender": gender,
+                        "actor_persona_name": actor_persona_name,
+                        "actor_outfit": actor_outfit,
+                        "actor_location": actor_location,
                         "character_desc": char_desc,
                         "background_desc": bg_desc,
+                        "s2v_motion_prompt": s2v_motion,
+                        "speech_hook_kr": speech_hook_kr,
                         "speech_hook": speech_hook,
                         "speech_app": speech_app,
                         "speech_cta": speech_cta,
@@ -256,8 +276,13 @@ Return ONLY valid JSON matching this exact structure:
             "amount": refund_krw,
             "amount_formatted": refund_formatted,
             "gender": "female",
+            "actor_persona_name": f"{resolved_lang.upper()} 근로자",
+            "actor_outfit": "단정한 근무복",
+            "actor_location": "한국 거주지",
             "character_desc": "",
             "background_desc": "",
+            "s2v_motion_prompt": "a friendly person holding smartphone, talking to camera with natural gentle smile, clear lip sync",
+            "speech_hook_kr": "한국에서 일하는 여러분! 세금 환급 꼭 받으세요!",
             "speech_hook": base_cfg["hook_0_10s"],
             "speech_app": base_cfg["app_10_18s"],
             "speech_cta": base_cfg["cta_18_22s"],

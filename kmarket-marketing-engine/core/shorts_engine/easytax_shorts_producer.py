@@ -200,23 +200,48 @@ class EasyTaxShortsProducer(BaseShortsProducer):
 
         logger.info(f"🚀 [이지텍스 22초 숏폼] 생산 시작: {country_name} ({effective_lang.upper()}) | 성별: {gender} | 환급액: ₩{effective_amount:,}")
 
-        # 3. [음성 합성] 0~11초 훅 음성(S2V용) + 22초 풀 음성(최종 영상용) - 제미나이 지정 성별 신경망 보이스
-        logger.info(f"🎙️ [Step 1] Edge-TTS 다국어 신경망 음성 합성 ({gender}, 10초 이상 여유 있는 호흡)...")
+        # 3. [음성 합성] 3단 독립 씬 오디오 분리 합성 (1씬 인물 훅 / 2씬 앱 시연 / 3씬 엔딩 CTA)
+        logger.info(f"🎙️ [Step 1] Edge-TTS 3단 다국어 신경망 음성 합성 ({gender}, 10초 이상 여유 있는 호흡)...")
         hook_wav_path = self.tts.generate_speech_wav(
             text=speech_hook,
             lang=effective_lang,
             gender=gender,
             rate="+0%",
-            filename_prefix=f"easytax_hook_{effective_lang}"
+            filename_prefix=f"easytax_hook_{effective_lang}_{dt_str}"
+        )
+        app_speech = scenario.get("speech_app", cfg.get("speech", ""))
+        app_wav_path = self.tts.generate_speech_wav(
+            text=app_speech,
+            lang=effective_lang,
+            gender=gender,
+            rate="+0%",
+            filename_prefix=f"easytax_app_{effective_lang}_{dt_str}"
+        )
+        cta_speech = scenario.get("speech_cta", "")
+        cta_wav_path = self.tts.generate_speech_wav(
+            text=cta_speech,
+            lang=effective_lang,
+            gender=gender,
+            rate="+0%",
+            filename_prefix=f"easytax_cta_{effective_lang}_{dt_str}"
         )
         full_wav_path = self.tts.generate_speech_wav(
             text=full_speech,
             lang=effective_lang,
             gender=gender,
             rate="+0%",
-            filename_prefix=f"easytax_full_{effective_lang}"
+            filename_prefix=f"easytax_full_{effective_lang}_{dt_str}"
         )
         audio_name = os.path.basename(hook_wav_path)
+
+        # 1씬 인사말 실제 음성 길이 측정 및 Wan 2.2 S2V 최적 프레임 수 동적 계산 (최소 10초 보장)
+        dur_hook = self.composer._get_video_duration(hook_wav_path)
+        target_s2v_dur = max(10.06, dur_hook + 0.6)  # 발화 후 0.6초 자연스러운 여운 확보
+        raw_frames = int(target_s2v_dur * 16)
+        n_steps = (raw_frames - 1 + 3) // 4
+        s2v_frames = max(161, 4 * n_steps + 1)  # Wan 3D VAE 4n+1 규격 엄수 (161, 177, 193...)
+        actual_s2v_sec = s2v_frames * 0.0625
+        logger.info(f"⏱️ [1씬 호흡 정밀 계산] 인사말 발화: {dur_hook:.2f}초 -> S2V 할당: {s2v_frames}프레임 ({actual_s2v_sec:.2f}초, 10초 이상 여유)")
 
         # 4. [Step 2] 숏폼 인물 사진 생성 및 액정 매립 (Wan 2.1 T2I)
         if custom_hero_image is not None:
@@ -260,20 +285,21 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         embedded_save_path = out_folder / f"03_embedded_start_frame_{effective_lang}.png"
         embedded_img.save(str(embedded_save_path))
 
-        # 5. [Step 3] Wan 2.2 S2V 10초 이상 립싱크 모션 생성 (177프레임 @ 16fps = 11.06초)
+        # 5. [Step 3] Wan 2.2 S2V 10초 이상 립싱크 모션 생성
         framed_img = self.prepare_framed_input_image(embedded_img, target_w=480, target_h=832)
         comfy_input_name = f"easytax_s2v_input_{effective_lang}_{dt_str}.png"
         comfy_input_path = os.path.join(self.wan_client.comfy_input_dir, comfy_input_name)
         framed_img.save(comfy_input_path)
 
         person_clip_path = str(out_folder / f"temp_person_s2v_{effective_lang}.mp4")
-        logger.info("🎬 [Step 3] Wan 2.2 S2V 10초 이상(177프레임, 11.06초) 립싱크 비디오 렌더링 시작...")
+        s2v_motion_prompt = scenario.get("s2v_motion_prompt") or "a friendly person holding smartphone at chest level, speaking sincerely to camera, natural gentle expressions, clear lip sync"
+        logger.info(f"🎬 [Step 3] Wan 2.2 S2V 립싱크 비디오 렌더링 ({s2v_frames}프레임, {actual_s2v_sec:.2f}초)...")
         self.wan_client.generate_s2v_video(
             image_name=comfy_input_name,
             audio_name=audio_name,
-            prompt_text="a friendly attractive person holding smartphone, talking to camera with natural gentle smile, clear lip sync, stable hands",
+            prompt_text=s2v_motion_prompt,
             output_mp4_path=person_clip_path,
-            frames=177,
+            frames=s2v_frames,
             prefix=f"easytax_s2v_{effective_lang}_{dt_str}"
         )
 
@@ -286,27 +312,32 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             output_mp4_path=app_clip_path
         )
 
-        # 7. [Step 5] 22초 하이브리드 완제품 컴포징 (3단 Concat + 22초 단일 음성 + 오버레이 자막)
+        # 7. [Step 5] 22초 하이브리드 완제품 컴포징 (3단 비디오 + 3단 무결점 씬 오디오 싱크)
         final_mp4_name = f"이지텍스_22초숏폼_{country_name}_{effective_amount:,}원_{dt_str}.mp4"
         final_mp4_path = str(out_folder / final_mp4_name)
 
         logger.info("✨ [Step 5] 1080p 세로 풀HD 22초 하이브리드 비디오 최종 컴포징...")
+        scene_audios = {
+            "hook": hook_wav_path,
+            "app": app_wav_path,
+            "cta": cta_wav_path
+        }
         self.composer.compose_hybrid_22s_shorts(
             clip_person_path=person_clip_path,
             clip_app_path=app_clip_path,
             full_audio_path=full_wav_path,
             visual_direction=visual_dir,
             output_mp4_path=final_mp4_path,
-            lang=effective_lang
+            lang=effective_lang,
+            scene_audios=scene_audios
         )
 
-
         # 8. [Step 6] 4대 숏폼 SNS 포스팅 가이드 파일 생성 및 저장
-        guide_filename = f"SNS_포스팅_가이드_{lang.upper()}.txt"
+        guide_filename = f"SNS_포스팅_가이드_{effective_lang.upper()}.txt"
         guide_path = out_folder / guide_filename
         self._write_sns_guide(
             file_path=guide_path,
-            lang=lang,
+            lang=effective_lang,
             country_name=country_name,
             amount=effective_amount,
             speech=full_speech,

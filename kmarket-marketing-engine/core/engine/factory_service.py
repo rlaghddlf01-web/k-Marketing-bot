@@ -118,8 +118,10 @@ class FactoryService:
 
                         from core.shorts_engine import EasyTaxShortsProducer
                         producer = EasyTaxShortsProducer()
-                        self._log(f"🎬 [EasyTax 숏폼] 1080p 고화질 숏폼 & SNS 배포팩 제작 시작 (언어: {lang.upper()}, 금액: ₩{resolved_amount:,})", "info")
-                        res = producer.produce(lang=lang, amount=resolved_amount)
+                        target_lang = None if (lang == "auto" or not lang) else lang
+                        display_lang = "🤖 제미나이 자동 추천 (8개국)" if target_lang is None else lang.upper()
+                        self._log(f"🎬 [EasyTax 숏폼] 1080p 고화질 숏폼 & SNS 배포팩 제작 시작 (타깃: {display_lang}, 금액: ₩{resolved_amount:,})", "info")
+                        res = producer.produce(lang=target_lang, amount=resolved_amount)
                         output_path = res.get("output_mp4", "")
                         folder_path = res.get("folder_path", "")
                         self._log(f"🎉 [EasyTax 숏폼 완제품 & SNS 배포팩 완성] 폴더: {folder_path}", "success")

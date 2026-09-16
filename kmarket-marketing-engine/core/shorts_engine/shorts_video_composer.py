@@ -495,7 +495,8 @@ class ShortsVideoComposer:
         output_mp4_path: str,
         lang: str = "vi",
         target_w: int = 1080,
-        target_h: int = 1920
+        target_h: int = 1920,
+        scene_audios: Optional[Dict[str, str]] = None
     ) -> str:
         """
         🎬 22초 완결형 하이브리드 숏폼 비디오 최종 결합 엔진
@@ -503,6 +504,7 @@ class ShortsVideoComposer:
         - Clip 2: 라이브 앱 시뮬레이션 (EasyTaxAppRecorder) -> 중앙 앱 시뮬레이터 100% 개방
         - Clip 3: 18~22초 안심 신뢰 보증 & CTA 카드
         - Overlays: 상단 타이틀 박스 + 하단 자막 박스 (제미나이 실시간 테마 컬러 & 글자 이탈 0% 원천 차단)
+        - Audio: 3단 독립 씬 오디오(scene_audios)가 주어질 경우 씬 전환점과 발화 시점을 마이크로초 1:1 동기화
         """
         temp_dir = os.path.dirname(output_mp4_path)
         os.makedirs(temp_dir, exist_ok=True)
@@ -555,37 +557,70 @@ class ShortsVideoComposer:
 
         # 4. FFmpeg 복합 필터 구성 (동적 타임스탬프 동기화)
         total_content_dur = dur_person + dur_app
-        filter_complex = [
-            # 3개 비디오 규격 1080x1920 정규화 후 Concat
-            f"[0:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v0]",
-            f"[1:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v1]",
-            f"[2:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v2]",
-            "[v0][v1][v2]concat=n=3:v=1:a=0[v_base]",
+        use_multi_audio = bool(scene_audios and scene_audios.get("hook") and scene_audios.get("app") and scene_audios.get("cta"))
 
-            # 상단 헤더 박스: 인물 및 앱 재생 구간 동안 지속
-            f"[v_base][4:v]overlay=0:0:enable='between(t,0,{total_content_dur:.2f})'[v_h]",
+        if use_multi_audio:
+            # 3단 개별 오디오 파일 입력 (인사말, 앱 조작, CTA)
+            cmd_inputs = [
+                "-i", clip_person_path,
+                "-i", clip_app_path,
+                "-i", cta_clip_path,
+                "-i", scene_audios["hook"],
+                "-i", scene_audios["app"],
+                "-i", scene_audios["cta"],
+                "-i", top_box_png,
+                "-i", bottom_s1_png,
+                "-i", bottom_s2_png,
+            ]
+            filter_complex = [
+                # 비디오 3단 Concat
+                f"[0:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v0]",
+                f"[1:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v1]",
+                f"[2:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v2]",
+                "[v0][v1][v2]concat=n=3:v=1:a=0[v_base]",
 
-            # 1단계 인물 씬 하단 자막: 인물 클립 동안만 표시
-            f"[v_h][5:v]overlay=0:0:enable='between(t,0.5,{dur_person:.2f})'[v_s1]",
+                # 오디오 3단 무결점 씬 동기화 (apad로 비디오 씬 길이만큼 정확히 여운 패딩 후 Concat)
+                f"[3:a]apad=whole_dur={dur_person:.2f}[a0_pad]",
+                f"[4:a]apad=whole_dur={dur_app:.2f}[a1_pad]",
+                "[a0_pad][a1_pad][5:a]concat=n=3:v=0:a=1[a_final]",
 
-            # 2단계 앱 시뮬레이션 씬 하단 자막: 앱 클립 동안만 표시
-            f"[v_s1][6:v]overlay=0:0:enable='between(t,{dur_person:.2f},{total_content_dur:.2f})'[v_final]"
-        ]
+                # 상단 헤더 박스: 인물 + 앱 씬 동안 표시
+                f"[v_base][6:v]overlay=0:0:enable='between(t,0,{total_content_dur:.2f})'[v_h]",
+                # 1단계 인물 씬 하단 자막: 인물 클립 동안만 표시
+                f"[v_h][7:v]overlay=0:0:enable='between(t,0.5,{dur_person:.2f})'[v_s1]",
+                # 2단계 앱 시뮬레이션 씬 하단 자막: 앱 클립 동안만 표시
+                f"[v_s1][8:v]overlay=0:0:enable='between(t,{dur_person:.2f},{total_content_dur:.2f})'[v_final]"
+            ]
+            map_audio = "[a_final]"
+        else:
+            cmd_inputs = [
+                "-i", clip_person_path,
+                "-i", clip_app_path,
+                "-i", cta_clip_path,
+                "-i", full_audio_path,
+                "-i", top_box_png,
+                "-i", bottom_s1_png,
+                "-i", bottom_s2_png,
+            ]
+            filter_complex = [
+                f"[0:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v0]",
+                f"[1:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v1]",
+                f"[2:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setsar=1,fps=30[v2]",
+                "[v0][v1][v2]concat=n=3:v=1:a=0[v_base]",
+                f"[v_base][4:v]overlay=0:0:enable='between(t,0,{total_content_dur:.2f})'[v_h]",
+                f"[v_h][5:v]overlay=0:0:enable='between(t,0.5,{dur_person:.2f})'[v_s1]",
+                f"[v_s1][6:v]overlay=0:0:enable='between(t,{dur_person:.2f},{total_content_dur:.2f})'[v_final]"
+            ]
+            map_audio = "3:a"
 
         filter_str = ";".join(filter_complex)
 
         cmd = [
             self.ffmpeg_exe, "-y",
-            "-i", clip_person_path,
-            "-i", clip_app_path,
-            "-i", cta_clip_path,
-            "-i", full_audio_path,
-            "-i", top_box_png,
-            "-i", bottom_s1_png,
-            "-i", bottom_s2_png,
+            *cmd_inputs,
             "-filter_complex", filter_str,
             "-map", "[v_final]",
-            "-map", "3:a",
+            "-map", map_audio,
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-crf", "18",
@@ -596,7 +631,7 @@ class ShortsVideoComposer:
             output_mp4_path
         ]
 
-        logger.info("⚙️ [ShortsVideoComposer] FFmpeg 3단 비디오 + 22초 단일 음성 + 제미나이 분할 박스 최종 결합 중...")
+        logger.info("⚙️ [ShortsVideoComposer] FFmpeg 3단 비디오 + 씬별 무결점 오디오 + 제미나이 분할 박스 최종 결합 중...")
         res = subprocess.run(cmd, capture_output=True)
         if res.returncode != 0:
             err_msg = res.stderr.decode("utf-8", errors="ignore")
