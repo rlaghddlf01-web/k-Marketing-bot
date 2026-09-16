@@ -37,17 +37,17 @@ def _get_local_image_data_uri(filename: str) -> str:
     return ""
 
 
-# 17개국 언어별 품목 다국어 명칭 (소형 가전제품 중심)
+# 17개국 언어별 품목 다국어 명칭 (100% 1인 직접 수령 소형 가전/생활용품)
 ITEM_I18N: Dict[str, Dict[str, str]] = {
     "uz": {
         "microwave": "Hashamatli Kompakt Mikroto'lqinli Pech (0 Von Bepul)",
         "rice_cooker": "Elektr Guruch Pishirgich (0 Von Bepul)",
+        "airfryer": "Katta Sig'imli Aerogrill (0 Von Bepul)",
+        "vacuum": "Simsiz Siklon Changyutgich (0 Von Bepul)",
+        "heater": "Keramik Mini Issiq Havo Isitgich (0 Von)",
+        "toaster": "Kompakt Toster va Non Pishirgich (0 Von)",
         "kettle": "Zanglamas Elektr Choynak (0 Von Bepul)",
         "fan": "Yozgi Mini Sovutish Ventilyatori (0 Von)",
-        "bed": "Hashamatli Katta Karavot (0 Von Bepul)",
-        "drawer": "3 Qavatli Yog'och Javon (0 Von Bepul)",
-        "desk": "O'qish Stoli va Qulay Stul (0 Von)",
-        "fridge": "Kompakt Muzlatgich (0 Von)",
         "seller": "Yaqin qo'shni (Sinchon)",
         "free_badge": "0 VON BEPUL",
         "trans_badge": "17 tilda real vaqtda 1:1 avto-tarjima",
@@ -55,15 +55,31 @@ ITEM_I18N: Dict[str, Dict[str, str]] = {
         "chat_btn": "1:1 Xavfsiz Chatda Bog'lanish (Avto-tarjima)",
         "manner_temp": "37.5℃ Iliq Harorat"
     },
+    "km": {
+        "microwave": "ម៉ាស៊ីនមីក្រូវ៉េវស្អាត (០ វ៉ុន ឥតគិតថ្លៃ)",
+        "rice_cooker": "ឆ្នាំងដាំបាយអគ្គិសនី (០ វ៉ុន ឥតគិតថ្លៃ)",
+        "airfryer": "ឆ្នាំងបំពងគ្មានប្រេង (០ វ៉ុន ឥតគិតថ្លៃ)",
+        "vacuum": "ម៉ាស៊ីនបូមធូលីឥតខ្សែ (០ វ៉ុន ឥតគិតថ្លៃ)",
+        "heater": "ម៉ាស៊ីនកម្តៅខ្នាតតូច (០ វ៉ុន)",
+        "toaster": "ម៉ាស៊ីនដុតនំប៉័ង (០ វ៉ុន)",
+        "kettle": "កំសៀវដាំទឹកអគ្គិសនី (០ វ៉ុន)",
+        "fan": "កង្ហារខ្នាតតូច (០ វ៉ុន)",
+        "seller": "អ្នកជិតខាង (Sinchon)",
+        "free_badge": "០ វ៉ុន ឥតគិតថ្លៃ",
+        "trans_badge": "ការបកប្រែស្វ័យប្រវត្តិ ១:១ ក្នុង ១៧ ភាសា",
+        "desc": "ចែកជូនដោយឥតគិតថ្លៃសម្រាប់បងប្អូនពលករ និងសិស្សនៅកូរ៉េ។ គុណភាពនៅល្អស្អាតខ្លាំង អាចមកយកបានថ្ងៃនេះ!",
+        "chat_btn": "ជជែកផ្ទាល់ ១:១ ប្រកបដោយសុវត្ថិភាព (បកប្រែស្វ័យប្រវត្តិ)",
+        "manner_temp": "សីតុណ្ហភាព 37.5℃"
+    },
     "vi": {
         "microwave": "Lò Vi Sóng Mini Cao Cấp (Miễn Phí 0 Won)",
         "rice_cooker": "Nồi Cơm Điện Thông Minh A+ (0 Won)",
+        "airfryer": "Nồi Chiên Không Dầu Cao Cấp (0 Won)",
+        "vacuum": "Máy Hút Bụi Không Dây Thông Minh (0 Won)",
+        "heater": "Máy Sưởi Gốm Mini Tiết Kiệm Điện (0 Won)",
+        "toaster": "Máy Nướng Bánh Mì Tiện Lợi (0 Won)",
         "kettle": "Ấm Đun Nước Siêu Tốc Inox (0 Won)",
         "fan": "Quạt Bàn Mini Tiết Kiệm Điện (0 Won)",
-        "bed": "Giường Ngủ Cao Cấp (Miễn Phí 0 Won)",
-        "drawer": "Tủ Gỗ 3 Ngăn Tiện Lợi (0 Won)",
-        "desk": "Bàn Học & Ghế Đệm (0 Won)",
-        "fridge": "Tủ Lạnh Mini Tiết Kiệm Điện (0 Won)",
         "seller": "Hàng xóm thân thiện (Sinchon)",
         "free_badge": "0 WON MIỄN PHÍ",
         "trans_badge": "Dịch tự động 1:1 thời gian thực 17 ngôn ngữ",
@@ -74,12 +90,12 @@ ITEM_I18N: Dict[str, Dict[str, str]] = {
     "ko": {
         "microwave": "소형 전자레인지 상태 A급 (0원 무료나눔)",
         "rice_cooker": "쿠쿠 6인용 전기압력밥솥 (0원 나눔)",
+        "airfryer": "디지털 대용량 에어프라이어 (0원 무료나눔)",
+        "vacuum": "무선 싸이클론 스틱 청소기 (0원 나눔)",
+        "heater": "초절전 PTC 미니 온풍기 (0원)",
+        "toaster": "모닝 팝업 토스터기 (0원)",
         "kettle": "스테인리스 무선 전기포트 (0원)",
         "fan": "탁상용 저소음 미니 선풍기 (0원)",
-        "bed": "고급 퀸 침대 프레임+매트리스 (0원 무료나눔)",
-        "drawer": "원룸 정리 끝판왕 3단 서랍장 (0원 나눔)",
-        "desk": "원목 공부책상 & 메쉬 의자 (0원)",
-        "fridge": "소형 원룸 냉장고 (0원 무료나눔)",
         "seller": "이웃 주민 (신촌 연세대 앞)",
         "free_badge": "0원 무료나눔",
         "trans_badge": "17개국어 실시간 1:1 자동번역 작동 중",
@@ -90,12 +106,12 @@ ITEM_I18N: Dict[str, Dict[str, str]] = {
     "en": {
         "microwave": "Compact Microwave Oven (0 KRW Free)",
         "rice_cooker": "Electric Rice Cooker Mint Condition (0 KRW)",
+        "airfryer": "Digital Air Fryer 5L (0 KRW Free)",
+        "vacuum": "Cordless Cyclone Stick Vacuum (0 KRW)",
+        "heater": "Compact PTC Ceramic Space Heater (0 KRW)",
+        "toaster": "Morning Bread Pop-up Toaster (0 KRW)",
         "kettle": "Stainless Electric Kettle (0 KRW)",
         "fan": "Quiet Desk Cooling Fan (0 KRW)",
-        "bed": "Luxury Queen Bed & Mattress (0 KRW Free)",
-        "drawer": "3-Tier Storage Wooden Drawer (0 KRW)",
-        "desk": "Study Desk & Ergonomic Chair (0 KRW)",
-        "fridge": "Compact Studio Refrigerator (0 KRW)",
         "seller": "Campus Neighbor (Sinchon)",
         "free_badge": "0 KRW FREE",
         "trans_badge": "17 Languages Real-Time Auto-Translation",
@@ -173,33 +189,61 @@ class KMarketCardNewsAppCapturer:
             ]
         return items_list
 
-    def capture_giveaway_feed(self, lang: str = "uz", force_refresh: bool = False) -> Image.Image:
+    def capture_giveaway_feed(self, lang: str = "uz", item_name: str = "", force_refresh: bool = False) -> Image.Image:
         """
         📱 [3번 슬라이드 전용] 실제 케이마켓 0원 무료나눔 매물 피드 순정 화면 (1080x1350)
         - 외부 Unsplash 의존 100% 제거 -> 로컬 고화질 Base64 직주입 (엑박 0%, 검은 화면 0%)
-        - 4개 소형가전 0원 실물 매물 1:1 완벽 매칭
+        - 100% 실사 소형가전 0원 실물 매물 1:1 완벽 매칭
         - 상단 로고 가림 원천 방지 레이아웃
         """
-        cached_file = self.cache_dir / f"kmarket_feed_pure_{lang.lower()}_1080x1350.png"
-        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000:
-            logger.info(f"[{lang.upper()}] 📦 캐시된 0원 매물 피드 순정 캡처 재사용: {cached_file.name}")
-            return Image.open(cached_file).convert("RGB")
-
         lang_key = lang.lower() if lang.lower() in ITEM_I18N else "en"
         i18n = ITEM_I18N.get(lang_key, ITEM_I18N["en"])
 
-        # 로컬 고화질 실물 이미지 Base64 인코딩 (딜레이 0ms, 무결점 로딩)
-        img_microwave = _get_local_image_data_uri("microwave.jpg")
-        img_rice_cooker = _get_local_image_data_uri("rice_cooker.jpg")
-        img_kettle = _get_local_image_data_uri("kettle.jpg")
-        img_fan = _get_local_image_data_uri("fan.jpg")
+        item_lower = item_name.lower()
+        # 테마 품목에 따라 피드 상단 메인 매물 동적 결정
+        if any(k in item_lower for k in ["밥솥", "rice cooker", "cooker"]):
+            feed_tag = "rice_cooker"
+            main_items = ["rice_cooker", "airfryer", "microwave", "kettle"]
+        elif any(k in item_lower for k in ["에어프라이어", "airfryer", "air fryer"]):
+            feed_tag = "airfryer"
+            main_items = ["airfryer", "toaster", "microwave", "vacuum"]
+        elif any(k in item_lower for k in ["청소기", "vacuum"]):
+            feed_tag = "vacuum"
+            main_items = ["vacuum", "microwave", "fan", "heater"]
+        elif any(k in item_lower for k in ["온풍기", "히터", "heater"]):
+            feed_tag = "heater"
+            main_items = ["heater", "kettle", "microwave", "toaster"]
+        elif any(k in item_lower for k in ["토스터", "toaster"]):
+            feed_tag = "toaster"
+            main_items = ["toaster", "kettle", "airfryer", "microwave"]
+        elif any(k in item_lower for k in ["포트", "kettle"]):
+            feed_tag = "kettle"
+            main_items = ["kettle", "toaster", "rice_cooker", "microwave"]
+        elif any(k in item_lower for k in ["선풍기", "fan"]):
+            feed_tag = "fan"
+            main_items = ["fan", "microwave", "kettle", "rice_cooker"]
+        else:
+            feed_tag = "microwave"
+            main_items = ["microwave", "rice_cooker", "airfryer", "kettle"]
 
-        feed_items = [
-            {"img": img_microwave, "title": i18n.get("microwave", "Kompakt Mikroto'lqinli Pech (0 Von)"), "loc": "Sinchon, Seul • 5 daqiqa oldin", "chats": 6},
-            {"img": img_rice_cooker, "title": i18n.get("rice_cooker", "Elektr Guruch Pishirgich (0 Von)"), "loc": "Yeonnam, Seul • 12 daqiqa oldin", "chats": 4},
-            {"img": img_kettle, "title": i18n.get("kettle", "Zanglamas Elektr Choynak (0 Von)"), "loc": "Sillim, Seul • 25 daqiqa oldin", "chats": 3},
-            {"img": img_fan, "title": i18n.get("fan", "Yozgi Mini Sovutish Ventilyatori (0 Von)"), "loc": "Ansan, Gyeonggi • 40 daqiqa oldin", "chats": 5},
-        ]
+        cached_file = self.cache_dir / f"kmarket_feed_pure_{feed_tag}_{lang.lower()}_1080x1350.png"
+        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000:
+            logger.info(f"[{lang.upper()}] 📦 캐시된 0원 매물 피드({feed_tag}) 순정 캡처 재사용: {cached_file.name}")
+            return Image.open(cached_file).convert("RGB")
+
+        locs = ["Sinchon, Seul • 5 daqiqa oldin", "Yeonnam, Seul • 12 daqiqa oldin", "Sillim, Seul • 25 daqiqa oldin", "Ansan, Gyeonggi • 40 daqiqa oldin"]
+        chats = [7, 4, 3, 5]
+
+        feed_items = []
+        for idx, k in enumerate(main_items):
+            img_b64 = _get_local_image_data_uri(f"{k}.jpg")
+            title = i18n.get(k, f"{k.replace('_', ' ').title()} (0 KRW)")
+            feed_items.append({
+                "img": img_b64,
+                "title": title,
+                "loc": locs[idx % len(locs)],
+                "chats": chats[idx % len(chats)]
+            })
 
         items_html = ""
         for it in feed_items:
@@ -376,27 +420,47 @@ class KMarketCardNewsAppCapturer:
         - 타깃 언어(우즈베크어 등) 실시간 1:1 자동번역 순정 UI 100% 완벽 렌더링
         - 상단 배지와 뒤로가기 버튼 분리 여백 확보
         """
-        cached_file = self.cache_dir / f"kmarket_detail_pure_{lang.lower()}_1080x1350.png"
-        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000:
-            logger.info(f"[{lang.upper()}] 📦 캐시된 매물 상세 순정 캡처 재사용: {cached_file.name}")
-            return Image.open(cached_file).convert("RGB")
-
         lang_key = lang.lower() if lang.lower() in ITEM_I18N else "en"
         i18n = ITEM_I18N.get(lang_key, ITEM_I18N["en"])
 
-        # 소형 가전 실물 이미지 Base64 주입 (검은 박스 0%)
-        hero_img_data = _get_local_image_data_uri("microwave.jpg")
-        title_text = i18n.get("microwave", "Hashamatli Kompakt Mikroto'lqinli Pech (0 Von Bepul)")
-
-        if any(k in item_name for k in ["밥솥", "rice cooker"]):
+        item_lower = item_name.lower()
+        if any(k in item_lower for k in ["밥솥", "rice cooker", "cooker"]):
             hero_img_data = _get_local_image_data_uri("rice_cooker.jpg")
             title_text = i18n.get("rice_cooker", "Elektr Guruch Pishirgich (0 Von Bepul)")
-        elif any(k in item_name for k in ["포트", "kettle"]):
+            item_tag = "rice_cooker"
+        elif any(k in item_lower for k in ["에어프라이어", "airfryer", "air fryer"]):
+            hero_img_data = _get_local_image_data_uri("airfryer.jpg")
+            title_text = i18n.get("airfryer", "Katta Sig'imli Aerogrill (0 Von Bepul)")
+            item_tag = "airfryer"
+        elif any(k in item_lower for k in ["청소기", "vacuum"]):
+            hero_img_data = _get_local_image_data_uri("vacuum.jpg")
+            title_text = i18n.get("vacuum", "Simsiz Siklon Changyutgich (0 Von Bepul)")
+            item_tag = "vacuum"
+        elif any(k in item_lower for k in ["온풍기", "히터", "heater"]):
+            hero_img_data = _get_local_image_data_uri("heater.jpg")
+            title_text = i18n.get("heater", "Keramik Mini Issiq Havo Isitgich (0 Von)")
+            item_tag = "heater"
+        elif any(k in item_lower for k in ["토스터", "toaster"]):
+            hero_img_data = _get_local_image_data_uri("toaster.jpg")
+            title_text = i18n.get("toaster", "Kompakt Toster va Non Pishirgich (0 Von)")
+            item_tag = "toaster"
+        elif any(k in item_lower for k in ["포트", "kettle"]):
             hero_img_data = _get_local_image_data_uri("kettle.jpg")
             title_text = i18n.get("kettle", "Zanglamas Elektr Choynak (0 Von Bepul)")
-        elif any(k in item_name for k in ["선풍기", "fan"]):
+            item_tag = "kettle"
+        elif any(k in item_lower for k in ["선풍기", "fan"]):
             hero_img_data = _get_local_image_data_uri("fan.jpg")
             title_text = i18n.get("fan", "Yozgi Mini Sovutish Ventilyatori (0 Von)")
+            item_tag = "fan"
+        else:
+            hero_img_data = _get_local_image_data_uri("microwave.jpg")
+            title_text = i18n.get("microwave", "Hashamatli Kompakt Mikroto'lqinli Pech (0 Von Bepul)")
+            item_tag = "microwave"
+
+        cached_file = self.cache_dir / f"kmarket_detail_{item_tag}_{lang.lower()}_1080x1350.png"
+        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000:
+            logger.info(f"[{lang.upper()}] 📦 캐시된 매물 상세({item_tag}) 순정 캡처 재사용: {cached_file.name}")
+            return Image.open(cached_file).convert("RGB")
 
         full_html = f"""<!DOCTYPE html>
         <html>

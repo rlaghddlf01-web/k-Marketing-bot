@@ -86,6 +86,21 @@ def _load_font(size: int, bold: bool = True, lang: str = "uz") -> ImageFont.Free
             r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
             r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
         ]
+    elif lang in ["km", "th"]:  # 크메르어(캄보디아), 태국어 완벽 지원
+        candidates = [
+            r"C:\Windows\Fonts\LeelaUIb.ttf" if bold else r"C:\Windows\Fonts\LeelawUI.ttf",
+            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
+        ]
+    elif lang in ["ne", "si", "bn", "hi"]:  # 네팔어, 힌디어 (데바나가리)
+        candidates = [
+            r"C:\Windows\Fonts\Nirmala.ttc",
+            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
+        ]
+    elif lang == "my":  # 미얀마어 (버마어)
+        candidates = [
+            r"C:\Windows\Fonts\mmrtextb.ttf" if bold else r"C:\Windows\Fonts\mmrtext.ttf",
+            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
+        ]
     else:
         candidates = [
             r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
@@ -176,13 +191,15 @@ class CardNewsBatchProducerKMarket:
         item_name = scenario.get("item", "3단 서랍장")
         target_area = scenario.get("target", "신촌")
 
+        slide1_base_photo: Optional[Image.Image] = None
+
         for card in sorted(cards, key=lambda c: c.get("slide_idx", 1)):
             s_idx = card.get("slide_idx", 1)
 
             # 🌟 [3번 슬라이드] 실제 케이마켓 0원 무료나눔 매물 피드 앱 화면 캡처
             if s_idx == 3:
-                logger.info("📱 [Slide 3] 실제 케이마켓 0원 매물 피드 고화질 캡처 적용!")
-                base_photo = self.app_capturer.capture_giveaway_feed(lang=lang)
+                logger.info(f"📱 [Slide 3] 실제 케이마켓 0원 매물 피드 고화질 캡처 적용! ({item_name})")
+                base_photo = self.app_capturer.capture_giveaway_feed(lang=lang, item_name=item_name)
 
             # 🌟 [4번 슬라이드] 실제 0원 매물 상세 & 17개 언어 실시간 직거래 순정 모바일 화면 (팝업 0% 전체 뷰)
             elif s_idx == 4:
@@ -193,7 +210,7 @@ class CardNewsBatchProducerKMarket:
                     target_area=target_area
                 )
 
-            # 🌟 [1, 2, 5번 슬라이드] 배경·가구 중심 WAN T2I 실사 라이프스타일 사진 생성
+            # 🌟 [1, 2, 5번 슬라이드] 배경·가구 중심 WAN T2I 실사 라이프스타일 사진 생성 (동일 마스터 시드 동기화)
             elif s_idx == 1 and custom_hero_image is not None:
                 base_photo = custom_hero_image
                 logger.info("🌟 [Slide 1] 검증 승인된 마스터 주인공 인물 사진(custom_hero_image) 직접 적용!")
@@ -287,6 +304,8 @@ class CardNewsBatchProducerKMarket:
         except Exception as e:
             logger.error(f"❌ [Slide {s_idx}] WAN 생성 실패 ({e}) → Fallback 사용")
             return fallback_img
+
+
 
     def _render_slide(
         self,

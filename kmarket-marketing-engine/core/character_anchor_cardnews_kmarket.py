@@ -37,18 +37,18 @@ LANG_ETHNIC_MAP: Dict[str, str] = {
 
 # 언어별 부정 에스닉 프롬프트 (타깃 민족 외 모두 차단)
 LANG_NEGATIVE_ETHNIC: Dict[str, str] = {
-    "vi": "Korean, Japanese, Chinese, East Asian features, fair pale skin",
+    "vi": "Korean, Japanese, Chinese, East Asian features, fair pale skin, beard, mustache, facial hair, stubble, goatee, South Asian, Indian",
     "uz": "East Asian, Chinese, Korean, Japanese features, flat face, flat nose bridge, monolid eyes, round face, pale East Asian skin, blonde hair, blue eyes",
     "ru": "East Asian, Asian features",
     "mn": "Southeast Asian, Korean, Japanese, Chinese features",
-    "th": "Korean, Japanese, Chinese, East Asian, pale fair skin",
+    "th": "Korean, Japanese, Chinese, East Asian, pale fair skin, beard, mustache, facial hair, stubble, goatee, South Asian, Indian",
     "ne": "East Asian, Korean, Japanese, Chinese features, flat face",
     "bn": "East Asian, Korean, Japanese, Chinese features",
-    "my": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "km": "Korean, Japanese, Chinese, East Asian, pale fair skin",
+    "my": "Korean, Japanese, Chinese, East Asian, pale fair skin, beard, mustache, facial hair, stubble, goatee, South Asian, Indian",
+    "km": "Korean, Japanese, Chinese, East Asian, pale fair skin, beard, mustache, facial hair, stubble, goatee, South Asian, Indian, Pakistani",
     "zh": "Korean, Japanese, Southeast Asian features",
     "ja": "Korean, Chinese, Southeast Asian features",
-    "id": "Korean, Japanese, Chinese, East Asian, pale fair skin",
+    "id": "Korean, Japanese, Chinese, East Asian, pale fair skin, beard, mustache, facial hair, stubble, goatee, South Asian, Indian",
     "tl": "Korean, Japanese, Chinese, East Asian, pale fair skin",
     "ar": "East Asian, Korean features",
     "es": "East Asian, Korean features",
@@ -120,7 +120,8 @@ def build_kmarket_cardnews_char_anchor(
 
     char = (
         f"a real {age_en} {ethnic} {gender_en} "
-        f"with consistent identical facial bone structure, identical eyes, and identical hairstyle across all cardnews slides, "
+        f"with clean-shaven smooth skin, strictly no beard, no mustache, neat modern haircut, "
+        f"consistent identical facial bone structure, identical eyes, and identical hairstyle across all cardnews slides, "
         f"{appearance_desc}"
     )
     return char
@@ -170,33 +171,49 @@ def build_kmarket_cardnews_scene_prompt(
     )
     continuity = CARDNEWS_CONTINUITY_HINTS.get(slide_idx, "the exact same protagonist,")
 
-    # 🎯 [대표님 절대 지침] 1번 슬라이드는 두 손 직거래의 물리적 사실성을 위해 무조건 "소형 가전제품"으로 강제
-    if any(k in item_name for k in ["전자레인지", "microwave"]):
+    # 🎯 1번, 2번 슬라이드: 두 손 직거래 및 방 배치용 100% 실사 소형 가전/생활용품 동적 매핑
+    item_lower = item_name.lower()
+    if any(k in item_lower for k in ["전자레인지", "microwave"]):
         item_appliance_en = "compact microwave oven"
-    elif any(k in item_name for k in ["밥솥", "rice cooker"]):
+    elif any(k in item_lower for k in ["밥솥", "rice cooker"]):
         item_appliance_en = "electric rice cooker"
-    elif any(k in item_name for k in ["포트", "kettle"]):
-        item_appliance_en = "electric kettle"
+    elif any(k in item_lower for k in ["에어프라이어", "airfryer", "air fryer"]):
+        item_appliance_en = "digital air fryer"
+    elif any(k in item_lower for k in ["포트", "주전자", "kettle"]):
+        item_appliance_en = "stainless electric kettle"
+    elif any(k in item_lower for k in ["청소기", "vacuum"]):
+        item_appliance_en = "compact cordless stick vacuum cleaner"
+    elif any(k in item_lower for k in ["다리미", "스팀", "steamer", "iron"]):
+        item_appliance_en = "handheld garment steamer"
+    elif any(k in item_lower for k in ["믹서기", "블렌더", "blender"]):
+        item_appliance_en = "compact personal smoothie blender"
+    elif any(k in item_lower for k in ["온풍기", "히터", "heater"]):
+        item_appliance_en = "compact ceramic space heater"
+    elif any(k in item_lower for k in ["토스터", "toaster"]):
+        item_appliance_en = "compact bread toaster"
+    elif any(k in item_lower for k in ["전기장판", "온수매트", "이불", "mat"]):
+        item_appliance_en = "warm heating mat in packaging"
+    elif any(k in item_lower for k in ["스탠드", "조명", "lamp"]):
+        item_appliance_en = "modern desk study lamp"
+    elif any(k in item_lower for k in ["가습기", "humidifier"]):
+        item_appliance_en = "desktop ultrasonic humidifier"
+    elif any(k in item_lower for k in ["멀티쿠커", "라면포트", "cooker"]):
+        item_appliance_en = "electric multi-cooker ramen pot"
+    elif any(k in item_lower for k in ["서랍장", "수납", "트롤리", "drawer"]):
+        item_appliance_en = "compact storage organizer box"
+    elif any(k in item_lower for k in ["테이블", "밥상", "table"]):
+        item_appliance_en = "folding wooden tea table"
+    elif any(k in item_lower for k in ["선풍기", "fan"]):
+        item_appliance_en = "compact cooling desk fan"
+    elif any(k in item_lower for k in ["거울", "mirror"]):
+        item_appliance_en = "LED tabletop vanity mirror"
     else:
-        # 가구/침대 등 대형 품목이 테마로 들어와도 1번 직거래 씬은 무조건 소형 가전(전자레인지/밥솥)으로 고정
-        item_appliance_en = "compact microwave oven"
+        item_appliance_en = "useful compact home appliance"
 
     item_desc_slide1 = f"a clean modern {item_appliance_en}"
 
-    # 슬라이드 2~5 일반 품목 매핑
-    item_en = ITEM_KO_TO_EN.get(item_name.strip(), "")
-    if not item_en:
-        for k, v in ITEM_KO_TO_EN.items():
-            if k in item_name:
-                item_en = v
-                break
-    if not item_en:
-        item_en = "useful home appliance and furniture"
-
-    item_desc = f"a clean modern {item_en}"
-
     if slide_idx == 1:
-        # 🌟 1번: 두 손으로 소형 가전(전자레인지 등)을 건네받는 생생한 거리 스냅 (우즈베크 주인공 얼굴 100% 앵커링)
+        # 🌟 1번: 두 손으로 소형 가전(밥솥/전자레인지/에어프라이어 등)을 건네받는 생생한 거리 스냅 (우즈베크 주인공 얼굴 100% 앵커링)
         prompt = (
             f"authentic candid lifestyle street photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken from 3.5 meters away, "
             f"wide environmental shot, subject occupies about 30% of the frame in full context of the clean sunny Korean residential street sidewalk in warm daytime sunlight. "
@@ -210,14 +227,14 @@ def build_kmarket_cardnews_scene_prompt(
             f"natural outdoor daylight ambient lighting, realistic mobile phone camera sensor capture, natural mobile lifestyle snapshot"
         )
     elif slide_idx == 2:
-        # 🌟 2번: 0원 가전으로 풀세팅된 원룸 자취방 실사 스냅샷 (실사 톤 고정, 3D 조감도/애니메이션 원천 배제)
+        # 🌟 2번: 0원 소형 가전으로 아늑하게 꾸며진 원룸 자취방 실사 스냅샷 (실사 톤 고정, 3D 조감도/애니메이션 원천 배제)
         prompt = (
             f"authentic candid documentary lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken by a roommate from 3.5 meters away, "
             f"wide environmental full-room view, subject occupies about 25% of the frame with natural 8-head tall adult body proportions. "
             f"Inside a real lived-in cozy Korean studio apartment room with bright natural window daylight, authentic linoleum flooring, real wooden cabinets. "
-            f"The protagonist {continuity} {char} is standing comfortably near the kitchen counter, "
+            f"The protagonist {continuity} {char} is standing comfortably near the counter and table, "
             f"smiling with warm genuine satisfaction admiring the newly furnished cozy room. "
-            f"On the counter and desk, a real physical compact microwave oven, small refrigerator, and neat furniture are arranged in tack-sharp f/11 deep depth of field pan-focus across the entire room. "
+            f"On the counter and desk, a real physical {item_appliance_en}, small refrigerator, and neat clean furniture are arranged in tack-sharp f/11 deep depth of field pan-focus across the entire room. "
             f"Raw unedited natural human skin texture with real pores, subtle skin sheen, natural matte cotton clothes, real everyday smartphone camera sensor capture, authentic documentary photo"
         )
     elif slide_idx == 3:
@@ -245,9 +262,9 @@ def build_kmarket_cardnews_scene_prompt(
             f"authentic candid wide environmental lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone photo taken from 3.5 meters away, "
             f"wide full room interior view with deep depth of field (f/11 aperture pan-focus), tack sharp focus across the entire room showing the furnished studio room, desk, drawers, bed, and appliances in crisp clarity. "
             f"The room interior and furniture occupy over 70% of the entire frame. "
-            f"The protagonist {continuity} {char} occupies only about 25% of the frame standing in the center room, full upper body and environment visible, "
+            f"The protagonist {continuity} {char} occupies only about 25% of the frame standing naturally in the cozy studio room, full upper body and environment visible, "
             f"looking directly into the camera lens with an enthusiastic friendly smile, "
-            f"giving a natural subtle thumbs-up gesture or welcoming open-hand gesture to the viewer, warmly inviting other foreign workers to use K-Market for free giveaways, "
+            f"giving a natural subtle thumbs-up gesture or welcoming open-hand gesture to the viewer, warmly inviting other international students and friends in Korea to use K-Market for free giveaways, "
             f"wearing clean smart-casual clothes, a neat button-down shirt or stylish sweater, "
             f"same consistent face and hairstyle as slide 1, raw natural skin texture, matte finish, wide full-body environmental perspective, distant camera view 3.5 meters away, tack sharp deep focus f/11 pan-focus across the entire room and background furniture"
         )

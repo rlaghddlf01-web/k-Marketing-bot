@@ -68,7 +68,9 @@ class WanFaceMaskInpaintService:
             mask_img = mask_img.filter(ImageFilter.GaussianBlur(radius=15))
             return ref_resized, mask_img, False
 
-        face = faces[0]
+        # 다중 인물 검출 시 (1번 슬라이드: 좌측/중앙 주인공 vs 우측 나눔인) 주인공 얼굴 자동 선택
+        candidate_faces = [f for f in faces if (f.bbox[0] + f.bbox[2]) / 2 < target_width * 0.65]
+        face = candidate_faces[0] if candidate_faces else faces[0]
         bbox = face.bbox.astype(int) # [x1, y1, x2, y2]
         bw = bbox[2] - bbox[0]
         bh = bbox[3] - bbox[1]
