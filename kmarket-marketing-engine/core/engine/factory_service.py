@@ -104,13 +104,20 @@ class FactoryService:
                         from core.engine.comfy_process_manager import ComfyProcessManager
                         ComfyProcessManager.ensure_running(log_callback=self._log)
 
-                        pipe = EasyTaxShortsPipeline()
-                        output_filename = f"easytax_shorts_{lang}_{resolved_amount}.mp4"
-                        output_path = pipe.produce(
-                            nationality_code=lang,
-                            amount=resolved_amount,
-                            output_filename=output_filename
-                        )
+                        import importlib
+                        import core.shorts_engine
+                        import core.shorts_engine.easytax_shorts_producer
+                        importlib.reload(core.shorts_engine.easytax_shorts_producer)
+                        importlib.reload(core.shorts_engine)
+
+                        from core.shorts_engine import EasyTaxShortsProducer
+                        producer = EasyTaxShortsProducer()
+                        self._log(f"🎬 [EasyTax 숏폼] 1080p 고화질 숏폼 & SNS 배포팩 제작 시작 (언어: {lang.upper()}, 금액: ₩{resolved_amount:,})", "info")
+                        res = producer.produce(lang=lang, amount=resolved_amount)
+                        output_path = res.get("output_mp4", "")
+                        folder_path = res.get("folder_path", "")
+                        self._log(f"🎉 [EasyTax 숏폼 완제품 & SNS 배포팩 완성] 폴더: {folder_path}", "success")
+                        return
                 elif brand == "kmarket":
                     if mode == "cardnews":
                         # 케이마켓 신형 5장 세트 일괄 제작
@@ -124,12 +131,20 @@ class FactoryService:
                         from core.engine.comfy_process_manager import ComfyProcessManager
                         ComfyProcessManager.ensure_running(log_callback=self._log)
 
-                        pipe = KMarketShortsPipeline()
-                        output_filename = f"kmarket_shorts_{lang}.mp4"
-                        output_path = pipe.produce(
-                            nationality_code=lang,
-                            output_filename=output_filename
-                        )
+                        import importlib
+                        import core.shorts_engine
+                        import core.shorts_engine.kmarket_shorts_producer
+                        importlib.reload(core.shorts_engine.kmarket_shorts_producer)
+                        importlib.reload(core.shorts_engine)
+
+                        from core.shorts_engine import KMarketShortsProducer
+                        producer = KMarketShortsProducer()
+                        self._log(f"🎬 [K-Market 숏폼] 1080p 고화질 숏폼 & SNS 배포팩 제작 시작 (언어: {lang.upper()})", "info")
+                        res = producer.produce(lang=lang)
+                        output_path = res.get("output_mp4", "")
+                        folder_path = res.get("folder_path", "")
+                        self._log(f"🎉 [K-Market 숏폼 완제품 & SNS 배포팩 완성] 폴더: {folder_path}", "success")
+                        return
                 else:
                     raise ValueError(f"지원하지 않는 브랜드입니다: {brand}")
 

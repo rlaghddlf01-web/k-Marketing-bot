@@ -15,27 +15,29 @@ import edge_tts
 import imageio_ffmpeg
 
 
-VOICE_MAP: Dict[str, str] = {
-    "ko": "ko-KR-SunHiNeural",
-    "vi": "vi-VN-HoaiMyNeural",
-    "uz": "uz-UZ-MadinaNeural",
-    "ru": "ru-RU-SvetlanaNeural",
-    "mn": "ru-RU-SvetlanaNeural",  # 몽골어 대체 또는 영문
-    "en": "en-US-JennyNeural",
-    "zh": "zh-CN-XiaoxiaoNeural",
-    "th": "th-TH-PremwadeeNeural",
-    "id": "id-ID-GadisNeural",
-    "tl": "fil-PH-BlessicaNeural",
-    "km": "km-KH-SreymomNeural",
-    "my": "my-MM-NilarNeural",
-    "ne": "ne-NP-HemkalaNeural",
-    "si": "si-LK-ThiliniNeural",
-    "bn": "bn-BD-NabanitaNeural",
+# 🎯 8개국 및 주요 언어별 남성/여성 공식 고음질 신경망 보이스 매핑 테이블
+VOICE_MAP: Dict[str, Dict[str, str]] = {
+    "ko": {"female": "ko-KR-SunHiNeural", "male": "ko-KR-InJoonNeural"},
+    "vi": {"female": "vi-VN-HoaiMyNeural", "male": "vi-VN-NamMinhNeural"},
+    "uz": {"female": "uz-UZ-MadinaNeural", "male": "uz-UZ-SardorNeural"},
+    "km": {"female": "km-KH-SreymomNeural", "male": "km-KH-PisethNeural"},
+    "id": {"female": "id-ID-GadisNeural", "male": "id-ID-ArdiNeural"},
+    "th": {"female": "th-TH-PremwadeeNeural", "male": "th-TH-NiwatNeural"},
+    "kk": {"female": "kk-KZ-AigulNeural", "male": "kk-KZ-DauletNeural"},
+    "tl": {"female": "fil-PH-BlessicaNeural", "male": "fil-PH-AngeloNeural"},
+    "my": {"female": "my-MM-NilarNeural", "male": "my-MM-ThihaNeural"},
+    "ru": {"female": "ru-RU-SvetlanaNeural", "male": "ru-RU-DmitryNeural"},
+    "mn": {"female": "ru-RU-SvetlanaNeural", "male": "ru-RU-DmitryNeural"},
+    "en": {"female": "en-US-JennyNeural", "male": "en-US-GuyNeural"},
+    "zh": {"female": "zh-CN-XiaoxiaoNeural", "male": "zh-CN-YunjianNeural"},
+    "ne": {"female": "ne-NP-HemkalaNeural", "male": "ne-NP-SagarNeural"},
+    "si": {"female": "si-LK-ThiliniNeural", "male": "si-LK-SameeraNeural"},
+    "bn": {"female": "bn-BD-NabanitaNeural", "male": "bn-BD-PradeepNeural"},
 }
 
 
 class TTSVoiceSynthesizer:
-    """다국어 숏폼 음성 합성 엔진"""
+    """다국어 숏폼 음성 합성 엔진 (성별 일치 보장)"""
 
     def __init__(self, output_dir: Optional[str] = None):
         self.ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
@@ -46,14 +48,24 @@ class TTSVoiceSynthesizer:
         self,
         text: str,
         lang: str = "ko",
-        rate: str = "+18%",
+        gender: str = "female",
+        rate: str = "+0%",
         target_duration: float = 5.0625,
         filename_prefix: str = "speech"
     ) -> str:
         """
-        텍스트를 5초 숏폼 규격(16kHz mono WAV)으로 합성하여 반환
+        인물 성별(gender)과 국가 언어(lang)에 100% 일치하는 신경망 보이스로 합성
         """
-        voice = VOICE_MAP.get(lang, "ko-KR-SunHiNeural")
+        # 성별 정규화 (male vs female)
+        gender_clean = "male" if str(gender).lower() in ["male", "m", "man", "남", "남성"] else "female"
+        lang_voices = VOICE_MAP.get(lang, VOICE_MAP.get("ko"))
+
+        if isinstance(lang_voices, dict):
+            voice = lang_voices.get(gender_clean, lang_voices.get("female", "ko-KR-SunHiNeural"))
+        elif isinstance(lang_voices, str):
+            voice = lang_voices
+        else:
+            voice = "ko-KR-SunHiNeural"
         mp3_path = os.path.join(self.output_dir, f"{filename_prefix}_{lang}.mp3")
         wav_path = os.path.join(self.output_dir, f"{filename_prefix}_{lang}.wav")
 

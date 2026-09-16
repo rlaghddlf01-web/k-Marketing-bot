@@ -68,7 +68,8 @@ class ComfyProcessManager:
             "-s",
             str(main_py),
             "--windows-standalone-build",
-            "--fast", "fp16_accumulation"
+            "--fast", "fp16_accumulation",
+            "--use-sage-attention"
         ]
 
         msg_start = "🚀 [ComfyUI 자율 매니저] ComfyUI GPU 엔진을 백그라운드에서 자동 기동합니다 (창 없이 조용히 실행)..."
