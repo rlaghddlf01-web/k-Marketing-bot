@@ -60,6 +60,7 @@ class WanPipelineClient:
             prompt_id = res.get("prompt_id")
 
         start_time = time.time()
+        completed_hist = None
         while time.time() - start_time < timeout_sec:
             time.sleep(3)
             try:
@@ -68,13 +69,29 @@ class WanPipelineClient:
                     if prompt_id in hist:
                         status = hist[prompt_id].get("status", {})
                         if status.get("completed", False):
+                            completed_hist = hist[prompt_id]
                             break
                         if status.get("status_str") == "error":
                             raise RuntimeError(f"ComfyUI Job Error: {status.get('messages')}")
             except urllib.error.URLError:
                 pass
 
-        frames = sorted(glob.glob(os.path.join(self.comfy_output_dir, f"{prefix}_*.png")))
+        # 1차: ComfyUI 히스토리의 outputs에서 실제 생성된 파일 목록 직접 추출
+        frames = []
+        if completed_hist:
+            outputs = completed_hist.get("outputs", {})
+            for node_id, node_out in outputs.items():
+                if isinstance(node_out, dict) and "images" in node_out:
+                    for img_info in node_out["images"]:
+                        fname = img_info.get("filename")
+                        subf = img_info.get("subfolder", "")
+                        fpath = os.path.join(self.comfy_output_dir, subf, fname) if subf else os.path.join(self.comfy_output_dir, fname)
+                        if os.path.exists(fpath):
+                            frames.append(fpath)
+
+        # 2차: outputs가 비어있거나 찾지 못한 경우 glob 폴더 패턴 백업 매칭
+        if not frames:
+            frames = sorted(glob.glob(os.path.join(self.comfy_output_dir, f"{prefix}_*.png")))
         return frames
 
     def generate_t2i_master(
@@ -278,10 +295,10 @@ class WanPipelineClient:
         seed: int = 2026,
         width: int = 480,
         height: int = 832,
-        frames: int = 81,
+        frames: int = 177,
         prefix: str = "s2v_run"
     ) -> str:
-        """Wan 2.2 S2V 립싱크 렌더링 후 MP4 완성 파일 생성"""
+        """Wan 2.2 S2V 립싱크 렌더링 후 MP4 완성 파일 생성 (177프레임 @ 16fps = 11.06초)"""
         neg = negative_text or "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景"
 
         workflow = {

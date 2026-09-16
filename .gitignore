@@ -47,6 +47,7 @@ outputs/
 *로그인*.txt
 *login*.txt
 *password*.txt
+server_status.json
 
 # 🤖 로컬 GPU 모델 가중치 및 대용량 바이너리 (GitHub 100MB 초과 방지)
 **/models/

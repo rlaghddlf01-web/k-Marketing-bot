@@ -50,11 +50,12 @@ class TTSVoiceSynthesizer:
         lang: str = "ko",
         gender: str = "female",
         rate: str = "+0%",
-        target_duration: float = 5.0625,
+        target_duration: Optional[float] = None,
         filename_prefix: str = "speech"
     ) -> str:
         """
         인물 성별(gender)과 국가 언어(lang)에 100% 일치하는 신경망 보이스로 합성
+        target_duration이 지정된 경우 해당 초로 길이 보정, None인 경우 자연스러운 전체 발화 길이 유지
         """
         # 성별 정규화 (male vs female)
         gender_clean = "male" if str(gender).lower() in ["male", "m", "man", "남", "남성"] else "female"
@@ -80,9 +81,11 @@ class TTSVoiceSynthesizer:
             self.ffmpeg_exe, "-y",
             "-i", mp3_path,
             "-ar", "16000",
-            "-ac", "1",
-            "-t", str(target_duration),
-            wav_path
+            "-ac", "1"
         ]
+        if target_duration is not None:
+            cmd.extend(["-t", str(target_duration)])
+        cmd.append(wav_path)
+
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return wav_path

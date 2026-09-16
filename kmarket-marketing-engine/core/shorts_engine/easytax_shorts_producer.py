@@ -19,6 +19,8 @@ from PIL import Image
 
 from .base_shorts_producer import BaseShortsProducer
 from brands.easytax.ui_templates.refund_receipt_template import RefundReceiptTemplate
+from .easytax_app_recorder import EasyTaxAppRecorder
+from .shorts_scenario_script_director import ShortsScenarioScriptDirector
 
 logger = logging.getLogger("EasyTaxShortsProducer")
 
@@ -121,12 +123,20 @@ class EasyTaxShortsProducer(BaseShortsProducer):
     def __init__(self):
         super().__init__(brand_name="이지텍스")
         self.ui_template = RefundReceiptTemplate()
+        self.app_recorder = EasyTaxAppRecorder()
+        self.script_director = ShortsScenarioScriptDirector()
 
-    def get_character_prompt(self, lang: str, **kwargs) -> Dict[str, str]:
-        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (iPhone 실사 질감 + 한 손 그립 + 닫힌 입술)"""
+    def get_character_prompt(
+        self,
+        lang: str,
+        custom_char_desc: Optional[str] = None,
+        custom_bg_desc: Optional[str] = None,
+        **kwargs
+    ) -> Dict[str, str]:
+        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (시나리오 디렉터 테마 맞춤 인물 & 배경)"""
         cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
-        char_desc = cfg["char_desc"]
-        bg_desc = cfg["bg_desc"]
+        char_desc = custom_char_desc or cfg["char_desc"]
+        bg_desc = custom_bg_desc or cfg["bg_desc"]
 
         positive = (
             f"candid authentic vertical iPhone mobile photo taken by a friend, {char_desc}, "
@@ -161,114 +171,137 @@ class EasyTaxShortsProducer(BaseShortsProducer):
 
     def produce(
         self,
-        lang: str = "vi",
+        lang: Optional[str] = None,
         amount: Optional[int] = None,
         custom_hero_image: Optional[Image.Image] = None,
         seed: int = 2026,
+        theme_id: Optional[str] = None,
         **kwargs
     ) -> Dict[str, Any]:
-        """EasyTax 8개국 완제품 숏폼 비디오 원클릭 생산"""
-        # 0. 설정 및 타깃 디렉토리 준비
-        cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
-        effective_amount = amount or cfg["default_amount"]
-        country_name = cfg["name"]
+        """EasyTax 완제품 22초 하이브리드 숏폼 비디오 원클릭 생산 (제미나이 언어/인물/대본 올인원 디렉팅)"""
+        # 1. ComfyUI 엔진 확인
+        self.ensure_engine_ready()
+
+        # 2. [시나리오 & 22초 대본 생성] (lang이 None 또는 'auto'면 제미나이가 테마에 최적화된 언어 직접 선택)
+        scenario = self.script_director.get_full_scenario(lang=lang, amount=amount or 3100000, theme_id=theme_id)
+        effective_lang = scenario.get("lang", "vi")
+        cfg = self.COUNTRY_CONFIG.get(effective_lang, self.COUNTRY_CONFIG["vi"])
+        country_name = scenario.get("country_name", cfg["name"])
+        effective_amount = amount or scenario.get("amount", cfg["default_amount"])
+        gender = scenario.get("gender", cfg.get("gender", "female"))
+
+        speech_hook = scenario["speech_hook"]
+        full_speech = scenario["full_speech"]
+        visual_dir = scenario["visual_direction"]
 
         dt_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_folder = self.output_base / f"이지텍스_{country_name}_{dt_str}"
         out_folder.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"🚀 [이지텍스 숏폼] 생산 시작: {country_name} ({lang.upper()}) | 환급액: ₩{effective_amount:,}")
+        logger.info(f"🚀 [이지텍스 22초 숏폼] 생산 시작: {country_name} ({effective_lang.upper()}) | 성별: {gender} | 환급액: ₩{effective_amount:,}")
 
-        # 1. ComfyUI 엔진 확인
-        self.ensure_engine_ready()
+        # 3. [음성 합성] 0~11초 훅 음성(S2V용) + 22초 풀 음성(최종 영상용) - 제미나이 지정 성별 신경망 보이스
+        logger.info(f"🎙️ [Step 1] Edge-TTS 다국어 신경망 음성 합성 ({gender}, 10초 이상 여유 있는 호흡)...")
+        hook_wav_path = self.tts.generate_speech_wav(
+            text=speech_hook,
+            lang=effective_lang,
+            gender=gender,
+            rate="+0%",
+            filename_prefix=f"easytax_hook_{effective_lang}"
+        )
+        full_wav_path = self.tts.generate_speech_wav(
+            text=full_speech,
+            lang=effective_lang,
+            gender=gender,
+            rate="+0%",
+            filename_prefix=f"easytax_full_{effective_lang}"
+        )
+        audio_name = os.path.basename(hook_wav_path)
 
-        # 2. [Step 1 & Step 2] 숏폼 인물 사진 생성 및 액정 매립
+        # 4. [Step 2] 숏폼 인물 사진 생성 및 액정 매립 (Wan 2.1 T2I)
         if custom_hero_image is not None:
             embedded_img = custom_hero_image
-            logger.info("🌟 [Step 1] 전달받은 마스터 인물 사진 사용")
+            logger.info("🌟 [Step 2] 전달받은 마스터 인물 사진 사용")
         else:
-            # 🎯 [100% 숏폼 독자 프롬프트] 카드뉴스 의존성 완전 분리: 1인칭 한 손 그립 + 립싱크용 닫힌 입술 적용
-            t2i_prompt = self.get_character_prompt(lang=lang)
+            t2i_prompt = self.get_character_prompt(
+                lang=effective_lang,
+                custom_char_desc=scenario.get("character_desc"),
+                custom_bg_desc=scenario.get("background_desc")
+            )
             pos_prompt = t2i_prompt["positive"]
             neg_prompt = t2i_prompt["negative"]
 
-            logger.info(f"🎨 [Step 1] 자연스러운 숏폼 UGC 씬 사진 생성 (한 손 그립, 입술 닫힘, seed={seed})")
+            logger.info(f"🎨 [Step 2] 시나리오 테마 맞춤형 UGC 인물 사진 생성 (seed={seed})")
             gen_path = self.wan_client.generate_t2i_master(
                 positive_prompt=pos_prompt,
                 negative_prompt=neg_prompt,
                 width=832,
                 height=1216,
                 seed=seed,
-                prefix=f"shorts_easytax_ugc_{lang}"
+                prefix=f"shorts_easytax_ugc_{effective_lang}"
             )
             master_img = Image.open(gen_path)
-            master_save_path = out_folder / f"01_master_t2i_{lang}.png"
+            master_save_path = out_folder / f"01_master_t2i_{effective_lang}.png"
             master_img.save(str(master_save_path))
 
-            # C. 스마트폰 실제 액정 매립 (엄격 품질 게이트: 물리 액정 직접 검출 실패 시 즉시 작업 중단)
             logger.info("📱 [Step 2] 스마트폰 정면 액정 화면 검출 및 환급 영수증 UI 정밀 매립...")
-            ui_img = self.render_ui_image(lang=lang, amount=effective_amount)
-            ui_save_path = out_folder / f"02_receipt_ui_{lang}.png"
+            ui_img = self.render_ui_image(lang=effective_lang, amount=effective_amount)
+            ui_save_path = out_folder / f"02_receipt_ui_{effective_lang}.png"
             ui_img.save(str(ui_save_path))
 
             try:
                 embedded_img = self.embedder.embed_screen(base_image=master_img, ui_image=ui_img)
                 logger.info("✅ [Step 2] 스마트폰 액정 정밀 매립 100% 성공! (영상 시작 프레임 무결성 통과)")
             except Exception as e:
-                err_msg = (
-                    f"❌ [품질 게이트 탈락] 스마트폰 정면 액정 화면 검출 실패 ({e}). "
-                    "숏폼 영상에서 3D 플로팅 합성을 사용할 경우 AI가 공중에 뜬 스마트폰을 왜곡/변형시키므로, "
-                    "불량 영상 렌더링 및 자동 업로드를 원천 방지하기 위해 작업을 안전하게 즉시 중단합니다."
-                )
+                err_msg = f"❌ [품질 게이트 탈락] 스마트폰 정면 액정 화면 검출 실패 ({e}). 작업을 안전하게 즉시 중단합니다."
                 logger.error(err_msg)
                 raise ValueError(err_msg)
 
-        embedded_save_path = out_folder / f"03_embedded_start_frame_{lang}.png"
+        embedded_save_path = out_folder / f"03_embedded_start_frame_{effective_lang}.png"
         embedded_img.save(str(embedded_save_path))
 
-        # 4. [Step 3] 다국어 TTS 음성 합성 & Wan 2.2 S2V 립싱크 렌더링
-        logger.info("🎙️ [Step 3] Edge-TTS 다국어 음성 생성...")
-        speech_text = self.get_speech_script(lang=lang, amount=effective_amount)
-        wav_path = self.tts.generate_speech_wav(
-            text=speech_text,
-            lang=lang,
-            gender=cfg.get("gender", "female"),
-            rate="+0%",  # 🎯 차분하고 편안한 보통 대화 속도 (수다쟁이 입 파닥거림 원천 차단)
-            filename_prefix=f"easytax_audio_{lang}"
-        )
-        audio_name = os.path.basename(wav_path)
-
-        # S2V 최적 프레이밍 (480x832) 저장
+        # 5. [Step 3] Wan 2.2 S2V 10초 이상 립싱크 모션 생성 (177프레임 @ 16fps = 11.06초)
         framed_img = self.prepare_framed_input_image(embedded_img, target_w=480, target_h=832)
-        comfy_input_name = f"easytax_s2v_input_{lang}_{dt_str}.png"
+        comfy_input_name = f"easytax_s2v_input_{effective_lang}_{dt_str}.png"
         comfy_input_path = os.path.join(self.wan_client.comfy_input_dir, comfy_input_name)
         framed_img.save(comfy_input_path)
 
-        raw_video_path = str(out_folder / f"temp_raw_s2v_{lang}.mp4")
-        logger.info("🎬 [Step 3] Wan 2.2 S2V 립싱크 비디오 렌더링 시작...")
+        person_clip_path = str(out_folder / f"temp_person_s2v_{effective_lang}.mp4")
+        logger.info("🎬 [Step 3] Wan 2.2 S2V 10초 이상(177프레임, 11.06초) 립싱크 비디오 렌더링 시작...")
         self.wan_client.generate_s2v_video(
             image_name=comfy_input_name,
             audio_name=audio_name,
-            prompt_text=f"a friendly attractive person holding smartphone, talking to camera with natural gentle smile, clear lip sync, stable hands",
-            output_mp4_path=raw_video_path,
-            prefix=f"easytax_s2v_{lang}"
+            prompt_text="a friendly attractive person holding smartphone, talking to camera with natural gentle smile, clear lip sync, stable hands",
+            output_mp4_path=person_clip_path,
+            frames=177,
+            prefix=f"easytax_s2v_{effective_lang}_{dt_str}"
         )
 
-        # 5. [Step 4] 1080x1920 세로 풀HD 업스케일 & 마케팅 오버레이 결합
-        final_mp4_name = f"이지텍스_숏폼_{country_name}_{effective_amount:,}원_{dt_str}.mp4"
+        # 6. [Step 4] EasyTax 실시간 웹앱 시뮬레이션 라이브 녹화 (10~18초, 8초 분량)
+        app_clip_path = str(out_folder / f"04_app_sim_{effective_lang}.mp4")
+        logger.info("📱 [Step 4] EasyTax 라이브 앱 시뮬레이션 실시간 레코딩 (8초 분량)...")
+        self.app_recorder.record_simulation_clip(
+            lang=effective_lang,
+            duration_sec=8.0,
+            output_mp4_path=app_clip_path
+        )
+
+        # 7. [Step 5] 22초 하이브리드 완제품 컴포징 (3단 Concat + 22초 단일 음성 + 오버레이 자막)
+        final_mp4_name = f"이지텍스_22초숏폼_{country_name}_{effective_amount:,}원_{dt_str}.mp4"
         final_mp4_path = str(out_folder / final_mp4_name)
 
-        logger.info("✨ [Step 4] 1080p 세로 풀HD 컴포징 및 마케팅 뱃지 결합...")
-        self.composer.finalize_1080p_shorts(
-            raw_video_path=raw_video_path,
+        logger.info("✨ [Step 5] 1080p 세로 풀HD 22초 하이브리드 비디오 최종 컴포징...")
+        self.composer.compose_hybrid_22s_shorts(
+            clip_person_path=person_clip_path,
+            clip_app_path=app_clip_path,
+            full_audio_path=full_wav_path,
+            visual_direction=visual_dir,
             output_mp4_path=final_mp4_path,
-            badge_text_primary=cfg["badge_primary"],
-            badge_text_secondary=cfg["badge_secondary"],
-            cta_text=cfg["cta_text"],
-            lang=lang
+            lang=effective_lang
         )
 
-        # 6. [Step 5] 4대 숏폼 SNS 포스팅 가이드 파일 생성 및 저장
+
+        # 8. [Step 6] 4대 숏폼 SNS 포스팅 가이드 파일 생성 및 저장
         guide_filename = f"SNS_포스팅_가이드_{lang.upper()}.txt"
         guide_path = out_folder / guide_filename
         self._write_sns_guide(
@@ -276,19 +309,19 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             lang=lang,
             country_name=country_name,
             amount=effective_amount,
-            speech=speech_text,
+            speech=full_speech,
             cfg=cfg
         )
         logger.info(f"📝 [SNS 가이드] 숏폼 배포 패키지 가이드 저장 완료: {guide_filename}")
 
         # 임시 원본 비디오 정리
-        if os.path.exists(raw_video_path):
+        if os.path.exists(person_clip_path):
             try:
-                os.remove(raw_video_path)
+                os.remove(person_clip_path)
             except Exception:
                 pass
 
-        logger.info(f"🎉 [이지텍스 숏폼 완성] 최종 산출물: {final_mp4_path}")
+        logger.info(f"🎉 [이지텍스 22초 숏폼 완성] 최종 완제품: {final_mp4_path}")
         return {
             "output_mp4": final_mp4_path,
             "folder_path": str(out_folder),
@@ -296,7 +329,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "country": country_name,
             "lang": lang,
             "amount": effective_amount,
-            "speech": speech_text
+            "speech": full_speech
         }
 
     def _write_sns_guide(

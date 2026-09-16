@@ -74,7 +74,7 @@ class FactoryService:
         def _worker():
             try:
                 brand_label = "EasyTax (세금 환급)" if brand == "easytax" else "K-Market (생활 커뮤니티)"
-                mode_label = "1080x1350 카드뉴스" if mode == "cardnews" else "5초 립싱크 숏폼"
+                mode_label = "1080x1350 카드뉴스" if mode == "cardnews" else "22초 완성 숏폼"
                 self._log(f"🚀 [원클릭 팩토리] {brand_label} {mode_label} ({lang.upper()}) 제작을 시작합니다...", "info")
 
                 output_path = ""
@@ -106,7 +106,13 @@ class FactoryService:
 
                         import importlib
                         import core.shorts_engine
+                        import core.shorts_engine.easytax_app_recorder
+                        import core.shorts_engine.shorts_scenario_script_director
+                        import core.shorts_engine.shorts_video_composer
                         import core.shorts_engine.easytax_shorts_producer
+                        importlib.reload(core.shorts_engine.easytax_app_recorder)
+                        importlib.reload(core.shorts_engine.shorts_scenario_script_director)
+                        importlib.reload(core.shorts_engine.shorts_video_composer)
                         importlib.reload(core.shorts_engine.easytax_shorts_producer)
                         importlib.reload(core.shorts_engine)
 

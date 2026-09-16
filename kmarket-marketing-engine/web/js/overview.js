@@ -131,7 +131,7 @@ function renderHubGrid() {
                             </select>
                         </div>
                         <button class="btn" id="btn-factory-kmarket-${h.key}" onclick="triggerOneClickProduce('kmarket', '${h.key}', this)" style="width:100%;font-size:12px;padding:8px 0;background:linear-gradient(135deg, #10B981 0%, #059669 100%);border:none;color:#FFFFFF;font-weight:900;border-radius:8px;box-shadow:0 4px 12px rgba(16,185,129,0.4);cursor:pointer;" title="케이마켓 모바일 UI 매립 원클릭 즉시 제작">
-                            ${h.key === 'shorts' ? '🎬 5초 립싱크 숏폼 원클릭 제작' : '📸 0원 나눔 카드뉴스 원클릭 제작'}
+                            ${h.key === 'shorts' ? '🎬 완성 숏폼 원클릭 제작' : '📸 0원 나눔 카드뉴스 원클릭 제작'}
                         </button>
                     </div>
                     <!-- 🌟 8대 황금 타깃 1일 2슬롯 24시간 무인 가동 및 정지 -->
@@ -224,7 +224,7 @@ function renderHubGrid() {
                             </select>
                         </div>
                         <button class="btn" id="btn-factory-easytax-${h.key}" onclick="triggerOneClickProduce('easytax', '${h.key}', this)" style="width:100%;font-size:12px;padding:8px 0;background:linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);border:none;color:#0B132B;font-weight:900;border-radius:8px;box-shadow:0 4px 12px rgba(212,175,55,0.4);cursor:pointer;" title="국세청 세금 환급 영수증 매립 원클릭 즉시 제작">
-                            ${h.key === 'shorts' ? '🎬 5초 세금 환급 숏폼 원클릭 제작' : '📸 국세청 환급 카드뉴스 원클릭 제작'}
+                            ${h.key === 'shorts' ? '🎬 세금 환급 완성 숏폼 원클릭 제작' : '📸 국세청 환급 카드뉴스 원클릭 제작'}
                         </button>
                     </div>
                     <!-- 🌟 8대 황금 타깃 1일 2슬롯 24시간 무인 가동 및 정지 -->
@@ -606,7 +606,7 @@ async function triggerOneClickProduce(brand, mode, btnElement = null) {
     const amount = amountSelect ? amountSelect.value : "random";
 
     const brandName = brand === "easytax" ? "EasyTax (세금 환급)" : "K-Market (생활 커뮤니티)";
-    const modeName = mode === "shorts" ? "5초 립싱크 숏폼" : "1080x1350 카드뉴스";
+    const modeName = mode === "shorts" ? "22초 완성 숏폼" : "1080x1350 카드뉴스";
     const amtLabel = brand === "easytax" ? (amount === "random" ? "🎲 실사 랜덤 금액" : `₩${Number(amount).toLocaleString()}원`) : "";
     
     appendLog(`[Action] 🚀 [${brandName}] ${modeName} (${lang.toUpperCase()}${amtLabel ? ' | ' + amtLabel : ''}) 원클릭 제작 요청...`, "info");
