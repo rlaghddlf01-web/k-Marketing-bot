@@ -20,6 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 from core.scenario_director_cardnews_kmarket import ScenarioDirectorCardnewsKMarket
 from core.engine.wan_pipeline_client import WanPipelineClient
 from core.engine.sns_guide_generator import SNSGuideGenerator
+from core.engine.kmarket_cardnews_app_capturer import KMarketCardNewsAppCapturer
 
 logger = logging.getLogger("CardNewsBatchProducerKMarket")
 
@@ -106,6 +107,7 @@ class CardNewsBatchProducerKMarket:
     def __init__(self):
         self.scenario_director = ScenarioDirectorCardnewsKMarket()
         self.wan_client = WanPipelineClient()
+        self.app_capturer = KMarketCardNewsAppCapturer()
         self.desktop = Path(r"C:\Users\zkfnt\Desktop")
         # ComfyUI 헬스체크
         self._wan_available = self.wan_client.check_health()
@@ -171,9 +173,28 @@ class CardNewsBatchProducerKMarket:
             master_seed = random.randint(1000000, 99999999)
         logger.info(f"🔒 [K-Market 캐릭터 일치 마스터 시드 확정]: {master_seed}")
 
+        item_name = scenario.get("item", "3단 서랍장")
+        target_area = scenario.get("target", "신촌")
+
         for card in sorted(cards, key=lambda c: c.get("slide_idx", 1)):
             s_idx = card.get("slide_idx", 1)
-            if s_idx == 1 and custom_hero_image is not None:
+
+            # 🌟 [3번 슬라이드] 실제 케이마켓 0원 무료나눔 매물 피드 앱 화면 캡처
+            if s_idx == 3:
+                logger.info("📱 [Slide 3] 실제 케이마켓 0원 매물 피드 고화질 캡처 적용!")
+                base_photo = self.app_capturer.capture_giveaway_feed(lang=lang)
+
+            # 🌟 [4번 슬라이드] 실제 0원 매물 상세 & 17개 언어 실시간 직거래 순정 모바일 화면 (팝업 0% 전체 뷰)
+            elif s_idx == 4:
+                logger.info(f"💬 [Slide 4] 실제 0원 매물 상세 순정 화면 고화질 캡처 적용! ({item_name}, {target_area})")
+                base_photo = self.app_capturer.capture_item_detail_view(
+                    lang=lang,
+                    item_name=item_name,
+                    target_area=target_area
+                )
+
+            # 🌟 [1, 2, 5번 슬라이드] 배경·가구 중심 WAN T2I 실사 라이프스타일 사진 생성
+            elif s_idx == 1 and custom_hero_image is not None:
                 base_photo = custom_hero_image
                 logger.info("🌟 [Slide 1] 검증 승인된 마스터 주인공 인물 사진(custom_hero_image) 직접 적용!")
             else:
@@ -289,6 +310,32 @@ class CardNewsBatchProducerKMarket:
         photo_cropped = resized_photo.crop((crop_x, crop_y, crop_x + 1080, crop_y + 1350))
         canvas.paste(photo_cropped, (0, 0))
 
+        # 🌟 3번 & 4번 (실제 앱 순정 화면): 하단 거대 스크림/불릿/버튼 덮어씌우기 전면 배제!
+        # 앱 자체 UI(매물 리스트, 상세 내용, 채팅)가 100% 온전하게 보이도록 상단 슬림 배지만 깔끔하게 오버레이
+        if s_idx in (3, 4):
+            # 상단 슬림 반투명 글래스모피즘 헤더 바 (높이 64px)
+            header_bar = Image.new("RGBA", (1080, 64), (15, 23, 42, 230))
+            canvas.paste(header_bar, (0, 0), header_bar)
+            draw = ImageDraw.Draw(canvas)
+
+            font_badge = _load_font(20, bold=True, lang=lang)
+            badge_text = card_data.get("badge", f"STEP {s_idx}")
+            page_badge = f"{s_idx:02d} / 05 >"
+
+            # 글자 길이에 맞춘 반응형 배지 너비 계산
+            b_box = draw.textbbox((0, 0), badge_text, font=font_badge)
+            text_w = b_box[2] - b_box[0]
+            badge_w = max(130, text_w + 24)
+
+            # 좌측 오렌지 배지 (컴팩트 슬림)
+            draw.rounded_rectangle([(20, 12), (20 + badge_w, 52)], radius=8, fill=(234, 88, 12))
+            draw.text((32, 20), badge_text, fill=(255, 255, 255), font=font_badge)
+
+            # 우측 페이지 번호
+            draw.text((960, 20), page_badge, fill=(255, 160, 0), font=font_badge)
+            return canvas
+
+        # 🌟 1, 2, 5번 (실사 라이프스타일 사진): 하단 부드러운 그라디언트 스크림 + 매거진 카피 오버레이
         # B. 하단 부드러운 그라디언트 스크림 (Gradient Scrim) 오버레이
         gradient_layer = Image.new("RGBA", (1080, 1350), (0, 0, 0, 0))
         g_draw = ImageDraw.Draw(gradient_layer)

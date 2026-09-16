@@ -101,3 +101,21 @@ class CardnewsKMarket:
     def produce_full_set(self, **kwargs) -> Dict[str, Any]:
         """직접 프로듀서 위임 alias"""
         return self.generate_carousel_cardnews(**kwargs)
+
+
+if __name__ == "__main__":
+    import sys
+    sys.stdout.reconfigure(encoding='utf-8')
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+
+    lang = sys.argv[1] if len(sys.argv) > 1 else "uz"
+    bot = CardnewsKMarket()
+    logger.info(f"🤖 [K-Market 마케팅 봇] {lang.upper()} 카드뉴스 5장 무인 자율 생산 가동...")
+    res = bot.generate_carousel_cardnews(lang=lang)
+    print("\n" + "=" * 60)
+    print(f"🎉 [K-Market 마케팅 봇 무인 생산 완료] 폴더: {res.get('folder_path')}")
+    for idx, s in enumerate(res.get('slides', []), 1):
+        print(f"  🖼️ 슬라이드 {idx}: {s}")
+    print(f"📄 SNS 가이드: {res.get('guide_path')}")
+    print("=" * 60)
+

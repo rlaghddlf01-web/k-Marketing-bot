@@ -160,17 +160,30 @@ def build_kmarket_cardnews_scene_prompt(
     - Slide 4: 절약한 돈으로 고향 가족을 생각하거나 여유를 되찾은 감동 컷
     - Slide 5: 시청자에게 케이마켓 0원 나눔을 자신 있게 추천하는 따뜻한 엄지척(👍) 컷
     """
-    # 🎯 [아이폰 15 Pro 일상 스냅 사진 골든 공식] — 자연스러운 폰카 화각(2.5m 거리), 8등신 인체 비례, 무보정 날 것의 실사
+    # 🎯 [아이폰 15 Pro 일상 스냅 사진 골든 공식] — 3.5m 거리 와이드 환경 샷, 배경/가구 70~75% & 인물 25~30%, f/11 팬포커스(블러 0%)
     iphone_candid_framing = (
-        "authentic candid snapshot shot on iPhone 15 Pro, casual everyday mobile phone photo taken by a friend, "
-        "photographed from 2.5 meters away with natural smartphone camera lens, "
-        "medium cowboy shot, waist-up view showing the complete upper body from head down to hips and belt, "
-        "natural 8-head tall realistic adult human body proportions, natural slender neck and shoulders, "
-        "subject occupies about 55% to 60% of the vertical frame with generous open space around, "
+        "authentic candid environmental lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone photo taken by a friend, "
+        "photographed from 3.5 meters away with natural smartphone camera lens, "
+        "wide environmental view, natural 8-head tall realistic adult human body proportions, "
+        "subject occupies only about 25% to 30% of the frame with generous open space around showing the surrounding room environment and furniture in deep depth of field (f/11 aperture), "
+        "tack sharp deep pan-focus across the entire background, f/11 small aperture with all background furniture and walls completely in sharp crisp focus, "
     )
     continuity = CARDNEWS_CONTINUITY_HINTS.get(slide_idx, "the exact same protagonist,")
 
-    # 한국어 품목명을 자연스러운 영어 품목명으로 변환 (Wan 2.1 프롬프트 무결성 보장)
+    # 🎯 [대표님 절대 지침] 1번 슬라이드는 두 손 직거래의 물리적 사실성을 위해 무조건 "소형 가전제품"으로 강제
+    if any(k in item_name for k in ["전자레인지", "microwave"]):
+        item_appliance_en = "compact microwave oven"
+    elif any(k in item_name for k in ["밥솥", "rice cooker"]):
+        item_appliance_en = "electric rice cooker"
+    elif any(k in item_name for k in ["포트", "kettle"]):
+        item_appliance_en = "electric kettle"
+    else:
+        # 가구/침대 등 대형 품목이 테마로 들어와도 1번 직거래 씬은 무조건 소형 가전(전자레인지/밥솥)으로 고정
+        item_appliance_en = "compact microwave oven"
+
+    item_desc_slide1 = f"a clean modern {item_appliance_en}"
+
+    # 슬라이드 2~5 일반 품목 매핑
     item_en = ITEM_KO_TO_EN.get(item_name.strip(), "")
     if not item_en:
         for k, v in ITEM_KO_TO_EN.items():
@@ -178,64 +191,65 @@ def build_kmarket_cardnews_scene_prompt(
                 item_en = v
                 break
     if not item_en:
-        item_en = "useful household appliance or furniture"
+        item_en = "useful home appliance and furniture"
 
     item_desc = f"a clean modern {item_en}"
 
-
     if slide_idx == 1:
-        # 🌟 1번: 2명이 소형 전자제품을 서로 건네며 기분 좋게 0원 직거래/나눔하는 생생한 현장 스냅
+        # 🌟 1번: 두 손으로 소형 가전(전자레인지 등)을 건네받는 생생한 거리 스냅 (우즈베크 주인공 얼굴 100% 앵커링)
         prompt = (
-            f"authentic candid lifestyle street photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken from 2.5 meters away, "
-            f"medium wide cowboy shot, waist-up view of two people meeting outdoors on a clean sunny Korean residential street sidewalk in warm daytime sunlight. "
-            f"In the center of the frame, two friendly people are exchanging {item_desc} in person: "
-            f"on one side, a friendly neighbor or senior is warmly handing over {item_desc} with both hands, "
-            f"and receiving it cheerfully with both hands is the main protagonist {char}, "
+            f"authentic candid lifestyle street photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken from 3.5 meters away, "
+            f"wide environmental shot, subject occupies about 30% of the frame in full context of the clean sunny Korean residential street sidewalk in warm daytime sunlight. "
+            f"In the center of the frame, the main protagonist {char} is happily receiving {item_desc_slide1} with both hands from a kind local giver. "
+            f"The giver is viewed partially from the side holding the other side of the small appliance box, keeping full visual focus directly on the protagonist {char}, "
             f"wearing comfortable neat civilian casual clothes, a simple neat jacket or sweater, "
-            f"with a beaming natural smile of pure joy and gratitude, looking happily at the giveaway item and the giver with trustworthy eye contact. "
-            f"Clean residential street background with softly blurred Korean buildings and trees, "
-            f"raw unedited natural human skin texture with subtle real pores and natural imperfections, matte skin finish, "
-            f"natural outdoor daylight ambient lighting, realistic mobile phone camera sensor capture, NO beauty filter, authentic candid mobile photo"
+            f"with a beaming natural smile of pure joy and gratitude, looking happily at the giveaway item with trustworthy eye contact. "
+            f"Clean Korean residential street background with tack sharp clear focus on the streetscape, asphalt road, storefront signs and buildings in deep depth of field (f/11 aperture), "
+            f"completely crisp and sharp background across the entire frame, deep focus f/11 aperture showing crystal clear distant buildings and street details, "
+            f"raw unedited natural human skin texture with subtle real pores, matte skin finish, "
+            f"natural outdoor daylight ambient lighting, realistic mobile phone camera sensor capture, natural mobile lifestyle snapshot"
         )
     elif slide_idx == 2:
-        # 🌟 2번: 0원 가전·가구로 가득 채워진 자취방 전체가 시원하게 다 보이는 와이드 룸 씬 (배경 딥 포커스)
+        # 🌟 2번: 0원 가전으로 풀세팅된 원룸 자취방 실사 스냅샷 (실사 톤 고정, 3D 조감도/애니메이션 원천 배제)
         prompt = (
-            f"authentic candid wide environmental lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone photo taken from 3.5 meters away, "
-            f"wide angle full room view, subject occupies about 35% of the frame leaving ample breathing space, natural 8-head tall realistic adult body proportions, "
-            f"in a clean well-organized cozy Korean studio apartment room flooded with bright natural window sunlight. "
-            f"Throughout the room in sharp clear focus, all newly furnished items are fully visible: a clean compact refrigerator, microwave oven on the table, neat study desk, and cozy bed neatly arranged. "
-            f"Deep depth of field, sharp clear focus across the entire room interior, fully visible furniture and home appliances in the background, NO blurry background, NO bokeh. "
-            f"The protagonist {continuity} {char} is standing or sitting relaxed near the desk in comfortable cozy civilian clothes, "
-            f"proud relieved facial expression, smiling warmly with deep satisfaction admiring the newly furnished cozy room full of appliances, "
-            f"raw unedited natural human skin texture with real pores, matte finish, realistic mobile phone sensor capture, NO beauty filter"
+            f"authentic candid documentary lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken by a roommate from 3.5 meters away, "
+            f"wide environmental full-room view, subject occupies about 25% of the frame with natural 8-head tall adult body proportions. "
+            f"Inside a real lived-in cozy Korean studio apartment room with bright natural window daylight, authentic linoleum flooring, real wooden cabinets. "
+            f"The protagonist {continuity} {char} is standing comfortably near the kitchen counter, "
+            f"smiling with warm genuine satisfaction admiring the newly furnished cozy room. "
+            f"On the counter and desk, a real physical compact microwave oven, small refrigerator, and neat furniture are arranged in tack-sharp f/11 deep depth of field pan-focus across the entire room. "
+            f"Raw unedited natural human skin texture with real pores, subtle skin sheen, natural matte cotton clothes, real everyday smartphone camera sensor capture, authentic documentary photo"
         )
     elif slide_idx == 3:
-        # 3번: 150만원 절약 안도와 휴식
+        # 3번: 150만원 절약 안도와 휴식 (배경 인테리어 선명 유지)
         prompt = (
             f"authentic candid lifestyle portrait photo shot on iPhone 15 Pro, {iphone_candid_framing}of {continuity} {char}, "
             f"seated comfortably on a simple sofa or wooden chair in the warm cozy room, "
             f"holding a warm ceramic mug of tea or coffee with a peaceful, deeply relieved smile, "
             f"wearing comfortable casual sweater, feeling proud and secure about saving over 1,500,000 KRW on living costs, "
-            f"soft warm ambient interior lighting, clean cozy home background, "
-            f"same consistent face and hairstyle as slide 1, raw natural skin texture, matte finish, NO beauty filter"
+            f"soft warm ambient interior lighting, clean cozy home background in tack sharp focus (f/11), "
+            f"same consistent face and hairstyle as slide 1, raw natural skin texture, matte finish, deep focus f/11 pan-focus, sharp clear room details"
         )
     elif slide_idx == 4:
-        # 4번: 가족 송금 또는 고향 생각 감동
+        # 4번: 가족 송금 또는 고향 생각 감동 (배경 인테리어 선명 유지)
         prompt = (
             f"authentic candid documentary photo shot on iPhone 15 Pro, {iphone_candid_framing}of {continuity} {char}, "
             f"sitting naturally near a sunny window in the studio room, looking at a framed family photo on the desk with an emotional heartfelt grateful smile, "
             f"wearing comfortable casual clothing, tears of pride and happiness in eyes, feeling accomplished supporting family while living well in Korea, "
-            f"warm golden hour window sunlight casting gentle light, clean organized room, "
-            f"same consistent face and hairstyle as slide 1, raw natural skin texture, realistic mobile phone sensor capture"
+            f"warm golden hour window sunlight casting gentle light, clean organized room with sharp background details (f/11), "
+            f"same consistent face and hairstyle as slide 1, raw natural skin texture, deep focus f/11 pan-focus, crisp interior details"
         )
     elif slide_idx == 5:
-        # 5번: 시청자에게 케이마켓 나눔 추천 및 엄지척 CTA
+        # 5번: 시청자에게 케이마켓 나눔 추천 (카메라 3.5m 거리 와이드 풀샷, 인물 25~30% / 방 배경 70% 이상 칼핀 노출, 클로즈업 0%)
         prompt = (
-            f"authentic candid portrait snapshot shot on iPhone 15 Pro, {iphone_candid_framing}of {continuity} {char} positioned centrally or on the right half of the frame, "
-            f"in the bright friendly room setting, looking directly into the camera lens with an enthusiastic encouraging friendly smile, "
-            f"giving a confident thumbs-up sign (thumbs up) or welcoming open-hand gesture to the viewer, warmly inviting other foreign workers to use K-Market for free giveaways, "
+            f"authentic candid wide environmental lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone photo taken from 3.5 meters away, "
+            f"wide full room interior view with deep depth of field (f/11 aperture pan-focus), tack sharp focus across the entire room showing the furnished studio room, desk, drawers, bed, and appliances in crisp clarity. "
+            f"The room interior and furniture occupy over 70% of the entire frame. "
+            f"The protagonist {continuity} {char} occupies only about 25% of the frame standing in the center room, full upper body and environment visible, "
+            f"looking directly into the camera lens with an enthusiastic friendly smile, "
+            f"giving a natural subtle thumbs-up gesture or welcoming open-hand gesture to the viewer, warmly inviting other foreign workers to use K-Market for free giveaways, "
             f"wearing clean smart-casual clothes, a neat button-down shirt or stylish sweater, "
-            f"same consistent face and hairstyle as slide 1, raw natural skin texture, matte finish, NO beauty filter"
+            f"same consistent face and hairstyle as slide 1, raw natural skin texture, matte finish, wide full-body environmental perspective, distant camera view 3.5 meters away, tack sharp deep focus f/11 pan-focus across the entire room and background furniture"
         )
     else:
         prompt = f"authentic candid snapshot of {char}, {scene_action}"
@@ -247,7 +261,7 @@ def build_kmarket_cardnews_scene_prompt(
 
 def build_kmarket_cardnews_negative_prompt(lang: str, slide_idx: int = 1, extra: str = "") -> str:
     """
-    K-Market 카드뉴스 전용 부정 프롬프트 (가분수/얼큰이/광각왜곡/밀랍인형/3D CG/8k 화보 원천 차단):
+    K-Market 카드뉴스 전용 부정 프롬프트 (뒷배경 블러/보케/가분수/얼큰이/광각왜곡/밀랍인형/3D CG 전면 원천 차단):
     - Slide 1: 2인 직거래 나눔 씬 허용 (multiple people 제외, 대규모 군중 crowd만 차단)
     - Slide 2~5: 단독 인물 일관성 유지를 위해 multiple people, crowd 차단
     """
@@ -257,12 +271,12 @@ def build_kmarket_cardnews_negative_prompt(lang: str, slide_idx: int = 1, extra:
     people_neg = "crowd, massive group of people, chaotic background, blurry crowd" if slide_idx == 1 else "different person, character change, multiple people, crowd"
 
     distortion_neg = (
+        "anime, cartoon, comic, manga, animated, drawing, sketch, vector art, illustration, digital painting, digital illustration, graphic novel, cel shading, 2d, 2d character, pixar style, disney style, 3d model, 3d render, CGI, blender render, architectural rendering, 3d architectural visualization, 3d interior render, 3ds max, vray render, architectural drawing, cgi room, unreal engine, octane render, artificial look, plastic skin, smooth plastic texture, wax figure, mannequin, doll, airbrushed, beauty filter, smooth skin filter, porcelain skin, oily skin glare, shiny plastic surface, over-smoothed skin, glossy skin, "
+        "bokeh, shallow depth of field, blurry background, soft background, out of focus background, background blur, portrait mode blur, macro blur, fuzzy background, depth of field blur, hazy background, "
         "8k, 8k uhd, photorealistic, commercial advertisement, studio lighting, studio photoshoot, professional photo shoot, fashion magazine cover, "
         "bobblehead, big head, oversized head, giant head, large head, dwarf body, short body, deformed anatomy, "
         "extreme close-up, macro shot, headshot, bust shot, cropped head, zoomed-in face, face taking up entire frame, face taking up more than 20% of image, "
         "wide-angle lens distortion, fisheye lens, perspective distortion, "
-        "plastic skin, smooth plastic texture, wax figure, mannequin, doll, airbrushed, beauty filter, smooth skin filter, porcelain skin, oily skin glare, shiny plastic surface, "
-        "3d render, CGI, digital painting, digital illustration, octane render, unreal engine, anime, cartoon, artificial look, over-smoothed skin, glossy skin, "
         "blank background, plain grey wall, solid color backdrop, empty studio wall, "
         "closed eyes, deformed fingers, extra fingers, missing fingers, fused fingers, bad anatomy, "
         "elderly, old person, middle-aged, age inconsistency, "

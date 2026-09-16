@@ -191,8 +191,8 @@ class GeminiCardnewsCopywriter:
 [주인공 페르소나]: {persona.get('name', '외국인 유학생')}
 
 ### 5장 슬라이드 스토리텔링 공식 (반드시 이 순서로 집필):
-- 1장 (★핵심 숏폼형 직거래 훅 - 2인 1:1 현장 교환 만남): 캠퍼스/기숙사 길거리에서 서로 다른 국적의 외국인 둘(예: 베트남 유학생과 네팔 청년, 또는 귀국 선배와 신입 유학생)이 직접 1:1로 만나 웃으며 {item}을 0원에 주고받는 생생한 직거래 실화 후킹! (예: "신촌 연세대 앞, 베트남 유학생과 네팔 친구의 0원 나눔 직거래 현장! 진짜 0원에 가져가도 되나요?")
-- 2장 (내 방 배치 & 150만원 절약): 텅 비고 차가웠던 원룸/기숙사를 0원 가구로 따뜻하고 아늑하게 풀세팅하고 가구값 150만 원을 아낀 감동
+- 1장 (★핵심 직거래 훅 - 무조건 두 손으로 들 수 있는 소형 가전제품): 길거리에서 서로 직접 1:1로 만나 웃으며 깨끗한 소형 가전제품(전자레인지 또는 전기밥솥)을 0원에 직접 두 손으로 건네받는 생생한 직거래 실화 후킹! (예: "신촌 연세대 앞, 전자레인지(또는 밥솥) 0원 나눔 직거래 현장! 진짜 0원에 가져가도 되나요?") ※주의: 침대나 대형 가구는 사람이 손으로 건넬 수 없으므로 1번 물품은 무조건 소형 가전제품(전자레인지/밥솥)으로 서술할 것.
+- 2장 (내 방 풀세팅 & 150만원 절약): 방 안에 전자레인지, 냉장고, 책상, 침대까지 0원 나눔으로 아늑하게 풀세팅하고 150만 원을 아낀 감동
 - 3장 (KTRS 마켓 실물 0원 무료나눔 매물 피드): "도대체 어디서 구했어? 매일 쏟아지는 K-Market 0원 실물 가구·가전 매물 피드 대공개!"
 - 4장 (안심 1:1 직거래 & 17개국어 번역 채팅): "한국어 몰라도 17개 언어 실시간 자동번역 채팅으로 10분 만에 안전하게 약속 완료!"
 - 5장 (행동 촉구 CTA): "오늘 등록된 0원 매물 놓치지 마세요! 지금 프로필 링크(Bio Link)를 눌러 0원 매물 바로 득템하세요!"
@@ -206,10 +206,10 @@ class GeminiCardnewsCopywriter:
   {{
     "slide_idx": 1,
     "badge": "STEP 1: BADGE IN {lang_info['name']}",
-    "title": "Slide 1 2-Person 1:1 Direct Exchange Title in {lang_info['name']}",
+    "title": "Slide 1 Small Appliance 0 KRW Giveaway Title in {lang_info['name']}",
     "subtitle": "Slide 1 Subtitle in {lang_info['name']}",
     "bullets": [
-      "• Bullet 1 (meeting in person, handing over {item}) in {lang_info['name']}",
+      "• Bullet 1 (meeting in person, receiving microwave/appliance) in {lang_info['name']}",
       "• Bullet 2 (genuine 0 Won free handover) in {lang_info['name']}",
       "• Bullet 3 (connected via KTRS Market app translation) in {lang_info['name']}"
     ]

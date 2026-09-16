@@ -171,7 +171,10 @@ class ScenarioDirectorCardnewsKMarket:
             "lang": lang,
             "theme_name": theme_id,
             "theme_title": theme_name,
+            "target": target,
+            "item": item,
             "character_anchor": char_anchor,
             "episode_id": f"cardnews_kmarket_{lang}_{theme_id}_{random.randint(1000, 9999)}",
             "cards": cards
         }
+
