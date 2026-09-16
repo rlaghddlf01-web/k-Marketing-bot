@@ -71,8 +71,16 @@ class TTSVoiceSynthesizer:
         wav_path = os.path.join(self.output_dir, f"{filename_prefix}_{lang}.wav")
 
         async def _run_tts():
-            comm = edge_tts.Communicate(text, voice, rate=rate)
-            await comm.save(mp3_path)
+            for attempt in range(3):
+                try:
+                    comm = edge_tts.Communicate(text, voice, rate=rate)
+                    await comm.save(mp3_path)
+                    if os.path.exists(mp3_path) and os.path.getsize(mp3_path) > 0:
+                        return
+                except Exception as e:
+                    if attempt == 2:
+                        raise e
+                    await asyncio.sleep(1.0)
 
         asyncio.run(_run_tts())
 
