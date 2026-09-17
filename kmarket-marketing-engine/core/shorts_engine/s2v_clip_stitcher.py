@@ -279,7 +279,7 @@ class S2VClipStitcher:
             try:
                 best_transition_frame = DualGuardFrameSelector.select_best_seamless_frame(
                     frame_paths=p1_frames,
-                    candidate_count=16,  # 맨 마지막 16프레임(약 4.0~5.06초) 무음 안착 구간에서 엄격 선별
+                    candidate_count=10,  # 81프레임 직전 마지막 10프레임(약 4.4~5.06초) 정밀 평가
                     target_w=384,
                     target_h=672
                 )
