@@ -106,10 +106,16 @@ class FactoryService:
 
                         import importlib
                         import core.shorts_engine
+                        import core.shorts_engine.gemini_shorts_visual_director
+                        import core.shorts_engine.eye_guard_frame_selector
+                        import core.shorts_engine.s2v_clip_stitcher
                         import core.shorts_engine.easytax_app_recorder
                         import core.shorts_engine.shorts_scenario_script_director
                         import core.shorts_engine.shorts_video_composer
                         import core.shorts_engine.easytax_shorts_producer
+                        importlib.reload(core.shorts_engine.gemini_shorts_visual_director)
+                        importlib.reload(core.shorts_engine.eye_guard_frame_selector)
+                        importlib.reload(core.shorts_engine.s2v_clip_stitcher)
                         importlib.reload(core.shorts_engine.easytax_app_recorder)
                         importlib.reload(core.shorts_engine.shorts_scenario_script_director)
                         importlib.reload(core.shorts_engine.shorts_video_composer)

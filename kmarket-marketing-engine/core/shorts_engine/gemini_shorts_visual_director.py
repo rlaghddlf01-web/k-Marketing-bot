@@ -88,10 +88,12 @@ class GeminiShortsVisualDirector:
         self,
         lang: Optional[str] = None,
         theme_info: Optional[Dict[str, Any]] = None,
-        amount: int = 3100000
+        amount: int = 3100000,
+        gender: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         테마를 분석하여 언어 자동 선택, 10초 이상 여유 있는 립싱크 대본, 인물 프롬프트, 박스 비주얼을 실시간 생성
+        (성별은 지정되지 않을 시 50:50 균등 확률로 남성/여성 자동 분배)
         """
         theme = theme_info or {}
         theme_name = theme.get("name", "한국 세금 90% 소득세 감면 및 환급")
@@ -99,6 +101,9 @@ class GeminiShortsVisualDirector:
         persona = theme.get("persona_type", "E-9/E-7 근로자")
         refund_krw = theme.get("refund_est", amount)
         refund_formatted = f"{refund_krw:,}"
+
+        # 성별 50:50 균등 분배 (지정값 없으면 female / male 5:5 확률 선택)
+        target_gender = str(gender).lower().strip() if gender and str(gender).lower().strip() in ["male", "female"] else random.choice(["female", "male"])
 
         # 언어 자동 선택 플래그
         is_auto_lang = not lang or lang == "auto" or lang not in GOLDEN_8_COUNTRIES
@@ -108,6 +113,10 @@ class GeminiShortsVisualDirector:
             f"Use the designated target language code '{lang}'."
         )
 
+        # 8대국 에스닉 앵커 가이드
+        from core.shorts_engine.shorts_character_anchor_easytax import get_shorts_ethnic_positive
+        ethnic_guide = get_shorts_ethnic_positive(lang) if not is_auto_lang else "authentic facial features matching selected country (strictly NOT East Asian/Chinese for Central Asian countries like Uzbekistan/Kazakhstan)"
+
         # 1. 제미나이 마스터 시스템 프롬프트 구성
         system_instruction = f"""
 You are the world's best viral vertical video director (TikTok/Reels/Shorts) creating a high-converting 22-second marketing video for KTRS EasyTax (Easy Korean Tax Refund App for Foreign Workers).
@@ -116,55 +125,123 @@ You are the world's best viral vertical video director (TikTok/Reels/Shorts) cre
 [Target Audience]: {target} (Persona: {persona})
 [Verified Legal Benefit]: Up to 90% income tax reduction under Korean tax regulations. Average refund: ₩{refund_formatted} KRW. 100% Native Language Mobile App. 0 Won upfront fee (100% success fee only after receiving refund into bank account).
 
+[CRITICAL MARKETING PROPOSITION & MANDATORY CORE CONCEPTS (STRICT ENFORCEMENT)]:
+The entire marketing video exists to solve ONE clear question for foreign workers in Korea:
+"Can I get back the income taxes that were deducted from my monthly paychecks?" (월급에서 떼인 소득세 환급 / Tax refund of salary deductions)
+1. MANDATORY: The speaker MUST explicitly state in their native language that this money is:
+   - "TAXES DEDUCTED FROM MONTHLY SALARY" (월급에서 원천징수되어 떼인 세금)
+   - "TAX REFUND RECEIVED FROM THE NATIONAL TAX SERVICE" (국세청에서 돌려받은 세금 환급)
+2. STRICTLY PROHIBITED: NEVER simply say "I received money" or "3,680,000 won arrived in my account" without explicitly stating that it is TAX REFUND FROM SALARY DEDUCTIONS! If the viewer doesn't understand it is a tax refund of salary deductions, they will mistake it for a loan, bonus, lottery, or scam!
+3. NATIVE LANGUAGE KEYWORD REQUIREMENTS:
+   - Uzbek (uz): MUST include "oylikdan ushlab qolingan soliq" (tax deducted from monthly salary) AND "soliqni qaytarib oldim" / "soliq qaytarmasi" (got tax refund).
+   - Vietnamese (vi): MUST include "tiền thuế bị trừ từ lương" (tax deducted from salary) AND "hoàn thuế" (tax refund).
+   - Indonesian (id): MUST include "pajak yang dipotong dari gaji" AND "pengembalian pajak".
+   - Russian/Kazakh (kk): MUST include "налог, удержанный с зарплаты" AND "возврат налога".
+   - Tagalog (tl): MUST include "taxes deducted from salary" AND "tax refund".
+   - Khmer (km): MUST include "ពន្ធកាត់ពីប្រាក់ខែ" AND "បង្វិលពន្ធ".
+   - Thai (th): MUST include "ภาษีที่ถูกหักจากเงินเดือน" AND "เงินคืนภาษี".
+   - Burmese (my): MUST include "လစာမှ ဖြတ်တောက်ခံရသော အခွန်" AND "အခွန်ပြန်အမ်းငွေ".
+
 [Language Selection Instruction]:
 {lang_instruction}
 
-[SCENE 1: 0s ~ 11s Human Actor Lip-Sync - CRITICAL PACING & STORYLINE]:
-The actor is speaking directly to the camera for 10 to 11 seconds.
-To prevent the actor from speaking too fast like a chatterbox ("수다쟁이"), strictly follow this 3-sentence calm, friendly peer-to-peer structure:
-- Sentence 1 (Warm greeting & empathy matching theme):
-  Introduce oneself by a native name and specific workplace/role in Korea matching today's theme, and empathize with the tax deducted from the monthly salary.
-  (e.g., "Hello, I am [Native Name], working at [Workplace/City]! Every month when getting paid, were you sad about the deducted tax?")
-- Sentence 2 (Super-simple legal fact & money proof without rigid jargon):
-  Do NOT use rigid jargon like 'Article 30'. Explain easily: under Korean law, foreign workers can get back up to 90% of taxes! I also received ₩{refund_formatted} KRW straight into my account via KTRS!
-- Sentence 3 (App screen transition bridge):
-  "How did I get it on my phone in 1 minute? Let me show you on my screen right now!"
+[MANDATORY ETHNICITY & FACIAL BONE STRUCTURE]:
+{ethnic_guide}
 
-[STRICT WORD COUNT LIMITS FOR SPEECH_HOOK TO ENSURE 10~11 SECONDS CALM PACE]:
-- If Uzbek (uz) or Russian/Kazakh (kk): STRICT MAXIMUM 14 to 16 WORDS! (Uzbek/Russian words have many syllables; NEVER exceed 16 words so the voice speaks calmly and deeply without rushing).
-- If Khmer (km), Thai (th), Burmese (my): STRICT MAXIMUM 16 to 19 WORDS!
-- If Vietnamese (vi), Tagalog (tl), Indonesian (id): STRICT MAXIMUM 20 to 24 WORDS!
+[SCENE 1: 0s ~ 10s Human Actor Lip-Sync - FULL 10-SECOND CONTINUOUS SPEECH (81f + 81f)]:
+The human actor scene is strictly composed of TWO 5-SECOND SHOTS (Shot 1: 0s~5s, Shot 2: 5s~10s) combined seamlessly into ONE 10.0-SECOND CONTINUOUS SCENE.
+CRITICAL MANDATE: THE ACTOR MUST SPEAK VIBRANTLY AND CONTINUOUSLY ACROSS THE ENTIRE 10 SECONDS! ZERO IDLE STARING, ZERO DEAD SILENCE!
+The speaker is ONE SINGLE foreign worker persona working in Korea (e.g. manufacturing/factory/construction E-9, E-7 worker).
 
-[ACTOR PERSONA & VISUAL PROMPT GENERATION (Wan 2.1 T2I & Wan 2.2 S2V)]:
-- actor_persona_name: Korean & native description of persona (e.g. "투안 (27세, 안산 반월공단 3년차 제조 근로자 / Tuấn)")
-- gender: "male" or "female" (must match character naturally)
-- actor_outfit: neat realistic workplace outfit matching the theme (e.g. "dark navy industrial polo work shirt with company badge", "casual clean collegiate hoodie", etc.)
-- actor_location: authentic living/dormitory space in the target Korean region (e.g. "warm cozy studio room in Ansan", "clean dormitory room near Hwaseong plant")
-- character_desc: English prompt for Wan 2.1 T2I (ethnicity matching selected language, age around 24~30, neat workplace outfit matching actor_outfit, natural authentic face, closed lips)
-- background_desc: English prompt for background (cozy modern dormitory room, studio room in Korea with soft indoor window lighting matching actor_location)
-- s2v_motion_prompt: English prompt for Wan 2.2 S2V (e.g. "a friendly person holding smartphone at chest level, speaking sincerely and calmly to camera with natural gentle expressions, clear lip sync, stable posture")
+CRITICAL STAGING & POSE (0s ~ 10s CONTINUOUS CONSISTENT POSE):
+- The actor sits or stands comfortably in their clean dormitory room in Korea, HOLDING A SLEEK MODERN SMARTPHONE STEADILY IN ONE HAND AT CHEST/WAIST LEVEL WITH THE SCREEN FACING FORWARD TOWARDS THE CAMERA FROM THE VERY START (0s) TO THE VERY END (10s).
+- The actor LOOKS DIRECTLY INTO THE CAMERA LENS AT ALL TIMES with attentive, sincere, friendly eye contact.
+- THE PHONE AND HANDS REMAIN STEADY AND STILL (no rapid hand gestures, no waving or sudden raising of phone). All motion is natural speech lip sync and subtle head movement to guarantee 0% hand distortion or screen tearing!
+
+[AVERAGE 20-SECOND FULL SCRIPT ARCHITECTURE - NATURAL HUMAN TEMPO (+0%)]:
+Do NOT use artificial speedup. The speech must sound 100% natural, peer-to-peer, and trustworthy.
+The script has an average total duration of ~20 seconds (18s ~ 22s depending on language characteristics):
+1. `speech_hook_part1` (Shot 1: 0s ~ 5s, speaks for ~4.5s at +0% tempo to fill the 81 frames):
+   Hooks viewer by directly asking about or mentioning the taxes deducted from monthly wages while working in Korea:
+   - Uzbek (uz): 7 to 9 words (e.g., "Har oy oyligingizdan ushlab qolingan soliqni bilasizmi?")
+   - Vietnamese (vi): 11 to 13 words (e.g., "Bạn có biết tiền thuế bị trừ từ lương hàng tháng có thể lấy lại?")
+   - Russian/Kazakh (kk): 7 to 9 words (e.g., "Знаете ли вы, что налог, удержанный с зарплаты, можно вернуть?")
+   - Indonesian (id): 8 to 10 words (e.g., "Tahu nggak kalau pajak yang dipotong dari gaji bisa diambil kembali?")
+   - Tagalog (tl): 9 to 11 words (e.g., "Did you know you can get back taxes deducted from your monthly salary?")
+   - Thai (th), Khmer (km), Burmese (my): 8 to 10 words
+   STRICTLY PROHIBITED: NEVER mention tuition, students, studying abroad, universities! Only factory/workplace foreign worker persona!
+
+2. `speech_hook_part2` (Shot 2: 5s ~ 10s, speaks for ~4.5s at +0% tempo):
+   Excited tax refund receipt proof via KTRS app (MUST state {refund_formatted} won of salary tax refunded!):
+   *NOTE: Numbers like {refund_formatted} take 4~5 words to pronounce in audio!*
+   - Uzbek (uz): 7 to 9 words (e.g., "Men KTRS orqali oylikdan ushlab qolingan {refund_formatted} von soliqni qaytarib oldim!")
+   - Vietnamese (vi): 11 to 13 words (e.g., "Tôi vừa được hoàn lại {refund_formatted} won tiền thuế từ lương qua app KTRS rồi!")
+   - Russian/Kazakh (kk): 7 to 9 words (e.g., "Через KTRS я только что вернул {refund_formatted} вон налога с зарплаты!")
+   - Indonesian (id): 9 to 11 words (e.g., "Saya baru saja terima pengembalian pajak gaji {refund_formatted} won lewat KTRS!")
+   - Tagalog (tl): 9 to 11 words
+   - Thai (th), Khmer (km), Burmese (my): 8 to 10 words
+   *RESULT: Part 1 (~4.5s) + Part 2 (~4.5s) fills the entire 10-second human scene with zero awkward silence!*
+
+3. `speech_app` (10s ~ End, speaks for ~8s to 11s over the App Simulation screen):
+   AT EXACTLY 10.0 SECONDS, THE SCREEN SWITCHES TO THE KTRS LIVE MOBILE APP DEMO.
+   THE EXACT SAME SPEAKER'S VOICE CONTINUES SEAMLESSLY OVER THE APP DEMO WITHOUT INTERRUPTION!
+   Explains in native language how easy it is to calculate YOUR salary tax refund in 1 minute on mobile, 0 won upfront fee, and check via link below:
+   - Uzbek (uz): 12 to 15 words (e.g., "Ilovada oylikni kiritib, qancha soliq qaytarilishini 1 daqiqada bepul hisoblang! Oldindan to'lov yo'q, quyidagi havoladan bepul tekshiring!")
+   - Vietnamese (vi): 22 to 26 words (e.g., "Chỉ cần nhập lương vào app, tính ngay số tiền thuế được hoàn miễn phí trong 1 phút! Miễn phí ban đầu, bấm link bên dưới kiểm tra ngay!")
+   - Russian/Kazakh (kk): 12 to 15 words
+   - Indonesian (id) & Tagalog (tl): 18 to 22 words
+   - Thai (th), Khmer (km), Burmese (my): 15 to 18 words
+   *CRITICAL: As soon as speech_app finishes, the entire video immediately stops with zero trailing dead space!*
+
+[ACTOR PERSONA & DIVERSE VISUAL SETTING GENERATION (Wan 2.1 T2I & Wan 2.2 S2V)]:
+- MANDATORY ASSIGNED GENDER: "{target_gender.upper()}" (STRICT! Output "gender": "{target_gender}")
+- actor_persona_name: Korean & native description matching "{target_gender}"
+  * If female: authentic female name & role (e.g. Uzbek: "말리카 (26세, 화성 부품공장 2년차 / Malika)", Vietnamese: "흐엉 (25세, 안산 전자공장 / Hương)", etc.)
+  * If male: authentic male name & role (e.g. Uzbek: "자수르 (28세, 반월공단 3년차 / Jasur)", Vietnamese: "투안 (27세, 구미 제조업 / Tuấn)", etc.)
+- gender: MUST BE "{target_gender}"!
+
+[DIVERSE DYNAMIC BACKGROUND MANDATE (CRITICAL)]:
+Do NOT always use the same living room! Dynamically select the setting that best resonates with today's theme mood:
+1. ✈️ Airport Terminal & Travel: "spacious modern international airport terminal departure lounge, travel luggage suitcase beside, ready to fly home to visit family with refund money" (Best for flight ticket, vacation, family remittance themes)
+2. ☕ Aesthetic Modern Cafe: "warm sunlit quiet modern coffee shop lounge armchair, softly blurred cafe interior" (Best for 1-minute mobile check, weekend ease, tax tips)
+3. 🏭 Industrial Factory & Workshop: "clean modern high-tech industrial assembly workshop or tidy plant breakroom, softly blurred automated machinery" (Best for manufacturing E-9, overtime tax reduction, plant workers)
+4. 🏠 Cozy Modern Living Room & Studio: "warm bright modern studio apartment living room, neat minimalist desk, soft window daylight" (Best for dorm life, living alone, roommate stories)
+5. 🎓 University Campus & Study Lounge: "bright quiet modern university library or study lounge" (Best for D-2 student part-time 3.3% tax refund)
+*CRITICAL MANDATE: NEVER include 'in Korea' or 'in South Korea' in background_desc or character_desc to prevent AI ethnicity distortion! Just describe the setting itself naturally.*
+
+- actor_outfit: neat realistic outfit matching the theme and chosen location (e.g. "stylish pastel casual t-shirt", "neat industrial polo work shirt", "comfortable travel jacket", "clean smart casual shirt")
+- actor_location: Korean summary of the chosen diverse setting (e.g. "인천공항 출국장 라운지 (캐리어 지참)", "화성 산업단지 공장 휴게실", "안산 감성 카페 창가 좌석", "따뜻한 원룸 거실")
+- character_desc: English prompt for Wan 2.1 T2I (ethnicity matching selected language, gender: "{target_gender}", age around 24~29, neat outfit, looking directly into camera lens with attentive eye contact, holding sleek smartphone naturally in one hand at waist level facing forward, lips completely closed together, mouth gently shut, strictly zero open mouth, absolutely zero teeth showing)
+- background_desc: English prompt for the chosen diverse setting (e.g. airport departure lounge with luggage, sunny modern cafe table, clean industrial workshop breakroom, or cozy modern room with window light. NEVER write 'in Korea')
+- s2v_motion_prompt: English prompt for Wan 2.2 S2V (e.g. "a friendly foreign {target_gender} worker sitting or standing comfortably in the scene, holding a smartphone steadily in one hand facing forward to camera, looking directly into camera lens with attentive eye contact, stable hands, still posture, speaking sincerely and naturally with clear lip sync and subtle natural head movement, no rapid hand gestures, clean realistic motion")
+
+[CRITICAL AMOUNT & REAL PHOTO INTEGRITY MANDATE]:
+- In speech_hook_part2, speech_hook, and bottom_step1_title, you MUST use the EXACT given refund amount "{refund_formatted}" won (e.g. "{refund_formatted} von" or "₩{refund_formatted}"). NEVER change this amount to 2,400,000 or any other number! It must match {refund_formatted} with 100% mathematical precision!
+- In character_desc, strictly NEVER use beauty/glamour buzzwords like 'handsome', 'beautiful', 'model', 'gorgeous', 'chiseled', 'elegant'! Instead describe an everyday honest foreign worker with authentic friendly facial features, wearing comfortable civilian casual clothes, with raw unedited natural skin texture with real pores to guarantee a 100% real iPhone mobile photo with ZERO plastic/CGI look!
 
 [OVERLAY BOX TEXTS & COLORS (STRICT ZERO OVERFLOW)]:
-- top_header: Maximum 22 characters in native language (e.g., HOÀN 90% THUẾ • KTRS)
-- bottom_step1_title: Maximum 25 characters (Scene 1 headline, e.g., ĐÃ NHẬN 3.840.000 WON)
-- bottom_step1_sub: Maximum 35 characters (Scene 1 subtitle)
-- bottom_step2_title: Maximum 25 characters (Scene 2 headline, e.g., CHỌN LƯƠNG • TÍNH 1 PHÚT)
-- bottom_step2_sub: Maximum 35 characters (Scene 2 subtitle)
-- cta_button_text: Maximum 18 characters (e.g., KIỂM TRA MIỄN PHÍ >)
+- top_header: Maximum 22 characters in native language (e.g., HOÀN 90% THUẾ • KTRS, 90% SOLIQ QAYTARISH • KTRS)
+- bottom_step1_title: Maximum 25 characters (Scene 1 headline, MUST include "{refund_formatted}" AND specify TAX REFUND, e.g., {refund_formatted} VON SOLIQ QAYTARILDI, HOÀN {refund_formatted} WON THUẾ)
+- bottom_step1_sub: Maximum 35 characters (Scene 1 subtitle, MUST state taxes deducted from monthly salary, e.g., Oylikdan ushlab qolingan soliqni tekshiring, Kiểm tra thuế bị trừ từ lương 1 phút)
+- bottom_step2_title: Maximum 25 characters (Scene 2 headline, e.g., CHỌN LƯƠNG • TÍNH 1 PHÚT, OYLIKNI KIRITING • 1 DAQIQA)
+- bottom_step2_sub: Maximum 35 characters (Scene 2 subtitle, e.g., NTS Hometax rasmiy xizmati, Trực tiếp liên kết NTS Hometax)
+- cta_button_text: Maximum 18 characters (e.g., HOZIROQ TEKSHIRING >, KIỂM TRA MIỄN PHÍ >)
 - palette_id: one of ['gold_navy', 'emerald_navy', 'crimson_gold', 'cyber_cyan', 'royal_purple', 'sunset_orange'] matching the theme mood.
 - STRICTLY NO UNICODE EMOJIS (No 🏛️, 💰, ⚡ to avoid font corruption).
 
 Return ONLY valid JSON matching this exact structure:
 {{
   "selected_lang": "vi",
-  "actor_persona_name": "Tuấn (27세, 안산 반월공단 3년차 제조 근로자)",
-  "gender": "male",
-  "actor_outfit": "dark navy industrial polo shirt",
-  "actor_location": "cozy dormitory room in Ansan",
-  "character_desc": "a friendly 27-year-old Vietnamese male factory worker in neat dark work shirt...",
-  "background_desc": "warm cozy modern apartment room in Ansan, soft ambient window daylight...",
-  "s2v_motion_prompt": "a friendly 27-year-old Vietnamese male worker holding smartphone, speaking sincerely to camera, natural gentle expressions, clear lip sync",
-  "speech_hook_kr": "안녕하세요! 안산 반월공단에서 일하는 3년 차 투안입니다...",
+  "actor_persona_name": "...",
+  "gender": "{target_gender}",
+  "actor_outfit": "...",
+  "actor_location": "...",
+  "character_desc": "a friendly 25-year-old {target_gender} worker in neat work shirt, holding smartphone facing forward, looking directly into camera...",
+  "background_desc": "warm cozy modern apartment room in Korea, soft ambient window daylight...",
+  "s2v_motion_prompt": "a friendly {target_gender} worker holding smartphone steadily facing forward, looking directly into camera, speaking sincerely with clear lip sync, stable hands",
+  "speech_hook_kr": "안녕하세요! 한국에서 일하는 ...",
+  "speech_hook_part1": "...",
+  "speech_hook_part2": "...",
   "speech_hook": "...",
   "speech_app": "...",
   "speech_cta": "...",
@@ -204,7 +281,33 @@ Return ONLY valid JSON matching this exact structure:
                     palette_id = data.get("palette_id", "gold_navy")
                     palette = THEME_PALETTES.get(palette_id, THEME_PALETTES["gold_navy"])
 
+                    speech_hook_p1 = data.get("speech_hook_part1", "").strip()
+                    speech_hook_p2 = data.get("speech_hook_part2", "").strip()
                     speech_hook = data.get("speech_hook", "").strip()
+
+                    if not speech_hook_p1 or not speech_hook_p2:
+                        from .s2v_clip_stitcher import S2VClipStitcher
+                        speech_hook_p1, speech_hook_p2 = S2VClipStitcher.split_speech_into_two_parts(speech_hook)
+
+                    if not speech_hook:
+                        speech_hook = f"{speech_hook_p1} {speech_hook_p2}".strip()
+
+                    # 🛡️ 금액 무결성 100% 강제 동기화 (LLM 숫자 왜곡 원천 차단)
+                    import re
+                    num_pattern = r'\b\d{1,3}(?:,\d{3})+\b|\b\d{6,8}\b'
+                    for fn in re.findall(num_pattern, speech_hook_p2):
+                        if fn.replace(",", "") != str(refund_krw):
+                            logger.info(f"🔄 [금액 무결성 동기화] Shot 2 발화 금액 교정: {fn} -> {refund_formatted}")
+                            speech_hook_p2 = speech_hook_p2.replace(fn, refund_formatted)
+                    for fn in re.findall(num_pattern, speech_hook):
+                        if fn.replace(",", "") != str(refund_krw):
+                            speech_hook = speech_hook.replace(fn, refund_formatted)
+
+                    bottom_s1_title = data.get("bottom_step1_title", f"ĐÃ NHẬN {refund_formatted} WON")
+                    for fn in re.findall(num_pattern, bottom_s1_title):
+                        if fn.replace(",", "") != str(refund_krw):
+                            bottom_s1_title = bottom_s1_title.replace(fn, refund_formatted)
+
                     speech_hook_kr = data.get("speech_hook_kr", "").strip()
                     speech_app = data.get("speech_app", "").strip()
                     speech_cta = data.get("speech_cta", "").strip()
@@ -216,13 +319,15 @@ Return ONLY valid JSON matching this exact structure:
                     actor_location = data.get("actor_location", "한국 거주지")
                     char_desc = data.get("character_desc", "")
                     bg_desc = data.get("background_desc", "")
-                    s2v_motion = data.get("s2v_motion_prompt", f"a friendly person holding smartphone, talking to camera with natural gentle smile, clear lip sync")
+                    s2v_motion = data.get("s2v_motion_prompt", "a friendly foreign worker sitting comfortably in a clean room, holding a smartphone steadily in one hand facing forward to camera, looking directly into camera lens with attentive eye contact, stable hands, still posture, speaking sincerely and naturally with clear lip sync and subtle natural head movement, no rapid hand gestures, clean realistic motion")
 
                     country_meta = GOLDEN_8_COUNTRIES.get(resolved_lang, GOLDEN_8_COUNTRIES["vi"])
                     country_name = country_meta["country"]
 
                     logger.info(f"✨ [GeminiShortsVisualDirector] 디렉팅 성공! 언어: {resolved_lang.upper()} ({country_name}) | 인물: {actor_persona_name} ({gender}) | 의상: {actor_outfit}")
                     logger.info(f"🎙️ [인사말 한국어]: {speech_hook_kr[:60]}...")
+                    logger.info(f"⏱️ [5초 샷 1]: {speech_hook_p1}")
+                    logger.info(f"⏱️ [5초 샷 2]: {speech_hook_p2}")
                     return {
                         "lang": resolved_lang,
                         "country_name": country_name,
@@ -237,6 +342,8 @@ Return ONLY valid JSON matching this exact structure:
                         "background_desc": bg_desc,
                         "s2v_motion_prompt": s2v_motion,
                         "speech_hook_kr": speech_hook_kr,
+                        "speech_hook_part1": speech_hook_p1,
+                        "speech_hook_part2": speech_hook_p2,
                         "speech_hook": speech_hook,
                         "speech_app": speech_app,
                         "speech_cta": speech_cta,
@@ -245,8 +352,8 @@ Return ONLY valid JSON matching this exact structure:
                         "palette": palette,
                         "visual_direction": {
                             "top_header": data.get("top_header", "HOÀN 90% THUẾ • KTRS"),
-                            "bottom_step1_title": data.get("bottom_step1_title", f"ĐÃ NHẬN {refund_formatted} WON"),
-                            "bottom_step1_sub": data.get("bottom_step1_sub", "Tra cứu hoàn thuế trong 1 phút"),
+                            "bottom_step1_title": bottom_s1_title,
+                            "bottom_step1_sub": data.get("bottom_step1_sub", "Tra cứu hoàn thuế dalam 1 phút"),
                             "bottom_step2_title": data.get("bottom_step2_title", f"ƯỚC TÍNH {refund_formatted} WON"),
                             "bottom_step2_sub": data.get("bottom_step2_sub", "Liên kết NTS Hometax • Visa E-7, E-9"),
                             "domain_text": "ktrs-service.vercel.app",
@@ -281,7 +388,7 @@ Return ONLY valid JSON matching this exact structure:
             "actor_location": "한국 거주지",
             "character_desc": "",
             "background_desc": "",
-            "s2v_motion_prompt": "a friendly person holding smartphone, talking to camera with natural gentle smile, clear lip sync",
+            "s2v_motion_prompt": "a friendly foreign worker sitting comfortably in a clean room, holding a smartphone steadily in one hand facing forward to camera, looking directly into camera lens with attentive eye contact, stable hands, still posture, speaking sincerely and naturally with clear lip sync and subtle natural head movement, no rapid hand gestures, clean realistic motion",
             "speech_hook_kr": "한국에서 일하는 여러분! 세금 환급 꼭 받으세요!",
             "speech_hook": base_cfg["hook_0_10s"],
             "speech_app": base_cfg["app_10_18s"],

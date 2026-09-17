@@ -49,6 +49,22 @@ class EasyTaxAppRecorder:
         out_p = Path(output_mp4_path).resolve()
         out_p.parent.mkdir(parents=True, exist_ok=True)
 
+        # 🌟 1. 무결점 사전 녹화 프리셋 직결 (흰 화면 0% 박멸, 브라우저 렉 0초)
+        preset_file = Path(__file__).resolve().parent / "presets" / f"easytax_app_{lang}.mp4"
+        if preset_file.exists() and preset_file.stat().st_size > 0:
+            logger.info(f"✨ [AppRecorder] 무결점 고화질 사전 녹화 프리셋 즉시 직결 (흰 화면 0%, 브라우저 오버헤드 0초): {preset_file.name}")
+            cmd = [
+                self.ffmpeg_exe, "-y",
+                "-i", str(preset_file),
+                "-t", str(duration_sec),
+                "-c", "copy",
+                str(out_p)
+            ]
+            res = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if res.returncode == 0 and out_p.exists() and out_p.stat().st_size > 0:
+                logger.info(f"🎉 [AppRecorder] 프리셋 직결 완료 ({duration_sec}s): {out_p}")
+                return str(out_p)
+
         target_persona = persona or lang
         home_url = f"https://ktrs-service.vercel.app/?lang={lang}"
         estimate_url = f"{self.BASE_URL}?simulation=true&persona={target_persona}&lang={lang}"
@@ -107,6 +123,7 @@ class EasyTaxAppRecorder:
                 )
 
                 # ── Part 1: 프리셋이 없을 때만 실시간 홈 화면 녹화 ──
+                ready_home = 2.0
                 if not use_preset_home:
                     ctx_home = browser.new_context(
                         viewport={"width": 430, "height": 932},
@@ -117,11 +134,13 @@ class EasyTaxAppRecorder:
                         record_video_size={"width": 430, "height": 932}
                     )
                     p_home = ctx_home.new_page()
+                    t0_home = time.time()
                     p_home.goto(home_url, wait_until="domcontentloaded")
                     p_home.add_style_tag(content=clean_css)
-                    p_home.wait_for_timeout(1400) # 스플래시 로딩 통과 후 본문 안정화 대기
+                    p_home.wait_for_timeout(2500) # 완전한 모국어 렌더링 및 안정화 대기
+                    ready_home = time.time() - t0_home
                     p_home.evaluate(scroll_js)    # 아래로 부드럽게 스크롤
-                    p_home.wait_for_timeout(1000)
+                    p_home.wait_for_timeout(2000)
                     ctx_home.close()
 
                 # ── Part 2: 환급 0단계 라이브 시뮬레이션 녹화 (약 4초) ──
@@ -134,12 +153,15 @@ class EasyTaxAppRecorder:
                     record_video_size={"width": 430, "height": 932}
                 )
                 p_est = ctx_est.new_page()
+                t0_est = time.time()
                 p_est.goto(estimate_url, wait_until="domcontentloaded")
                 p_est.add_style_tag(content=clean_css)
+                p_est.wait_for_timeout(4000) # 다국어 i18n 하이드레이션 완전 대기 (한국어 깜빡임 완벽 차단)
+                ready_est = time.time() - t0_est
                 p_est.wait_for_timeout(2500) # 슬라이더 조작 ➡️ 250만원 클릭 대기
                 # 결과 카드(환급액)가 화면 중앙에 오도록 살짝 부드럽게 스크롤
                 p_est.evaluate("() => window.scrollBy({top: 380, behavior: 'smooth'})")
-                p_est.wait_for_timeout(2200) # 310만원 환급액 강조 대기
+                p_est.wait_for_timeout(2500) # 환급액 강조 대기
                 ctx_est.close()
 
                 browser.close()
@@ -168,7 +190,7 @@ class EasyTaxAppRecorder:
                     raise RuntimeError("❌ [AppRecorder] 홈 녹화 비디오가 존재하지 않습니다.")
                 cmd_home = [
                     self.ffmpeg_exe, "-y",
-                    "-ss", "1.3",
+                    "-ss", f"{ready_home:.2f}",
                     "-t", "3.5",
                     "-i", str(home_webms[0]),
                     "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
@@ -177,11 +199,11 @@ class EasyTaxAppRecorder:
                 ]
             subprocess.run(cmd_home, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            # Part 2 MP4 변환 (앞부분 1.2초 번역 전환 깜빡임 스킵하여 모국어 완성 화면부터 시작, 4.5초 유지)
+            # Part 2 MP4 변환 (완전한 모국어 렌더링 완료 시점부터 컷오프하여 흰 화면/깜빡임 0% 보장)
             est_mp4 = str(temp_p / "part2_est.mp4")
             cmd_est = [
                 self.ffmpeg_exe, "-y",
-                "-ss", "1.2",
+                "-ss", f"{ready_est:.2f}",
                 "-t", "4.5",
                 "-i", est_raw,
                 "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",

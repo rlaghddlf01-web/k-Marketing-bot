@@ -154,15 +154,20 @@ class VRAMSafetyGuard:
                 import re
                 m_off = re.search(r"([\d\.]+)\s*MB offloaded", line)
                 m_load = re.search(r"([\d\.]+)\s*MB loaded", line)
-                if m_off:
+                if m_off and m_load:
                     off_mb = float(m_off.group(1))
-                    load_mb = float(m_load.group(1)) if m_load else 0.0
-                    # 4000MB (4GB) 이상 CPU로 밀려났거나, GPU에 2000MB 이하만 적재된 경우
-                    if off_mb > 4000.0 or load_mb < 2000.0:
-                        reason = f"모델의 {off_mb:.1f}MB가 CPU로 오프로드됨 (GPU 적재량: {load_mb:.1f}MB)"
-                        return True, reason
-            except Exception:
-                return True, "모델이 GPU VRAM 부족으로 CPU로 대량 오프로드됨"
+                    load_mb = float(m_load.group(1))
+                    total_model_mb = off_mb + load_mb
+                    # 거대 비디오 모델(Wan2.2 S2V 12GB 등, 5000MB 초과 모델)에 대한 킬스위치
+                    if total_model_mb > 5000.0:
+                        # 4,000MB(4GB) 이상 심각하게 CPU로 튕겨 나갔거나 GPU 적재량이 4,000MB 미만인 치명적 경우에만 차단
+                        # (10GB 이상 정상 GPU 적재 시 2GB 미만의 버퍼 오프로드는 16GB GPU의 정상 고속 동작 대역입니다)
+                        if off_mb > 4000.0 or load_mb < 4000.0:
+                            reason = f"비디오 모델의 {off_mb:.1f}MB가 RAM으로 심각하게 밀려남 감지 (GPU 적재량: {load_mb:.1f}MB, 전체 크기: {total_model_mb:.1f}MB)"
+                            return True, reason
+            except Exception as e:
+                logger.warning(f"VRAM 로그 라인 파싱 예외: {e}")
+                return False, ""
 
         return False, ""
 

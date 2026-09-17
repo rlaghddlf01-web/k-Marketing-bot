@@ -357,12 +357,12 @@ class WanPipelineClient:
         output_mp4_path: str,
         negative_text: Optional[str] = None,
         seed: int = 2026,
-        width: int = 480,
-        height: int = 832,
-        frames: int = 177,
+        width: int = 384,
+        height: int = 672,
+        frames: int = 49,
         prefix: str = "s2v_run"
     ) -> str:
-        """Wan 2.2 S2V 립싱크 렌더링 후 MP4 완성 파일 생성 (177프레임 @ 16fps = 11.06초)"""
+        """Wan 2.2 S2V 립싱크 렌더링 후 MP4 완성 파일 생성 (384x672 @ 16fps, 49프레임 = 3.06초, 14B 16GB GPU 100% VRAM 단독 탑재 규격)"""
         neg = negative_text or "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景"
 
         workflow = {
@@ -413,16 +413,15 @@ class WanPipelineClient:
         audio_full_path = os.path.join(self.comfy_input_dir, audio_name)
         os.makedirs(os.path.dirname(os.path.abspath(output_mp4_path)), exist_ok=True)
 
+        duration_sec = len(generated_frames) / 16.0  # 16fps 기준 정확한 영상 길이 (3.0625초 등)
+
         cmd = [
             self.ffmpeg_exe, "-y",
             "-f", "concat", "-safe", "0", "-i", list_file,
             "-i", audio_full_path,
-            "-filter_complex", "[1:a]apad[a_padded]",
-            "-map", "0:v",
-            "-map", "[a_padded]",
+            "-t", f"{duration_sec:.4f}",
             "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "18", "-preset", "fast",
             "-c:a", "aac", "-b:a", "192k",
-            "-shortest",
             output_mp4_path
         ]
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

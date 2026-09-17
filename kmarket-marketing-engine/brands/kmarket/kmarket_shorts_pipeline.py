@@ -71,7 +71,7 @@ class KMarketShortsPipeline:
         input_img_path = os.path.join(self.wan_client.comfy_input_dir, input_img_name)
         framed_img.save(input_img_path)
 
-        # 5. 음성 합성 (81프레임 = 5.06초)
+        # 5. 음성 합성 (49프레임 = 3.06초)
         script = PromptDirectorShortsKMarket.get_speech_script(nationality_code)
         wav_path = self.tts.generate_speech_wav(
             text=script,

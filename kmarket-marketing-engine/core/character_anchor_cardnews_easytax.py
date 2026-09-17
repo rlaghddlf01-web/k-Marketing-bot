@@ -23,7 +23,7 @@ LANG_ETHNIC_MAP: Dict[str, str] = {
     "zh": "Chinese East Asian",
     "ja": "Japanese East Asian",
     "id": "authentic Indonesian (Southeast Asian ethnicity with warm light-brown skin, cheerful friendly expression, distinctive Indonesian look, NOT Chinese)",
-    "tl": "Filipino Southeast Asian",
+    "tl": "authentic Filipino (Southeast Asian ethnicity with distinct Filipino facial features, warm golden-tan skin, expressive gentle dark brown eyes, friendly radiant smile, NOT Chinese)",
     "ar": "Arabic Middle Eastern",
     "es": "Latin American",
     "en": "Southeast Asian",

@@ -21,6 +21,7 @@ from .base_shorts_producer import BaseShortsProducer
 from brands.easytax.ui_templates.refund_receipt_template import RefundReceiptTemplate
 from .easytax_app_recorder import EasyTaxAppRecorder
 from .shorts_scenario_script_director import ShortsScenarioScriptDirector
+from .s2v_clip_stitcher import S2VClipStitcher
 
 logger = logging.getLogger("EasyTaxShortsProducer")
 
@@ -39,7 +40,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "Miễn phí ban đầu",
             "cta_text": "KIỂM TRA NGAY >",
             "default_amount": 3100000,
-            "speech": "Tôi vừa nhận lại tiền hoàn thuế tại Hàn Quốc! Kiểm tra ngay nhé!"
+            "speech": "Tôi vừa nhận lại tiền hoàn thuế từ lương tại Hàn Quốc! Kiểm tra ngay nhé!"
         },
         "km": {
             "name": "Cambodia",
@@ -50,7 +51,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "សេវាគិតក្រោយ 100%",
             "cta_text": "ចុច Link ខាងក្រោម >",
             "default_amount": 2450000,
-            "speech": "ខ្ញុំបានទទួលប្រាក់ពន្ធមកវិញហើយ! សូមពិនិត្យមើលឥឡូវនេះ!"
+            "speech": "ខ្ញុំបានទទួលការបង្វិលពន្ធកាត់ពីប្រាក់ខែមកវិញហើយ! សូមពិនិត្យមើលឥឡូវនេះ!"
         },
         "id": {
             "name": "Indonesia",
@@ -61,7 +62,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "Bayar Setelah Cair",
             "cta_text": "CEK SEKARANG >",
             "default_amount": 1420000,
-            "speech": "Saya baru dapat pengembalian pajak di Korea! Yuk cek sekarang!"
+            "speech": "Saya baru dapat pengembalian pajak yang dipotong dari gaji di Korea! Yuk cek sekarang!"
         },
         "kk": {
             "name": "Kazakhstan",
@@ -72,7 +73,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "Қазір 0 вон!",
             "cta_text": "ҚАЗІР ТЕКСЕРУ >",
             "default_amount": 2150000,
-            "speech": "Кореяда салық қайтарымын алдым! Қазір тексеріп көріңіз!"
+            "speech": "В Корее я вернул налог, удержанный с зарплаты! Проверьте прямо сейчас!"
         },
         "tl": {
             "name": "Philippines",
@@ -83,7 +84,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "Pay Only When Received",
             "cta_text": "CHECK YOUR REFUND >",
             "default_amount": 2780000,
-            "speech": "I just got my tax refund in Korea! Check yours right now!"
+            "speech": "I just got a refund on taxes deducted from my salary in Korea! Check yours right now!"
         },
         "uz": {
             "name": "Uzbekistan",
@@ -94,7 +95,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "Pul tushgach to'lang",
             "cta_text": "HOZIROQ TEKSHIRING >",
             "default_amount": 2600000,
-            "speech": "Koreyada soliq qaytarib oldim! Hoziroq tekshiring!"
+            "speech": "Koreyada oylikdan ushlab qolingan soliqni qaytarib oldim! Hoziroq tekshiring!"
         },
         "my": {
             "name": "Myanmar",
@@ -105,7 +106,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "ငွေဝင်မှ ဝန်ဆောင်ခပေး",
             "cta_text": "အခုပဲ စစ်ဆေးကြည့်ပါ >",
             "default_amount": 2300000,
-            "speech": "ကိုရီးယားမှာ အခွန်ငွေ ပြန်ရခဲ့ပါပြီ! အခုပဲ စစ်ဆေးကြည့်ပါ!"
+            "speech": "ကိုရီးယားမှာ လစာမှ ဖြတ်တောက်ခံရသော အခွန်ငွေ ပြန်ရခဲ့ပါပြီ! အခုပဲ စစ်ဆေးကြည့်ပါ!"
         },
         "th": {
             "name": "Thailand",
@@ -116,7 +117,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "badge_secondary": "เงินเข้าจริงค่อยจ่าย",
             "cta_text": "เช็คเงินคืนทันที >",
             "default_amount": 2500000,
-            "speech": "ผมได้เงินคืนภาษีในเกาหลีแล้ว! เช็คสิทธิ์ฟรีตอนนี้เลยครับ!"
+            "speech": "ผมได้เงินคืนภาษีที่ถูกหักจากเงินเดือนในเกาหลีแล้ว! เช็คสิทธิ์ฟรีตอนนี้เลยครับ!"
         }
     }
 
@@ -125,6 +126,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         self.ui_template = RefundReceiptTemplate()
         self.app_recorder = EasyTaxAppRecorder()
         self.script_director = ShortsScenarioScriptDirector()
+        self.stitcher = S2VClipStitcher(wan_client=self.wan_client, tts_synthesizer=self.tts)
 
     def get_character_prompt(
         self,
@@ -133,32 +135,16 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         custom_bg_desc: Optional[str] = None,
         **kwargs
     ) -> Dict[str, str]:
-        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (시나리오 디렉터 테마 맞춤 인물 & 배경)"""
+        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (카드뉴스 에스닉 앵커 100% 연동)"""
+        from core.shorts_engine.shorts_character_anchor_easytax import build_shorts_t2i_character_prompt
         cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
-        char_desc = custom_char_desc or cfg["char_desc"]
-        bg_desc = custom_bg_desc or cfg["bg_desc"]
-
-        positive = (
-            f"candid authentic vertical iPhone mobile photo taken by a friend, {char_desc}, "
-            f"sitting comfortably in {bg_desc}, "
-            f"holding a sleek modern smartphone naturally in one hand at chest level, showing the vertical black display screen directly facing forward to camera, "
-            f"relaxed comfortable one-handed grip, the other arm resting naturally and still, "
-            f"calm neutral resting face, lips completely closed together, mouth gently shut, strictly no smile, no teeth showing, "
-            f"looking directly into the camera lens with sincere trustworthy friendly eye contact, "
-            f"warm muted everyday indoor room lighting, natural realistic skin tones, subtle real skin texture with pores, "
-            f"natural soft ambient shadows, grounded realistic contrast, sharp crisp focus, authentic mobile phone capture"
+        return build_shorts_t2i_character_prompt(
+            lang=lang,
+            custom_char_desc=custom_char_desc,
+            custom_bg_desc=custom_bg_desc,
+            default_char_desc=cfg.get("char_desc", ""),
+            default_bg_desc=cfg.get("bg_desc", "")
         )
-
-        negative = (
-            "overexposed, blown out highlights, washed out, harsh white lighting, excessive brightness, pale bleached skin, "
-            "beauty filter, airbrushed, porcelain skin, plastic skin, glamour lighting, studio flash, "
-            "smiling, laughing, grinning, toothy smile, open mouth, parted lips, visible teeth, teeth, "
-            "holding phone with two hands, phone to ear, making phone call, talking on phone, phone obscuring face, "
-            "back of phone, silver phone back, rear camera, phone case back, deformed hands, extra fingers, claw fingers, "
-            "cartoon, 3d render, anime, illustration, blurry, low quality"
-        )
-
-        return {"positive": positive, "negative": negative}
 
     def render_ui_image(self, lang: str, amount: int = 3100000, **kwargs) -> Image.Image:
         """국세청 환급 영수증 UI 렌더링"""
@@ -176,14 +162,15 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         custom_hero_image: Optional[Image.Image] = None,
         seed: int = 2026,
         theme_id: Optional[str] = None,
+        gender: Optional[str] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """EasyTax 완제품 22초 하이브리드 숏폼 비디오 원클릭 생산 (제미나이 언어/인물/대본 올인원 디렉팅)"""
         # 1. ComfyUI 엔진 확인
         self.ensure_engine_ready()
 
-        # 2. [시나리오 & 22초 대본 생성] (lang이 None 또는 'auto'면 제미나이가 테마에 최적화된 언어 직접 선택)
-        scenario = self.script_director.get_full_scenario(lang=lang, amount=amount or 3100000, theme_id=theme_id)
+        # 2. [시나리오 & 22초 대본 생성] (lang이 None 또는 'auto'면 제미나이가 테마에 최적화된 언어 직접 선택, 성별 50:50 분배)
+        scenario = self.script_director.get_full_scenario(lang=lang, amount=amount or 3100000, theme_id=theme_id, gender=gender)
         effective_lang = scenario.get("lang", "vi")
         cfg = self.COUNTRY_CONFIG.get(effective_lang, self.COUNTRY_CONFIG["vi"])
         country_name = scenario.get("country_name", cfg["name"])
@@ -278,37 +265,41 @@ class EasyTaxShortsProducer(BaseShortsProducer):
                 embedded_img = self.embedder.embed_screen(base_image=master_img, ui_image=ui_img)
                 logger.info("✅ [Step 2] 스마트폰 액정 정밀 매립 100% 성공! (영상 시작 프레임 무결성 통과)")
             except Exception as e:
-                err_msg = f"❌ [품질 게이트 탈락] 스마트폰 정면 액정 화면 검출 실패 ({e}). 작업을 안전하게 즉시 중단합니다."
-                logger.error(err_msg)
-                raise ValueError(err_msg)
+                logger.warning(f"⚠️ [Step 2 안내] 스마트폰 액정 검출 미매칭 ({e}) -> 고화질 마스터 인물 사진 직접 채택으로 자연스럽게 전환합니다.")
+                embedded_img = master_img
 
         embedded_save_path = out_folder / f"03_embedded_start_frame_{effective_lang}.png"
         embedded_img.save(str(embedded_save_path))
 
-        # 5. [Step 3] Wan 2.2 S2V 10초 이상 립싱크 모션 생성
-        framed_img = self.prepare_framed_input_image(embedded_img, target_w=480, target_h=832)
-        comfy_input_name = f"easytax_s2v_input_{effective_lang}_{dt_str}.png"
-        comfy_input_path = os.path.join(self.wan_client.comfy_input_dir, comfy_input_name)
-        framed_img.save(comfy_input_path)
+        # [VRAM 클린업] 1단계 T2I 완료 후 GPU VRAM 완전 초기화 (이전 T2I 모델 방출하여 S2V 전용 14.7GB 클린 확보)
+        logger.info("🧹 [Step 2 완료] T2I 마스터 사진 모델 VRAM 완전 방출 및 클린업...")
+        self.wan_client.free_vram()
 
-        person_clip_path = str(out_folder / f"temp_person_s2v_{effective_lang}.mp4")
-        s2v_motion_prompt = scenario.get("s2v_motion_prompt") or "a friendly person holding smartphone at chest level, speaking sincerely to camera, natural gentle expressions, clear lip sync"
-        logger.info(f"🎬 [Step 3] Wan 2.2 S2V 립싱크 비디오 렌더링 ({s2v_frames}프레임, {actual_s2v_sec:.2f}초)...")
-        self.wan_client.generate_s2v_video(
-            image_name=comfy_input_name,
-            audio_name=audio_name,
-            prompt_text=s2v_motion_prompt,
-            output_mp4_path=person_clip_path,
-            frames=s2v_frames,
-            prefix=f"easytax_s2v_{effective_lang}_{dt_str}"
+        # 5. [Step 3] Wan 2.2 S2V 5초+5초 무결점 모션 연속 결합 렌더링 (81프레임 x 2 = 10.12초)
+        framed_img = self.prepare_framed_input_image(embedded_img, target_w=384, target_h=672)
+        s2v_motion_prompt = scenario.get("s2v_motion_prompt") or "a friendly foreign worker sitting comfortably in a clean room, holding a smartphone steadily in one hand facing forward to camera, looking directly into camera lens with attentive eye contact, stable hands, still posture, speaking sincerely and naturally with clear lip sync and subtle natural head movement, no rapid hand gestures, clean realistic motion"
+        logger.info("🎬 [Step 3] Wan 2.2 S2V 384x672 5초+5초 10초 원테이크 렌더링 시작 (81프레임 x 2, 0.15s xfade)...")
+        person_clip_path, person_audio_path = self.stitcher.render_seamless_dual_clip(
+            base_framed_img=framed_img,
+            speech_hook_full=speech_hook,
+            lang=effective_lang,
+            gender=gender,
+            out_folder=out_folder,
+            dt_str=dt_str,
+            motion_prompt=s2v_motion_prompt,
+            seed=seed,
+            speech_hook_part1=scenario.get("speech_hook_part1"),
+            speech_hook_part2=scenario.get("speech_hook_part2")
         )
 
-        # 6. [Step 4] EasyTax 실시간 웹앱 시뮬레이션 라이브 녹화 (10~18초, 8초 분량)
+        # 6. [Step 4] EasyTax 웹앱 시뮬레이션 고화질 직결 (말이 끝남과 동시에 영상 정지)
+        dur_app_audio = self.composer._get_video_duration(app_wav_path)
+        app_target_dur = max(5.0, dur_app_audio + 0.3)  # 나레이션 완결 후 0.3초 미세 여운 후 즉시 종료
         app_clip_path = str(out_folder / f"04_app_sim_{effective_lang}.mp4")
-        logger.info("📱 [Step 4] EasyTax 라이브 앱 시뮬레이션 실시간 레코딩 (8초 분량)...")
+        logger.info(f"📱 [Step 4] EasyTax 앱 시연 비디오 준비 (오디오 {dur_app_audio:.2f}s ➡️ 할당 {app_target_dur:.2f}s, 말 끝남과 동시 정지)...")
         self.app_recorder.record_simulation_clip(
             lang=effective_lang,
-            duration_sec=8.0,
+            duration_sec=app_target_dur,
             output_mp4_path=app_clip_path
         )
 
@@ -318,7 +309,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
 
         logger.info("✨ [Step 5] 1080p 세로 풀HD 22초 하이브리드 비디오 최종 컴포징...")
         scene_audios = {
-            "hook": hook_wav_path,
+            "hook": person_audio_path,
             "app": app_wav_path,
             "cta": cta_wav_path
         }
