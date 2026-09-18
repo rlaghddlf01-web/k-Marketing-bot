@@ -71,7 +71,7 @@ class GeminiShortsCopywriter:
                 f"- 5년 소멸시효 전 긴급 구제 청구"
             )
         else:
-            landing_url = f"https://kmarket-service.vercel.app/?lang={lang}"
+            landing_url = f"https://ktrs-market.vercel.app/{lang}"
             amount_str = "0 KRW (100% 무료 나눔)"
             item = scenario.get("item", "가구/가전")
             service_desc = (
@@ -283,3 +283,235 @@ class GeminiShortsCopywriter:
             "hashtags_str": hashtags_str,
             "channels": channels
         }
+
+    def generate_shorts_script(
+        self,
+        service_id: str,
+        lang: str,
+        scenario: Dict[str, Any],
+        refund_formatted: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        🎬 [제미나이 100% 무인 자동화] 숏폼 22초 3단계 대본, 자막 및 배지 실시간 동적 창작
+        """
+        lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
+        theme_name = scenario.get("theme_name", scenario.get("theme_title", "Korea Guide"))
+        persona_name = scenario.get("persona_name", "외국인 거주자")
+
+        if service_id == "easytax":
+            amount_str = refund_formatted or scenario.get("amount_str") or "3,100,000 KRW"
+            prompt = f"""
+너는 세계 최고의 바이럴 숏폼 영상 감독이자 카피라이터야.
+한국에 거주하는 외국인 근로자(E-9/E-7)를 위해, 국세청 세금 환급(소득세 90% 감면) 22초 숏폼 대본과 자막을 [{lang_info['name']} ({lang_info['native_name']})] 언어로 직접 창작해라.
+
+[타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
+[주제]: {theme_name} (환급 예상액: {amount_str})
+[페르소나]: {persona_name}
+
+### 22초 3단계 구성 규칙:
+1. 0~10초 (킬러 후킹): 매달 월급에서 떼인 세금을 KTRS로 {amount_str} 돌려받았다는 실제 감동과 놀라움 발화 (자연스러운 2문장 구어체)
+2. 10~18초 (앱 조작 안내): 앱에서 월급만 선택하면 환급금이 1초 만에 계산되어 나온다는 쉬운 조작법 설명 발화
+3. 18~22초 (안심 CTA): 선입금 0원, 통장에 돈 들어온 후 정산하는 100% 후불제이며 링크로 지금 무료 확인하라는 발화
+4. 상단 배너, 하단 자막(1단계/2단계), CTA 버튼, 마케팅 배지 2종을 반드시 순수 [{lang_info['name']}] 언어로 작성!
+5. ⚠️ 절대 화폐 규칙: 금액 단위는 반드시 '{amount_str}' 또는 '원(Won)'으로만 표기하고 외국 자국 통화로 환각 번역하지 말 것!
+
+### 아래 JSON 형식으로만 정확히 출력할 것:
+```json
+{{
+  "hook_0_10s": "0~10초 인물 발화 대사 in {lang_info['name']}",
+  "app_10_18s": "10~18초 앱 조작 발화 대사 in {lang_info['name']}",
+  "cta_18_22s": "18~22초 CTA 발화 대사 in {lang_info['name']}",
+  "top_header": "상단 솔리드 배너 텍스트 in {lang_info['name']}",
+  "bottom_step1_title": "하단 1단계 자막 타이틀 in {lang_info['name']}",
+  "bottom_step1_sub": "하단 1단계 자막 서브 in {lang_info['name']}",
+  "bottom_step2_title": "하단 2단계 자막 타이틀 in {lang_info['name']}",
+  "bottom_step2_sub": "하단 2단계 자막 서브 in {lang_info['name']}",
+  "cta_button_text": "CTA 버튼 텍스트 in {lang_info['name']}",
+  "badge_primary": "메인 배지 (예: 90% 환급) in {lang_info['name']}",
+  "badge_secondary": "보조 배지 (예: 100% 후불제) in {lang_info['name']}",
+  "ending_card_title": "엔딩 카드 타이틀 in {lang_info['name']}",
+  "ending_card_sub": "엔딩 카드 서브타이틀 in {lang_info['name']}"
+}}
+```
+"""
+        else:
+            item = scenario.get("item", "가구/가전")
+            target_area = scenario.get("target", "대학가")
+            prompt = f"""
+너는 세계 최고의 바이럴 숏폼 영상 감독이자 카피라이터야.
+한국에 거주하는 외국인 유학생 및 근로자를 위해, KTRS 마켓 0원 무료 나눔 22초 숏폼 대본과 자막을 [{lang_info['name']} ({lang_info['native_name']})] 언어로 직접 창작해라.
+
+[타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
+[주제/지역]: {theme_name} ({target_area})
+[무료 품목]: {item} (귀국 선배들이 남긴 100% 무료 나눔)
+[페르소나]: {persona_name}
+
+### 22초 3단계 구성 규칙:
+1. 0~10초 (킬러 후킹): 한국에서 깨끗한 {item}을 0원에 직접 무료로 나눔받았다는 감동 실화 발화 (자연스러운 2문장 구어체)
+2. 10~18초 (앱 조작 안내): KTRS 마켓 앱에서 0원 매물 피드를 보고 17개 언어 실시간 자동번역 채팅으로 약속 잡는 법 설명 발화
+3. 18~22초 (안심 CTA): 150만원 아끼는 꿀팁이며 프로필 링크에서 지금 바로 0원 매물을 확인하라는 발화
+4. 상단 배너, 하단 자막(1단계/2단계), CTA 버튼, 마케팅 배지 2종을 반드시 순수 [{lang_info['name']}] 언어로 작성!
+5. ⚠️ 절대 화폐 규칙: 반드시 '0원', '0 Won', '0 KRW'로만 표기할 것!
+
+### 아래 JSON 형식으로만 정확히 출력할 것:
+```json
+{{
+  "hook_0_10s": "0~10초 인물 발화 대사 in {lang_info['name']}",
+  "app_10_18s": "10~18초 앱 조작 발화 대사 in {lang_info['name']}",
+  "cta_18_22s": "18~22초 CTA 발화 대사 in {lang_info['name']}",
+  "top_header": "상단 솔리드 배너 텍스트 in {lang_info['name']}",
+  "bottom_step1_title": "하단 1단계 자막 타이틀 in {lang_info['name']}",
+  "bottom_step1_sub": "하단 1단계 자막 서브 in {lang_info['name']}",
+  "bottom_step2_title": "하단 2단계 자막 타이틀 in {lang_info['name']}",
+  "bottom_step2_sub": "하단 2단계 자막 서브 in {lang_info['name']}",
+  "cta_button_text": "CTA 버튼 텍스트 in {lang_info['name']}",
+  "badge_primary": "메인 배지 (예: 0원 무료나눔) in {lang_info['name']}",
+  "badge_secondary": "보조 배지 (예: 직거래 안심) in {lang_info['name']}",
+  "ending_card_title": "엔딩 카드 타이틀 in {lang_info['name']}",
+  "ending_card_sub": "엔딩 카드 서브타이틀 in {lang_info['name']}"
+}}
+```
+"""
+        try:
+            if self.client:
+                response = self.client.models.generate_content(
+                    model='gemini-3.1-flash-lite',
+                    contents=prompt
+                )
+                raw_text = response.text.strip()
+                if "```json" in raw_text:
+                    raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_text:
+                    raw_text = raw_text.split("```")[1].split("```")[0].strip()
+                data = json.loads(raw_text)
+                if isinstance(data, dict) and "hook_0_10s" in data:
+                    # 정제
+                    for k, v in data.items():
+                        if isinstance(v, str):
+                            data[k] = self._clean_text(v)
+                    logger.info(f"[{service_id.upper()}:{lang.upper()}] 🎉 제미나이 숏폼 22초 대본/자막 실시간 자동 창작 완료!")
+                    return data
+        except Exception as e:
+            logger.warning(f"제미나이 숏폼 대본 생성 에러 ({e}), 기본 스크립트 폴백")
+
+        # 안전 폴백
+        return self._fallback_script(service_id, lang, scenario, refund_formatted)
+
+    def _fallback_script(
+        self,
+        service_id: str,
+        lang: str,
+        scenario: Dict[str, Any],
+        refund_formatted: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """네트워크 장애 시 최소 안전 폴백"""
+        if service_id == "easytax":
+            amount_str = refund_formatted or "3,100,000 KRW"
+            return {
+                "hook_0_10s": f"Did you know taxes deducted from your salary in Korea can be refunded? I just received {amount_str} back via KTRS!",
+                "app_10_18s": f"It is so simple! Just enter your salary in the app, and your estimated refund of {amount_str} appears instantly!",
+                "cta_18_22s": "Zero upfront fee, 100% pay after refund received! Click the link below to check your refund for free!",
+                "top_header": "90% INCOME TAX REFUND • KTRS",
+                "bottom_step1_title": f"{amount_str} SALARY TAX REFUND",
+                "bottom_step1_sub": "Check your deducted taxes in 1 minute",
+                "bottom_step2_title": "SALARY 2.5M • 3,100,000 WON REFUND",
+                "bottom_step2_sub": "Official NTS Tax Partner • Visa E-7, E-9",
+                "cta_button_text": "CHECK FOR FREE >",
+                "badge_primary": "90% TAX REFUND",
+                "badge_secondary": "100% Pay Later",
+                "ending_card_title": "100% Safe Tax Refund",
+                "ending_card_sub": "National Tax Service Partner"
+            }
+        else:
+            item = scenario.get("item", "Home Goods")
+            return {
+                "hook_0_10s": f"I just got {item} completely free for 0 Won in Korea! Check the K-Market app right now!",
+                "app_10_18s": "It is so easy! Browse daily 0 Won free item feeds and chat safely with 17-language real-time translation!",
+                "cta_18_22s": "Save over 1,500,000 Won on living costs! Click the link below to claim free items today!",
+                "top_header": "100% FREE GIVEAWAY • K-MARKET",
+                "bottom_step1_title": f"0 WON FREE {item.upper()}",
+                "bottom_step1_sub": "Direct handover near your campus & room",
+                "bottom_step2_title": "17-LANGUAGE AUTO-TRANSLATION CHAT",
+                "bottom_step2_sub": "Safe 1:1 direct meeting in Korea",
+                "cta_button_text": "GET FREE ITEMS >",
+                "badge_primary": "0 WON FREE",
+                "badge_secondary": "Direct Pickup",
+                "ending_card_title": "KTRS Market Free Community",
+                "ending_card_sub": "100% Free Sharing for Expats"
+            }
+
+    def format_guide_text(self, package: Dict[str, Any]) -> str:
+        """
+        🎬 4대 숏폼(유튜브 쇼츠, 틱톡, 인스타그램 릴스, 페이스북 릴스) 배포 가이드 텍스트 렌더링
+        """
+        service_id = package.get("service_id", "easytax").upper()
+        lang = package.get("lang", "en").lower()
+        lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
+        hook_title = package.get("hook_title", "")
+        landing_url = package.get("landing_url", "")
+        hashtags_str = package.get("hashtags_str", "")
+        channels = package.get("channels", {})
+
+        yt = channels.get("youtube_shorts", {})
+        tt = channels.get("tiktok", {})
+        ig = channels.get("instagram_reels", {})
+        fb = channels.get("facebook_reels", {})
+
+        doc = f"""================================================================================
+🎬 [{service_id} 숏폼 영상 4대 SNS 공식 배포 가이드 (제미나이 100% 실시간 자율 창작)]
+================================================================================
+타깃 언어/국가: {lang_info.get('name', lang.upper())} ({lang.upper()})
+영상 후킹 타이틀: {hook_title}
+공식 랜딩 링크: {landing_url}
+영상 규격: 1080x1920 (9:16 세로 풀HD 숏폼)
+================================================================================
+
+[1] 🔴 유튜브 쇼츠 (YouTube Shorts) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [쇼츠 제목 (Title)]
+{yt.get('title', '')}
+
+📌 [쇼츠 설명 (Description)]
+{yt.get('description', '')}
+👉 {landing_url}
+{yt.get('hashtags', hashtags_str)}
+
+📌 [고정 댓글 (Pinned Comment)]
+{yt.get('pinned_comment', landing_url)}
+
+
+[2] 🎵 틱톡 (TikTok) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [추천 캡션 (복사용 원문)]
+{tt.get('caption', '')}
+
+{tt.get('hashtags', hashtags_str)}
+
+📌 [프로필 바이오 유도]
+👉 공식 링크: {landing_url}
+
+
+[3] 📸 인스타그램 릴스 (Instagram Reels) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [추천 캡션 (복사용 원문)]
+{ig.get('caption', '')}
+
+{ig.get('hashtags', hashtags_str)}
+
+📌 [프로필 바이오 유도]
+🔗 Bio Link: @{service_id.lower()}_official -> {landing_url}
+
+
+[4] 📘 페이스북 릴스 (Facebook Reels) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [추천 본문 (링크 0% 노출 극대화)]
+{fb.get('post_content', '')}
+
+{fb.get('hashtags', hashtags_str)}
+
+💬 [첫 번째 댓글 (스텔스 링크)]
+{fb.get('first_comment', landing_url)}
+================================================================================
+"""
+        return doc
+

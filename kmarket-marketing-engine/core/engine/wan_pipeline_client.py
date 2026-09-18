@@ -99,7 +99,13 @@ class WanPipelineClient:
         last_log_pos = os.path.getsize(log_path) if log_path and os.path.exists(log_path) else 0
 
         while time.time() - start_time < timeout_sec:
-            time.sleep(2)
+            time.sleep(1)
+
+            # 🛑 [비상 정지 킬스위치 감시] 대시보드에서 정지 요청 시 즉시 루프 탈출 및 GPU 인터럽트
+            from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+            if GenerationAbortGuard.is_abort_requested():
+                GenerationAbortGuard.trigger_global_stop(host=self.host, reason="WAN 대기 중 대시보드 정지 신호 감지")
+                raise GenerationAbortedException("대시보드 정지 요청으로 WAN 연산이 즉시 중단되었습니다.")
 
             # 🛡️ [VRAM 안전 가드레일 2단계: 실시간 런타임 킬스위치]
             if check_vram_safety and log_path and os.path.exists(log_path):
@@ -136,6 +142,9 @@ class WanPipelineClient:
                             completed_hist = hist[prompt_id]
                             break
                         if status.get("status_str") == "error":
+                            msgs = str(status.get("messages", ""))
+                            if "execution_interrupted" in msgs or GenerationAbortGuard.is_abort_requested():
+                                raise GenerationAbortedException("ComfyUI 실행이 중단(Interrupted)되었습니다.")
                             raise RuntimeError(f"ComfyUI Job Error: {status.get('messages')}")
             except urllib.error.URLError:
                 pass

@@ -15,105 +15,15 @@ import random
 import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 
 from core.scenario_director_cardnews_kmarket import ScenarioDirectorCardnewsKMarket
 from core.engine.wan_pipeline_client import WanPipelineClient
-from core.engine.sns_guide_generator import SNSGuideGenerator
+from core.gemini_cardnews_copywriter import GeminiCardnewsCopywriter
 from core.engine.kmarket_cardnews_app_capturer import KMarketCardNewsAppCapturer
+from core.cardnews_typography_kmarket import CardnewsTypographyKMarket
 
 logger = logging.getLogger("CardNewsBatchProducerKMarket")
-
-
-def _draw_text_wrapped(
-    draw,
-    text: str,
-    font,
-    x: int,
-    y: int,
-    max_width: int,
-    fill: tuple,
-    shadow_fill: tuple = (0, 0, 0),
-    line_gap: int = 6
-) -> int:
-    """
-    텍스트를 max_width 안에서 자동 줄바꿈하여 렌더링.
-    - 드롭섀도우(shadow_fill) 1px 오프셋 자동 적용
-    - 마지막으로 그린 줄의 다음 y 좌표 반환 (동적 레이아웃)
-    """
-    if not text:
-        return y
-
-    words = text.split()
-    lines: list = []
-    current = ""
-    for word in words:
-        test = (current + " " + word).strip()
-        bbox = draw.textbbox((0, 0), test, font=font)
-        if bbox[2] - bbox[0] <= max_width:
-            current = test
-        else:
-            if current:
-                lines.append(current)
-            current = word
-    if current:
-        lines.append(current)
-
-    line_h = draw.textbbox((0, 0), "Ag", font=font)[3] + line_gap
-    curr_y = y
-    for line in lines:
-        draw.text((x + 1, curr_y + 1), line, fill=shadow_fill, font=font)
-        draw.text((x,     curr_y),     line, fill=fill,        font=font)
-        curr_y += line_h
-    return curr_y
-
-
-def _load_font(size: int, bold: bool = True, lang: str = "uz") -> ImageFont.FreeTypeFont:
-    """언어별 최적 유니코드 폰트 자동 매칭 (베트남어 성조/우즈벡어/몽골어 키릴 글자 깨짐 0% 보장)"""
-    if lang == "ko":
-        candidates = [
-            r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf",
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-        ]
-    elif lang in ["vi", "es", "id", "tl", "en"]:
-        candidates = [
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
-            r"C:\Windows\Fonts\tahomabd.ttf" if bold else r"C:\Windows\Fonts\tahoma.ttf",
-        ]
-    elif lang in ["ru", "uz", "mn", "kk"]:
-        candidates = [
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
-        ]
-    elif lang in ["km", "th"]:  # 크메르어(캄보디아), 태국어 완벽 지원
-        candidates = [
-            r"C:\Windows\Fonts\LeelaUIb.ttf" if bold else r"C:\Windows\Fonts\LeelawUI.ttf",
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-        ]
-    elif lang in ["ne", "si", "bn", "hi"]:  # 네팔어, 힌디어 (데바나가리)
-        candidates = [
-            r"C:\Windows\Fonts\Nirmala.ttc",
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-        ]
-    elif lang == "my":  # 미얀마어 (버마어)
-        candidates = [
-            r"C:\Windows\Fonts\mmrtextb.ttf" if bold else r"C:\Windows\Fonts\mmrtext.ttf",
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-        ]
-    else:
-        candidates = [
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-            r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf",
-        ]
-
-    for p in candidates:
-        if os.path.exists(p):
-            try:
-                return ImageFont.truetype(p, size)
-            except Exception:
-                continue
-    return ImageFont.load_default()
 
 
 class CardNewsBatchProducerKMarket:
@@ -123,6 +33,8 @@ class CardNewsBatchProducerKMarket:
         self.scenario_director = ScenarioDirectorCardnewsKMarket()
         self.wan_client = WanPipelineClient()
         self.app_capturer = KMarketCardNewsAppCapturer()
+        self.typography_engine = CardnewsTypographyKMarket()
+        self.copywriter = GeminiCardnewsCopywriter(service_id="kmarket")
         self.desktop = Path(r"C:\Users\zkfnt\Desktop")
         # ComfyUI 헬스체크
         self._wan_available = self.wan_client.check_health()
@@ -196,10 +108,20 @@ class CardNewsBatchProducerKMarket:
         for card in sorted(cards, key=lambda c: c.get("slide_idx", 1)):
             s_idx = card.get("slide_idx", 1)
 
+            # 🛑 [비상 정지 킬스위치 감시] 대시보드 정지 요청 시 즉각 루프 올스톱(Abort)
+            from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+            if GenerationAbortGuard.is_abort_requested():
+                logger.warning(f"🛑 [K-Market Slide {s_idx}] 대시보드 정지 요청 감지 → 전체 루프 즉각 탈출(Abort)!")
+                raise GenerationAbortedException("대시보드 정지 요청으로 K-Market 카드뉴스 생성이 즉각 중단되었습니다.")
+
             # 🌟 [3번 슬라이드] 실제 케이마켓 0원 무료나눔 매물 피드 앱 화면 캡처
             if s_idx == 3:
                 logger.info(f"📱 [Slide 3] 실제 케이마켓 0원 매물 피드 고화질 캡처 적용! ({item_name})")
-                base_photo = self.app_capturer.capture_giveaway_feed(lang=lang, item_name=item_name)
+                base_photo = self.app_capturer.capture_giveaway_feed(
+                    lang=lang,
+                    item_name=item_name,
+                    dynamic_title=card.get("title")
+                )
 
             # 🌟 [4번 슬라이드] 실제 0원 매물 상세 & 17개 언어 실시간 직거래 순정 모바일 화면 (팝업 0% 전체 뷰)
             elif s_idx == 4:
@@ -207,19 +129,22 @@ class CardNewsBatchProducerKMarket:
                 base_photo = self.app_capturer.capture_item_detail_view(
                     lang=lang,
                     item_name=item_name,
-                    target_area=target_area
+                    target_area=target_area,
+                    dynamic_title=card.get("title"),
+                    dynamic_desc=card.get("subtitle")
                 )
 
-            # 🌟 [1, 2, 5번 슬라이드] 배경·가구 중심 WAN T2I 실사 라이프스타일 사진 생성 (동일 마스터 시드 동기화)
+            # 🌟 [1, 2, 5번 슬라이드] 배경·가구 중심 WAN T2I 실사 라이프스타일 사진 생성 (슬라이드별 독립 시드로 재탕 원천 방지)
             elif s_idx == 1 and custom_hero_image is not None:
                 base_photo = custom_hero_image
                 logger.info("🌟 [Slide 1] 검증 승인된 마스터 주인공 인물 사진(custom_hero_image) 직접 적용!")
             else:
+                slide_seed = master_seed + (s_idx - 1) * 1337
                 base_photo = self._generate_slide_photo(
                     s_idx=s_idx,
                     card_data=card,
                     fallback_img=fallback_img,
-                    master_seed=master_seed
+                    master_seed=slide_seed
                 )
             base_photos[s_idx] = base_photo
 
@@ -248,7 +173,10 @@ class CardNewsBatchProducerKMarket:
             file_path=guide_path,
             lang=lang,
             theme_title=theme_title,
-            cards=cards
+            cards=cards,
+            item_name=item_name,
+            target_area=target_area,
+            scenario=scenario
         )
 
         logger.info(f"🎉 [K-Market 5장 카드뉴스 세트 완성] 폴더: {out_dir}")
@@ -273,6 +201,10 @@ class CardNewsBatchProducerKMarket:
         - Slide 1~5: 전 슬라이드 독립 T2I (generate_t2i_master, seed=master_seed)
         - 100% 라이프스타일 실사 연출 (스마트폰 화면 매립 / 플로팅 UI 일체 배제)
         """
+        from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+        if GenerationAbortGuard.is_abort_requested():
+            raise GenerationAbortedException(f"[Slide {s_idx}] 대시보드 정지 요청으로 생성을 취소합니다.")
+
         if not self._wan_available:
             logger.warning(f"[Slide {s_idx}] ComfyUI 미실행 → Fallback 사용")
             return fallback_img
@@ -302,6 +234,9 @@ class CardNewsBatchProducerKMarket:
             logger.info(f"✅ [Slide {s_idx}] WAN 생성 완료: {generated_path}")
             return generated_img
         except Exception as e:
+            if isinstance(e, GenerationAbortedException) or GenerationAbortGuard.is_abort_requested():
+                logger.warning(f"🛑 [Slide {s_idx}] 대시보드 정지 감지 → Fallback 무시 및 루프 즉각 올스톱!")
+                raise
             logger.error(f"❌ [Slide {s_idx}] WAN 생성 실패 ({e}) → Fallback 사용")
             return fallback_img
 
@@ -315,195 +250,38 @@ class CardNewsBatchProducerKMarket:
         lang: str
     ) -> Image.Image:
         """
-        순수 라이프스타일 실사 사진 기반 1080x1350 풀블리드 + 그라디언트 스크림 + 매거진 타이포 렌더링
-        (스마트폰 액정 매립 및 3D 플로팅 UI 전면 배제)
+        K-Market 전용 Playwright HarfBuzz 타이포그래피 합성:
+        - Slide 1, 2, 5: 순수 라이프스타일 실사 사진 + 하단 그라디언트 스크림 + 카테고리 배지 + 골드 헤드라인 + 서브 + 3줄 불릿 + 동적 CTA
+        - Slide 3, 4: 실제 0원 무료나눔 매물 피드 및 1:1 번역 직거래 순정 앱 화면 + 상단 슬림 글래스모피즘 헤더
+        - 제미나이 100% 실시간 card_data + Playwright HarfBuzz 무결점 텍스트 셰이핑 적용
         """
-        # A. 1080x1350 풀사이즈 캔버스 센터 크롭 리사이즈
-        canvas = Image.new("RGB", (1080, 1350), (15, 23, 42))
-        W, H = base_photo.size
-        scale = max(1080 / W, 1350 / H)
-        resized_photo = base_photo.resize((int(W * scale), int(H * scale)), Image.Resampling.LANCZOS)
-
-        crop_x = (resized_photo.width - 1080) // 2
-        crop_y = (resized_photo.height - 1350) // 2
-        photo_cropped = resized_photo.crop((crop_x, crop_y, crop_x + 1080, crop_y + 1350))
-        canvas.paste(photo_cropped, (0, 0))
-
-        # 🌟 3번 & 4번 (실제 앱 순정 화면): 하단 거대 스크림/불릿/버튼 덮어씌우기 전면 배제!
-        # 앱 자체 UI(매물 리스트, 상세 내용, 채팅)가 100% 온전하게 보이도록 상단 슬림 배지만 깔끔하게 오버레이
-        if s_idx in (3, 4):
-            # 상단 슬림 반투명 글래스모피즘 헤더 바 (높이 64px)
-            header_bar = Image.new("RGBA", (1080, 64), (15, 23, 42, 230))
-            canvas.paste(header_bar, (0, 0), header_bar)
-            draw = ImageDraw.Draw(canvas)
-
-            font_badge = _load_font(20, bold=True, lang=lang)
-            badge_text = card_data.get("badge", f"STEP {s_idx}")
-            page_badge = f"{s_idx:02d} / 05 >"
-
-            # 글자 길이에 맞춘 반응형 배지 너비 계산
-            b_box = draw.textbbox((0, 0), badge_text, font=font_badge)
-            text_w = b_box[2] - b_box[0]
-            badge_w = max(130, text_w + 24)
-
-            # 좌측 오렌지 배지 (컴팩트 슬림)
-            draw.rounded_rectangle([(20, 12), (20 + badge_w, 52)], radius=8, fill=(234, 88, 12))
-            draw.text((32, 20), badge_text, fill=(255, 255, 255), font=font_badge)
-
-            # 우측 페이지 번호
-            draw.text((960, 20), page_badge, fill=(255, 160, 0), font=font_badge)
-            return canvas
-
-        # 🌟 1, 2, 5번 (실사 라이프스타일 사진): 하단 부드러운 그라디언트 스크림 + 매거진 카피 오버레이
-        # B. 하단 부드러운 그라디언트 스크림 (Gradient Scrim) 오버레이
-        gradient_layer = Image.new("RGBA", (1080, 1350), (0, 0, 0, 0))
-        g_draw = ImageDraw.Draw(gradient_layer)
-        scrim_start_y = 820
-        scrim_height = 1350 - scrim_start_y
-
-        for i in range(scrim_height):
-            curr_y = scrim_start_y + i
-            ratio = i / float(scrim_height)
-            alpha = int((ratio ** 2.2) * 242)
-            g_draw.line([(0, curr_y), (1080, curr_y)], fill=(15, 23, 42, alpha))
-
-        canvas = Image.alpha_composite(canvas.convert("RGBA"), gradient_layer).convert("RGB")
-        draw = ImageDraw.Draw(canvas)
-
-        # C. 타이포그래피 (헤드 46px / 서브 27px / 배지 22px)
-        font_head = _load_font(46, bold=True, lang=lang)
-        font_sub = _load_font(27, bold=False, lang=lang)
-        font_badge = _load_font(22, bold=True, lang=lang)
-
-        badge_text = card_data.get("badge", f"STEP {s_idx}")
-        title_text = card_data.get("title", f"Step {s_idx} Title")
-        subtitle_text = card_data.get("subtitle", "")
-        bullets = card_data.get("bullets", [])
-
-        TEXT_X = 60
-        MAX_W = 960
-        CTA_TOP = 1185
-
-        # 상단 페이지 인덱스 배지 (우측)
-        page_badge = f"{s_idx:02d} / 05 >"
-        draw.text((930, 916), page_badge, fill=(255, 160, 0), font=font_badge)
-
-        # 좌측 플로팅 배지 (글자 실측 기반 100% 자동 반응형 라운드 사각형)
-        b_bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
-        text_w = b_bbox[2] - b_bbox[0]
-        pad_x = 16
-        max_safe_w = 850 - TEXT_X
-        badge_w = min(max_safe_w, max(140, text_w + pad_x * 2))
-        
-        # 케이마켓 브랜드 포인트 배지 컬러: 비비드 오렌지 (249, 115, 22)
-        draw.rounded_rectangle([(TEXT_X, 910), (TEXT_X + badge_w, 956)], radius=8, fill=(249, 115, 22))
-        draw.text((TEXT_X + pad_x, 918), badge_text, fill=(255, 255, 255), font=font_badge)
-
-        # 글자 레이아웃 시작 y
-        cur_y = 968
-
-        # 헤드라인 (골드/옐로우 + 아웃라인 섀도우)
-        cur_y = _draw_text_wrapped(
-            draw, title_text, font_head,
-            x=TEXT_X, y=cur_y, max_width=MAX_W,
-            fill=(255, 215, 0), shadow_fill=(0, 0, 0), line_gap=5
+        return self.typography_engine.composite_slide(
+            base_photo=base_photo,
+            card_data=card_data,
+            s_idx=s_idx,
+            lang=lang
         )
-        cur_y += 10
-
-        # 서브카피 (라이트 그레이)
-        cur_y = _draw_text_wrapped(
-            draw, subtitle_text, font_sub,
-            x=TEXT_X, y=cur_y, max_width=MAX_W,
-            fill=(225, 230, 240), shadow_fill=(0, 0, 0), line_gap=5
-        )
-        cur_y += 10
-
-        # 3줄 불릿 (라이트 블루/아이보리)
-        for bullet_line in bullets[:3]:
-            if not bullet_line or cur_y + 36 > CTA_TOP:
-                break
-            cur_y = _draw_text_wrapped(
-                draw, bullet_line, font_sub,
-                x=TEXT_X, y=cur_y, max_width=MAX_W,
-                fill=(200, 225, 255), shadow_fill=(0, 0, 0), line_gap=4
-            )
-            cur_y += 6
-
-        # D. 8개국어 맞춤형 K-Market CTA 버튼 텍스트
-        cta_i18n = {
-            "uz": {
-                "cta": "0 so'mlik bepul buyumlarni ko'rish  >",
-                "next": "Keyingi qismni ko'rish  >"
-            },
-            "vi": {
-                "cta": "Nhận đồ miễn phí 0đ ngay  >",
-                "next": "Xem tiếp nội dung tiếp theo  >"
-            },
-            "mn": {
-                "cta": "0 воны үнэгүй бараа шалгах  >",
-                "next": "Дараагийн хэсгийг үзэх  >"
-            },
-            "th": {
-                "cta": "ดูของแจกฟรี 0 วอนทันที  >",
-                "next": "ดูเนื้อหาถัดไป  >"
-            },
-            "km": {
-                "cta": "ពិនិត្យមើលរបស់ឥតគិតថ្លៃ 0 វ៉ុន  >",
-                "next": "មើលផ្នែកបន្ទាប់  >"
-            },
-            "ne": {
-                "cta": "० वनका निःशुल्क सामान हेर्नुहोस्  >",
-                "next": "अर्को भाग हेर्नुहोस्  >"
-            },
-            "id": {
-                "cta": "Cek barang gratis 0 won sekarang  >",
-                "next": "Lihat bagian selanjutnya  >"
-            },
-            "my": {
-                "cta": "၀ ဝမ် အခမဲ့ပစ္စည်းများ ကြည့်ရန်  >",
-                "next": "နောက်တစ်ပိုင်းကို ကြည့်ပါ  >"
-            },
-            "ru": {
-                "cta": "Смотреть бесплатные вещи (0 вон)  >",
-                "next": "Смотреть дальше  >"
-            },
-            "ko": {
-                "cta": "0원 무료 나눔 물품 확인하기  >",
-                "next": "다음 내용 확인하기  >"
-            },
-            "en": {
-                "cta": "Check 0-won free items now  >",
-                "next": "See the next slide  >"
-            }
-        }
-        btn_dict = cta_i18n.get(lang, cta_i18n["en"])
-        btn_text = btn_dict["cta"] if s_idx in [1, 5] else btn_dict["next"]
-
-        # 케이마켓 1, 5번 CTA: 비비드 네온 오렌지, 2~4번: 다크 슬레이트
-        btn_bg = (235, 87, 34) if s_idx in [1, 5] else (30, 41, 59)
-        btn_fg = (255, 255, 255)
-
-        draw.rounded_rectangle([(60, 1190), (1020, 1285)], radius=20, fill=btn_bg)
-        bbox_cta = draw.textbbox((0, 0), btn_text, font=font_head)
-        tw_cta = bbox_cta[2] - bbox_cta[0]
-        draw.text(((1080 - tw_cta) // 2, 1214), btn_text, fill=btn_fg, font=font_head)
-
-        return canvas
 
     def _write_sns_guide(
         self,
         file_path: Path,
         lang: str,
         theme_title: str,
-        cards: List[Dict[str, Any]]
+        cards: List[Dict[str, Any]],
+        item_name: str = "가구/가전",
+        target_area: str = "신촌",
+        scenario: Optional[Dict[str, Any]] = None
     ):
-        """K-Market 4대 SNS 채널별 포스팅 가이드 텍스트 저장 (현지어 원문 + 한국어 해설 2단 병기)"""
+        """K-Market 4대 SNS 채널별 포스팅 가이드 텍스트 저장 (제미나이 100% 실시간 2단 창작)"""
         try:
-            content = SNSGuideGenerator.generate_kmarket_guide_content(
+            package = self.copywriter.generate_cardnews_post_package(
+                service_id="kmarket",
                 lang=lang,
-                theme_title=theme_title,
+                theme={"name": theme_title, "item": item_name, "target": target_area},
+                persona=scenario.get("character_anchor", {}) if scenario else {},
                 cards=cards
             )
+            content = self.copywriter.format_guide_text(package)
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
             logger.info(f"📄 [{lang.upper()}] K-Market 2단 SNS 가이드 저장 완료: {file_path.name}")

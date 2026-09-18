@@ -446,7 +446,10 @@ async function startAllBots() {
 }
 
 async function stopAllBots() {
-    showToast("🛑 모든 무인 봇을 정지합니다.", "warning");
+    showToast("🛑 모든 무인 봇 및 GPU 연산을 즉시 중단합니다.", "warning");
+    try {
+        await fetch("/api/emergency/stop", { method: "POST" });
+    } catch (e) {}
     await stopKMarketDaemon();
     await stopEasyTaxDaemon();
     if (typeof loadTelegramCommunityStats === "function") loadTelegramCommunityStats();

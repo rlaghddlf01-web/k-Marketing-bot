@@ -8,50 +8,16 @@ CharacterAnchorBuilder - 🎭 [캐릭터 일관성 앵커 전문 생성 엔진]
 """
 
 from typing import Dict
+from core.character_phenotype_definitions import (
+    COUNTRY_8_PHENOTYPES,
+    COUNTRY_8_NEGATIVE_ETHNIC,
+)
 
 # ======================================================================
-# 🌍 17개국 언어 → 타깃 국가 에스닉 외모 앵커 딕셔너리
+# 🌍 17개국 언어 → 타깃 국가 에스닉 외모 앵커 딕셔너리 (8개국 고유 골격 모듈 100% 연동)
 # ======================================================================
-LANG_ETHNIC_MAP: Dict[str, str] = {
-    "vi": "Vietnamese Southeast Asian",
-    "uz": "Uzbek Central Asian",
-    "ru": "Russian Eastern European",
-    "mn": "Mongolian",
-    "th": "Thai Southeast Asian",
-    "ne": "Nepali South Asian",
-    "bn": "Bangladeshi South Asian",
-    "my": "Burmese Myanmar Southeast Asian",
-    "km": "Cambodian Khmer Southeast Asian",
-    "zh": "Chinese East Asian",
-    "ja": "Japanese East Asian",
-    "id": "Indonesian Southeast Asian",
-    "tl": "Filipino Southeast Asian",
-    "ar": "Arabic Middle Eastern",
-    "es": "Latin American",
-    "en": "Southeast Asian",
-    "ko": "Korean East Asian",
-}
-
-# 언어별 부정 에스닉 프롬프트 (타깃 민족 외 모두 차단)
-LANG_NEGATIVE_ETHNIC: Dict[str, str] = {
-    "vi": "Korean, Japanese, Chinese, East Asian features, fair pale skin",
-    "uz": "East Asian, Korean, Japanese, Chinese features",
-    "ru": "East Asian, Asian features",
-    "mn": "Southeast Asian, Korean, Japanese features",
-    "th": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ne": "East Asian, Korean, Japanese, Chinese features",
-    "bn": "East Asian, Korean, Japanese, Chinese features",
-    "my": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "km": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "zh": "Korean, Japanese, Southeast Asian features",
-    "ja": "Korean, Chinese, Southeast Asian features",
-    "id": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "tl": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ar": "East Asian, Korean features",
-    "es": "East Asian, Korean features",
-    "en": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ko": "Southeast Asian, South Asian, Western features",
-}
+LANG_ETHNIC_MAP: Dict[str, str] = COUNTRY_8_PHENOTYPES
+LANG_NEGATIVE_ETHNIC: Dict[str, str] = COUNTRY_8_NEGATIVE_ETHNIC
 
 # 한국어 나이대 → 영어 변환 테이블
 AGE_KO_TO_EN: Dict[str, str] = {
@@ -119,15 +85,16 @@ def build_scene_prompt(
     """
     continuity = SCENE_CONTINUITY_HINTS.get(scene_idx, "the same protagonist,")
     if scene_idx == 1:
+        # 🎯 주인공 골격({char}) 맨 최전방(Token 0) 배치
         prompt = (
-            f"cinematic authentic 9:16 portrait of {char}, "
+            f"{char}. Cinematic authentic 9:16 portrait of the protagonist, "
             f"{scene_action}, "
             f"highly detailed realistic face, 4k ultra realistic photograph, "
             f"human-centric framing, face occupying 60% of frame"
         )
     else:
         prompt = (
-            f"cinematic authentic 9:16 portrait of {continuity} {char}, "
+            f"{char}, {continuity}. Cinematic authentic 9:16 portrait of the protagonist, "
             f"{scene_action}, "
             f"same consistent face and clothing as scene {scene_idx-1}, "
             f"4k ultra realistic photograph, human-centric framing"
@@ -139,7 +106,8 @@ def build_scene_prompt(
 
 def build_negative_prompt(lang: str, extra: str = "") -> str:
     """
-    언어별 에스닉 차단 + 공통 품질 차단 negative prompt 생성
+    언어별 에스닉 차단 + 공통 품질 차단 negative prompt 생성:
+    - 🎯 [1순위 최전방 배치]: ethnic_neg (Korean, East Asian, Chinese 차단)를 맨 첫머리에 배치하여 UMT5 토큰 감쇠 원천 방지
     """
     ethnic_neg = LANG_NEGATIVE_ETHNIC.get(lang, "")
     base_neg = (
@@ -149,9 +117,11 @@ def build_negative_prompt(lang: str, extra: str = "") -> str:
         "elderly, old person, middle-aged, age inconsistency, "
         "different person, character change, multiple people, crowd"
     )
-    parts = [base_neg]
+    # 🎯 [1순위 맨 앞 배치]: ethnic_neg를 맨 첫머리에 전진 배치
+    parts = []
     if ethnic_neg:
         parts.append(ethnic_neg)
+    parts.append(base_neg)
     if extra:
         parts.append(extra)
     return ", ".join(parts)

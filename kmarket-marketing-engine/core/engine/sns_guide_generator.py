@@ -217,15 +217,50 @@ class SNSGuideGenerator:
         card1_title = cards[0].get("title", "") if len(cards) > 0 else ""
         card5_title = cards[4].get("title", "") if len(cards) > 4 else ""
 
-        # 현지어 카피 템플릿 추출 (지원 언어 외에는 범용 템플릿 적용)
-        templates = CHANNEL_COPY_TEMPLATES.get(lang)
-        if not templates:
-            templates = cls._build_generic_templates(lang, card1_title, card5_title, amount_fmt, link, hashtags, theme_title)
+        # 0. 🤖 제미나이 AI 100% 현지어 실시간 4대 SNS 패키지 창작 시도
+        native_threads = None
+        native_insta = None
+        native_fb = None
+        native_tg = None
+        try:
+            from core.gemini_cardnews_copywriter import GeminiCardnewsCopywriter
+            copywriter = GeminiCardnewsCopywriter(service_id="easytax")
+            gemini_pack = copywriter.generate_cardnews_post_package(
+                service_id="easytax",
+                lang=lang,
+                theme={"name": theme_title},
+                persona={},
+                cards=cards,
+                refund_formatted=amount_fmt
+            )
+            ch = gemini_pack.get("channels", {})
+            if ch.get("threads") and ch.get("instagram"):
+                native_threads = f"{ch['threads'].get('main_post', '')}\n\n{ch['threads'].get('reply_link', '')}"
+                native_insta = f"{ch['instagram'].get('caption', '')}\n\n{ch['instagram'].get('hashtags', hashtags)}"
+                native_fb = f"{ch['facebook'].get('post_content', '')}\n\n{ch['facebook'].get('first_comment', '')}"
+                native_tg = f"{ch['telegram'].get('caption', '')}\n\n👉 {link}"
+        except Exception as e:
+            pass
 
-        # 1. 🧵 스레드 본문
-        native_threads = templates["threads"].format(
-            card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
-        )
+        if not native_threads:
+            # 현지어 카피 템플릿 추출 (지원 언어 외에는 범용 템플릿 적용)
+            templates = CHANNEL_COPY_TEMPLATES.get(lang)
+            if not templates:
+                templates = cls._build_generic_templates(lang, card1_title, card5_title, amount_fmt, link, hashtags, theme_title)
+
+            # 1. 🧵 스레드 본문
+            native_threads = templates["threads"].format(
+                card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
+            )
+            native_insta = templates["instagram"].format(
+                card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
+            )
+            native_fb = templates["facebook"].format(
+                card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
+            )
+            native_tg = templates["telegram"].format(
+                card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
+            )
         ko_threads = (
             f"🔥 {card1_title} ({amount_fmt})\n\n"
             f"대한민국 국세청(NTS) 조세특례제한법 제30조 외국인 소득세 최대 90% 감면 혜택 안내.\n"
@@ -235,9 +270,6 @@ class SNSGuideGenerator:
         )
 
         # 2. 📸 인스타그램 본문
-        native_insta = templates["instagram"].format(
-            card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
-        )
         ko_insta = (
             f"🇰🇷 대한민국 국세청 외국인 근로자 세무 환급 안내\n"
             f"\"{card1_title} - {amount_fmt} 입금 완료!\"\n\n"
@@ -252,9 +284,6 @@ class SNSGuideGenerator:
         )
 
         # 3. 📘 페이스북 본문
-        native_fb = templates["facebook"].format(
-            card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
-        )
         ko_fb = (
             f"📢 [필독] {theme_title} - 소득세 최대 90% 환급 신청 안내 ({amount_fmt})\n\n"
             f"한국의 제조 공장, 농축산, 건설, 물류 현장에서 땀 흘려 일하시는 근로자 여러분 안녕하십니까.\n"
@@ -269,9 +298,6 @@ class SNSGuideGenerator:
         )
 
         # 4. ✈️ 텔레그램 본문
-        native_tg = templates["telegram"].format(
-            card1_title=card1_title, card5_title=card5_title, amount_fmt=amount_fmt, link=link, hashtags=hashtags, theme_title=theme_title
-        )
         ko_tg = (
             f"⚡ [공지] 대한민국 국세청 외국인 근로자 세금 환급 안내\n\n"
             f"💰 예상 환급금: {amount_fmt}\n"
@@ -411,9 +437,34 @@ class SNSGuideGenerator:
         card1_title = cards[0].get("title", "") if len(cards) > 0 else ""
         card5_title = cards[4].get("title", "") if len(cards) > 4 else ""
 
-        # 언어별 K-Market 전용 템플릿
-        if lang == "uz":
-            native_threads = (
+        # 0. 🤖 제미나이 AI 100% 현지어 실시간 4대 SNS 패키지 창작 시도
+        native_threads = None
+        native_insta = None
+        native_fb = None
+        native_tg = None
+        try:
+            from core.gemini_cardnews_copywriter import GeminiCardnewsCopywriter
+            copywriter = GeminiCardnewsCopywriter(service_id="kmarket")
+            gemini_pack = copywriter.generate_cardnews_post_package(
+                service_id="kmarket",
+                lang=lang,
+                theme={"name": theme_title, "item": item_name},
+                persona={},
+                cards=cards
+            )
+            ch = gemini_pack.get("channels", {})
+            if ch.get("threads") and ch.get("instagram"):
+                native_threads = f"{ch['threads'].get('main_post', '')}\n\n{ch['threads'].get('reply_link', '')}"
+                native_insta = f"{ch['instagram'].get('caption', '')}\n\n{ch['instagram'].get('hashtags', hashtags)}"
+                native_fb = f"{ch['facebook'].get('post_content', '')}\n\n{ch['facebook'].get('first_comment', '')}"
+                native_tg = f"{ch['telegram'].get('caption', '')}\n\n👉 {link}"
+        except Exception as e:
+            pass
+
+        if not native_threads:
+            # 언어별 K-Market 전용 템플릿
+            if lang == "uz":
+                native_threads = (
                 f"🔥 {card1_title}\n\n"
                 f"Koreyada yashayotgan vatandoshlar uchun KTRS Market 0 vonlik bepul buyumlar ulashish xizmati!\n"
                 f"Koreyada yashash xarajatlarini 1,500,000 von tejab qoling. Bepul maishiy texnika va mebellarni olib keting.\n"

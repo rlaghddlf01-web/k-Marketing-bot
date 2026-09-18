@@ -109,7 +109,7 @@ class ScenarioDirectorCardnewsKMarket:
                 image_prompt = build_kmarket_cardnews_scene_prompt(
                     slide_idx=1,
                     char=char_anchor,
-                    scene_action=f"meeting outdoors on a clean Korean sidewalk near {target} to receive a free {item}",
+                    scene_action=f"meeting outdoors on a clean city sidewalk near {target} to receive a free {item}",
                     item_name=item
                 )
             elif idx == 2:
@@ -137,7 +137,7 @@ class ScenarioDirectorCardnewsKMarket:
                     item_name=item
                 )
             else:
-                # 🎬 5번 슬라이드: 시청자에게 케이마켓 나눔 추천 및 엄지척 CTA
+                # 🎬 5번 슬라이드: 시청자에게 케이마켓 나눔 추천 따뜻한 클로징 CTA
                 image_prompt = build_kmarket_cardnews_scene_prompt(
                     slide_idx=5,
                     char=char_anchor,
@@ -162,6 +162,7 @@ class ScenarioDirectorCardnewsKMarket:
                 "title": copy_item.get("title", f"Step {idx} Title"),
                 "subtitle": copy_item.get("subtitle", ""),
                 "bullets": copy_item.get("bullets", []),
+                "cta_button": copy_item.get("cta_button", ""),
                 "image_prompt": image_prompt,
                 "negative_prompt": negative_prompt
             })

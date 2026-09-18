@@ -372,13 +372,24 @@ Return ONLY valid JSON matching this exact structure:
         chosen_palette_id = random.choice(palette_keys)
         palette = THEME_PALETTES[chosen_palette_id]
 
-        from .shorts_scenario_script_director import ShortsScenarioScriptDirector
-        base_cfg = ShortsScenarioScriptDirector.SCRIPTS_22S.get(resolved_lang, ShortsScenarioScriptDirector.SCRIPTS_22S["vi"])
-        full_speech = f"{base_cfg['hook_0_10s']} {base_cfg['app_10_18s']} {base_cfg['cta_18_22s']}"
+        from core.gemini_shorts_copywriter import GeminiShortsCopywriter
+        from config import LANGUAGES
+        copywriter = GeminiShortsCopywriter(service_id="easytax")
+        script_data = copywriter.generate_shorts_script(
+            service_id="easytax",
+            lang=resolved_lang,
+            scenario=theme_info,
+            refund_formatted=refund_formatted
+        )
+        speech_hook = script_data.get("hook_0_10s", "")
+        speech_app = script_data.get("app_10_18s", "")
+        speech_cta = script_data.get("cta_18_22s", "")
+        full_speech = f"{speech_hook} {speech_app} {speech_cta}".strip()
+        country_name = LANGUAGES.get(resolved_lang, {}).get("name", resolved_lang.upper())
 
         return {
             "lang": resolved_lang,
-            "country_name": base_cfg["country_name"],
+            "country_name": country_name,
             "theme_name": theme_name,
             "amount": refund_krw,
             "amount_formatted": refund_formatted,
@@ -390,20 +401,20 @@ Return ONLY valid JSON matching this exact structure:
             "background_desc": "",
             "s2v_motion_prompt": "a friendly foreign worker sitting comfortably in a clean room, holding a smartphone steadily in one hand facing forward to camera, looking directly into camera lens with attentive eye contact, stable hands, still posture, speaking sincerely and naturally with clear lip sync and subtle natural head movement, no rapid hand gestures, clean realistic motion",
             "speech_hook_kr": "한국에서 일하는 여러분! 세금 환급 꼭 받으세요!",
-            "speech_hook": base_cfg["hook_0_10s"],
-            "speech_app": base_cfg["app_10_18s"],
-            "speech_cta": base_cfg["cta_18_22s"],
+            "speech_hook": speech_hook,
+            "speech_app": speech_app,
+            "speech_cta": speech_cta,
             "full_speech": full_speech,
             "palette_id": chosen_palette_id,
             "palette": palette,
             "visual_direction": {
-                "top_header": base_cfg["top_header"],
-                "bottom_step1_title": base_cfg["bottom_step1_title"],
-                "bottom_step1_sub": base_cfg["bottom_step1_sub"],
-                "bottom_step2_title": base_cfg["bottom_step2_title"],
-                "bottom_step2_sub": base_cfg["bottom_step2_sub"],
+                "top_header": script_data.get("top_header", "90% INCOME TAX REFUND • KTRS"),
+                "bottom_step1_title": script_data.get("bottom_step1_title", f"{refund_formatted} REFUND"),
+                "bottom_step1_sub": script_data.get("bottom_step1_sub", "1-Minute Free Check"),
+                "bottom_step2_title": script_data.get("bottom_step2_title", f"TAX REFUND {refund_formatted}"),
+                "bottom_step2_sub": script_data.get("bottom_step2_sub", "National Tax Service"),
                 "domain_text": "ktrs-service.vercel.app",
-                "cta_button_text": base_cfg.get("cta_button_text", "KIỂM TRA MIỄN PHÍ >"),
+                "cta_button_text": script_data.get("cta_button_text", "KIỂM TRA MIỄN PHÍ >"),
                 "palette": palette
             }
         }

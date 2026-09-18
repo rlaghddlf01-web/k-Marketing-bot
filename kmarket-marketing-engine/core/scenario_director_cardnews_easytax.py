@@ -259,6 +259,7 @@ class ScenarioDirectorCardnewsEasyTax:
                 "title": copy_item.get("title", f"Step {idx} Title"),
                 "subtitle": copy_item.get("subtitle", ""),
                 "bullets": copy_item.get("bullets", []),
+                "cta_button": copy_item.get("cta_button", ""),
                 "image_prompt": full_prompt,
                 "negative_prompt": neg_prompt,
                 "is_scene_focus": is_scene_focus,

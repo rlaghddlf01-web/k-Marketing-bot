@@ -98,28 +98,79 @@ class KMarketThreadsPublisher:
         return selected
 
     def _find_cardnews_images(self, lang: str) -> List[str]:
-        """바탕화면 카드뉴스 산출물 폴더에서 5장 이미지 탐색 (추가 비용 0원 재사용)"""
+        """바탕화면 카드뉴스 산출물 폴더에서 5장 이미지 탐색 (자연스러운 1->5 순서 보장)"""
         images = []
-        if self.desktop_cardnews_dir.exists():
-            # 1. 언어 맞춤 이미지 탐색 (예: kmarket_cardnews_ko_s*.jpg)
+        candidate_bases = []
+        if self.desktop_cardnews_dir and self.desktop_cardnews_dir.exists():
+            candidate_bases.append(self.desktop_cardnews_dir)
+            km_alt = self.desktop_cardnews_dir.parent / "케이마켓"
+            if km_alt.exists() and km_alt not in candidate_bases:
+                candidate_bases.append(km_alt)
+            ktrs_alt = self.desktop_cardnews_dir.parent / "KTRS마켓"
+            if ktrs_alt.exists() and ktrs_alt not in candidate_bases:
+                candidate_bases.append(ktrs_alt)
+
+        for base in candidate_bases:
+            # 1. 언어 맞춤 하위 폴더 탐색 (대소문자 모두 대응)
+            matching_dirs = sorted(
+                [d for d in base.glob(f"케이마켓_{lang.upper()}_*") if d.is_dir()] +
+                [d for d in base.glob(f"케이마켓_{lang.lower()}_*") if d.is_dir()] +
+                [d for d in base.glob(f"*{lang.lower()}*") if d.is_dir()],
+                key=lambda p: p.stat().st_mtime,
+                reverse=True
+            )
+            if matching_dirs:
+                latest_dir = matching_dirs[0]
+                slide_files = sorted(
+                    list(latest_dir.glob("slide_*.png")) + list(latest_dir.glob("slide_*.jpg")),
+                    key=lambda p: (
+                        int(''.join(filter(str.isdigit, p.stem))) if any(c.isdigit() for c in p.stem) else str(p)
+                    )
+                )
+                if len(slide_files) >= 5:
+                    return [str(f) for f in slide_files[:5]]
+                elif slide_files:
+                    return [str(f) for f in slide_files]
+
+            # 2. 플랫 파일 탐색 (kmarket_cardnews_{lang}_s*.jpg) - 자연스러운 1->5 오름차순 정렬
             pattern = f"kmarket_cardnews_{lang}_s*.jpg"
-            found = sorted(self.desktop_cardnews_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
+            found = sorted(
+                self.desktop_cardnews_dir.glob(pattern),
+                key=lambda p: (
+                    int(''.join(filter(str.isdigit, p.stem))) if any(c.isdigit() for c in p.stem) else str(p)
+                )
+            )
             if len(found) >= 5:
-                images = [str(f) for f in found[:5]]
+                return [str(f) for f in found[:5]]
             elif found:
                 images = [str(f) for f in found]
 
-            # 2. 부족할 경우 다른 언어 고화질 카드뉴스 슬라이드 대체 활용
-            if len(images) < 5:
-                fallback_found = sorted(self.desktop_cardnews_dir.glob("kmarket_cardnews_*_s*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
-                if len(fallback_found) >= 5:
-                    images = [str(f) for f in fallback_found[:5]]
+            # 3. 부족할 경우 최신 임의 폴더에서 탐색
+            all_dirs = sorted(
+                [d for d in self.desktop_cardnews_dir.iterdir() if d.is_dir()],
+                key=lambda p: p.stat().st_mtime,
+                reverse=True
+            )
+            for d in all_dirs:
+                slide_files = sorted(
+                    list(d.glob("slide_*.png")) + list(d.glob("slide_*.jpg")),
+                    key=lambda p: (
+                        int(''.join(filter(str.isdigit, p.stem))) if any(c.isdigit() for c in p.stem) else str(p)
+                    )
+                )
+                if len(slide_files) >= 5:
+                    return [str(f) for f in slide_files[:5]]
 
-        # 3. 프로젝트 내부 outputs/cardnews/kmarket 폴백 탐색
+        # 4. 프로젝트 내부 outputs/cardnews/kmarket 폴백 탐색
         if len(images) < 5:
             proj_dir = OUTPUTS_DIR / "cardnews" / "kmarket"
             if proj_dir.exists():
-                proj_found = sorted(proj_dir.glob(f"*{lang}*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
+                proj_found = sorted(
+                    proj_dir.glob(f"*{lang}*.jpg"),
+                    key=lambda p: (
+                        int(''.join(filter(str.isdigit, p.stem))) if any(c.isdigit() for c in p.stem) else str(p)
+                    )
+                )
                 if len(proj_found) >= 5:
                     images = [str(f) for f in proj_found[:5]]
 
@@ -148,7 +199,8 @@ class KMarketThreadsPublisher:
 
         for lang in target_langs:
             campaign = UTMTracker.generate_campaign_tag("kmarket", f"threads_{time_slot}_{lang}", lang)
-            landing_url = UTMTracker.build_landing_url(
+            landing_url = UTMTracker.build_service_landing_url(
+                service_id="kmarket",
                 base_domain=base_domain,
                 lang=lang,
                 path="",
@@ -224,14 +276,14 @@ class KMarketThreadsPublisher:
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(thread_data, f, ensure_ascii=False, indent=2)
 
-            with open(md_path, "w", encoding="utf-8") as f:
+            with open(md_path, "w", encoding="utf-8-sig") as f:
                 f.write(full_md)
 
             # 5-2. 🖥️ 바탕화면 '스레드_산출물/KTRS마켓' 복사용 텍스트 & 마크다운 실시간 자동 배출
             if hasattr(self, "desktop_threads_dir") and self.desktop_threads_dir:
                 try:
                     desktop_md = self.desktop_threads_dir / f"{filename_base}.md"
-                    with open(desktop_md, "w", encoding="utf-8") as f:
+                    with open(desktop_md, "w", encoding="utf-8-sig") as f:
                         f.write(full_md)
 
                     desktop_txt = self.desktop_threads_dir / f"{filename_base}_복사용.txt"
@@ -259,7 +311,7 @@ class KMarketThreadsPublisher:
                             lbl = f"{idx+1}번 답글 (전환 링크 안내 댓글)"
                         txt_lines.append(f"▼ [{lbl}] ▼\n{p}\n\n--------------------------------------------------\n")
 
-                    with open(desktop_txt, "w", encoding="utf-8") as f:
+                    with open(desktop_txt, "w", encoding="utf-8-sig") as f:
                         f.write("\n".join(txt_lines))
                     logger.info(f"🖥️ [Desktop] 바탕화면 스레드 파일 생성 완료: {desktop_txt.name}")
                 except Exception as e:

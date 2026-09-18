@@ -6,56 +6,16 @@ CharacterAnchorCardnewsEasyTax - 💰 [EasyTax 카드뉴스 전용 독립 캐릭
 """
 
 from typing import Dict
+from core.character_phenotype_definitions import (
+    COUNTRY_8_PHENOTYPES,
+    COUNTRY_8_NEGATIVE_ETHNIC,
+)
 
 # ======================================================================
-# 🌍 17개국 언어 -> 타깃 국가 에스닉 외모 앵커 딕셔너리
+# 🌍 17개국 언어 -> 타깃 국가 에스닉 외모 앵커 딕셔너리 (8개국 고유 골격 모듈 100% 연동)
 # ======================================================================
-LANG_ETHNIC_MAP: Dict[str, str] = {
-    "vi": "authentic Vietnamese (Southeast Asian ethnicity with distinct Vietnamese features, warm golden-tan skin, gentle almond eyes, radiant smile, NOT Chinese)",
-    "uz": "authentic Uzbek (Central Asian Turkic-Eurasian ethnicity with distinctive Uzbek facial features: prominent straight high nose bridge, deep-set expressive almond-shaped hazel-brown eyes with natural double eyelids, soft defined cheekbones and elegant slim jawline, natural warm olive-tan skin, healthy dark brown hair, authentic Tashkent Central Asian appearance, definitely NOT East Asian, NOT Chinese, NOT Korean)",
-    "ru": "authentic Russian Eastern European",
-    "mn": "authentic Mongolian (Central Asian Mongolian ethnicity with distinctive high cheekbones, radiant sun-kissed skin, expressive warm dark eyes, authentic Mongolian look, NOT Southeast Asian, NOT Chinese)",
-    "th": "authentic Thai (Southeast Asian ethnicity with warm tan skin, friendly gentle smile, distinctive Thai features, NOT Chinese)",
-    "ne": "authentic Nepali (Himalayan South Asian ethnicity with warm wheatish skin, distinctive expressive deep eyes, genuine warm smile, NOT Chinese)",
-    "bn": "authentic Bangladeshi South Asian",
-    "my": "authentic Burmese Myanmar (Southeast Asian ethnicity with natural warm olive skin tone, gentle smile, distinctive Myanmar appearance, NOT Chinese)",
-    "km": "authentic Cambodian Khmer (Southeast Asian ethnicity with warm golden-brown skin, distinctive Khmer facial features, friendly radiant smile, NOT Chinese)",
-    "zh": "Chinese East Asian",
-    "ja": "Japanese East Asian",
-    "id": "authentic Indonesian (Southeast Asian ethnicity with warm light-brown skin, cheerful friendly expression, distinctive Indonesian look, NOT Chinese)",
-    "tl": "authentic Filipino (Southeast Asian ethnicity with distinct Filipino facial features, warm golden-tan skin, expressive gentle dark brown eyes, friendly radiant smile, NOT Chinese)",
-    "ar": "Arabic Middle Eastern",
-    "es": "Latin American",
-    "en": "Southeast Asian",
-    "ko": "Korean East Asian",
-    "si": "Sri Lankan South Asian",
-    "kk": "authentic Kazakh (Central Asian Turkic-Eurasian ethnicity with distinctive sharp high nose bridge, expressive eyes, authentic Almaty Central Asian features, NOT Chinese)",
-    "ur": "Pakistani South Asian",
-}
-
-# 언어별 부정 에스닉 프롬프트 (타깃 민족 외 모두 차단)
-LANG_NEGATIVE_ETHNIC: Dict[str, str] = {
-    "vi": "Korean, Japanese, Chinese, East Asian features, fair pale skin",
-    "uz": "East Asian, Chinese, Korean, Japanese features, flat face, flat nose bridge, monolid eyes, round face, pale East Asian skin, blonde hair, blue eyes",
-    "ru": "East Asian, Asian features",
-    "mn": "Southeast Asian, Korean, Japanese, Chinese features",
-    "th": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ne": "East Asian, Korean, Japanese, Chinese features, flat face",
-    "bn": "East Asian, Korean, Japanese, Chinese features",
-    "my": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "km": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "zh": "Korean, Japanese, Southeast Asian features",
-    "ja": "Korean, Chinese, Southeast Asian features",
-    "id": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "tl": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ar": "East Asian, Korean features",
-    "es": "East Asian, Korean features",
-    "en": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ko": "Southeast Asian, South Asian, Western features",
-    "si": "East Asian, Korean, Japanese, Chinese features",
-    "kk": "East Asian, Chinese, Korean, Japanese features, flat face, flat nose bridge, monolid eyes",
-    "ur": "East Asian, Korean, Japanese, Chinese features",
-}
+LANG_ETHNIC_MAP: Dict[str, str] = COUNTRY_8_PHENOTYPES
+LANG_NEGATIVE_ETHNIC: Dict[str, str] = COUNTRY_8_NEGATIVE_ETHNIC
 
 # 한국어 나이대 -> 영어 변환 테이블
 AGE_KO_TO_EN: Dict[str, str] = {
@@ -150,9 +110,9 @@ def build_easytax_cardnews_scene_prompt(
     continuity = CARDNEWS_CONTINUITY_HINTS.get(slide_idx, "the exact same protagonist,")
 
     if slide_idx == 1:
-        # 1번: 일상 거실/방, 편안한 캐주얼 사복, [핵심] 스마트폰 검은 액정이 똑바로 카메라 정면을 바라봄
+        # 1번: 주인공 골격({char}) 맨 최전방(Token 0) 배치 + 일상 거실/방, 스마트폰 정면 파지
         prompt = (
-            f"candid authentic {iphone_candid_framing}of {char}, "
+            f"{char}. Candid authentic {iphone_candid_framing}"
             f"sitting naturally in a normal bright modern living room with softly blurred bookshelf and natural window ambient light in the background. "
             f"Wearing clean comfortable civilian casual clothes, a simple neat casual t-shirt. "
             f"The person is holding a sleek modern smartphone vertically in one hand at waist level, "
@@ -162,9 +122,9 @@ def build_easytax_cardnews_scene_prompt(
             f"natural everyday room ambient lighting, realistic mobile phone camera sensor capture, NO beauty filter, authentic candid mobile photo"
         )
     elif slide_idx == 2:
-        # 2번: 공장/작업장, 실제 작업 유니폼, 스마트폰 절대 금지! 땀 흘리며 성실히 일하는 역동적 3/4 앵글 샷
+        # 2번: 주인공 골격({char}) 맨 최전방 배치 + 공장/작업장 유니폼
         prompt = (
-            f"authentic candid industrial workplace photo taken on iPhone 15 Pro, {iphone_candid_framing}of {continuity} {char}, "
+            f"{char}, {continuity}. Authentic candid industrial workplace photo taken on iPhone 15 Pro, {iphone_candid_framing}"
             f"in a completely different background setting from slide 1, now in a modern high-tech industrial assembly workshop with softly blurred automated machinery, clean workspace, and authentic factory ambient lighting. "
             f"Wearing a real industrial company navy blue work jacket uniform with front zipper, safety ID badge, and work gloves. "
             f"{scene_action}, "
@@ -173,42 +133,42 @@ def build_easytax_cardnews_scene_prompt(
             f"raw real skin texture, subtle authentic forehead sweat, realistic mobile phone sensor capture"
         )
     elif slide_idx == 3:
-        # 3번: 아늑한 카페/방, 포근한 니트 스웨터, 스마트폰 절대 금지! 좌측 공중 앱 화면을 향해 손짓하며 안도하는 3/4 샷
+        # 3번: 주인공 골격({char}) 맨 최전방 배치 + 아늑한 카페/방 포근한 니트
         prompt = (
-            f"authentic candid documentary lifestyle photo shot on iPhone 15 Pro, {iphone_candid_framing}of {continuity} {char} positioned on the right half of the frame, "
+            f"{char}, {continuity}. Authentic candid documentary lifestyle photo shot on iPhone 15 Pro, {iphone_candid_framing}positioned on the right half of the frame, "
             f"in a completely different setting from slide 2, now sitting comfortably on a wooden chair in a warm quiet sunlit cafe or cozy room, "
             f"with clean open negative space on the left half of the frame. "
             f"Wearing completely different soft cozy civilian clothes, a stylish pastel beige knit sweater or warm daily cardigan. "
             f"Empty hands resting naturally and comfortably on the wooden table, or gesturing gently with an open palm toward the empty left side with a peaceful, relieved, and confident smile. "
             f"NO smartphone in hand, completely empty natural hands, absolutely not holding any mobile device, "
-            f"same consistent face and hairstyle as slide 1, raw natural skin texture, matte finish, everyday ambient lighting"
+            f"raw natural skin texture, matte finish, everyday ambient lighting"
         )
     elif slide_idx == 4:
-        # 4번: 공항 로비/캐리어, 예쁜 여행 사복, 스마트폰 절대 금지! 비행기표/여권 들고 고향 갈 감동의 풀/웨이스트 샷
+        # 4번: 주인공 골격({char}) 맨 최전방 배치 + 공항 로비/캐리어
         prompt = (
-            f"authentic candid documentary travel photo shot on iPhone 15 Pro, {iphone_candid_framing}of {continuity} {char}, "
+            f"{char}, {continuity}. Authentic candid documentary travel photo shot on iPhone 15 Pro, {iphone_candid_framing}"
             f"in a completely different background setting, now at a bright spacious modern airport international departure terminal beside a travel suitcase luggage with gifts for family back home. "
             f"Wearing completely different stylish casual travel clothing, a fashionable casual denim jacket or autumn trench coat over a white shirt, comfortable traveler outfit. "
             f"{scene_action}, "
             f"holding an airline boarding pass flight ticket home and passport with both hands, radiant ecstatic smile of pure homecoming joy, tears of relief in eyes, ready to visit beloved family, "
             f"NO smartphone in hand, absolutely not holding any mobile phone, "
-            f"same consistent face and hairstyle as slide 1, raw natural skin texture, realistic mobile phone sensor capture"
+            f"raw natural skin texture, realistic mobile phone sensor capture"
         )
     elif slide_idx == 5:
-        # 5번: 세련된 카페 테이블, 단정한 셔츠, 스마트폰 절대 금지! 시청자에게 커피잔 앞 엄지척(👍)으로 강력 권유하는 미디엄 샷
+        # 5번: 주인공 골격({char}) 맨 최전방 배치 + 세련된 카페 테이블 엄지척(👍)
         prompt = (
-            f"authentic candid portrait snapshot shot on iPhone 15 Pro, {iphone_candid_framing}of {continuity} {char} positioned on the right half of the frame, "
+            f"{char}, {continuity}. Authentic candid portrait snapshot shot on iPhone 15 Pro, {iphone_candid_framing}positioned on the right half of the frame, "
             f"in a completely different modern stylish coffee shop setting, seated at a wooden cafe table with a warm ceramic coffee mug on the table, "
             f"clean open negative space on the left half of the frame. "
             f"Wearing completely different smart-casual clothing, a neat stylish button-down shirt or elegant casual blouse. "
             f"Leaning slightly forward over the cafe table looking directly into the camera with an encouraging enthusiastic friendly smile, "
             f"giving a confident thumbs-up sign (thumbs up) or welcoming open-hand gesture directly toward the viewer, warmly inviting them to check their tax refund, "
             f"NO smartphone in hand, absolutely not holding any mobile device, completely empty hands, "
-            f"clean negative space on the left, same consistent face and hairstyle as slide 1, "
+            f"clean negative space on the left, "
             f"raw natural skin texture, matte finish, NO beauty filter"
         )
     else:
-        prompt = f"authentic candid snapshot of {char}, {scene_action}"
+        prompt = f"{char}. authentic candid snapshot, {scene_action}"
 
     if extra_detail:
         prompt += f", {extra_detail}"
@@ -217,13 +177,15 @@ def build_easytax_cardnews_scene_prompt(
 
 def build_easytax_cardnews_negative_prompt(lang: str, extra: str = "") -> str:
     """
-    EasyTax 카드뉴스 전용 부정 프롬프트 (가분수/얼큰이/광각왜곡/밀랍인형/3D CG/8k 화보 원천 차단)
+    EasyTax 카드뉴스 전용 부정 프롬프트 (가분수/얼큰이/광각왜곡/밀랍인형/3D CG/8k 화보 원천 차단):
+    - 🎯 [1순위 최전방 배치]: ethnic_neg (Korean, East Asian, Chinese 차단)를 맨 첫머리에 배치하여 UMT5 토큰 감쇠 원천 방지
     """
     ethnic_neg = LANG_NEGATIVE_ETHNIC.get(lang, "")
 
     distortion_neg = (
         "8k, commercial advertisement, studio lighting, studio photoshoot, professional photo shoot, fashion magazine cover, "
         "bobblehead, big head, oversized head, giant head, large head, dwarf body, short body, deformed anatomy, "
+        "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, deep-set hollow eyes, long neck, elongated neck, thin giraffe neck, creepy smile, toothy grimace, exaggerated wide smile, "
         "extreme close-up, macro shot, headshot, bust shot, cropped head, zoomed-in face, face taking up entire frame, face taking up more than 20% of image, "
         "wide-angle lens distortion, fisheye lens, perspective distortion, "
         "plastic skin, smooth plastic texture, wax figure, mannequin, doll, airbrushed, beauty filter, smooth skin filter, porcelain skin, oily skin glare, shiny plastic surface, "
@@ -241,9 +203,12 @@ def build_easytax_cardnews_negative_prompt(lang: str, extra: str = "") -> str:
         base_neg = distortion_neg
     else:
         base_neg = f"caucasian, white person, blonde hair, blue eyes, {distortion_neg}"
-    parts = [base_neg]
+
+    # 🎯 [1순위 맨 앞 배치]: ethnic_neg를 맨 첫머리에 전진 배치
+    parts = []
     if ethnic_neg:
         parts.append(ethnic_neg)
+    parts.append(base_neg)
     if extra:
         parts.append(extra)
     return ", ".join(parts)

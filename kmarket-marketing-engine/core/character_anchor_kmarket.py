@@ -9,56 +9,18 @@ CharacterAnchorKMarket - 🛒 [K-Market 자취/0원나눔 전용 캐릭터 일�
 """
 
 from typing import Dict
+from core.character_phenotype_definitions import (
+    COUNTRY_8_PHENOTYPES,
+    COUNTRY_8_NEGATIVE_ETHNIC,
+)
 
 # ======================================================================
-# 🌍 17개국 언어 -> 타깃 국가 에스닉 외모 앵커 딕셔너리
+# 🌍 17개국 언어 -> 타깃 국가 에스닉 외모 앵커 딕셔너리 (8개국 고유 골격 모듈 100% 연동)
 # ======================================================================
-LANG_ETHNIC_MAP: Dict[str, str] = {
-    "vi": "Vietnamese Southeast Asian",
-    "uz": "Uzbek Central Asian",
-    "ru": "Russian Eastern European",
-    "mn": "Mongolian",
-    "th": "Thai Southeast Asian",
-    "ne": "Nepali South Asian",
-    "bn": "Bangladeshi South Asian",
-    "my": "Burmese Myanmar Southeast Asian",
-    "km": "Cambodian Khmer Southeast Asian",
-    "zh": "Chinese East Asian",
-    "ja": "Japanese East Asian",
-    "id": "Indonesian Southeast Asian",
-    "tl": "Filipino Southeast Asian",
-    "ar": "Arabic Middle Eastern",
-    "es": "Latin American",
-    "en": "Southeast Asian",
-    "ko": "Korean East Asian",
-    "si": "Sri Lankan South Asian",
-    "kk": "Kazakh Central Asian",
-    "ur": "Pakistani South Asian",
-}
+LANG_ETHNIC_MAP: Dict[str, str] = COUNTRY_8_PHENOTYPES
 
 # 언어별 부정 에스닉 프롬프트 (타깃 민족 외 모두 차단)
-LANG_NEGATIVE_ETHNIC: Dict[str, str] = {
-    "vi": "Korean, Japanese, Chinese, East Asian features, fair pale skin",
-    "uz": "East Asian, Korean, Japanese, Chinese features",
-    "ru": "East Asian, Asian features",
-    "mn": "Southeast Asian, Korean, Japanese features",
-    "th": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ne": "East Asian, Korean, Japanese, Chinese features",
-    "bn": "East Asian, Korean, Japanese, Chinese features",
-    "my": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "km": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "zh": "Korean, Japanese, Southeast Asian features",
-    "ja": "Korean, Chinese, Southeast Asian features",
-    "id": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "tl": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ar": "East Asian, Korean features",
-    "es": "East Asian, Korean features",
-    "en": "Korean, Japanese, Chinese, East Asian, pale fair skin",
-    "ko": "Southeast Asian, South Asian, Western features",
-    "si": "East Asian, Korean, Japanese, Chinese features",
-    "kk": "East Asian, Korean, Japanese features",
-    "ur": "East Asian, Korean, Japanese, Chinese features",
-}
+LANG_NEGATIVE_ETHNIC: Dict[str, str] = COUNTRY_8_NEGATIVE_ETHNIC
 
 # 한국어 나이대 -> 영어 변환 테이블
 AGE_KO_TO_EN: Dict[str, str] = {
@@ -142,11 +104,10 @@ def build_kmarket_scene_prompt(
         # 🛒 테마 아이템 동적 반영 (60대 테마 실물 아이템 자동 삽입)
         item_desc = f"a compact portable {item_name}" if item_name else "a compact portable household item"
 
-        # 📌 Slide 1 전용: 실외 길거리 보도블록, 주인공({char}) + 상대방(대비 의상) = 2인 실물 아이템 직접 인계
+        # 📌 Slide 1 전용: 주인공 골격({char}) 맨 최전방(Token 0) 배치 + 실외 길거리 보도블록 2인 실물 아이템 직접 인계
         prompt = (
-            f"candid documentary eye-level outdoor street photo of strictly two people only on a clean Korean residential sidewalk in broad daylight, "
-            f"person A ({char}) on the left is cheerfully receiving {item_desc} with both hands, "
-            f"person B (a friendly young Asian local resident {counterpart_outfit}) on the right is handing over {item_desc} with both hands, "
+            f"{char}. Candid documentary eye-level outdoor street photo of strictly two people only on a sunny residential sidewalk in broad daylight, "
+            f"person A on the left is cheerfully receiving {item_desc} with both hands from person B (a friendly young Asian local resident {counterpart_outfit}) on the right, "
             f"the two people are wearing completely different contrasting outfits with different colors, "
             f"{scene_action}, "
             f"clean direct hand-to-hand item handover exchange between only two people on the sidewalk, no skin-to-skin contact, "
@@ -158,26 +119,26 @@ def build_kmarket_scene_prompt(
     elif scene_idx == 2:
         item_desc = f"a clean {item_name}" if item_name else "a clean household item"
         prompt = (
-            f"authentic eye-level medium interior documentary shot, {continuity} {char}, {scene_action}, "
-            f"peaceful relieved warm smile relaxing in cozy beautifully furnished Korean studio apartment with {item_desc} under warm interior lamp lighting, "
-            f"authentic Korean studio apartment interior living environment, "
+            f"{char}, {continuity}. Authentic eye-level medium interior documentary shot, {scene_action}, "
+            f"peaceful relieved warm smile relaxing in cozy beautifully furnished studio apartment with {item_desc} under warm interior lamp lighting, "
+            f"authentic studio apartment interior living environment, "
             f"unposed natural lifestyle photography, warm ambient room lighting, 8k uhd, photorealistic, sharp focus"
         )
     elif scene_idx == 3:
         prompt = (
-            f"authentic eye-level medium lifestyle documentary shot, {continuity} {char}, {scene_action}, "
+            f"{char}, {continuity}. Authentic eye-level medium lifestyle documentary shot, {scene_action}, "
             f"same consistent character appearance as previous scenes, cozy studio room desk environment, "
             f"unposed natural documentary photography, 8k uhd, photorealistic"
         )
     elif scene_idx == 5:
         prompt = (
-            f"authentic eye-level medium creator lifestyle documentary portrait, {continuity} {char}, {scene_action}, "
-            f"same consistent character appearance as previous scenes, authentic furnished Korean studio room background, "
+            f"{char}, {continuity}. Authentic eye-level medium creator lifestyle documentary portrait, {scene_action}, "
+            f"same consistent character appearance as previous scenes, authentic furnished studio room background, "
             f"looking directly into camera with an encouraging and decisive confident smile, pointing forward with friendly inviting gesture, "
             f"natural studio interior lighting, unposed direct connection, 8k uhd, photorealistic, sharp focus"
         )
     else:
-        prompt = f"{scene_action}"
+        prompt = f"{char}. {scene_action}"
 
     if extra_detail:
         prompt += f", {extra_detail}"
@@ -187,6 +148,7 @@ def build_kmarket_scene_prompt(
 def build_kmarket_negative_prompt(lang: str, extra: str = "") -> str:
     """
     K-Market 전용 부정 프롬프트:
+    - 🎯 [1순위 최전방 배치]: ethnic_neg (Korean, East Asian, Chinese 차단)를 맨 첫머리에 배치하여 UMT5 토큰 감쇠 원천 방지
     - 공부/독서/필기 차단, 얼굴 뭉개짐/기형 손가락/플라스틱 인형 피부 원천 차단
     """
     ethnic_neg = LANG_NEGATIVE_ETHNIC.get(lang, "")
@@ -197,6 +159,7 @@ def build_kmarket_negative_prompt(lang: str, extra: str = "") -> str:
         "empty hands, handshake without furniture, standing without furniture, people only, no furniture, missing item, "
         "blurry face, blurred face, melted face, smudged face, undefined facial features, faceless, "
         "distorted face, deformed eyes, squinting, bad eyes, asymmetric eyes, bad teeth, deformed mouth, "
+        "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, deep-set hollow eyes, long neck, elongated neck, thin giraffe neck, bobblehead, creepy smile, toothy grimace, exaggerated wide smile, "
         "out of focus face, soft focus face, motion blur on face, foggy face, hazy face, "
         "deformed fingers, fused fingers, extra fingers, missing fingers, malformed hands, claw hands, "
         "bad anatomy, grotesque, "
@@ -206,9 +169,11 @@ def build_kmarket_negative_prompt(lang: str, extra: str = "") -> str:
         "cartoon, 3d render, illustration, painting, CGI, plastic skin, lowres, jpeg artifacts, "
         "elderly, old person, middle-aged, different person, character change"
     )
-    parts = [base_neg]
+    # 🎯 [1순위 맨 앞 배치]: ethnic_neg를 맨 첫머리에 전진 배치
+    parts = []
     if ethnic_neg:
         parts.append(ethnic_neg)
+    parts.append(base_neg)
     if extra:
         parts.append(extra)
     return ", ".join(parts)

@@ -22,6 +22,7 @@ from brands.easytax.ui_templates.refund_receipt_template import RefundReceiptTem
 from .easytax_app_recorder import EasyTaxAppRecorder
 from .shorts_scenario_script_director import ShortsScenarioScriptDirector
 from .s2v_clip_stitcher import S2VClipStitcher
+from core.gemini_shorts_copywriter import GeminiShortsCopywriter
 
 logger = logging.getLogger("EasyTaxShortsProducer")
 
@@ -36,88 +37,70 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             "gender": "female",
             "char_desc": "a lovely 25-year-old Vietnamese woman, friendly calm face, gentle dark eyes, sleek black ponytail, casual neat navy blue top",
             "bg_desc": "modern warm cozy Seoul apartment living room, wooden bookshelf, soft indoor daylight",
-            "badge_primary": "HOÀN 90% THUẾ",
-            "badge_secondary": "Miễn phí ban đầu",
-            "cta_text": "KIỂM TRA NGAY >",
             "default_amount": 3100000,
-            "speech": "Tôi vừa nhận lại tiền hoàn thuế từ lương tại Hàn Quốc! Kiểm tra ngay nhé!"
         },
         "km": {
             "name": "Cambodia",
             "gender": "male",
             "char_desc": "a handsome 27-year-old Cambodian young man, warm dark eyes, clean-shaven smooth skin, strictly no beard, no mustache, neat modern haircut, casual dark grey shirt",
             "bg_desc": "bright modern Seoul studio apartment, neat wooden shelves, soft natural window light",
-            "badge_primary": "បានលុយមកវិញ!",
-            "badge_secondary": "សេវាគិតក្រោយ 100%",
-            "cta_text": "ចុច Link ខាងក្រោម >",
             "default_amount": 2450000,
-            "speech": "ខ្ញុំបានទទួលការបង្វិលពន្ធកាត់ពីប្រាក់ខែមកវិញហើយ! សូមពិនិត្យមើលឥឡូវនេះ!"
         },
         "id": {
             "name": "Indonesia",
             "gender": "male",
             "char_desc": "a handsome 28-year-old Indonesian young man, calm pleasant expression, clean-shaven, short neat black hair, casual navy blue polo shirt",
             "bg_desc": "modern cozy living room with indoor green plants, soft warm lighting",
-            "badge_primary": "100% TANPA BIAYA DI AWAL",
-            "badge_secondary": "Bayar Setelah Cair",
-            "cta_text": "CEK SEKARANG >",
             "default_amount": 1420000,
-            "speech": "Saya baru dapat pengembalian pajak yang dipotong dari gaji di Korea! Yuk cek sekarang!"
         },
         "kk": {
             "name": "Kazakhstan",
             "gender": "male",
             "char_desc": "a handsome 29-year-old Kazakh man, Central Asian features, calm confident expression, short black hair, casual dark olive bomber jacket",
             "bg_desc": "modern clean apartment living room, grey sofa, warm indoor lamp light",
-            "badge_primary": "100% КЕЙІН ТӨЛЕУ",
-            "badge_secondary": "Қазір 0 вон!",
-            "cta_text": "ҚАЗІР ТЕКСЕРУ >",
             "default_amount": 2150000,
-            "speech": "В Корее я вернул налог, удержанный с зарплаты! Проверьте прямо сейчас!"
         },
         "tl": {
             "name": "Philippines",
             "gender": "female",
             "char_desc": "a pleasant 26-year-old Filipina woman, calm composed expression, neat casual dark striped blouse, clean tied hair",
             "bg_desc": "bright cozy apartment interior, modern desk with notebook, sunny window",
-            "badge_primary": "ZERO UPFRONT FEE",
-            "badge_secondary": "Pay Only When Received",
-            "cta_text": "CHECK YOUR REFUND >",
             "default_amount": 2780000,
-            "speech": "I just got a refund on taxes deducted from my salary in Korea! Check yours right now!"
         },
         "uz": {
             "name": "Uzbekistan",
             "gender": "male",
             "char_desc": "a handsome 27-year-old Uzbek man, friendly attractive face, clean-shaven, calm confident look, navy blue crewneck sweater",
             "bg_desc": "comfortable modern living room, warm indoor atmosphere, bookshelf",
-            "badge_primary": "100% OLDINDAN TO'LOV YO'Q",
-            "badge_secondary": "Pul tushgach to'lang",
-            "cta_text": "HOZIROQ TEKSHIRING >",
             "default_amount": 2600000,
-            "speech": "Koreyada oylikdan ushlab qolingan soliqni qaytarib oldim! Hoziroq tekshiring!"
         },
         "my": {
             "name": "Myanmar",
             "gender": "male",
             "char_desc": "a polite 26-year-old Myanmar young man, kind composed face, clean-shaven smooth skin, neat dark hair, casual dark blue collared shirt",
             "bg_desc": "peaceful modern apartment living room, warm sunlight, clean interior",
-            "badge_primary": "အခမဲ့စစ်ဆေးပါ",
-            "badge_secondary": "ငွေဝင်မှ ဝန်ဆောင်ခပေး",
-            "cta_text": "အခုပဲ စစ်ဆေးကြည့်ပါ >",
             "default_amount": 2300000,
-            "speech": "ကိုရီးယားမှာ လစာမှ ဖြတ်တောက်ခံရသော အခွန်ငွေ ပြန်ရခဲ့ပါပြီ! အခုပဲ စစ်ဆေးကြည့်ပါ!"
         },
         "th": {
             "name": "Thailand",
             "gender": "male",
             "char_desc": "a cheerful 27-year-old Thai young man, calm pleasant expression, clean-shaven, neat modern haircut, casual charcoal grey sweatshirt",
             "bg_desc": "modern warm living space, soft background lighting, cozy atmosphere",
-            "badge_primary": "ฟรีค่าบริการล่วงหน้า",
-            "badge_secondary": "เงินเข้าจริงค่อยจ่าย",
-            "cta_text": "เช็คเงินคืนทันที >",
             "default_amount": 2500000,
-            "speech": "ผมได้เงินคืนภาษีที่ถูกหักจากเงินเดือนในเกาหลีแล้ว! เช็คสิทธิ์ฟรีตอนนี้เลยครับ!"
+        },
+        "ne": {
+            "name": "Nepal",
+            "gender": "male",
+            "char_desc": "a warm 27-year-old Nepalese young man, friendly expressive face, clean-shaven, neat dark hair, casual comfortable navy blue sweater",
+            "bg_desc": "clean sunny apartment living room, neat bookshelf, warm indoor lighting",
+            "default_amount": 2200000,
+        },
+        "mn": {
+            "name": "Mongolia",
+            "gender": "male",
+            "char_desc": "a strong 28-year-old Mongolian young man, healthy sun-bronzed appearance, clean-shaven, modern short haircut, casual dark fleece jacket",
+            "bg_desc": "cozy modern Seoul studio apartment, soft warm ambient window light",
+            "default_amount": 2650000,
         }
     }
 
@@ -127,6 +110,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         self.app_recorder = EasyTaxAppRecorder()
         self.script_director = ShortsScenarioScriptDirector()
         self.stitcher = S2VClipStitcher(wan_client=self.wan_client, tts_synthesizer=self.tts)
+        self.copywriter = GeminiShortsCopywriter(service_id="easytax")
 
     def get_character_prompt(
         self,
@@ -151,9 +135,9 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         return self.ui_template.render(amount=amount)
 
     def get_speech_script(self, lang: str, amount: int = 3100000, **kwargs) -> str:
-        """다국어 나레이션 스크립트"""
-        cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
-        return cfg["speech"]
+        """다국어 나레이션 스크립트 (제미나이 100% 실시간 생성)"""
+        scenario = self.script_director.get_full_scenario(lang=lang, amount=amount)
+        return scenario.get("speech_hook", "")
 
     def produce(
         self,
@@ -332,7 +316,8 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             country_name=country_name,
             amount=effective_amount,
             speech=full_speech,
-            cfg=cfg
+            cfg=cfg,
+            scenario=scenario
         )
         logger.info(f"📝 [SNS 가이드] 숏폼 배포 패키지 가이드 저장 완료: {guide_filename}")
 
@@ -361,17 +346,25 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         country_name: str,
         amount: int,
         speech: str,
-        cfg: Dict[str, Any]
+        cfg: Dict[str, Any],
+        scenario: Optional[Dict[str, Any]] = None
     ):
-        """인스타그램 릴스, 틱톡, 유튜브 쇼츠, 페이스북 릴스 전용 다국어 배포 가이드 작성"""
+        """인스타그램 릴스, 틱톡, 유튜브 쇼츠, 페이스북 릴스 전용 다국어 배포 가이드 작성 (제미나이 100% 동적 생성)"""
         amount_fmt = f"{amount:,} KRW"
-        badge_p = cfg.get("badge_primary", "HOÀN 90% THUẾ")
-        cta = cfg.get("cta_text", "CHECK LINK >")
 
-        hashtags = (
-            f"#{country_name}InKorea #EasyTax #KoreaTaxRefund #TaxRefund #E9Visa #E7Visa "
-            f"#WorkInKorea #LifeInKorea #외국인세금환급 #국세청환급 #{lang.upper()}"
+        # 🤖 제미나이 AI 4대 숏폼 플랫폼 맞춤 팩 생성
+        scen = scenario or {"theme_name": f"{country_name} Tax Refund", "amount": amount}
+        sns_pack = self.copywriter.generate_shorts_post_package(
+            service_id="easytax",
+            lang=lang,
+            scenario=scen,
+            refund_formatted=amount_fmt
         )
+        ch = sns_pack.get("channels", {})
+        yt = ch.get("youtube_shorts", {})
+        tt = ch.get("tiktok", {})
+        ig = ch.get("instagram_reels", {})
+        fb = ch.get("facebook_reels", {})
 
         content = f"""================================================================================
 🎬 [EasyTax 숏폼 영상 4대 SNS 배포 가이드 & 카피라이트]
@@ -380,57 +373,45 @@ class EasyTaxShortsProducer(BaseShortsProducer):
 환급 인증 금액: {amount_fmt} (₩{amount:,})
 영상 규격: 1080x1920 (9:16 세로 풀HD 숏폼)
 발화 나레이션: {speech}
+공식 랜딩 링크: {sns_pack.get('landing_url', '')}
 ================================================================================
 
 [1] 🎵 틱톡 (TikTok) 포스팅 가이드
 --------------------------------------------------------------------------------
 📌 [추천 캡션 (복사용 원문)]
-{badge_p}! 💸 {speech}
-👇 {cta} (Link in Bio / Profile)
-
-{hashtags} #TikTokShorts #ViralVideo #KoreaLife
+{tt.get('caption', speech)}
 
 📌 [고정 댓글 (Pinned Comment)]
-👉 Check your tax refund for free now! (Profile link)
-(선입금 0원, 환급금 입금 후 수수료 차감되는 100% 안전 후불제입니다)
+{tt.get('pinned_comment', '👉 ' + sns_pack.get('landing_url', ''))}
 
 
 [2] 📸 인스타그램 릴스 (Instagram Reels) 포스팅 가이드
 --------------------------------------------------------------------------------
 📌 [추천 캡션 (복사용 원문)]
-🇰🇷 {country_name} workers in Korea!
-"{amount_fmt} received directly from National Tax Service!"
-
-{speech}
-
-✨ EasyTax Guarantees:
-1️⃣ ZERO upfront fee! (100% 후불제)
-2️⃣ 1-minute free estimation on mobile!
-3️⃣ Certified legal tax refund in Korea!
-
-👉 Click the link in bio to check your refund right now!
-
-{hashtags} #Reels #KoreaLife #TaxBack
+{ig.get('caption', speech)}
 
 
 [3] 🔴 유튜브 쇼츠 (YouTube Shorts) 포스팅 가이드
 --------------------------------------------------------------------------------
 📌 [쇼츠 제목 (Title)]
-{amount_fmt} Tax Refund in Korea! {badge_p} 🇰🇷 #Shorts
+{yt.get('title', f'{amount_fmt} Tax Refund in Korea! #Shorts')}
 
 📌 [쇼츠 설명 (Description)]
-{speech}
-👉 Free Check Link: (프로필/고정댓글 링크 입력)
-{hashtags} #Shorts #KoreaTaxRefund
+{yt.get('description', speech)}
+
+📌 [고정 댓글 (Pinned Comment)]
+{yt.get('pinned_comment', '👉 ' + sns_pack.get('landing_url', ''))}
 
 
 [4] 📘 페이스북 릴스 (Facebook Reels) 포스팅 가이드
 --------------------------------------------------------------------------------
 📌 [추천 캡션]
-📢 [공식 환급 안내] {country_name} 근로자 세금 환급 인증 ({amount_fmt})
-{speech}
-지금 바로 프로필 링크를 눌러 무료로 환급 예상액을 확인하세요!
+{fb.get('post_content', speech)}
+
+📌 [첫 번째 댓글 (스텔스 링크)]
+{fb.get('first_comment', '👉 ' + sns_pack.get('landing_url', ''))}
 ================================================================================
 """
         with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
             f.write(content)

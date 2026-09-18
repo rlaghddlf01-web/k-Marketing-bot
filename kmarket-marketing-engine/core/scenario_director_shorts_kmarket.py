@@ -99,66 +99,66 @@ KMARKET_60_THEMES = [
 KMARKET_PERSONA_ANCHORS = [
     {
         "persona_id": "sinchon_female_d2",
-        "name": "동양인 신입 유학생 (신촌 연세대 원룸)",
+        "name": "신입 유학생 (신촌 연세대 원룸)",
         "gender": "female",
         "age_group": "20대 초반",
         "town": "서울 신촌 대학가",
         "cat": "campus",
-        "anchor_desc": "a specific 21-year-old Asian female college student with shoulder-length black straight bob haircut, gentle dark brown eyes, fair skin"
+        "anchor_desc": "a specific 21-year-old female college student with shoulder-length black straight hair, gentle dark brown eyes"
     },
     {
         "persona_id": "anam_male_d2",
-        "name": "동양인 어학연수생 (안암 고려대 자취방)",
+        "name": "어학연수생 (안암 고려대 자취방)",
         "gender": "male",
         "age_group": "20대 초반",
         "town": "서울 안암 대학가",
         "cat": "campus",
-        "anchor_desc": "a specific 22-year-old Asian male college student with neat short black side-part haircut, clean-shaven face, warm cheerful smile"
+        "anchor_desc": "a specific 22-year-old male college student with neat short black side-part haircut, clean-shaven face, warm cheerful smile"
     },
     {
         "persona_id": "ansan_female_e9",
-        "name": "동양인 제조공단 근로자 (안산 원곡동 원룸)",
+        "name": "제조공단 근로자 (안산 원곡동 원룸)",
         "gender": "female",
         "age_group": "20대 후반",
         "town": "안산 다문화 타운",
         "cat": "industry",
-        "anchor_desc": "a specific 27-year-old Asian woman with a clean black ponytail, kind dark eyes, warm gentle smile"
+        "anchor_desc": "a specific 27-year-old woman with a clean black ponytail, kind dark eyes, warm gentle smile"
     },
     {
         "persona_id": "suwon_male_e9",
-        "name": "동양인 산업단지 근로자 (수원 영통 기숙사)",
+        "name": "산업단지 근로자 (수원 영통 기숙사)",
         "gender": "male",
         "age_group": "20대 후반",
         "town": "수원 영통 공단",
         "cat": "industry",
-        "anchor_desc": "a specific 28-year-old Asian man with short athletic black haircut, honest friendly facial features"
+        "anchor_desc": "a specific 28-year-old man with short athletic black haircut, honest friendly facial features"
     },
     {
         "persona_id": "hyehwa_male_d2",
-        "name": "동양인 석박사 대학원생 (혜화 성균관대)",
+        "name": "석박사 대학원생 (혜화 성균관대)",
         "gender": "male",
         "age_group": "20대 후반",
         "town": "서울 혜화 대학가",
         "cat": "campus",
-        "anchor_desc": "a specific 26-year-old Asian male graduate researcher with modern slim black wire-frame glasses, tidy black hair"
+        "anchor_desc": "a specific 26-year-old male graduate researcher with modern slim black wire-frame glasses, tidy black hair"
     },
     {
         "persona_id": "gangnam_female_e7",
-        "name": "동양인 IT 엔지니어 (판교/강남 직거래)",
+        "name": "IT 엔지니어 (판교/강남 직거래)",
         "gender": "female",
         "age_group": "30대 초반",
         "town": "서울 강남/역삼",
         "cat": "it",
-        "anchor_desc": "a specific 30-year-old Asian career woman with elegant wavy dark brown hair, bright intelligent eyes"
+        "anchor_desc": "a specific 30-year-old career woman with elegant wavy dark brown hair, bright intelligent eyes"
     },
     {
         "persona_id": "guro_male_f4",
-        "name": "동포/동양인 전문직 (구로/대림 원룸)",
+        "name": "전문직 청년 (구로/대림 원룸)",
         "gender": "male",
         "age_group": "30대 초반",
         "town": "서울 구로 디지털",
         "cat": "it",
-        "anchor_desc": "a specific 31-year-old Asian man with neatly styled parted dark hair, confident warm smile"
+        "anchor_desc": "a specific 31-year-old man with neatly styled parted dark hair, confident warm smile"
     }
 ]
 

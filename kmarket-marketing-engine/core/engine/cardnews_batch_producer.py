@@ -13,7 +13,7 @@ import time
 import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image
 
 from core.scenario_director_cardnews_easytax import ScenarioDirectorCardnewsEasyTax
 from core.screen_inset_compositor import ScreenInsetCompositor
@@ -23,85 +23,9 @@ from core.easytax_app_capturer import EasyTaxAppCapturer
 from brands.easytax.ui_templates.refund_receipt_template import RefundReceiptTemplate
 from brands.easytax.scenarios.prompt_director_cardnews import PromptDirectorCardNewsEasyTax
 from core.gemini_cardnews_copywriter import GeminiCardnewsCopywriter
+from core.cardnews_typography_easytax import CardnewsTypographyEasyTax
 
 logger = logging.getLogger("CardNewsBatchProducer")
-
-def _draw_text_wrapped(
-    draw,
-    text: str,
-    font,
-    x: int,
-    y: int,
-    max_width: int,
-    fill: tuple,
-    shadow_fill: tuple = (0, 0, 0),
-    line_gap: int = 6
-) -> int:
-    """
-    텍스트를 max_width 안에서 자동 줄바꿼하여 선버려다.
-    - 드롭썸도우(shadow_fill) 1px 오프셋 자동 적용
-    - 마지막으로 그린 줄의 다음 y 좌표 반환 (동적 레이아웃 토대)
-    """
-    if not text:
-        return y
-
-    # 단어 단위 줄바꿼
-    words = text.split()
-    lines: list = []
-    current = ""
-    for word in words:
-        test = (current + " " + word).strip()
-        bbox = draw.textbbox((0, 0), test, font=font)
-        if bbox[2] - bbox[0] <= max_width:
-            current = test
-        else:
-            if current:
-                lines.append(current)
-            current = word
-    if current:
-        lines.append(current)
-
-    line_h = draw.textbbox((0, 0), "Ag", font=font)[3] + line_gap
-    curr_y = y
-    for line in lines:
-        draw.text((x + 1, curr_y + 1), line, fill=shadow_fill, font=font)
-        draw.text((x,     curr_y),     line, fill=fill,        font=font)
-        curr_y += line_h
-    return curr_y
-
-
-def _load_font(size: int, bold: bool = True, lang: str = "vi") -> ImageFont.FreeTypeFont:
-    """언어별 최적 유니코드 폰트 자동 매칭 (베트남어/우즈벡어 글자 깨짐 0% 보장)"""
-    if lang == "ko":
-        candidates = [
-            r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf",
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-        ]
-    elif lang in ["vi", "es", "id", "tl", "en"]:  # 베트남어 성조 100% 지원
-        candidates = [
-            # ✅ Segoe UI Bold: 베트남어 성조(à á â ã ä...) 완전 지원, ASCII > 사용으로 Tofu 0%
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
-            r"C:\Windows\Fonts\tahomabd.ttf" if bold else r"C:\Windows\Fonts\tahoma.ttf",
-        ]
-    elif lang in ["ru", "uz", "mn", "kk"]:  # 키릴 및 중앙아시아 문자
-        candidates = [
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-            r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
-        ]
-    else:
-        candidates = [
-            r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
-            r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf",
-        ]
-
-    for p in candidates:
-        if os.path.exists(p):
-            try:
-                return ImageFont.truetype(p, size)
-            except Exception:
-                continue
-    return ImageFont.load_default()
 
 
 class CardNewsBatchProducer:
@@ -115,6 +39,7 @@ class CardNewsBatchProducer:
         self.app_capturer = EasyTaxAppCapturer()
         self.ui_template = RefundReceiptTemplate()
         self.copywriter = GeminiCardnewsCopywriter(service_id="easytax")
+        self.typography_engine = CardnewsTypographyEasyTax()
         # 로컬 바탕화면 전용 저장 경로
         self.desktop = Path(r"C:\Users\zkfnt\Desktop")
         # ComfyUI 헬스체크 (실행 여부 확인)
@@ -194,6 +119,13 @@ class CardNewsBatchProducer:
 
         for card in sorted(cards, key=lambda c: c.get("slide_idx", 1)):
             s_idx = card.get("slide_idx", 1)
+
+            # 🛑 [비상 정지 킬스위치 감시] 대시보드 정지 요청 시 즉각 루프 올스톱(Abort)
+            from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+            if GenerationAbortGuard.is_abort_requested():
+                logger.warning(f"🛑 [EasyTax Slide {s_idx}] 대시보드 정지 요청 감지 → 전체 루프 즉각 탈출(Abort)!")
+                raise GenerationAbortedException("대시보드 정지 요청으로 EasyTax 카드뉴스 생성이 즉각 중단되었습니다.")
+
             if s_idx == 1 and custom_hero_image is not None:
                 base_photo = custom_hero_image
                 logger.info("🌟 [Slide 1] 검증 승인된 마스터 주인공 인물 사진(custom_hero_image) 직접 적용!")
@@ -233,7 +165,8 @@ class CardNewsBatchProducer:
             lang=lang,
             theme_title=theme_title,
             amount=effective_amount,
-            cards=cards
+            cards=cards,
+            scenario=scenario
         )
 
         logger.info(f"🎉 [EasyTax 5장 카드뉴스 세트 완성] 폴더: {out_dir}")
@@ -259,6 +192,10 @@ class CardNewsBatchProducer:
         - Slide 1~5: 전 슬라이드 독립 T2I (generate_t2i_master, seed=master_seed)
         - 60% 황금비율 미디엄 샷 적용 + 씬별 100% 다른 의상/배경/포즈 연출
         """
+        from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+        if GenerationAbortGuard.is_abort_requested():
+            raise GenerationAbortedException(f"[Slide {s_idx}] 대시보드 정지 요청으로 생성을 취소합니다.")
+
         if not self._wan_available:
             logger.warning(f"[Slide {s_idx}] ComfyUI 미실행 → Fallback 사용")
             return fallback_img
@@ -292,6 +229,9 @@ class CardNewsBatchProducer:
             logger.info(f"✅ [Slide {s_idx}] WAN 생성 완료: {generated_path}")
             return generated_img
         except Exception as e:
+            if isinstance(e, GenerationAbortedException) or GenerationAbortGuard.is_abort_requested():
+                logger.warning(f"🛑 [Slide {s_idx}] 대시보드 정지 감지 → Fallback 무시 및 루프 즉각 올스톱!")
+                raise
             logger.error(f"❌ [Slide {s_idx}] WAN 생성 실패 ({e}) → Fallback 사용")
             return fallback_img
 
@@ -303,12 +243,14 @@ class CardNewsBatchProducer:
         lang: str,
         amount: int
     ) -> Image.Image:
-        """슬라이드 번호별 합성 + 텍스트 오버레이 (1080x1350 풀블리드 + 그라디언트 스크림)"""
-
+        """
+        EasyTax 전용 Playwright HarfBuzz 타이포그래피 합성:
+        - 1, 3, 5번 인물/앱 화면 합성 (PhoneScreenEmbedder / ScreenInsetCompositor)
+        - 제미나이 100% 동적 card_data(로열 네이비 & 골드 헤드라인, 부제, 3줄 불릿, CTA버튼) 오버레이 합성
+        """
         # A. 슬라이드 번호에 따라 스마트폰 화면 인셋 합성 (이미 WAN으로 생성된 base_photo 사용)
         if s_idx == 1:
             ui_img = self.ui_template.render(amount=amount)
-            # 1. 인물이 손에 쥔 스마트폰 액정 영역에 직접 정밀 광학 매립 시도
             try:
                 composite_photo = self.embedder.embed_screen(base_image=base_photo, ui_image=ui_img)
                 logger.info("📱 [Slide 1] 인물 스마트폰 액정에 환급 영수증 정밀 매립 성공!")
@@ -344,149 +286,12 @@ class CardNewsBatchProducer:
             # 2번 (공장/노동 현장), 4번 (귀국/감동): img2img로 동일 인물 유지된 사진 그대로 사용
             composite_photo = base_photo
 
-        # B. 1080x1350 풀사이즈 캔버스 센터 크롭 리사이즈
-        canvas = Image.new("RGB", (1080, 1350), (11, 19, 43))
-        W, H = composite_photo.size
-        scale = max(1080 / W, 1350 / H)
-        resized_photo = composite_photo.resize((int(W * scale), int(H * scale)), Image.Resampling.LANCZOS)
-
-        crop_x = (resized_photo.width - 1080) // 2
-        crop_y = (resized_photo.height - 1350) // 2
-        photo_cropped = resized_photo.crop((crop_x, crop_y, crop_x + 1080, crop_y + 1350))
-        canvas.paste(photo_cropped, (0, 0))
-
-        # C. 하단 부드러운 그라디언트 스크림 (Gradient Scrim) 오버레이
-        gradient_layer = Image.new("RGBA", (1080, 1350), (0, 0, 0, 0))
-        g_draw = ImageDraw.Draw(gradient_layer)
-        scrim_start_y = 820
-        scrim_height = 1350 - scrim_start_y
-
-        for i in range(scrim_height):
-            curr_y = scrim_start_y + i
-            ratio = i / float(scrim_height)
-            alpha = int((ratio ** 2.2) * 238)
-            g_draw.line([(0, curr_y), (1080, curr_y)], fill=(11, 19, 43, alpha))
-
-        canvas = Image.alpha_composite(canvas.convert("RGBA"), gradient_layer).convert("RGB")
-        draw = ImageDraw.Draw(canvas)
-
-        # D. 매거진 타이포그래피 (자동 줄바꿼 + 켴은 폰트 + 드롭썸도우 포함)
-        # 폰트 크기: 헤드 46px / 서브 27px / 배지 22px
-        font_head  = _load_font(46, bold=True,  lang=lang)
-        font_sub   = _load_font(27, bold=False, lang=lang)
-        font_badge = _load_font(22, bold=True,  lang=lang)
-
-        badge_text    = card_data.get("badge",    f"STEP {s_idx}")
-        title_text    = card_data.get("title",    f"Step {s_idx} Title")
-        subtitle_text = card_data.get("subtitle", "")
-        bullets       = card_data.get("bullets",  [])
-
-        TEXT_X     = 60    # 좌측 여백
-        MAX_W      = 960   # 1080 - 60(left) - 60(right) 텍스트 안전 영역
-        CTA_TOP    = 1185  # CTA 버튼 상단 경계
-
-        # 상단 페이지 인덱스 배지 (우측)
-        page_badge = f"{s_idx:02d} / 05 >"
-        draw.text((930, 916), page_badge, fill=(212, 175, 55), font=font_badge)
-
-        # 좌측 플로팅 배지 라운드렉탄글 (글자 실측 기반 100% 자동 반응형)
-        b_bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
-        text_w = b_bbox[2] - b_bbox[0]
-        pad_x = 16
-        max_safe_w = 850 - TEXT_X  # 우측 페이지 번호(930px)와의 충돌 방지 안전선
-        badge_w = min(max_safe_w, max(140, text_w + pad_x * 2))
-        draw.rounded_rectangle([(TEXT_X, 910), (TEXT_X + badge_w, 956)], radius=8, fill=(30, 80, 160))
-        draw.text((TEXT_X + pad_x, 918), badge_text, fill=(255, 255, 255), font=font_badge)
-
-        # 글자 레이아웃 시작 y (배지 아래 12px 여백)
-        cur_y = 968
-
-        # 헤드라인 (골드 + 아웃라인 셈도우)
-        cur_y = _draw_text_wrapped(
-            draw, title_text, font_head,
-            x=TEXT_X, y=cur_y, max_width=MAX_W,
-            fill=(255, 215, 0), shadow_fill=(0, 0, 0), line_gap=5
+        return self.typography_engine.composite_slide(
+            composite_photo=composite_photo,
+            card_data=card_data,
+            s_idx=s_idx,
+            lang=lang
         )
-        cur_y += 10  # 헤드~서브 사이 여백
-
-        # 서브카피 (라이트 그레이)
-        cur_y = _draw_text_wrapped(
-            draw, subtitle_text, font_sub,
-            x=TEXT_X, y=cur_y, max_width=MAX_W,
-            fill=(225, 230, 240), shadow_fill=(0, 0, 0), line_gap=5
-        )
-        cur_y += 10  # 서브~불릿 사이 여백
-
-        # 3줄 불릿 (라이트 블루) — CTA 버튼 영역 취침 안전장치 포함
-        for bullet_line in bullets[:3]:
-            if not bullet_line or cur_y + 36 > CTA_TOP:
-                break  # CTA 버튼과 격치다면 충구 중단
-            cur_y = _draw_text_wrapped(
-                draw, bullet_line, font_sub,
-                x=TEXT_X, y=cur_y, max_width=MAX_W,
-                fill=(200, 220, 255), shadow_fill=(0, 0, 0), line_gap=4
-            )
-            cur_y += 6  # 불릿 줄 간 여백
-
-        # 🎯 8개국어 맞춤 CTA 버튼 텍스트 사전 등록 (글자 깨짐 100% 박멸)
-        cta_i18n = {
-            "uz": {
-                "cta": "Qaytariladigan pulni bepul tekshirish  >",
-                "next": "Keyingi qismni ko'rish  >"
-            },
-            "vi": {
-                "cta": "Kiểm tra tiền hoàn thuế miễn phí ngay  >",
-                "next": "Xem tiếp nội dung tiếp theo  >"
-            },
-            "mn": {
-                "cta": "Татварын буцаан олголтоо шалгах  >",
-                "next": "Дараагийн хэсгийг үзэх  >"
-            },
-            "th": {
-                "cta": "ตรวจสอบเงินคืนภาษีฟรีทันที  >",
-                "next": "ดูเนื้อหาถัดไป  >"
-            },
-            "km": {
-                "cta": "ពិនិត្យប្រាក់ពន្ធឥតគិតថ្លៃ  >",
-                "next": "មើលផ្នែកបន្ទាប់  >"
-            },
-            "ne": {
-                "cta": "कर फिर्ता रकम नि:शुल्क हेर्नुहोस्  >",
-                "next": "अर्को भाग हेर्नुहोस्  >"
-            },
-            "id": {
-                "cta": "Cek pengembalian pajak gratis sekarang  >",
-                "next": "Lihat bagian selanjutnya  >"
-            },
-            "my": {
-                "cta": "အခမဲ့ အခွန်ပြန်အမ်းငွေ စစ်ဆေးရန်  >",
-                "next": "နောက်တစ်ပိုင်းကို ကြည့်ပါ  >"
-            },
-            "ru": {
-                "cta": "Проверить возврат налога бесплатно  >",
-                "next": "Смотреть дальше  >"
-            },
-            "ko": {
-                "cta": "지금 내 환급금 무료 조회하기  >",
-                "next": "다음 내용 확인하기  >"
-            },
-            "en": {
-                "cta": "Check your tax refund for free now  >",
-                "next": "See the next slide  >"
-            }
-        }
-        btn_dict = cta_i18n.get(lang, cta_i18n["en"])
-        btn_text = btn_dict["cta"] if s_idx in [1, 5] else btn_dict["next"]
-
-        btn_bg = (212, 175, 55) if s_idx in [1, 5] else (30, 41, 59)
-        btn_fg = (15, 23, 42)   if s_idx in [1, 5] else (255, 255, 255)
-
-        draw.rounded_rectangle([(60, 1190), (1020, 1285)], radius=20, fill=btn_bg)
-        bbox_cta = draw.textbbox((0, 0), btn_text, font=font_head)
-        tw_cta   = bbox_cta[2] - bbox_cta[0]
-        draw.text(((1080 - tw_cta) // 2, 1214), btn_text, fill=btn_fg, font=font_head)
-
-        return canvas
 
     def _write_sns_guide(
         self,
@@ -494,17 +299,20 @@ class CardNewsBatchProducer:
         lang: str,
         theme_title: str,
         amount: int,
-        cards: List[Dict[str, Any]]
+        cards: List[Dict[str, Any]],
+        scenario: Optional[Dict[str, Any]] = None
     ):
-        """스레드, 인스타그램, 페이스북, 텔레그램 4대 채널별 포스팅 가이드 텍스트 저장 (현지어 원문 + 한국어 해설 2단 세트)"""
+        """스레드, 인스타그램, 페이스북, 텔레그램 4대 채널별 포스팅 가이드 텍스트 저장 (제미나이 100% 실시간 2단 세트)"""
         try:
-            from core.engine.sns_guide_generator import SNSGuideGenerator
-            content = SNSGuideGenerator.generate_guide_content(
+            package = self.copywriter.generate_cardnews_post_package(
+                service_id="easytax",
                 lang=lang,
-                theme_title=theme_title,
-                amount=amount,
-                cards=cards
+                theme={"name": theme_title},
+                persona=scenario.get("character_anchor", {}) if scenario else {},
+                cards=cards,
+                refund_formatted=f"{amount:,} KRW"
             )
+            content = self.copywriter.format_guide_text(package)
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
             logger.info(f"📄 [{lang.upper()}] 다국어 2단 SNS 가이드(현지어+한국어) 저장 완료: {file_path.name}")

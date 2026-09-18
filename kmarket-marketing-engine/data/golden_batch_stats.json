@@ -15,5 +15,212 @@
       "cardnews": 0,
       "details": []
     }
+  },
+  "2026-09-18": {
+    "morning": {
+      "shorts": 0,
+      "cardnews": 0,
+      "details": []
+    },
+    "evening": {
+      "shorts": 0,
+      "cardnews": 0,
+      "details": []
+    },
+    "manual": {
+      "shorts": 0,
+      "cardnews": 21,
+      "details": [
+        {
+          "time": "07:50:27",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "07:56:30",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "08:02:22",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "08:08:15",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "08:14:10",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "th",
+          "success": true
+        },
+        {
+          "time": "08:20:10",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "id",
+          "success": true
+        },
+        {
+          "time": "08:26:07",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "mn",
+          "success": true
+        },
+        {
+          "time": "08:31:57",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "my",
+          "success": true
+        },
+        {
+          "time": "10:54:28",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "11:00:31",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "11:06:21",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "11:52:12",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "11:58:43",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "12:00:50",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "km",
+          "success": false
+        },
+        {
+          "time": "12:01:18",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "ne",
+          "success": false
+        },
+        {
+          "time": "12:01:35",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "th",
+          "success": false
+        },
+        {
+          "time": "12:01:40",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "id",
+          "success": false
+        },
+        {
+          "time": "12:01:46",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "mn",
+          "success": false
+        },
+        {
+          "time": "12:01:53",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "my",
+          "success": false
+        },
+        {
+          "time": "12:22:15",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "12:28:48",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "12:35:22",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "12:42:00",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "12:48:45",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "th",
+          "success": true
+        },
+        {
+          "time": "12:55:17",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "id",
+          "success": true
+        },
+        {
+          "time": "13:01:49",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "mn",
+          "success": true
+        },
+        {
+          "time": "13:08:28",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "my",
+          "success": true
+        }
+      ]
+    }
   }
 }

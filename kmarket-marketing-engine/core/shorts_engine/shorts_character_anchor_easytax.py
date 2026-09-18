@@ -109,7 +109,7 @@ def build_shorts_t2i_character_prompt(
     )
 
     positive = (
-        f"authentic candid snapshot shot on iPhone 15 Pro of {full_char}, "
+        f"{full_char}. Authentic candid snapshot shot on iPhone 15 Pro, "
         f"{phone_hold_front}"
         f"{iphone_candid_framing}"
         f"sitting naturally in {bg_desc}. "
@@ -131,6 +131,7 @@ def build_shorts_t2i_character_prompt(
         "phone to ear, making phone call, talking on phone, phone obscuring face, deformed hand holding phone, "
         "open mouth, parted lips, slightly open mouth, half-open mouth, open lips, visible teeth, showing teeth, teeth, smiling with teeth, grinning, laughing, "
         "bobblehead, big head, oversized head, giant head, large head, dwarf body, short body, deformed anatomy, "
+        "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, deep-set hollow eyes, long neck, elongated neck, thin giraffe neck, creepy smile, toothy grimace, exaggerated wide smile, "
         "extreme close-up, macro shot, headshot, bust shot, cropped head, zoomed-in face, face taking up entire frame, face taking up more than 20% of image, "
         "wide-angle lens distortion, fisheye lens, perspective distortion, "
         "plastic skin, smooth plastic texture, wax figure, mannequin, doll, airbrushed, beauty filter, smooth skin filter, porcelain skin, oily skin glare, shiny plastic surface, "
@@ -142,11 +143,11 @@ def build_shorts_t2i_character_prompt(
         "blurry, low quality"
     )
 
-    # 🎯 중앙아시아(uz, kk)는 caucasian(백인) 차단 면제, 동남아는 caucasian 차단 적용
+    # 🎯 [1순위 최전방 배치]: ethnic_neg를 무조건 1순위 맨 앞에 배치!
     if lang in EURASIAN_LANGS:
         neg_parts = [ethnic_neg, distortion_and_beauty_negative]
     else:
-        neg_parts = ["caucasian, white person, blonde hair, blue eyes", ethnic_neg, distortion_and_beauty_negative]
+        neg_parts = [ethnic_neg, "caucasian, white person, blonde hair, blue eyes", distortion_and_beauty_negative]
 
     # 빈 문자열 제거 후 결합
     negative = ", ".join([p.strip() for p in neg_parts if p.strip()])

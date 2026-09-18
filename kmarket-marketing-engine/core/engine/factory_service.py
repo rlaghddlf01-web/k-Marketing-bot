@@ -71,6 +71,9 @@ class FactoryService:
                 }
             self.active_jobs[job_id] = True
 
+        from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+        GenerationAbortGuard.reset_stop_flag()
+
         def _worker():
             try:
                 brand_label = "EasyTax (세금 환급)" if brand == "easytax" else "K-Market (생활 커뮤니티)"
@@ -164,6 +167,8 @@ class FactoryService:
 
                 self._log(f"🎉 [원클릭 팩토리] {brand_label} {mode_label} 완성! 바탕화면 저장 완료: {output_path}", "success")
 
+            except GenerationAbortedException:
+                self._log("⏹️ [원클릭 팩토리] 사용자의 정지 요청으로 작업이 즉시 안전하게 중단되었습니다.", "warning")
             except Exception as e:
                 err_msg = str(e)
                 traceback.print_exc()
@@ -179,3 +184,13 @@ class FactoryService:
             "job_id": job_id,
             "message": f"[{brand.upper()}] {mode.upper()} ({lang.upper()}) 원클릭 제작 작업이 백그라운드에서 시작되었습니다."
         }
+
+    def stop_factory_task(self):
+        """진행 중인 팩토리 작업 전체 즉시 중단 및 GPU 킬스위치 실행"""
+        from core.engine.generation_abort_guard import GenerationAbortGuard
+        GenerationAbortGuard.trigger_global_stop(reason="대시보드 원클릭 팩토리 비상 정지")
+        with self.lock:
+            for jid in list(self.active_jobs.keys()):
+                self.active_jobs[jid] = False
+        self._log("🛑 [원클릭 팩토리] 모든 활성 제작 작업에 비상 정지 신호를 발송하고 작업을 중단했습니다.", "warning")
+

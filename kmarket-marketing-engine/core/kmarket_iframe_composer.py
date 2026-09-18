@@ -29,7 +29,7 @@ class KMarketIframeComposer:
     def __init__(self):
         self.output_dir = OUTPUTS_DIR / "shorts_kmarket"
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\KTRS마켓")
+        self.desktop_dir = Path(r"C:\Users\zkfnt\Desktop\숏폼_산출물\케이마켓")
         self.desktop_dir.mkdir(parents=True, exist_ok=True)
         self.bgm_manager = BGMManager()
         try:
