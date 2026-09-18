@@ -169,6 +169,7 @@ class CardnewsEasyTax:
             f"📢 [EasyTax 5장 카드뉴스 — 5대 SNS 알고리즘 맞춤형 원클릭 포스팅 패키지]\n"
             f"• 타깃 언어: {lang.upper()} | 테마: {scenario.get('theme_title', scenario.get('theme_name'))}\n"
             f"• 공식 환급 링크: {landing_url}\n"
+            f"• 17개국 바이럴 해시태그: {hashtags_str}\n"
             f"• 생성 일시: {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"================================================================================\n\n"
 
@@ -186,6 +187,8 @@ class CardnewsEasyTax:
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             f"📝 [본문 글 (링크 0% - 알고리즘 도달률 5배 노출 극대화)]:\n"
             f"{fb.get('post_content', '')}\n\n"
+            f"🏷️ 페이스북 해시태그:\n"
+            f"{fb.get('hashtags', hashtags_str)}\n\n"
             f"★ [첫 번째 댓글 (게시 직후 바로 달아줄 스텔스 링크)]:\n"
             f"{fb.get('first_comment', f'👉 {landing_url}')}\n\n"
 
@@ -203,6 +206,8 @@ class CardnewsEasyTax:
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             f"📝 [1번 메인 타래 (카드뉴스 5장 첨부용)]:\n"
             f"{th.get('main_post', '')}\n\n"
+            f"🏷️ 스레드 해시태그:\n"
+            f"{th.get('hashtags', hashtags_str)}\n\n"
             f"★ [2번 답글 타래 (1번에 바로 이어달릴 링크 답글)]:\n"
             f"{th.get('reply_link', f'🔗 {landing_url}')}\n\n"
 
@@ -211,6 +216,8 @@ class CardnewsEasyTax:
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             f"📝 5장 앨범 전송용 캡션:\n"
             f"{tg.get('caption', '')}\n\n"
+            f"🏷️ 텔레그램 해시태그:\n"
+            f"{tg.get('hashtags', hashtags_str)}\n\n"
             f"🔘 인라인 버튼: [{tg.get('button_text', '무료 환급 신청')}] ➔ {landing_url}\n\n"
 
             f"================================================================================\n"

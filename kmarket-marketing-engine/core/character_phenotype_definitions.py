@@ -90,31 +90,41 @@ COUNTRY_8_PHENOTYPES: Dict[str, str] = {
 COUNTRY_8_NEGATIVE_ETHNIC: Dict[str, str] = {
     "vi": (
         "Korean, East Asian, Chinese, Han Chinese, Japanese, K-pop style, K-pop hairstyle, parted haircut, "
-        "pale porcelain skin, fair skin, white face, flat nose, monolid eyes, beard, mustache, facial hair, stubble, goatee, "
+        "South Asian, Indian, Pakistani, Middle Eastern, Arab, Caucasian, "
+        "beard, mustache, facial hair, stubble, goatee, five o'clock shadow, sideburns, "
+        "pale porcelain skin, fair skin, white face, flat nose, monolid eyes, "
         "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, long neck, elongated neck, bobblehead, creepy smile, toothy grimace, "
         "multiple people, two people, extra person, bystander, partner"
     ),
     "km": (
         "Korean, East Asian, Chinese, Han Chinese, Japanese, K-pop style, K-pop hairstyle, parted haircut, "
-        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, beard, mustache, facial hair, stubble, goatee, "
+        "South Asian, Indian, Pakistani, Middle Eastern, Arab, Caucasian, "
+        "beard, mustache, facial hair, stubble, goatee, five o'clock shadow, sideburns, "
+        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, "
         "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, long neck, elongated neck, bobblehead, creepy smile, toothy grimace, "
         "multiple people, two people, extra person, bystander, partner"
     ),
     "th": (
         "Korean, East Asian, Chinese, Han Chinese, Japanese, K-pop style, K-pop hairstyle, parted haircut, "
-        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, beard, mustache, facial hair, stubble, goatee, "
+        "South Asian, Indian, Pakistani, Middle Eastern, Arab, Caucasian, "
+        "beard, mustache, facial hair, stubble, goatee, five o'clock shadow, sideburns, "
+        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, "
         "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, long neck, elongated neck, bobblehead, creepy smile, toothy grimace, "
         "multiple people, two people, extra person, bystander, partner"
     ),
     "id": (
         "Korean, East Asian, Chinese, Han Chinese, Japanese, K-pop style, K-pop hairstyle, parted haircut, "
-        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, beard, mustache, facial hair, stubble, goatee, "
+        "South Asian, Indian, Pakistani, Middle Eastern, Arab, Caucasian, "
+        "beard, mustache, facial hair, stubble, goatee, five o'clock shadow, sideburns, "
+        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, "
         "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, long neck, elongated neck, bobblehead, creepy smile, toothy grimace, "
         "multiple people, two people, extra person, bystander, partner"
     ),
     "my": (
         "Korean, East Asian, Chinese, Han Chinese, Japanese, K-pop style, K-pop hairstyle, parted haircut, "
-        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, beard, mustache, facial hair, stubble, goatee, "
+        "South Asian, Indian, Pakistani, Middle Eastern, Arab, Caucasian, "
+        "beard, mustache, facial hair, stubble, goatee, five o'clock shadow, sideburns, "
+        "pale porcelain skin, fair skin, white face, monolid eyes, flat nose, "
         "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, long neck, elongated neck, bobblehead, creepy smile, toothy grimace, "
         "multiple people, two people, extra person, bystander, partner"
     ),

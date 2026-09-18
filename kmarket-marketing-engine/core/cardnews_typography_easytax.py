@@ -18,6 +18,32 @@ from playwright.sync_api import sync_playwright
 logger = logging.getLogger("CardnewsTypographyEasyTax")
 
 
+# 🌐 EasyTax 브랜드 배지 100% 안심 후불제 다국어 사전 (17개국 전원 현지어 네이티브 매핑)
+EASYTAX_BRAND_SUB_I18N: Dict[str, str] = {
+    "ko": "100% 안심 후불제",
+    "en": "100% Safe Pay-After-Refund",
+    "uz": "100% Xavfsiz Keyin To'lash",
+    "vi": "100% Trả sau an tâm",
+    "km": "ទូទាត់ក្រោយដោយសុវត្ថិភាព ១០០%",
+    "th": "จ่ายทีหลังปลอดภัย 100%",
+    "id": "100% Bayar Setelah Cair Aman",
+    "my": "၁၀၀% စိတ်ချရသော နောက်မှပေးချေမှု",
+    "ne": "१००% सुरक्षित पछि भुक्तानी",
+    "mn": "100% Баталгаат Дараа Төлбөр",
+    "ru": "100% Безопасная постоплата",
+    "zh": "100% 先退税后付费",
+    "ja": "100% 安心後払い制",
+    "tl": "100% Ligtas na Bayad-Mamaya",
+    "bn": "১০০% নিরাপদ পরবর্তীতে পরিশোধ",
+    "si": "100% ආරක්ෂිත පසුව ගෙවීම",
+    "hi": "100% सुरक्षित बाद में भुगतान",
+    "ur": "100% محفوظ بعد میں ادائیگی",
+    "ar": "دفع لاحق آمن 100%",
+    "fr": "Paiement après remboursement 100% sécurisé",
+    "es": "Pago posterior 100% seguro",
+}
+
+
 class CardnewsTypographyEasyTax:
     """EasyTax 전용 카드뉴스 고해상도 무결점 타이포그래피 렌더러 (제미나이 100% 동적 주입)"""
 
@@ -40,12 +66,18 @@ class CardnewsTypographyEasyTax:
         subtitle = card_data.get("subtitle", "")
         bullets = card_data.get("bullets", [])
 
+        # 🎯 브랜드 배지 서브텍스트: 100% 타깃 현지어 안심 후불제 자동 매핑
+        norm_lang = (lang or "en").lower().strip()
+        brand_sub_text = EASYTAX_BRAND_SUB_I18N.get(
+            norm_lang, EASYTAX_BRAND_SUB_I18N.get("en", "100% Safe Pay-After-Refund")
+        )
+
         # EasyTax 전용 브랜드 로고 헤더
-        brand_logo_html = """
+        brand_logo_html = f"""
             <div class="brand-badge brand-easytax">
                 <span class="brand-icon">🏛️</span>
                 <span class="brand-text">EasyTax</span>
-                <span class="brand-sub">국세청 공식 세무법인</span>
+                <span class="brand-sub">{html.escape(brand_sub_text)}</span>
             </div>
         """
         page_badge = f"{s_idx:02d} / 05 >"
@@ -53,9 +85,9 @@ class CardnewsTypographyEasyTax:
         # CTA 버튼 텍스트: 제미나이가 실시간 창작한 cta_button 연동
         btn_text = card_data.get("cta_button") or ("다음 내용 보기 >" if s_idx not in (1, 5) else "내 환급금 조회하기 >")
 
-        # EasyTax 테마: 1, 5번은 럭셔리 골드 CTA, 2, 3, 4번은 다크 네이비 CTA
-        cta_bg = "#d4af37" if s_idx in (1, 5) else "#1e293b"
-        cta_color = "#0b132b" if s_idx in (1, 5) else "#ffffff"
+        # EasyTax 테마: 1~5번 전 슬라이드 럭셔리 골드(노랑) CTA 버튼 100% 통일
+        cta_bg = "#d4af37"
+        cta_color = "#0b132b"
         badge_bg = "#1e50a0"
         badge_color = "#ffffff"
 
@@ -135,17 +167,16 @@ class CardnewsTypographyEasyTax:
                     letter-spacing: 0.5px;
                 }}
 
-                /* 하단 그라디언트 스크림 및 콘텐츠 컨테이너 */
+                /* 하단 그라디언트 스크림 및 콘텐츠 컨테이너 (85% 걷어낸 초경량 소프트 비네팅) */
                 .bottom-scrim {{
                     width: 100%;
                     background: linear-gradient(
                         180deg,
-                        rgba(11, 19, 43, 0.0) 0%,
-                        rgba(11, 19, 43, 0.76) 22%,
-                        rgba(11, 19, 43, 0.95) 55%,
-                        rgba(11, 19, 43, 0.99) 100%
+                        rgba(0, 0, 0, 0) 0%,
+                        rgba(0, 0, 0, 0.15) 30%,
+                        rgba(15, 23, 42, 0.35) 100%
                     );
-                    padding: 40px 28px 26px;
+                    padding: 20px 24px 22px;
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
@@ -158,32 +189,37 @@ class CardnewsTypographyEasyTax:
                     background: {badge_bg};
                     color: {badge_color};
                     font-weight: 800;
-                    font-size: 12px;
-                    padding: 5px 13px;
+                    font-size: 12.5px;
+                    padding: 4px 12px;
                     border-radius: 6px;
                     letter-spacing: -0.2px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
                     margin-bottom: 2px;
                 }}
 
-                /* 헤드라인 타이틀 (럭셔리 골드) */
+                /* 🌟 [골드 입체 테두리 & 3D 딥 섀도우 헤드라인] */
                 .headline-title {{
-                    font-size: 22px;
-                    font-weight: 800;
+                    font-size: 23px;
+                    font-weight: 900;
                     color: #ffd700;
-                    line-height: 1.32;
-                    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+                    line-height: 1.3;
+                    -webkit-text-stroke: 3.5px #0a0f1d;
+                    paint-order: stroke fill;
+                    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.95), 0 2px 4px rgba(0, 0, 0, 0.9);
                     letter-spacing: -0.4px;
                     word-break: break-word;
                 }}
 
                 /* 서브타이틀 */
                 .subtitle-text {{
-                    font-size: 13.5px;
-                    font-weight: 500;
-                    color: #e2e8f0;
-                    line-height: 1.45;
-                    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #ffffff;
+                    line-height: 1.4;
+                    -webkit-text-stroke: 2px #0a0f1d;
+                    paint-order: stroke fill;
+                    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.95);
                     letter-spacing: -0.2px;
                     word-break: break-word;
                 }}
@@ -193,40 +229,44 @@ class CardnewsTypographyEasyTax:
                     display: flex;
                     flex-direction: column;
                     gap: 3px;
-                    margin: 4px 0 6px;
+                    margin: 2px 0 4px;
                 }}
                 .bullet-item {{
                     display: flex;
                     align-items: baseline;
                     gap: 6px;
-                    font-size: 12.5px;
-                    color: #cbd5e1;
-                    line-height: 1.38;
-                    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #ffffff;
+                    line-height: 1.35;
+                    -webkit-text-stroke: 1.8px #0a0f1d;
+                    paint-order: stroke fill;
+                    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
                 }}
                 .bullet-dot {{
                     color: #38bdf8;
                     font-weight: 900;
-                    font-size: 14px;
+                    font-size: 13px;
+                    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
                 }}
                 .bullet-text {{
                     word-break: break-word;
                 }}
 
-                /* 하단 CTA 버튼 */
+                /* 하단 CTA 버튼 (선명한 노랑/골드) */
                 .cta-button {{
                     width: 100%;
                     background: {cta_bg};
                     color: {cta_color};
                     font-size: 15px;
                     font-weight: 800;
-                    padding: 12px 20px;
+                    padding: 11px 20px;
                     border-radius: 12px;
                     text-align: center;
-                    border: none;
-                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+                    border: 1px solid rgba(255, 255, 255, 0.25);
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
                     letter-spacing: -0.2px;
-                    margin-top: 4px;
+                    margin-top: 3px;
                 }}
             </style>
         </head>
@@ -286,8 +326,9 @@ class CardnewsTypographyEasyTax:
         scale = max(1080 / W, 1350 / H)
         resized_photo = composite_photo.resize((int(W * scale), int(H * scale)), Image.Resampling.LANCZOS)
 
+        # 상단 머리 위 공간감(Headroom) 보존 크롭 (상단 여백 80% 유지, 하단 텍스트 영역 우선 수용)
         crop_x = (resized_photo.width - 1080) // 2
-        crop_y = (resized_photo.height - 1350) // 2
+        crop_y = max(0, min(int((resized_photo.height - 1350) * 0.25), resized_photo.height - 1350))
         photo_cropped = resized_photo.crop((crop_x, crop_y, crop_x + 1080, crop_y + 1350))
         canvas.paste(photo_cropped, (0, 0))
 

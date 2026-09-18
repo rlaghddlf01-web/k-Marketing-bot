@@ -170,6 +170,14 @@ class CardNewsBatchProducer:
         )
 
         logger.info(f"🎉 [EasyTax 5장 카드뉴스 세트 완성] 폴더: {out_dir}")
+        
+        # 🧹 [1개국 5장 세트 완료 즉각 VRAM 캐시 방출]
+        try:
+            from core.engine.gpu_memory_flusher import GPUMemoryFlusher
+            GPUMemoryFlusher.flush_gpu_vram(unload_models=False)
+        except Exception:
+            pass
+
         return {
             "folder_path": str(out_dir),
             "slides": [str(p) for p in saved_slides],
@@ -197,14 +205,14 @@ class CardNewsBatchProducer:
             raise GenerationAbortedException(f"[Slide {s_idx}] 대시보드 정지 요청으로 생성을 취소합니다.")
 
         if not self._wan_available:
-            logger.warning(f"[Slide {s_idx}] ComfyUI 미실행 → Fallback 사용")
+            logger.info(f"[Slide {s_idx}] ComfyUI 미실행 → 마스터 베이스 사진 적용")
             return fallback_img
 
         positive_prompt = card_data.get("image_prompt", "")
         negative_prompt = card_data.get("negative_prompt", None)
 
         if not positive_prompt:
-            logger.warning(f"[Slide {s_idx}] image_prompt 없음 → Fallback 사용")
+            logger.warning(f"[Slide {s_idx}] image_prompt 없음 → 마스터 베이스 사진 적용")
             return fallback_img
 
         width, height = 832, 1216
@@ -212,9 +220,8 @@ class CardNewsBatchProducer:
 
         try:
             # 🎯 [전 슬라이드 독립 T2I + 마스터 시드 동기화]
-            # - 이전 슬라이드의 옷/배경/포즈가 잔상으로 남는 img2img 전면 폐기
-            # - 슬라이드별 100% 다른 의상/포즈/배경을 완벽한 60% 미디엄 샷으로 독립 생성
-            # - 동일 캐릭터 앵커 프롬프트 + 동일 master_seed로 동일 인물 정체성 보존
+            # - 프롬프트 최전방(Token 0)에 100% 동일한 주인공 인물 앵커 고정
+            # - 동일 캐릭터 앵커 프롬프트 + 동일 master_seed로 1~5번 전원 동일 인물 정체성 보존
             logger.info(f"🎨 [Slide {s_idx}] WAN T2I 씬 사진 생성 (seed={master_seed}) → {prefix}")
             generated_path = self.wan_client.generate_t2i_master(
                 positive_prompt=positive_prompt,
@@ -232,7 +239,7 @@ class CardNewsBatchProducer:
             if isinstance(e, GenerationAbortedException) or GenerationAbortGuard.is_abort_requested():
                 logger.warning(f"🛑 [Slide {s_idx}] 대시보드 정지 감지 → Fallback 무시 및 루프 즉각 올스톱!")
                 raise
-            logger.error(f"❌ [Slide {s_idx}] WAN 생성 실패 ({e}) → Fallback 사용")
+            logger.error(f"❌ [Slide {s_idx}] WAN 생성 실패 ({e}) → 1번 주인공 마스터 베이스 사진 안전 유지")
             return fallback_img
 
     def _render_slide(

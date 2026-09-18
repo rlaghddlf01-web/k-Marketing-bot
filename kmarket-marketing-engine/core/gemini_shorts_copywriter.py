@@ -17,7 +17,7 @@ import json
 import logging
 import re
 from typing import Dict, Any, List, Optional
-from config import GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET, LANGUAGES
+from config import GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET, LANGUAGES, BASE_URLS
 
 logger = logging.getLogger("GeminiShortsCopywriter")
 
@@ -62,7 +62,8 @@ class GeminiShortsCopywriter:
         persona_name = scenario.get("persona_name", "외국인 거주자")
 
         if service_id == "easytax":
-            landing_url = f"https://ktrs-service.vercel.app/?lang={lang}"
+            base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app").rstrip("/")
+            landing_url = f"{base_domain}/?lang={lang}"
             amount_str = refund_formatted or "3,840,000 KRW"
             service_desc = (
                 f"EasyTax 국세청 조특법 30조 90% 소득세 감면 & 경정청구 세무 환급\n"
@@ -71,7 +72,8 @@ class GeminiShortsCopywriter:
                 f"- 5년 소멸시효 전 긴급 구제 청구"
             )
         else:
-            landing_url = f"https://ktrs-market.vercel.app/{lang}"
+            base_domain = BASE_URLS.get("kmarket", "https://ktrs-market.vercel.app").rstrip("/")
+            landing_url = f"{base_domain}/{lang}"
             amount_str = "0 KRW (100% 무료 나눔)"
             item = scenario.get("item", "가구/가전")
             service_desc = (
@@ -464,6 +466,8 @@ class GeminiShortsCopywriter:
 영상 후킹 타이틀: {hook_title}
 공식 랜딩 링크: {landing_url}
 영상 규격: 1080x1920 (9:16 세로 풀HD 숏폼)
+🏷️ 17개국 바이럴 해시태그 (복사용): 
+{hashtags_str}
 ================================================================================
 
 [1] 🔴 유튜브 쇼츠 (YouTube Shorts) 포스팅 가이드

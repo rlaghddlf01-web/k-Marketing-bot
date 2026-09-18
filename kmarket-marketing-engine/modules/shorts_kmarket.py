@@ -255,6 +255,7 @@ class ShortsKMarket:
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             f"📝 [릴스 본문 (링크 0% - 알고리즘 도달률 5배 극대화)]:\n"
             f"{fb.get('post_content', '')}\n\n"
+            f"🏷️ 릴스 해시태그: {fb.get('hashtags', hashtags_str)}\n\n"
             f"★ [첫 번째 댓글 (릴스 게시 직후 바로 달아줄 스텔스 링크)]:\n"
             f"{fb.get('first_comment', f'👉 {landing_url}')}\n\n"
 

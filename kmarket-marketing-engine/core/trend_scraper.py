@@ -224,13 +224,13 @@ class ViralTrendScraper:
         }
         return matrix
 
-    def get_viral_hashtags(self, service_id: str = "kmarket", lang: str = "en", count: int = 10) -> List[str]:
+    def get_viral_hashtags(self, service_id: str = "kmarket", lang: str = "en", count: int = 25) -> List[str]:
         """
-        4단 하이브리드 황금 조합 반환 (대한민국 체류 외국인 근로자 타깃 집중):
-        [1] 🏭 필수 외국인 근로자 타깃 태그 (#E9비자, #외국인근로자, #E9visa)
-        [2] 🎯 해당 언어 '국내 체류 외국인' 고유 타깃 태그 (국가별 커뮤니티 정밀 도달)
-        [3] 💎 서비스 전용 전환 태그 (환급/0원나눔 클릭 전환)
-        [4] 🇰🇷 대한민국 실시간 급상승 트렌드 -> 알고리즘 추천 노출
+        4단 하이브리드 황금 조합 반환 (대시보드 17개국 매트릭스와 100% 일치):
+        [1] 🏭 필수 외국인 근로자 타깃 태그 (#E9비자, #외국인근로자, #세금환급)
+        [2] 🎯 해당 언어 '국내 체류 외국인' 고유 타깃 태그 (in_korea_common)
+        [3] 💎 서비스 전용 전환 태그 (easytax / kmarket)
+        [4] 📍 전국 주요 공단/외국인 밀집지역 핫스팟 태그 (hot_districts)
         """
         kr_trends = self.hashtag_db.get("korea_live_trends", ["#koreatrend", "#fyp"])
         countries = self.hashtag_db.get("countries", {})
@@ -238,19 +238,22 @@ class ViralTrendScraper:
 
         # 1. 대한민국 외국인 근로자 필수 초타깃 태그
         if service_id == "easytax":
-            worker_tags = ["#E9비자", "#외국인근로자", "#세금환급", "#소득세감면", "#E9visa", "#TaxRefundKorea"]
+            worker_tags = ["#E9비자", "#외국인근로자", "#세금환급", "#E9visa", "#TaxRefundKorea", "#소득세감면"]
         else:
             worker_tags = ["#0원나눔", "#외국인근로자", "#E9비자", "#한국생활", "#무료나눔", "#FreeGiveaway"]
 
-        in_korea_tags = lang_data.get("in_korea_common", ["#lifeinkorea", "#expatsinkorea"])[:3]
-        service_tags = lang_data.get(service_id, ["#kmarket", "#koreatips"])[:3]
-        live_tags = kr_trends[:2]
+        in_korea_tags = lang_data.get("in_korea_common", ["#lifeinkorea", "#expatsinkorea"])
+        service_tags = lang_data.get(service_id, ["#kmarket", "#koreatips"])
+        district_tags = lang_data.get("hot_districts", [])
 
-        combined = worker_tags[:3] + in_korea_tags + service_tags + worker_tags[3:] + live_tags
+        # 대시보드 매트릭스와 100% 동일하게 전체 태그 결합 (중복 제거)
+        combined = worker_tags[:3] + in_korea_tags + service_tags + district_tags + worker_tags[3:]
         unique_tags = list(dict.fromkeys(combined))
-        return unique_tags[:count]
+        if count and count > 0:
+            return unique_tags[:count]
+        return unique_tags
 
-    def format_hashtag_string(self, service_id: str = "kmarket", lang: str = "en", count: int = 10) -> str:
+    def format_hashtag_string(self, service_id: str = "kmarket", lang: str = "en", count: int = 25) -> str:
         """SNS 본문/설명란에 바로 붙일 수 있는 문자열 형식 반환"""
         tags = self.get_viral_hashtags(service_id, lang, count)
         return " ".join(tags)

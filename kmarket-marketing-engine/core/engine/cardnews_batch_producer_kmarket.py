@@ -134,12 +134,12 @@ class CardNewsBatchProducerKMarket:
                     dynamic_desc=card.get("subtitle")
                 )
 
-            # 🌟 [1, 2, 5번 슬라이드] 배경·가구 중심 WAN T2I 실사 라이프스타일 사진 생성 (슬라이드별 독립 시드로 재탕 원천 방지)
+            # 🌟 [1, 2, 5번 슬라이드] 배경·가구 중심 WAN T2I 실사 라이프스타일 사진 생성 (1~5번 전 슬라이드 동일 인물 마스터 시드 100% 동기화)
             elif s_idx == 1 and custom_hero_image is not None:
                 base_photo = custom_hero_image
                 logger.info("🌟 [Slide 1] 검증 승인된 마스터 주인공 인물 사진(custom_hero_image) 직접 적용!")
             else:
-                slide_seed = master_seed + (s_idx - 1) * 1337
+                slide_seed = master_seed
                 base_photo = self._generate_slide_photo(
                     s_idx=s_idx,
                     card_data=card,

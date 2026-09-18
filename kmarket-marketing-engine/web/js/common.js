@@ -166,7 +166,12 @@ function switchBrand(brand) {
     if (typeof loadHashtags === "function") loadHashtags();
     if (typeof loadGallery === "function") loadGallery();
     if (typeof loadGoldenCopies === "function") loadGoldenCopies();
-    if (typeof loadIRAnalytics === "function") loadIRAnalytics();
+    if (typeof switchIRBrand === "function") {
+        const targetIRBtn = document.getElementById(brand === "kmarket" ? "ir-brand-km" : "ir-brand-tax");
+        switchIRBrand(brand, targetIRBtn);
+    } else if (typeof loadIRAnalytics === "function") {
+        loadIRAnalytics();
+    }
     if (typeof loadHealthStatus === "function") loadHealthStatus();
 }
 

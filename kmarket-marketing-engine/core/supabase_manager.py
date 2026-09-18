@@ -416,4 +416,380 @@ class SupabaseManager:
         import os
         return os.getenv("COLAB_GPU_API_URL", "").strip()
 
+    def fetch_live_traffic_data(self, brand: str = "all", period: str = "today", limit: int = 150) -> Dict[str, Any]:
+        """
+        📊 [실시간 유입 트래픽 및 UTM 관제 데이터 통합 집계]
+        - Supabase kmarket_traffic_logs, marketing_utm_logs, tax_applications 실데이터 조회
+        - UTC -> KST(+9) 시간 변환 및 5단계 기간 필터링:
+          1) today (오늘 24H 시간대별)
+          2) daily (최근 14일 날짜별)
+          3) weekly (최근 8주 주간별)
+          4) monthly (당해 12개월 월별)
+          5) yearly (2024~2027 연도별)
+        - 출처(10대 채널), 17개국 언어/국가, 캠페인, 접속 일시 및 원본 타임스탬프 완벽 구조화
+        """
+        result = {
+            "total_count": 0,
+            "period_count": 0,
+            "km_count": 0,
+            "tax_count": 0,
+            "sources_map": {},
+            "countries_map": {},
+            "visitors_list": [],
+            "raw_timestamps": []
+        }
+        if not self.client:
+            return result
+
+        try:
+            import re
+            now_kst = get_now_kst()
+            today_start_kst = datetime.datetime(now_kst.year, now_kst.month, now_kst.day, tzinfo=KST)
+
+            if period == "daily":
+                period_start_kst = today_start_kst - datetime.timedelta(days=14)
+            elif period == "weekly":
+                period_start_kst = today_start_kst - datetime.timedelta(days=56) # 8주
+            elif period == "monthly":
+                period_start_kst = datetime.datetime(now_kst.year, 1, 1, tzinfo=KST)
+            elif period == "yearly":
+                period_start_kst = datetime.datetime(2024, 1, 1, tzinfo=KST)
+            else: # today (기본 24시간)
+                period_start_kst = today_start_kst
+
+            period_start_utc_iso = period_start_kst.astimezone(datetime.timezone.utc).isoformat()
+
+            def parse_iso(ts_str):
+                if not ts_str:
+                    return None
+                try:
+                    ts_str = str(ts_str).replace('Z', '+00:00')
+                    return datetime.datetime.fromisoformat(ts_str)
+                except Exception:
+                    return None
+
+            brand_filter = (brand or "all").lower()
+
+            all_visitors = []
+            sources_map = {}
+            countries_map = {}
+            raw_timestamps = []
+            period_count = 0
+            total_count = 0
+            km_period_count = 0
+            tax_period_count = 0
+
+            lang_name_map = {
+                "mn": ("몽골", "🇲🇳 몽골어", "mn"),
+                "km": ("캄보디아", "🇰🇭 캄보디아어", "km"),
+                "vi": ("베트남", "🇻🇳 베트남어", "vi"),
+                "my": ("미얀마", "🇲🇲 미얀마어", "my"),
+                "ne": ("네팔", "🇳🇵 네팔어", "ne"),
+                "th": ("태국", "🇹🇭 태국어", "th"),
+                "uz": ("우즈베키스탄", "🇺🇿 우즈벡어", "uz"),
+                "id": ("인도네시아", "🇮🇩 인도네시아어", "id"),
+                "en": ("미국/글로벌", "🇺🇸 영어", "en"),
+                "zh": ("중국", "🇨🇳 중국어", "zh"),
+                "ru": ("러시아", "🇷🇺 러시아어", "ru"),
+                "ja": ("일본", "🇯🇵 일본어", "ja"),
+                "si": ("스리랑카", "🇱🇰 스리랑카어", "si"),
+                "kk": ("카자흐스탄", "🇰🇿 카자흐어", "kk"),
+                "bn": ("방글라데시", "🇧🇩 방글라어", "bn"),
+                "ur": ("파키스탄", "🇵🇰 우르두어", "ur"),
+                "ko": ("대한민국", "🇰🇷 한국어", "ko")
+            }
+
+            # 1. kmarket_traffic_logs (K-Market 실시간 방문자 로그)
+            km_visitors_list = []
+            tax_visitors_list = []
+            km_sources_map = {}
+            tax_sources_map = {}
+            km_countries_map = {}
+            tax_countries_map = {}
+            km_raw_timestamps = []
+            tax_raw_timestamps = []
+
+            if brand_filter in ["all", "kmarket"]:
+                try:
+                    tot_res = self.client.table("kmarket_traffic_logs").select("id", count="exact").execute()
+                    km_total = tot_res.count or 0
+                    total_count += km_total
+
+                    period_res = self.client.table("kmarket_traffic_logs") \
+                        .select("*") \
+                        .gte("created_at", period_start_utc_iso) \
+                        .order("created_at", desc=True) \
+                        .limit(800) \
+                        .execute()
+
+                    km_rows = period_res.data or []
+                    period_count += len(km_rows)
+                    km_period_count += len(km_rows)
+
+                    for r in km_rows:
+                        ckey = (r.get("channel_key") or "").lower()
+                        cname = r.get("channel_name") or ""
+                        surl = r.get("source_url") or ""
+                        ref = (r.get("referrer") or "").lower()
+                        usrc = (r.get("utm_source") or "").lower()
+                        umed = (r.get("utm_medium") or "").lower()
+
+                        if "instagram" in ckey or usrc in ["ig", "instagram"] or "instagram" in ref:
+                            channel = "Instagram"
+                            ch_icon = "📸"
+                        elif "facebook" in ckey or usrc in ["fb", "facebook"] or "facebook" in ref or "fbclid" in surl:
+                            channel = "Facebook"
+                            ch_icon = "📘"
+                        elif "tiktok" in ckey or usrc in ["tiktok", "tt"] or "tiktok" in ref:
+                            channel = "TikTok"
+                            ch_icon = "🎵"
+                        elif "threads" in ckey or usrc == "threads" or "threads" in ref or "threads" in surl:
+                            channel = "Threads"
+                            ch_icon = "🧵"
+                        elif "telegram" in ckey or usrc == "telegram" or "t.me" in ref:
+                            channel = "Telegram"
+                            ch_icon = "📲"
+                        elif "reddit" in ckey or usrc == "reddit" or "reddit.com" in ref:
+                            channel = "Reddit"
+                            ch_icon = "🤖"
+                        elif "google" in ckey or "google" in usrc or "google" in ref:
+                            channel = "Google SEO"
+                            ch_icon = "🌐"
+                        elif "youtube" in ckey or "youtube" in usrc or "youtu.be" in ref:
+                            channel = "YouTube"
+                            ch_icon = "▶️"
+                        elif ckey == "direct" or "direct" in cname.lower() or not ref:
+                            channel = "Direct / 북마크"
+                            ch_icon = "🔗"
+                        else:
+                            channel = cname or ckey or "웹 방문"
+                            ch_icon = "🌐"
+
+                        sources_map[channel] = sources_map.get(channel, 0) + 1
+                        km_sources_map[channel] = km_sources_map.get(channel, 0) + 1
+
+                        lang_code = ""
+                        m = re.search(r"ktrs-market\.vercel\.app/([a-z]{2})", surl)
+                        if m:
+                            lang_code = m.group(1)
+                        elif "lang=" in surl:
+                            m2 = re.search(r"lang=([a-z]{2})", surl)
+                            if m2:
+                                lang_code = m2.group(1)
+
+                        country_info = lang_name_map.get(lang_code, ("글로벌", f"/{lang_code}" if lang_code else "메인 홈", lang_code or "global"))
+                        c_name = country_info[0]
+                        lang_label = country_info[1]
+                        countries_map[c_name] = countries_map.get(c_name, 0) + 1
+                        km_countries_map[c_name] = km_countries_map.get(c_name, 0) + 1
+
+                        target_app = f"K-Market ({lang_label})"
+                        camp = r.get("utm_campaign") or ("바이럴 SNS 링크" if channel in ["Instagram", "Facebook", "Threads", "TikTok"] else "실시간 자연 유입")
+
+                        dt = parse_iso(r.get("created_at"))
+                        dt_kst = dt.astimezone(KST) if dt else now_kst
+                        dt_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M:%S")
+
+                        raw_timestamps.append(dt_kst)
+                        km_raw_timestamps.append(dt_kst)
+                        v_obj = {
+                            "brand": "kmarket",
+                            "brand_label": "K-Market",
+                            "brand_icon": "🛒",
+                            "source_name": channel,
+                            "channel_icon": ch_icon,
+                            "medium": umed or "social",
+                            "campaign": camp,
+                            "country": c_name,
+                            "lang_label": lang_label,
+                            "target_app": target_app,
+                            "action_stage": "실물 매물 탐색 / 번역 채팅 진입",
+                            "ip": "클라우드 검증됨 (Vercel)",
+                            "created_at": dt_kst_str,
+                            "_dt": dt_kst
+                        }
+                        all_visitors.append(v_obj)
+                        km_visitors_list.append(v_obj)
+                except Exception as e:
+                    logger.warning(f"Supabase kmarket_traffic_logs 조회 예외: {e}")
+
+            # 2. tax_applications (EasyTax 환급 신청 및 고의도 유입 로그)
+            if brand_filter in ["all", "easytax"]:
+                try:
+                    tot_tax = self.client.table("tax_applications").select("id", count="exact").execute()
+                    tax_total = tot_tax.count or 0
+                    total_count += tax_total
+
+                    tax_res = self.client.table("tax_applications") \
+                        .select("*") \
+                        .gte("created_at", period_start_utc_iso) \
+                        .order("created_at", desc=True) \
+                        .limit(500) \
+                        .execute()
+                    tax_rows = tax_res.data or []
+                    period_count += len(tax_rows)
+                    tax_period_count += len(tax_rows)
+
+                    for r in tax_rows:
+                        meta = r.get("metadata") or {}
+                        usrc = (meta.get("utmSource") or "").lower()
+                        umed = (meta.get("utmMedium") or "form").lower()
+                        ulang = meta.get("userLanguage") or r.get("language") or "vi"
+                        refund_est = r.get("estimated_refund_amount") or meta.get("preFilterEstimate") or 0
+
+                        if "facebook" in usrc or "fb" in usrc:
+                            channel = "Facebook"
+                            ch_icon = "📘"
+                        elif "instagram" in usrc or "ig" in usrc:
+                            channel = "Instagram"
+                            ch_icon = "📸"
+                        elif "tiktok" in usrc:
+                            channel = "TikTok"
+                            ch_icon = "🎵"
+                        elif "telegram" in usrc:
+                            channel = "Telegram"
+                            ch_icon = "📲"
+                        elif "reddit" in usrc:
+                            channel = "Reddit"
+                            ch_icon = "🤖"
+                        elif "google" in usrc or "seo" in usrc:
+                            channel = "Google SEO"
+                            ch_icon = "🌐"
+                        elif "threads" in usrc:
+                            channel = "Threads"
+                            ch_icon = "🧵"
+                        else:
+                            channel = usrc.capitalize() if usrc else "Facebook"
+                            ch_icon = "📘"
+
+                        sources_map[channel] = sources_map.get(channel, 0) + 1
+                        tax_sources_map[channel] = tax_sources_map.get(channel, 0) + 1
+
+                        country_info = lang_name_map.get(ulang, ("베트남", f"언어: {ulang}", ulang))
+                        c_name = country_info[0]
+                        lang_label = country_info[1]
+                        countries_map[c_name] = countries_map.get(c_name, 0) + 1
+                        tax_countries_map[c_name] = tax_countries_map.get(c_name, 0) + 1
+
+                        target_app = f"EasyTax ({lang_label})"
+                        camp = f"💰 예상환급 {refund_est:,.0f}원 모의계산 완료" if refund_est else "세금 환급 신청서 접수"
+
+                        dt = parse_iso(r.get("created_at"))
+                        dt_kst = dt.astimezone(KST) if dt else now_kst
+                        dt_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M:%S")
+
+                        raw_timestamps.append(dt_kst)
+                        tax_raw_timestamps.append(dt_kst)
+                        v_obj = {
+                            "brand": "easytax",
+                            "brand_label": "EasyTax",
+                            "brand_icon": "💰",
+                            "source_name": channel,
+                            "channel_icon": ch_icon,
+                            "medium": umed,
+                            "campaign": camp,
+                            "country": c_name,
+                            "lang_label": lang_label,
+                            "target_app": target_app,
+                            "action_stage": "조특법 90% 감면 계산 / 국세청 환급 접수",
+                            "ip": "신청 접수 완료 (인증됨)",
+                            "created_at": dt_kst_str,
+                            "_dt": dt_kst
+                        }
+                        all_visitors.append(v_obj)
+                        tax_visitors_list.append(v_obj)
+                except Exception as e:
+                    logger.warning(f"Supabase tax_applications 조회 예외: {e}")
+
+            # 3. marketing_utm_logs (중앙 마케팅 UTM 로그)
+            try:
+                utm_res = self.client.table("marketing_utm_logs") \
+                    .select("*") \
+                    .gte("created_at", period_start_utc_iso) \
+                    .order("created_at", desc=True) \
+                    .limit(500) \
+                    .execute()
+                for r in (utm_res.data or []):
+                    srv = (r.get("service_id") or "kmarket").lower()
+                    if brand_filter != "all" and srv != brand_filter:
+                        continue
+                    total_count += 1
+                    period_count += 1
+                    if srv == "kmarket":
+                        km_period_count += 1
+                    else:
+                        tax_period_count += 1
+
+                    plat = (r.get("platform") or "web").capitalize()
+                    ch_icon = "📸" if "instagram" in plat.lower() else ("📘" if "facebook" in plat.lower() else ("🎵" if "tiktok" in plat.lower() else ("📲" if "telegram" in plat.lower() else ("🤖" if "reddit" in plat.lower() else ("🧵" if "threads" in plat.lower() else "🌐")))))
+                    sources_map[plat] = sources_map.get(plat, 0) + 1
+
+                    dt = parse_iso(r.get("created_at"))
+                    dt_kst = dt.astimezone(KST) if dt else now_kst
+                    dt_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M:%S")
+
+                    raw_timestamps.append(dt_kst)
+                    v_obj = {
+                        "brand": srv,
+                        "brand_label": "K-Market" if srv == "kmarket" else "EasyTax",
+                        "brand_icon": "🛒" if srv == "kmarket" else "💰",
+                        "source_name": plat,
+                        "channel_icon": ch_icon,
+                        "medium": r.get("channel_type") or "link",
+                        "campaign": r.get("campaign_id") or "마케팅 봇 링크 클릭",
+                        "country": "글로벌 타깃",
+                        "lang_label": "다국어 랜딩",
+                        "target_app": "K-Market" if srv == "kmarket" else "EasyTax",
+                        "action_stage": "외부 캠페인 링크 유입",
+                        "ip": r.get("source_ip") or "클라우드 유입",
+                        "created_at": dt_kst_str,
+                        "_dt": dt_kst
+                    }
+                    all_visitors.append(v_obj)
+                    if srv == "kmarket":
+                        km_visitors_list.append(v_obj)
+                        km_sources_map[plat] = km_sources_map.get(plat, 0) + 1
+                        km_raw_timestamps.append(dt_kst)
+                    else:
+                        tax_visitors_list.append(v_obj)
+                        tax_sources_map[plat] = tax_sources_map.get(plat, 0) + 1
+                        tax_raw_timestamps.append(dt_kst)
+            except Exception:
+                pass
+
+            # 최신순 정렬 및 limit 적용
+            all_visitors.sort(key=lambda x: x.get("_dt") or datetime.datetime.min.replace(tzinfo=KST), reverse=True)
+            for v in all_visitors:
+                v.pop("_dt", None)
+
+            km_visitors_list.sort(key=lambda x: x.get("_dt") or datetime.datetime.min.replace(tzinfo=KST), reverse=True)
+            for v in km_visitors_list:
+                v.pop("_dt", None)
+
+            tax_visitors_list.sort(key=lambda x: x.get("_dt") or datetime.datetime.min.replace(tzinfo=KST), reverse=True)
+            for v in tax_visitors_list:
+                v.pop("_dt", None)
+
+            result["total_count"] = total_count
+            result["period_count"] = period_count
+            result["km_count"] = km_period_count
+            result["tax_count"] = tax_period_count
+            result["sources_map"] = sources_map
+            result["countries_map"] = countries_map
+            result["visitors_list"] = all_visitors[:limit]
+            result["km_visitors_list"] = km_visitors_list[:limit]
+            result["tax_visitors_list"] = tax_visitors_list[:limit]
+            result["km_sources_map"] = km_sources_map
+            result["tax_sources_map"] = tax_sources_map
+            result["km_countries_map"] = km_countries_map
+            result["tax_countries_map"] = tax_countries_map
+            result["raw_timestamps"] = raw_timestamps
+            result["km_raw_timestamps"] = km_raw_timestamps
+            result["tax_raw_timestamps"] = tax_raw_timestamps
+
+        except Exception as e:
+            logger.error(f"fetch_live_traffic_data 실행 중 오류: {e}")
+
+        return result
+
 

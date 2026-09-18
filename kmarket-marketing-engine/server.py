@@ -652,6 +652,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
         elif path == "/api/hashtags":
             self._handle_get_hashtags()
+            return
         elif path == "/api/ir-analytics" or path.startswith("/api/ir-analytics"):
             self._handle_get_ir_analytics(parsed)
             return
@@ -1141,22 +1142,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self._set_headers("application/json")
         self.wfile.write(json.dumps({"hashtags": scraper.hashtag_db}).encode("utf-8"))
 
-    def _handle_get_ir_analytics(self):
-        from core.ir_analytics import IRAnalyticsEngine
-        parsed = urllib.parse.urlparse(self.path)
-        qs = urllib.parse.parse_qs(parsed.query)
-        period = qs.get("period", ["today"])[0]
-        brand = qs.get("brand", ["all"])[0]
-
-        db_mgr = DBManager()
-        supabase_mgr = SupabaseManager(db_mgr)
-        import importlib
-        import core.ir_analytics
-        importlib.reload(core.ir_analytics)
-        engine = core.ir_analytics.IRAnalyticsEngine(db_mgr, supabase_mgr)
-        data = engine.get_detailed_dashboard_data(period, brand=brand)
-        self._set_headers("application/json")
-        self.wfile.write(json.dumps(data).encode("utf-8"))
 
     def _handle_track_visitor(self, parsed):
         try:
@@ -1329,70 +1314,20 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self._set_headers("application/json")
         self.wfile.write(json.dumps(res).encode("utf-8"))
 
-    def _handle_get_ir_analytics(self, parsed_url):
+    def _handle_get_ir_analytics(self, parsed_url=None):
         from core.ir_analytics import IRAnalyticsEngine
-        query_params = urllib.parse.parse_qs(parsed_url.query)
+        from core.supabase_manager import SupabaseManager
+        query_url = parsed_url or urllib.parse.urlparse(self.path)
+        query_params = urllib.parse.parse_qs(query_url.query)
         period = query_params.get("period", ["today"])[0]
         brand = query_params.get("brand", ["all"])[0]
 
         db_mgr = DBManager()
-        engine = IRAnalyticsEngine(db_mgr)
+        supabase_mgr = SupabaseManager(db_mgr)
+        engine = IRAnalyticsEngine(db_mgr, supabase_mgr)
         data = engine.get_detailed_dashboard_data(period=period, brand=brand)
         self._set_headers("application/json")
-        self.wfile.write(json.dumps(data).encode("utf-8"))
-
-    def _handle_get_utm_logs(self, parsed_url):
-        query_params = urllib.parse.parse_qs(parsed_url.query)
-        brand = query_params.get("brand", ["all"])[0]
-        db_mgr = DBManager()
-        logs = []
-        with db_mgr._get_connection() as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            if brand == "kmarket":
-                cursor.execute("SELECT * FROM utm_logs WHERE target_service = 'kmarket' ORDER BY created_at DESC LIMIT 30")
-            elif brand == "easytax":
-                cursor.execute("SELECT * FROM utm_logs WHERE target_service = 'easytax' ORDER BY created_at DESC LIMIT 30")
-            else:
-                cursor.execute("SELECT * FROM utm_logs ORDER BY created_at DESC LIMIT 30")
-            rows = cursor.fetchall()
-            logs = [dict(r) for r in rows]
-
-        self._set_headers("application/json")
-        self.wfile.write(json.dumps({"logs": logs, "brand": brand}).encode("utf-8"))
-
-    def _handle_track_visitor(self, parsed_url):
-        query_params = urllib.parse.parse_qs(parsed_url.query)
-        utm_source = query_params.get("utm_source", ["direct"])[0]
-        utm_medium = query_params.get("utm_medium", ["link"])[0]
-        utm_campaign = query_params.get("utm_campaign", ["viral"])[0]
-        utm_content = query_params.get("utm_content", ["hub"])[0]
-        target = query_params.get("target", ["kmarket"])[0]
-        ip = self.client_address[0] if self.client_address else "127.0.0.1"
-
-        db_mgr = DBManager()
-        with db_mgr._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO utm_logs (utm_source, utm_medium, utm_campaign, utm_content, target_service, ip)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (utm_source, utm_medium, utm_campaign, utm_content, target, ip))
-            conn.commit()
-
-        # 🧬 링크 클릭 유입 집계
-        try:
-            channel_hint = f"{target}_shorts" if "shorts" in utm_content else f"{target}_cardnews"
-            engine_hint = "gemini"
-            ab_evolution_engine.record_engagement(channel_hint, engine_hint, clicks=1)
-            log_event(f"🎯 [유입 클릭] {target.upper()} 링크 유입 -> {engine_hint}", "success")
-        except Exception:
-            pass
-
-        # 타겟 서비스로 리다이렉트
-        target_url = "https://ktrs-market.vercel.app" if target == "kmarket" else "https://ktrs-service.vercel.app"
-        self._set_headers("text/html", 302)
-        self.send_header("Location", target_url)
-        self.end_headers()
+        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
     def _handle_get_media_engine(self):
         """미디어 생성 엔진 설정 및 A/B 자가학습 통계 조회"""

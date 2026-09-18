@@ -121,6 +121,13 @@ class GoldenBatchProducer:
                 
             time.sleep(1.0)  # 안정적 파일 쓰기를 위한 미세 딜레이
             
+            # 🧹 [1개국 숏폼 생성 완료 즉각 VRAM 캐시 방출]
+            try:
+                from core.engine.gpu_memory_flusher import GPUMemoryFlusher
+                GPUMemoryFlusher.flush_after_country(lang=lang, brand=brand, content_type="shorts")
+            except Exception as fe:
+                logger.warning(f"VRAM Flush 경고 (작업 계속): {fe}")
+            
         return {
             "brand": brand,
             "type": "shorts",
@@ -159,6 +166,13 @@ class GoldenBatchProducer:
                 self._record_batch_stat(slot_name, brand, "cardnews", lang, False)
                 
             time.sleep(1.0)
+            
+            # 🧹 [1개국 카드뉴스 생성 완료 즉각 VRAM 캐시 방출]
+            try:
+                from core.engine.gpu_memory_flusher import GPUMemoryFlusher
+                GPUMemoryFlusher.flush_after_country(lang=lang, brand=brand, content_type="cardnews")
+            except Exception as fe:
+                logger.warning(f"VRAM Flush 경고 (작업 계속): {fe}")
             
         return {
             "brand": brand,

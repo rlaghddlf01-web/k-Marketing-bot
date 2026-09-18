@@ -297,6 +297,14 @@ class KMarketShortsProducer(BaseShortsProducer):
                 pass
 
         logger.info(f"🎉 [케이마켓 숏폼 완성] 최종 산출물: {final_mp4_path}")
+        
+        # 🧹 [1개국 K-Market 숏폼 완성 즉각 VRAM 캐시 방출]
+        try:
+            from core.engine.gpu_memory_flusher import GPUMemoryFlusher
+            GPUMemoryFlusher.flush_gpu_vram(unload_models=False)
+        except Exception:
+            pass
+
         return {
             "output_mp4": final_mp4_path,
             "folder_path": str(out_folder),
@@ -325,57 +333,6 @@ class KMarketShortsProducer(BaseShortsProducer):
             lang=lang,
             scenario=scen
         )
-        ch = sns_pack.get("channels", {})
-        yt = ch.get("youtube_shorts", {})
-        tt = ch.get("tiktok", {})
-        ig = ch.get("instagram_reels", {})
-        fb = ch.get("facebook_reels", {})
-
-        content = f"""================================================================================
-🎬 [K-Market 숏폼 영상 4대 SNS 배포 가이드 & 카피라이트]
-================================================================================
-타깃 국가: {country_name} ({lang.upper()})
-거래 물품 테마: {theme_title} (무료 나눔 / 직거래 0원)
-영상 규격: 1080x1920 (9:16 세로 풀HD 숏폼)
-발화 나레이션: {speech}
-공식 랜딩 링크: {sns_pack.get('landing_url', '')}
-================================================================================
-
-[1] 🎵 틱톡 (TikTok) 포스팅 가이드
---------------------------------------------------------------------------------
-📌 [추천 캡션 (복사용 원문)]
-{tt.get('caption', speech)}
-
-📌 [고정 댓글 (Pinned Comment)]
-{tt.get('pinned_comment', '👉 ' + sns_pack.get('landing_url', ''))}
-
-
-[2] 📸 인스타그램 릴스 (Instagram Reels) 포스팅 가이드
---------------------------------------------------------------------------------
-📌 [추천 캡션 (복사용 원문)]
-{ig.get('caption', speech)}
-
-
-[3] 🔴 유튜브 쇼츠 (YouTube Shorts) 포스팅 가이드
---------------------------------------------------------------------------------
-📌 [쇼츠 제목 (Title)]
-{yt.get('title', f'{theme_title} 100% Free! #Shorts')}
-
-📌 [쇼츠 설명 (Description)]
-{yt.get('description', speech)}
-
-📌 [고정 댓글 (Pinned Comment)]
-{yt.get('pinned_comment', '👉 ' + sns_pack.get('landing_url', ''))}
-
-
-[4] 📘 페이스북 릴스 (Facebook Reels) 포스팅 가이드
---------------------------------------------------------------------------------
-📌 [추천 캡션]
-{fb.get('post_content', speech)}
-
-📌 [첫 번째 댓글 (스텔스 링크)]
-{fb.get('first_comment', '👉 ' + sns_pack.get('landing_url', ''))}
-================================================================================
-"""
+        content = self.copywriter.format_guide_text(sns_pack)
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)

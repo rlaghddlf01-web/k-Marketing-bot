@@ -9,7 +9,7 @@ import json
 import logging
 import re
 from typing import Dict, Any, List, Optional
-from config import GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET, LANGUAGES
+from config import GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY_KMARKET, LANGUAGES, BASE_URLS
 
 logger = logging.getLogger("GeminiCardnewsCopywriter")
 
@@ -500,7 +500,8 @@ class GeminiCardnewsCopywriter:
         target = theme.get("target", "외국인 거주자")
 
         if service_id == "easytax":
-            landing_url = f"https://ktrs-service.vercel.app/?lang={lang}"
+            base_domain = BASE_URLS.get("easytax", "https://ktrs-service.vercel.app").rstrip("/")
+            landing_url = f"{base_domain}/?lang={lang}"
             amount_str = refund_formatted or "3,840,000 KRW"
             service_desc = (
                 f"EasyTax 대한민국 국세청 조특법 30조 90% 소득세 감면 & 경정청구 세무 환급\n"
@@ -509,7 +510,8 @@ class GeminiCardnewsCopywriter:
                 f"- 5년 소멸시효 전 긴급 구제 청구"
             )
         else:
-            landing_url = f"https://kmarket-service.vercel.app/?lang={lang}"
+            base_domain = BASE_URLS.get("kmarket", "https://ktrs-market.vercel.app").rstrip("/")
+            landing_url = f"{base_domain}/{lang}"
             amount_str = "0 KRW (100% 무료 나눔)"
             item = theme.get("item", "가구/가전")
             service_desc = (
@@ -519,11 +521,11 @@ class GeminiCardnewsCopywriter:
                 f"- 한국어 몰라도 17개 언어 실시간 번역 채팅으로 내 동네 0원 매물 1초 확인"
             )
 
-        # 1. 트렌드 스크래퍼 기반 기본 해시태그 로드
+        # 1. 트렌드 스크래퍼 기반 17개국 정밀 타깃 해시태그 전체 로드 (대시보드와 100% 동기화)
         from core.trend_scraper import ViralTrendScraper as TrendScraper
         scraper = TrendScraper()
-        tags_list = [t.lstrip('#') for t in scraper.get_viral_hashtags(service_id, lang, count=12)]
-        formatted_hashtags = scraper.format_hashtag_string(service_id, lang, count=12)
+        tags_list = [t.lstrip('#') for t in scraper.get_viral_hashtags(service_id, lang, count=25)]
+        formatted_hashtags = scraper.format_hashtag_string(service_id, lang, count=25)
 
         if not self.client:
             return self._fallback_post_package(service_id, lang, theme_name, landing_url, formatted_hashtags, amount_str)
@@ -547,48 +549,49 @@ class GeminiCardnewsCopywriter:
 4장: {cards[3].get('title', '') if len(cards) > 3 else ''}
 5장: {cards[4].get('title', '') if len(cards) > 4 else ''}
 
-### [★ 대한민국 체류 외국인 근로자(E-9/E-7) 및 유학생(D-2) 초타깃 규칙]:
-- 한국의 공장, 농축산, 건설, 제조업 등에서 땀 흘려 일하는 외국인 근로자들의 생활밀착형 공감(비싼 생활비 절약, 피땀 흘려 번 세금 90% 환급)을 중심으로 작성해라!
-- 인스타 캡션과 페이스북 본문/첫댓글에 외국인 근로자들이 실제로 검색하는 필수 해시태그(#E9비자 #외국인근로자 #E9visa 등)가 자연스럽게 포함되도록 할 것!
+### [★ 엄격한 언어 및 번역 무결성 수칙 - 절대 위반 금지]:
+1. 모든 외국어 텍스트는 100% 순수한 [{lang_info['name']}] 원어민 구어체로만 작성해라.
+2. 절대로 외국어 문장 중간에 한국어 단어(예: '후불제', '안심', '환급', '클릭' 등)를 그대로 섞어 쓰지 마라! 반드시 해당 국가의 자연스러운 표현으로 100% 완전 번역해라.
+3. 본문 텍스트 내부에 임의의 `#해시태그`를 절대 직접 작성하지 마라 (시스템이 정식 17개국 매트릭스 태그를 완벽하게 결합함).
 
 ### 5대 플랫폼별 알고리즘 해킹 규칙:
 1. instagram (인스타그램 캐러셀):
-   - caption: 감동 스토리 끝에 반드시 "🔗 프로필 상단 링크(@{service_id}_official)를 클릭하여 확인하세요!" 바이오 링크 유도.
-   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역/해설.
+   - caption: 감동 스토리 + 핵심 혜택 3가지 요약 + 100% 안심 후불제 강조 + "🔗 프로필 링크(@{service_id}_official) 또는 아래 링크에서 지금 바로 무료 확인하세요!\n👉 {landing_url}"
+   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역 및 해설.
 2. facebook (페이스북 피드):
-   - post_content: 본문에 링크를 넣으면 노출이 80% 깎인다! 링크를 절대 넣지 말고 "👇 무료 신청/조회 링크는 첫 번째 댓글(1st comment)을 확인하세요!"로 끝낼 것.
-   - first_comment: 글 등록 직후 달아줄 스텔스 링크 ({landing_url} 포함).
-   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역/해설.
+   - post_content: 본문에 링크를 넣으면 노출이 80% 깎인다! 링크를 절대 넣지 말고 "👇 1분 무료 신청/조회 링크는 첫 번째 댓글(1st comment)을 확인하세요!"로 끝낼 것.
+   - first_comment: 글 등록 직후 달아줄 스텔스 공식 링크 메시지 ("👉 1분 무료 환급액 확인 (착수금 0원 100% 안심 후불제):\n{landing_url}").
+   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역 및 해설.
 3. threads (메타 스레드):
-   - main_post: 1번 메인 타래는 카드뉴스 후킹 텍스트 (링크 0%).
-   - reply_link: 2번 답글 타래에 바로 이어달릴 링크 ({landing_url}) 메시지.
-   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역/해설.
+   - main_post: ⚠️ [매우 중요]: 스레드는 최대 500자 글자 수 제한이 매우 엄격하므로, 1번 메인 타래는 반드시 120~180자 내외의 강렬하고 매력적인 숏폼 후킹 텍스트(링크 0%)로 간결하게 작성할 것! 절대 200자를 넘기지 마라.
+   - reply_link: 2번 답글 타래에 바로 이어달릴 링크 메시지 ("👉 1분 무료 신청/조회 바로가기:\n{landing_url}").
+   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역 및 해설.
 4. telegram (텔레그램 채널):
-   - caption: 5장 사진 묶음 앨범용 핵심 요약 캡션.
-   - button_text: 원클릭 인라인 버튼 문구 (예: "💰 무료 환급 조회하기" 또는 "🎁 0원 나눔 받기").
-   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역/해설.
+   - caption: 텔레그램 채널/그룹에 바로 복사-붙여넣기 할 수 있도록 본문 중간/하단에 공식 링크("👉 1분 무료 신청/조회 바로가기:\n{landing_url}")가 반드시 명확히 포함된 완전체 포스트.
+   - button_text: 버튼 문구 (예: "💰 1분 무료 확인하기"의 {lang_info['name']} 번역).
+   - ko_explanation: 관리자가 확인할 수 있는 정확한 한국어 번역 및 해설.
 5. reddit (레딧):
-   - title, body, first_comment 및 ko_explanation.
+   - title, body, first_comment ({landing_url} 포함) 및 ko_explanation.
 
 ### 출력 형식 (반드시 아래 JSON 포맷으로만 엄격히 출력):
 {{
   "post_title": "공통 후킹 헤드라인 ({lang_info['name']})",
   "instagram": {{
-    "caption": "인스타용 캡션 ({lang_info['name']})",
+    "caption": "인스타용 캡션 ({landing_url} 포함) ({lang_info['name']})",
     "ko_explanation": "인스타 캡션 한국어 번역 및 해설"
   }},
   "facebook": {{
-    "post_content": "페북용 본문 ({lang_info['name']})",
+    "post_content": "페북용 본문 (링크 제외) ({lang_info['name']})",
     "first_comment": "페북 첫 댓글용 스텔스 링크 ({landing_url} 포함) ({lang_info['name']})",
     "ko_explanation": "페북 본문 한국어 번역 및 해설"
   }},
   "threads": {{
-    "main_post": "스레드 1번 메인 타래 ({lang_info['name']})",
+    "main_post": "스레드 1번 메인 타래 (링크 제외) ({lang_info['name']})",
     "reply_link": "스레드 2번 이어달기 링크 답글 ({landing_url} 포함) ({lang_info['name']})",
     "ko_explanation": "스레드 본문 한국어 번역 및 해설"
   }},
   "telegram": {{
-    "caption": "텔레그램 5장 앨범 요약 캡션 ({lang_info['name']})",
+    "caption": "텔레그램 전체 포스트 ({landing_url} 포함) ({lang_info['name']})",
     "button_text": "원클릭 버튼 문구 ({lang_info['name']})",
     "ko_explanation": "텔레그램 캡션 한국어 번역 및 해설"
   }},
@@ -681,7 +684,7 @@ class GeminiCardnewsCopywriter:
                 "service_id": service_id,
                 "lang": lang,
                 "post_title": post_title,
-                "post_caption": ig_cap,  # 기본 호환용
+                "post_caption": ig_cap,
                 "landing_url": landing_url,
                 "hashtags": tags_list,
                 "hashtags_str": formatted_hashtags,
@@ -704,40 +707,46 @@ class GeminiCardnewsCopywriter:
         """API 통신 지연 시 무중단 클린 폴백 5대 채널 포스트 패키지"""
         from core.trend_scraper import ViralTrendScraper as TrendScraper
         scraper = TrendScraper()
-        tags_list = [t.lstrip('#') for t in scraper.get_viral_hashtags(service_id, lang, count=12)]
+        tags_list = [t.lstrip('#') for t in scraper.get_viral_hashtags(service_id, lang, count=25)]
 
         if service_id == "easytax":
             title = f"💰 Official Expat Tax Refund: {theme_name} ({amount_str})"
             ig_caption = (
                 f"Did you know expat workers in South Korea can get up to 90% income tax refund under Article 30?\n\n"
                 f"✅ Estimated Refund: {amount_str}\n"
-                f"✅ Zero Advance Fee: 100% success-based settlement after refund arrives in your bank account!\n"
-                f"✅ 5-Year Statute of Limitations: Claim your past 5 years of taxes before they expire.\n\n"
-                f"🔗 Check your exact refund amount in 1 minute via the link in our bio! (@easytax_official)"
+                f"✅ Zero Advance Fee: 100% safe pay-after-refund settlement!\n"
+                f"✅ 5-Year Statute of Limitations: Claim your past taxes before they expire.\n\n"
+                f"🔗 Check your exact refund amount via profile link (@easytax_official) or direct link:\n"
+                f"👉 {landing_url}"
             )
-            ig_ko = f"한국 거주 외국인 근로자 소득세 90% 감면 환급 안내 (예상액: {amount_str}, 착수금 0원 100% 후불제)"
+            ig_ko = f"한국 거주 외국인 근로자 소득세 90% 감면 환급 안내 (예상액: {amount_str}, 착수금 0원 100% 안심 후불제)"
             fb_post = (
                 f"Did you know expat workers in South Korea can get up to 90% income tax refund under Article 30?\n\n"
                 f"✅ Estimated Refund: {amount_str}\n"
-                f"✅ Zero Advance Fee: 100% success-based settlement after refund arrives in your bank account!\n"
-                f"✅ 5-Year Statute of Limitations: Claim your past 5 years of taxes before they expire.\n\n"
+                f"✅ Zero Advance Fee: 100% safe pay-after-refund settlement!\n"
+                f"✅ 5-Year Statute of Limitations: Claim your past taxes before they expire.\n\n"
                 f"👇 Check the first comment below for the free 1-minute estimation tool link!"
             )
-            fb_comment = f"👉 Estimate your refund for free in 1 minute (Certified NTS Agent): {landing_url}"
-            fb_ko = f"외국인 근로자 국세청 세금 환급 안내 ({amount_str} 환급, 첫 댓글 링크 확인)"
+            fb_comment = f"👉 Estimate your refund for free in 1 minute (100% Safe Pay-After-Refund):\n{landing_url}"
+            fb_ko = f"외국인 근로자 세금 환급 안내 ({amount_str} 환급, 첫 댓글 링크 확인)"
             rd_title = f"[Guide] How expat workers in Korea can claim up to 90% tax refund ({amount_str})"
             rd_body = (
                 f"Under Korean Restriction of Special Taxation Act (Article 30), foreign workers at SMEs are eligible for up to 90% tax reduction for up to 5 years.\n\n"
                 f"- Eligibility: E-9, H-2, E-7 and students D-2 with 3.3% withholding tax.\n"
-                f"- No upfront fee: Regulated certified tax agents settle only after successful deposit.\n\n"
+                f"- No upfront fee: 100% safe pay-after-refund.\n\n"
                 f"(Tool link and details in the comment below)"
             )
-            rd_comment = f"Here is the certified online refund simulation tool for anyone interested: {landing_url}"
+            rd_comment = f"👉 Here is the online refund simulation tool (Zero advance fee): {landing_url}"
             rd_ko = f"조특법 30조 외국인 근로자 90% 소득세 감면 정보 (수수료 후불제)"
             th_main = f"Expat tax refund rights in Korea: Claim up to 90% ({amount_str}) before 5-year expiration! 🧵👇"
-            th_reply = f"🔗 Calculate your exact refund in 1 minute: {landing_url}"
+            th_reply = f"👉 Calculate your exact refund in 1 minute:\n{landing_url}"
             th_ko = f"한국 거주 외국인 세금 환급 권리: 5년 소멸시효 전 최대 90% 환급 신청"
-            tg_caption = f"📢 [EasyTax] {theme_name}\n• Estimated Refund: {amount_str}\n• 100% Zero Upfront Fee"
+            tg_caption = (
+                f"📢 [EasyTax] {theme_name}\n"
+                f"• Estimated Refund: {amount_str}\n"
+                f"• 100% Zero Upfront Fee (Safe Pay-After-Refund)\n\n"
+                f"👉 Check your refund for free in 1 minute:\n{landing_url}"
+            )
             tg_btn = "💰 1-Minute Free Refund Check"
             tg_ko = f"이지텍스 외국인 세금 환급 공지 (예상 환급액: {amount_str})"
         else:
@@ -747,9 +756,10 @@ class GeminiCardnewsCopywriter:
                 f"✅ Verified 100% Free Items left by graduating students and expats.\n"
                 f"✅ Save up to 1,500,000 KRW on essential furniture and electronics.\n"
                 f"✅ 17-Language Real-Time Auto-Translation Chat for safe and easy local trade.\n\n"
-                f"🔗 Claim today's free items via the link in our bio! (@kmarket_official)"
+                f"🔗 Check 0 Won items near you via profile link (@kmarket_official) or direct link:\n"
+                f"👉 {landing_url}"
             )
-            ig_ko = f"한국 생활 0원 무료 나눔 안내 (150만원 절약, 17개국어 실시간 번역 채팅)"
+            ig_ko = f"케이마켓 0원 무료 나눔 안내 (가구/가전 150만원 절약, 17개국어 실시간 번역 채팅)"
             fb_post = (
                 f"Furnish your entire room in South Korea for 0 Won!\n\n"
                 f"✅ Verified 100% Free Items left by graduating students and expats.\n"
@@ -757,7 +767,7 @@ class GeminiCardnewsCopywriter:
                 f"✅ 17-Language Real-Time Auto-Translation Chat for safe and easy local trade.\n\n"
                 f"👇 Check the first comment below to grab today's newly posted 0 Won items!"
             )
-            fb_comment = f"👉 Browse 0 Won free giveaways near your campus: {landing_url}"
+            fb_comment = f"👉 Browse 0 Won free giveaways near your campus:\n{landing_url}"
             fb_ko = f"케이마켓 0원 무료 나눔 안내 (가구/가전 150만원 절약, 첫 댓글 링크)"
             rd_title = f"[Student Tip] How international students in Korea furnish rooms for 0 Won"
             rd_body = (
@@ -765,12 +775,17 @@ class GeminiCardnewsCopywriter:
                 f"Graduating seniors leave thousands of clean appliances every semester for free pickup.\n\n"
                 f"(Link to the 17-language free giveaway platform in the comment below)"
             )
-            rd_comment = f"You can check the local 0 Won listings here: {landing_url}"
+            rd_comment = f"👉 You can check the local 0 Won listings here:\n{landing_url}"
             rd_ko = f"유학생 자취방 0원으로 풀세팅하는 법 (귀국 선배 무료 나눔)"
             th_main = f"Furnish your studio room in Korea for 0 Won! Save 1,500,000 KRW on student living 🧵👇"
-            th_reply = f"🔗 Claim free furniture & appliances now: {landing_url}"
+            th_reply = f"👉 Claim free furniture & appliances now:\n{landing_url}"
             th_ko = f"한국 자취방 0원으로 꾸미기: 150만원 아끼는 무료 나눔"
-            tg_caption = f"📢 [KTRS 마켓] {theme_name}\n• 100% Free Giveaway\n• Save 1.5M KRW"
+            tg_caption = (
+                f"📢 [KTRS Market] {theme_name}\n"
+                f"• 100% Free Giveaway (Save 1.5M KRW)\n"
+                f"• 17-Language Real-Time Auto-Translation Chat\n\n"
+                f"👉 Claim Free 0 Won Items:\n{landing_url}"
+            )
             tg_btn = "🎁 Claim Free 0 Won Item"
             tg_ko = f"케이마켓 무료 나눔 공지 (100% 무료, 150만원 절약)"
 
@@ -825,8 +840,11 @@ class GeminiCardnewsCopywriter:
     def format_guide_text(self, package: Dict[str, Any]) -> str:
         """
         📢 4대 SNS(스레드, 인스타그램, 페이스북, 텔레그램) 2단 포스팅 가이드 텍스트 렌더링
-        - 현지어 원문 (복사용) + 관리자용 한국어 대조/해설 2단 완벽 병기
+        - 현지어 원문 (원클릭 복사용) + 관리자용 한국어 대조/해설 2단 완벽 병기
+        - 대시보드 17개국 바이럴 해시태그 풀세트 100% 일관 결합
+        - 채널별 실제 작동하는 공식 링크 URL 완벽 내장
         """
+        import re
         service_id = package.get("service_id", "easytax").upper()
         lang = package.get("lang", "en").lower()
         lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
@@ -840,20 +858,60 @@ class GeminiCardnewsCopywriter:
         fb = channels.get("facebook", {})
         tg = channels.get("telegram", {})
 
+        # 제미나이가 본문에 임의로 작성한 태그를 깨끗이 제거하고, 정식 해시태그 풀세트를 결합하는 정밀 헬퍼
+        def clean_and_attach_hashtags(content_text: str, tags: str) -> str:
+            raw = (content_text or "").strip()
+            # 본문에 있는 제미나이 임의 해시태그 (#으로 시작하는 단어들) 전부 제거
+            cleaned = re.sub(r'#[\w\u0e00-\u0e7f\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]+', '', raw).strip()
+            # 다중 줄바꿈 정리
+            cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+            if not tags:
+                return cleaned
+            return f"{cleaned}\n\n{tags}" if cleaned else tags
+
+        # 🧵 스레드(Threads) 전용 헬퍼: 500자 제한을 절대 넘지 않도록 상위 3~4개 핵심 태그만 선별 결합 (총 300자 내외 보장)
+        def format_threads_main(content_text: str, tags: str) -> str:
+            raw = (content_text or "").strip()
+            cleaned = re.sub(r'#[\w\u0e00-\u0e7f\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]+', '', raw).strip()
+            cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+            # 상위 3~4개 핵심 해시태그만 선별
+            tag_list = [t.strip() for t in tags.split() if t.strip().startswith('#')]
+            top_tags = " ".join(tag_list[:4]) if tag_list else ""
+            
+            result = f"{cleaned}\n\n{top_tags}" if top_tags else cleaned
+            # 혹시 전체 길이가 400자를 넘어가면 안전하게 350자 이내로 문장 단위 정제
+            if len(result) > 420:
+                truncated = cleaned[:280]
+                if '.' in truncated:
+                    truncated = truncated.rsplit('.', 1)[0] + '.'
+                result = f"{truncated}\n\n{top_tags}"
+            return result
+
+        th_main = format_threads_main(th.get('main_post', ''), hashtags_str)
+        ig_caption = clean_and_attach_hashtags(ig.get('caption', ''), hashtags_str)
+        fb_content = clean_and_attach_hashtags(fb.get('post_content', ''), hashtags_str)
+        tg_caption = clean_and_attach_hashtags(tg.get('caption', ''), hashtags_str)
+
+        # 텔레그램 본문에 혹시 landing_url이 빠져 있다면 자동으로 삽입
+        if landing_url and landing_url not in tg_caption:
+            tg_caption = tg_caption.replace(f"\n\n{hashtags_str}", f"\n\n👉 {landing_url}\n\n{hashtags_str}")
+
         doc = f"""================================================================================
 📢 [{service_id} 카드뉴스 공식 SNS 4대 채널 포스팅 패키지 (제미나이 100% 실시간 자율 창작)]
 🌍 타깃 국가/언어: {lang_info.get('name', lang.upper())} ({lang.upper()})
 📌 주제: {theme_title}
 🔗 공식 랜딩 링크: {landing_url}
+🏷️ 17개국 바이럴 해시태그 (복사용): 
+{hashtags_str}
 ================================================================================
 
 [1] 🧵 스레드 (Threads) 포스팅 가이드
 --------------------------------------------------------------------------------
-📌 [추천 메인 타래 (현지어 복사용)]
-{th.get('main_post', '')}
+📌 [추천 메인 타래 (현지어 복사용 - 링크 0% 노출 극대화)]
+{th_main}
 
 🔗 [이어달릴 2번 답글 링크 (현지어 복사용)]
-{th.get('reply_link', landing_url)}
+{th.get('reply_link', f'👉 {landing_url}')}
 
 🇰🇷 [한국어 대조/해설 (관리자 확인용)]
 {th.get('ko_explanation', th.get('main_post', ''))}
@@ -861,10 +919,8 @@ class GeminiCardnewsCopywriter:
 
 [2] 📸 인스타그램 (Instagram) 캐러셀 포스팅 가이드
 --------------------------------------------------------------------------------
-📌 [추천 캡션 (현지어 복사용)]
-{ig.get('caption', '')}
-
-{hashtags_str}
+📌 [추천 캡션 (현지어 복사용 - 프로필 링크 & URL 일체형)]
+{ig_caption}
 
 🇰🇷 [한국어 대조/해설 (관리자 확인용)]
 {ig.get('ko_explanation', ig.get('caption', ''))}
@@ -872,11 +928,11 @@ class GeminiCardnewsCopywriter:
 
 [3] 📘 페이스북 (Facebook) 피드 포스팅 가이드
 --------------------------------------------------------------------------------
-📌 [추천 본문 (현지어 복사용 - 링크 0% 노출 극대화)]
-{fb.get('post_content', '')}
+📌 [추천 본문 (현지어 복사용 - 링크 0% 알고리즘 노출 극대화)]
+{fb_content}
 
-💬 [첫 번째 댓글 (스텔스 공식 링크)]
-{fb.get('first_comment', landing_url)}
+💬 [첫 번째 댓글 (스텔스 공식 링크 복사용)]
+{fb.get('first_comment', f'👉 {landing_url}')}
 
 🇰🇷 [한국어 대조/해설 (관리자 확인용)]
 {fb.get('ko_explanation', fb.get('post_content', ''))}
@@ -884,9 +940,11 @@ class GeminiCardnewsCopywriter:
 
 [4] ✈️ 텔레그램 (Telegram) 5장 앨범 가이드
 --------------------------------------------------------------------------------
-📌 [추천 캡션 (현지어 복사용)]
-{tg.get('caption', '')}
-원클릭 버튼: [{tg.get('button_text', '링크 이동')}] -> {landing_url}
+📌 [추천 캡션 (현지어 복사용 - 원클릭 바로가기 링크 일체형)]
+{tg_caption}
+
+🔘 [원클릭 인라인 버튼 가이드 (봇 운영 시)]
+[{tg.get('button_text', '무료 확인하기')}] -> {landing_url}
 
 🇰🇷 [한국어 대조/해설 (관리자 확인용)]
 {tg.get('ko_explanation', tg.get('caption', ''))}

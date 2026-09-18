@@ -79,9 +79,15 @@ class CardnewsKMarket:
             meta_path = folder_path / "metadata.json"
             with open(meta_path, "w", encoding="utf-8") as f:
                 json.dump(metadata_payload, f, ensure_ascii=False, indent=2)
-            logger.info(f"🤖 [K-Market] metadata.json 저장 완료: {meta_path.name}")
         except Exception as e:
             logger.warning(f"metadata.json 저장 경고: {e}")
+
+        # 🧹 [1개국 K-Market 카드뉴스 완료 즉각 VRAM 캐시 방출]
+        try:
+            from core.engine.gpu_memory_flusher import GPUMemoryFlusher
+            GPUMemoryFlusher.flush_gpu_vram(unload_models=False)
+        except Exception:
+            pass
 
         return {
             "success": True,

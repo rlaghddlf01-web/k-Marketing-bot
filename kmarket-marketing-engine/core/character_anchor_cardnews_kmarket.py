@@ -216,15 +216,15 @@ def build_kmarket_cardnews_scene_prompt(
             f"natural outdoor daylight ambient lighting, realistic mobile phone camera sensor capture, natural mobile lifestyle snapshot"
         )
     elif slide_idx == 2:
-        # 🌟 2번: 3.5m 와이드 룸 전경 맨 앞머리(Token 0) 배치 ➔ 원룸 방과 가구 75% 이상 & 인물 20~25% 일상 실사 스냅
+        # 🌟 2번: 4m 거리 극광각 룸 전경 ➔ 방/가구/주방 75~80% 와이드 지배 & 인물은 20~25% 원거리 자연스러운 전신 실사 스냅
         prompt = (
-            f"Authentic candid documentary lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken by a roommate from 3.5 meters away, "
-            f"wide environmental full-room view, the cozy studio room interior and furniture occupy over 75% of the entire frame, subject occupies only about 20% to 25% of the frame with natural 8-head tall adult body proportions, with generous open space around showing the studio room and furniture in sharp focus. "
-            f"Inside a real lived-in cozy studio apartment room with bright natural window daylight, authentic clean linoleum flooring, real wooden cabinets. "
-            f"The protagonist {continuity} {char} is a natural full standing figure situated comfortably near the counter and table, "
-            f"smiling with warm genuine satisfaction admiring the newly furnished cozy room. "
-            f"On the counter and desk, a real physical {item_appliance_en}, small refrigerator, and neat clean furniture are arranged in tack-sharp f/11 deep depth of field pan-focus across the entire room. "
-            f"Raw unedited natural human skin texture with real pores, subtle skin sheen, natural matte cotton clothes, real everyday smartphone camera sensor capture, authentic documentary photo"
+            f"Authentic candid wide environmental lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken from 4 meters away, "
+            f"extreme wide full-room interior view, the cozy studio apartment room and furniture occupy over 80% of the entire frame, "
+            f"generous open wide space showing authentic wooden kitchen cabinets, counter, linoleum floor, sunny window daylight, and ceiling in tack-sharp f/11 deep focus pan-focus across the entire room. "
+            f"In the middle-ground, the protagonist {continuity} {char} is a natural full standing figure occupying only about 20% of the frame, "
+            f"standing casually near the kitchen counter and table, smiling with warm genuine satisfaction admiring the furnished cozy room. "
+            f"On the counter and desk, a real physical {item_appliance_en}, small refrigerator, and neat clean furniture are arranged in tack-sharp crisp focus. "
+            f"Natural full-body perspective, distant camera view, raw unedited natural human skin texture, natural matte cotton clothes, real smartphone camera capture, authentic documentary photo"
         )
     elif slide_idx == 3:
         # 3번: 150만원 절약 안도와 휴식 (배경 인테리어 선명 유지)
