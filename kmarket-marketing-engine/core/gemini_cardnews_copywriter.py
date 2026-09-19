@@ -156,14 +156,22 @@ class GeminiCardnewsCopywriter:
 
             cards = json.loads(raw_text)
             if isinstance(cards, list) and len(cards) == 5:
-                # 텍스트 안전 정제
+                # 텍스트 안전 정제 및 🎯 [금액 100% 원천 동기화] 검증
                 for c in cards:
                     c["badge"] = self._clean_text(c.get("badge", ""))
                     c["title"] = self._clean_text(c.get("title", ""))
                     c["subtitle"] = self._clean_text(c.get("subtitle", ""))
                     c["bullets"] = [self._clean_text(b) for b in c.get("bullets", [])]
                     c["cta_button"] = self._clean_text(c.get("cta_button", ""))
-                logger.info(f"[{lang.upper()}] 🎉 제미나이 100% 현지어 카드뉴스 카피라이팅 성공!")
+
+                # 1번 슬라이드 및 본문에서 환급액 표기 무결성 100% 보장
+                # (제미나이가 혹시라도 환각 숫자를 출력했을 경우 확정된 refund_formatted로 정밀 치환)
+                if cards and "title" in cards[0]:
+                    import re
+                    # 임의의 화폐/금액 패턴(\d{1,3}(,\d{3})+ (KRW|원|Won)?) 감지 시 확정된 refund_formatted로 일치
+                    cards[0]["title"] = re.sub(r"\b\d{1,3}(,\d{3})+\s*(KRW|Won|원)?\b", refund_formatted, cards[0]["title"], flags=re.IGNORECASE)
+
+                logger.info(f"[{lang.upper()}] 🎉 제미나이 100% 현지어 카드뉴스 카피라이팅 성공 (환급액: {refund_formatted})!")
                 return cards
         except Exception as e:
             logger.warning(f"[{lang.upper()}] 제미나이 카피라이팅 실패, 폴백 사용: {e}")

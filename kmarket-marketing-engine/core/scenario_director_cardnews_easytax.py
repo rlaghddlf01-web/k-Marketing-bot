@@ -75,7 +75,13 @@ class ScenarioDirectorCardnewsEasyTax:
             gender_matched = [p for p in e9_pool if p["gender"] == target_gender]
             return gender_matched[0] if gender_matched else random.choice(e9_pool)
 
-    def get_carousel_scenario(self, lang: str = "vi", theme_index: Optional[int] = None, preferred_gender: Optional[str] = None) -> Dict[str, Any]:
+    def get_carousel_scenario(
+        self,
+        lang: str = "vi",
+        theme_index: Optional[int] = None,
+        preferred_gender: Optional[str] = None,
+        amount: Optional[int] = None
+    ) -> Dict[str, Any]:
         """카드뉴스 전용 독립 캐릭터 앵커로 1, 2, 4번 슬라이드 100% 동일 인물 보장 5장 카드뉴스 생성"""
         from config import DATA_DIR
         import json
@@ -105,7 +111,8 @@ class ScenarioDirectorCardnewsEasyTax:
         theme_name = chosen_theme["name"]
         target = chosen_theme["target"]
         persona_type = chosen_theme["persona_type"]
-        refund_est = chosen_theme.get("refund_est", 3840000)
+        # 🎯 [금액 100% 원천 동기화] 지정된 amount 우선 적용 (없으면 테마 고유 refund_est)
+        refund_est = amount if amount is not None else chosen_theme.get("refund_est", 3840000)
         refund_formatted = f"{refund_est:,} KRW"
 
         # 1. 🎯 테마 맞춤형 7대 비자별 페르소나 및 독립 캐릭터 앵커 생성

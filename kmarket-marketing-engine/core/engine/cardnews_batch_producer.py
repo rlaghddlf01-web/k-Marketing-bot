@@ -70,18 +70,19 @@ class CardNewsBatchProducer:
         master_seed: Optional[int] = None
     ) -> Dict[str, Any]:
         """5장 카드뉴스 세트 및 SNS 가이드 일괄 생산"""
-        # 1. 시나리오 기획 로드 (60대 테마)
+        # 1. 시나리오 기획 로드 (60대 테마 및 단일 환급액 100% 동기화)
         scenario = self.scenario_director.get_carousel_scenario(
             lang=lang,
             theme_index=theme_index,
-            preferred_gender=preferred_gender
+            preferred_gender=preferred_gender,
+            amount=amount
         )
         theme_id = scenario.get("theme_name", "general")
         theme_title = scenario.get("theme_title", "EasyTax Tax Refund")
         cards = scenario.get("cards", [])
 
-        # 🎯 [결함 5 근본 해결] 테마 고유 환급액 우선 연동 (영수증 UI와 제미나이 헤드라인 금액 100% 일치)
-        effective_amount = scenario.get("refund_est") or amount
+        # 🎯 [금액 100% 원천 일치] 테마와 카피라이팅에 확정된 단일 환급액 추출
+        effective_amount = scenario.get("refund_est", amount)
         logger.info(f"💰 [환급액 일원화 확정] 테마 고유 환급액: {effective_amount:,}원 (영수증 UI ₩{effective_amount:,} = 헤드라인 {effective_amount:,} KRW 일치)")
 
         # 🎮 ComfyUI GPU 엔진 상태 확인 및 무인 자동 기동

@@ -10,6 +10,9 @@ from typing import Dict, Optional
 from core.character_anchor_cardnews_easytax import (
     LANG_ETHNIC_MAP,
     LANG_NEGATIVE_ETHNIC,
+    AGE_KO_TO_EN,
+    build_easytax_cardnews_char_anchor,
+    build_easytax_cardnews_negative_prompt,
 )
 
 # 중앙아시아 / 유라시아 계열 (백인/코카시안 차단 필터 면제 국가)
@@ -32,124 +35,68 @@ def build_shorts_t2i_character_prompt(
     custom_bg_desc: Optional[str] = None,
     default_char_desc: str = "",
     default_bg_desc: str = "",
+    gender: str = "female",
+    age_group_ko: str = "20대 후반",
 ) -> Dict[str, str]:
     """
-    Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성:
-    1. 타깃 국가별 정밀 에스닉 긍정 프롬프트 주입
-    2. 동양인/중국인 편향 방지 네거티브 및 국가별 맞춤 필터 주입 (중앙아시아는 백인 차단 면제)
-    3. 스마트폰 파지 및 시선/표정 무결성 헌법 적용
+    Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (카드뉴스 1번 슬라이드 골든 공식과 100% 동일 + 입 다문 립싱크 미소):
+    1. 카드뉴스 검증 8개국 에스닉 캐릭터 앵커 1:1 연동
+    2. 소파 팔걸이 결합 3.0m 와이드 카우보이 화각 + 골반/허리(hip & waist level) 스마트폰 정면 파지
+    3. 거실 책장/화분/소파/창문 햇살 75% f/11 팬포커스
+    4. 🤐 [S2V 립싱크 헌법]: 치아 없는 입 다문 부드러운 미소 (lips completely closed together, zero teeth)
+    5. 아이폰 15 Pro 무필터 일상 스냅샷 실사 락
     """
-    ethnic_pos = get_shorts_ethnic_positive(lang)
-    ethnic_neg = get_shorts_ethnic_negative(lang)
+    # 1. 8개국 에스닉 캐릭터 정의 (카드뉴스와 100% 동일)
+    persona_desc = custom_char_desc or default_char_desc or "gentle warm eyes, natural healthy hair"
+    char = build_easytax_cardnews_char_anchor(
+        lang=lang,
+        gender=gender,
+        age_group_ko=age_group_ko,
+        persona_anchor_desc=persona_desc
+    )
 
-    # 배경 및 인물 묘사에서 'in Korea' 오염 및 뷰티/CG 유발어 철저 정화
-    # 배경 및 인물 묘사에서 'in Korea' 오염 및 뷰티/CG 유발어 철저 정화
-    char_desc = (custom_char_desc or default_char_desc).replace("in Korea", "").replace("in South Korea", "").strip()
-    bg_desc = (custom_bg_desc or default_bg_desc).replace("in Korea", "").replace("in South Korea", "").strip()
-    
-    # 🚫 [플라스틱/밀랍인형/3D CGI 0% 박멸] AI 화보/뷰티 필터 가중치 자극 단어 완전 멸균
-    for bad_w in ["handsome", "beautiful", "gorgeous", "attractive", "model", "flawless", "chiseled", "elegant", "aesthetic"]:
-        char_desc = char_desc.replace(bad_w, "").replace(bad_w.capitalize(), "").strip()
-        bg_desc = bg_desc.replace(bad_w, "").replace(bad_w.capitalize(), "").strip()
-
-    # 🚫 [테이블/책상 가슴 가림 원천 차단] 테이블에 팔을 얹어 폰을 두 손으로 조작하는 자세 원천 방지
-    for table_w in ["wooden table and ceramic coffee mug", "wooden table", "cafe table", "desk", "counter"]:
-        bg_desc = bg_desc.replace(table_w, "comfortable lounge armchair").replace(table_w.capitalize(), "").strip()
-
-    # 🚫 [폰 파지 & 입모양 중복 지시어 정제] char_desc에 들어있는 파지/입모양 구문을 제거하여 단일 골든 헌법으로 통합
-    for dup_phrase in [
-        "holding sleek smartphone naturally in one hand at waist level facing forward",
-        "holding sleek smartphone naturally in one hand",
-        "holding a smartphone vertically in one hand facing forward to camera",
-        "holding a smartphone steadily in one hand facing forward to camera",
-        "holding sleek modern smartphone vertically in one hand",
-        "holding smartphone",
-        "holding sleek smartphone",
-        "lips completely closed together, mouth gently shut, strictly zero open mouth, absolutely zero teeth showing",
-        "lips completely closed together",
-        "mouth gently shut",
-        "strictly zero open mouth",
-        "absolutely zero teeth showing",
-    ]:
-        char_desc = char_desc.replace(dup_phrase, "").strip()
-
-    # 중복 쉼표 정리
-    char_desc = ", ".join([p.strip() for p in char_desc.split(",") if p.strip()])
-
-    if not bg_desc:
-        bg_desc = "a normal bright modern cozy living room with soft natural window ambient daylight and blurred background"
-
-    # 인물 묘사에 에스닉 앵커가 없으면 맨 앞에 강력 주입
-    if ethnic_pos:
-        full_char = f"{ethnic_pos}, honest friendly facial features, {char_desc}"
-    else:
-        full_char = f"honest friendly facial features, {char_desc}"
-
-    # 🎯 [카드뉴스 100% 검증 골든 화각] 아이폰 15 Pro 일상 스냅 사진 (2.5미터 카우보이 샷, 폰카 날것의 실사)
+    # 2. 🎯 [최전방 공통 화각 가드레일]: 카드뉴스 1번과 100% 동일한 3.0m 카우보이 화각 (인물 45~50% 차지)
     iphone_candid_framing = (
         "authentic candid snapshot shot on iPhone 15 Pro, casual everyday mobile phone photo taken by a friend, "
-        "photographed from 2.5 meters away with natural smartphone camera lens, "
-        "medium cowboy shot, waist-up view showing the complete upper body from head down to hips and belt, "
+        "photographed from 3.0 meters away with natural smartphone camera lens, "
+        "wide environmental cowboy shot, waist-up view showing the complete upper body from head down past hips and belt, "
         "natural 8-head tall realistic adult human body proportions, natural slender neck and shoulders, "
-        "subject occupies about 55% to 60% of the vertical frame with generous open space around, "
+        "subject occupies about 45% to 50% of the vertical frame with generous open room space around, "
+        "tack sharp deep pan-focus across the entire background (f/11 aperture) with all background details and furniture completely in sharp crisp focus with zero blur, "
     )
 
-    # 🤐 [대표님 절대 지침: 입벌림 절대 금지] 완벽한 립 닫힘 헌법 (S2V 립싱크 찢어짐 0%)
+    # 3. 의상 및 가구 결합 포즈 (카드뉴스 1번과 100% 동일)
+    uniform_clothing = "wearing clean comfortable civilian casual clothes, a neat casual jacket or daily shirt"
+
+    # 4. 🤐 [S2V 립싱크 전용 입 다문 미소 헌법]
     closed_mouth_mandate = (
-        "lips completely closed together, mouth gently and firmly closed, strictly closed lips, "
-        "mouth shut naturally, zero open mouth, strictly no parted lips, absolutely zero teeth showing, "
-        "calm confident pleasant resting face, looking directly into the camera lens with sincere trustworthy eye contact, "
+        "lips completely closed together, mouth gently shut, strictly zero open mouth, strictly no parted lips, absolutely zero teeth showing, "
+        "calm confident pleasant gentle resting smile, looking directly into the camera lens with authentic trustworthy eye contact celebrating huge tax refund relief. "
     )
 
-    # 📱 [핵심 파지 헌법: 프롬프트 최우선 배치] 스마트폰 검은 액정 정면 파지를 최전방에 배치하여 어텐션 1순위 확보
-    phone_hold_front = (
-        "holding a sleek modern smartphone vertically in one hand at chest level in front of torso, "
-        "with the black vertical display screen turned facing directly forward toward the camera lens, crisp smartphone screen bezel, "
-        "firm one-handed grip, the other arm relaxed naturally at side, the smartphone is held clearly inside the frame at mid-torso height. "
-    )
-
+    # 5. 긍정 프롬프트 최종 조립 (카드뉴스 1번 골든 구조 100% 이식)
     positive = (
-        f"{full_char}. Authentic candid snapshot shot on iPhone 15 Pro, "
-        f"{phone_hold_front}"
-        f"{iphone_candid_framing}"
-        f"sitting naturally in {bg_desc}. "
-        f"Wearing clean comfortable civilian casual clothes, a simple neat casual shirt or everyday t-shirt. "
+        f"candid authentic {iphone_candid_framing}of {char}. "
+        f"seated comfortably on a modern fabric living room sofa with one arm resting naturally on the sofa armrest, "
+        f"and the other hand holding a sleek modern smartphone vertically at hip and waist level, "
+        f"presenting the clean front vertical black AMOLED display screen turned facing directly forward toward the camera, crisp smartphone screen bezel. "
+        f"Authentic wooden bookshelves, indoor plants, textured wallpaper, sofa cushions, and clear window sunlight occupying over 75% of the frame. "
+        f"{uniform_clothing}. "
         f"{closed_mouth_mandate}"
-        f"clear wide-open eyes, alert and attentive eyes, sharp iris and pupil, focused lively eye contact, "
-        f"raw unedited natural human skin texture with subtle real pores and natural imperfections, matte skin finish, "
-        f"natural everyday room ambient lighting, realistic mobile phone camera sensor capture, NO beauty filter, authentic candid mobile photo"
+        f"Raw unedited natural human skin texture with subtle real pores and natural imperfections, matte skin finish, "
+        f"natural everyday room ambient lighting, realistic mobile phone camera sensor capture, authentic candid mobile photo shot on iPhone 15 Pro, NO beauty filter."
     )
 
-    # 🚫 [카드뉴스 검증 골든 네거티브 + 폰 각도 무결성 헌법]
-    distortion_and_beauty_negative = (
-        "8k, commercial advertisement, studio lighting, studio photoshoot, professional photo shoot, fashion magazine cover, "
-        "holding phone with two hands, two handed grip, typing on phone, text messaging, phone resting on table, phone resting on lap, "
-        "tilted phone, angled phone, leaning phone, phone facing inward, horizontal phone, phone pointed like remote, "
-        "phone cut off at bottom, phone cropped at edge, phone partially out of frame, phone held too low, "
-        "back of phone, rear phone case, back cover of smartphone, phone camera lenses on device, triple camera bump, "
-        "upside down phone, handing over phone, offering phone, thrusting forward, outstretched arm, "
-        "phone to ear, making phone call, talking on phone, phone obscuring face, deformed hand holding phone, "
-        "open mouth, parted lips, slightly open mouth, half-open mouth, open lips, visible teeth, showing teeth, teeth, smiling with teeth, grinning, laughing, "
-        "bobblehead, big head, oversized head, giant head, large head, dwarf body, short body, deformed anatomy, "
-        "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, deep-set hollow eyes, long neck, elongated neck, thin giraffe neck, creepy smile, toothy grimace, exaggerated wide smile, "
-        "extreme close-up, macro shot, headshot, bust shot, cropped head, zoomed-in face, face taking up entire frame, face taking up more than 20% of image, "
-        "wide-angle lens distortion, fisheye lens, perspective distortion, "
-        "plastic skin, smooth plastic texture, wax figure, mannequin, doll, airbrushed, beauty filter, smooth skin filter, porcelain skin, oily skin glare, shiny plastic surface, "
-        "3d render, CGI, digital painting, digital illustration, octane render, unreal engine, anime, cartoon, artificial look, over-smoothed skin, glossy skin, glamour photo, "
-        "half-closed eyes, sleepy eyes, squinting eyes, droopy eyelids, lazy eyes, asymmetric eyes, unnatural gaze, staring blankly, weird eyes, "
-        "overexposed, blown out highlights, washed out, harsh white lighting, excessive brightness, pale bleached skin, "
-        "blank background, plain grey wall, solid color backdrop, empty studio wall, "
-        "deformed hands, extra fingers, missing fingers, fused fingers, claw fingers, bad anatomy, "
-        "blurry, low quality"
+    # 6. 부정 프롬프트 (카드뉴스 1번 골든 네거티브 + 치아/열린 입 차단 100% 결합)
+    negative = build_easytax_cardnews_negative_prompt(
+        lang=lang,
+        extra=(
+            "empty hands, no phone in hand, smartphone in pocket, holding nothing, "
+            "open mouth, parted lips, slightly open mouth, half-open mouth, open lips, visible teeth, showing teeth, teeth, smiling with teeth, grinning, laughing, "
+            "holding phone with two hands, typing on phone, text messaging, phone resting on table, phone resting on lap, "
+            "tilted phone, angled phone, leaning phone, phone facing inward, horizontal phone, phone pointed like remote, "
+            "upside down phone, deformed hand holding phone"
+        )
     )
-
-    # 🎯 [1순위 최전방 배치]: ethnic_neg를 무조건 1순위 맨 앞에 배치!
-    if lang in EURASIAN_LANGS:
-        neg_parts = [ethnic_neg, distortion_and_beauty_negative]
-    else:
-        neg_parts = [ethnic_neg, "caucasian, white person, blonde hair, blue eyes", distortion_and_beauty_negative]
-
-    # 빈 문자열 제거 후 결합
-    negative = ", ".join([p.strip() for p in neg_parts if p.strip()])
 
     return {"positive": positive, "negative": negative}

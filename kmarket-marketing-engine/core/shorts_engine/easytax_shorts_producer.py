@@ -117,6 +117,8 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         lang: str,
         custom_char_desc: Optional[str] = None,
         custom_bg_desc: Optional[str] = None,
+        gender: str = "female",
+        age_group_ko: str = "20대 후반",
         **kwargs
     ) -> Dict[str, str]:
         """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (카드뉴스 에스닉 앵커 100% 연동)"""
@@ -127,7 +129,9 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             custom_char_desc=custom_char_desc,
             custom_bg_desc=custom_bg_desc,
             default_char_desc=cfg.get("char_desc", ""),
-            default_bg_desc=cfg.get("bg_desc", "")
+            default_bg_desc=cfg.get("bg_desc", ""),
+            gender=gender,
+            age_group_ko=age_group_ko
         )
 
     def render_ui_image(self, lang: str, amount: int = 3100000, **kwargs) -> Image.Image:
@@ -227,30 +231,42 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             pos_prompt = t2i_prompt["positive"]
             neg_prompt = t2i_prompt["negative"]
 
-            logger.info(f"🎨 [Step 2] 시나리오 테마 맞춤형 UGC 인물 사진 생성 (seed={seed})")
-            gen_path = self.wan_client.generate_t2i_master(
-                positive_prompt=pos_prompt,
-                negative_prompt=neg_prompt,
-                width=832,
-                height=1216,
-                seed=seed,
-                prefix=f"shorts_easytax_ugc_{effective_lang}"
-            )
-            master_img = Image.open(gen_path)
-            master_save_path = out_folder / f"01_master_t2i_{effective_lang}.png"
-            master_img.save(str(master_save_path))
+            # 🎯 [스마트폰 액정 영수증 매립 무결성 보장 루프 (최대 4회 자동 재시도)]
+            max_retries = 4
+            current_seed = seed
+            embedded_img = None
+            master_img = None
 
-            logger.info("📱 [Step 2] 스마트폰 정면 액정 화면 검출 및 환급 영수증 UI 정밀 매립...")
             ui_img = self.render_ui_image(lang=effective_lang, amount=effective_amount)
             ui_save_path = out_folder / f"02_receipt_ui_{effective_lang}.png"
             ui_img.save(str(ui_save_path))
 
-            try:
-                embedded_img = self.embedder.embed_screen(base_image=master_img, ui_image=ui_img)
-                logger.info("✅ [Step 2] 스마트폰 액정 정밀 매립 100% 성공! (영상 시작 프레임 무결성 통과)")
-            except Exception as e:
-                logger.warning(f"⚠️ [Step 2 안내] 스마트폰 액정 검출 미매칭 ({e}) -> 고화질 마스터 인물 사진 직접 채택으로 자연스럽게 전환합니다.")
-                embedded_img = master_img
+            for attempt in range(1, max_retries + 1):
+                logger.info(f"🎨 [Step 2] 시나리오 맞춤형 UGC 인물 사진 생성 (시도 {attempt}/{max_retries}, seed={current_seed})")
+                gen_path = self.wan_client.generate_t2i_master(
+                    positive_prompt=pos_prompt,
+                    negative_prompt=neg_prompt,
+                    width=832,
+                    height=1216,
+                    seed=current_seed,
+                    prefix=f"shorts_easytax_ugc_{effective_lang}"
+                )
+                master_img = Image.open(gen_path)
+                master_save_path = out_folder / f"01_master_t2i_{effective_lang}.png"
+                master_img.save(str(master_save_path))
+
+                logger.info("📱 [Step 2] 0.02초 서브픽셀 스마트폰 액정 검출 및 영수증 매립 시도...")
+                try:
+                    embedded_img = self.embedder.embed_screen(base_image=master_img, ui_image=ui_img)
+                    logger.info(f"✅ [Step 2] 스마트폰 액정 정밀 매립 100% 성공! (시도 {attempt}회차 통과 ➔ 영상 단계 직행)")
+                    break
+                except Exception as e:
+                    if attempt < max_retries:
+                        logger.warning(f"⚠️ [Step 2] 액정 미검출 ({e}) ➔ 시드 변경(seed={current_seed + 1}) 후 T2I 마스터 사진 자동 재시도...")
+                        current_seed += 1
+                    else:
+                        logger.warning(f"⚠️ [Step 2] 최대 재시도({max_retries}회) 완료 ➔ 고화질 원본 마스터 사진으로 안전 진행")
+                        embedded_img = master_img
 
         embedded_save_path = out_folder / f"03_embedded_start_frame_{effective_lang}.png"
         embedded_img.save(str(embedded_save_path))

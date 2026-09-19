@@ -387,11 +387,19 @@ class GeminiShortsCopywriter:
                     raw_text = raw_text.split("```")[1].split("```")[0].strip()
                 data = json.loads(raw_text)
                 if isinstance(data, dict) and "hook_0_10s" in data:
-                    # 정제
+                    # 정제 및 🎯 [금액 100% 원천 동기화] 검증
                     for k, v in data.items():
                         if isinstance(v, str):
                             data[k] = self._clean_text(v)
-                    logger.info(f"[{service_id.upper()}:{lang.upper()}] 🎉 제미나이 숏폼 22초 대본/자막 실시간 자동 창작 완료!")
+
+                    # easytax 서비스 시 대본 및 자막 속 금액 일치 검증
+                    if service_id == "easytax" and amount_str:
+                        import re
+                        for field in ["hook_0_10s", "app_10_18s", "bottom_step1_title", "bottom_step2_title"]:
+                            if field in data and isinstance(data[field], str):
+                                data[field] = re.sub(r"\b\d{1,3}(,\d{3})+\s*(KRW|Won|원)?\b", amount_str, data[field], flags=re.IGNORECASE)
+
+                    logger.info(f"[{service_id.upper()}:{lang.upper()}] 🎉 제미나이 숏폼 22초 대본/자막 실시간 자동 창작 완료 (환급액: {amount_str})!")
                     return data
         except Exception as e:
             logger.warning(f"제미나이 숏폼 대본 생성 에러 ({e}), 기본 스크립트 폴백")

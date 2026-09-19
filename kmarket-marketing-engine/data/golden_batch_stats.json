@@ -278,7 +278,7 @@
     },
     "manual": {
       "shorts": 0,
-      "cardnews": 23,
+      "cardnews": 30,
       "details": [
         {
           "time": "08:52:01",
@@ -446,6 +446,55 @@
           "brand": "easytax",
           "type": "cardnews",
           "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "20:45:00",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "20:55:53",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "21:06:59",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "21:17:59",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "th",
+          "success": true
+        },
+        {
+          "time": "21:29:20",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "id",
+          "success": true
+        },
+        {
+          "time": "21:40:18",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "mn",
+          "success": true
+        },
+        {
+          "time": "21:51:14",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "my",
           "success": true
         }
       ]

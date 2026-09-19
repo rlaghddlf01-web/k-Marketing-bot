@@ -27,7 +27,7 @@ VOICE_MAP: Dict[str, Dict[str, str]] = {
     "tl": {"female": "fil-PH-BlessicaNeural", "male": "fil-PH-AngeloNeural"},
     "my": {"female": "my-MM-NilarNeural", "male": "my-MM-ThihaNeural"},
     "ru": {"female": "ru-RU-SvetlanaNeural", "male": "ru-RU-DmitryNeural"},
-    "mn": {"female": "ru-RU-SvetlanaNeural", "male": "ru-RU-DmitryNeural"},
+    "mn": {"female": "mn-MN-YesuiNeural", "male": "mn-MN-BataaNeural"},
     "en": {"female": "en-US-JennyNeural", "male": "en-US-GuyNeural"},
     "zh": {"female": "zh-CN-XiaoxiaoNeural", "male": "zh-CN-YunjianNeural"},
     "ne": {"female": "ne-NP-HemkalaNeural", "male": "ne-NP-SagarNeural"},

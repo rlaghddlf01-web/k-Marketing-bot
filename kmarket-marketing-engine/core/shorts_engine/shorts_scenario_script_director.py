@@ -30,7 +30,7 @@ class ShortsScenarioScriptDirector:
     def get_full_scenario(
         self,
         lang: Optional[str] = None,
-        amount: int = 3100000,
+        amount: Optional[int] = None,
         theme_id: Optional[str] = None,
         gender: Optional[str] = None
     ) -> Dict[str, Any]:
@@ -39,7 +39,6 @@ class ShortsScenarioScriptDirector:
         (하드코딩 사전 0%, 100% 실시간 제미나이 자율 직작문)
         """
         effective_lang = lang or "vi"
-        amount_fmt = f"{amount:,} KRW"
 
         # 1. 시나리오 테마 추출
         chosen_theme = None
@@ -55,8 +54,12 @@ class ShortsScenarioScriptDirector:
                 "name": "한국 세금 90% 소득세 감면 및 환급",
                 "target": "외국인 근로자",
                 "persona_type": "E-9/E-7 근로자",
-                "refund_est": amount
+                "refund_est": 3100000
             }
+
+        # 🎯 [금액 100% 원천 동기화] 지정된 amount 우선 적용, 없으면 테마 고유 refund_est (최종 기본값 3,100,000)
+        effective_amount = amount if amount is not None else chosen_theme.get("refund_est", 3100000)
+        amount_fmt = f"{effective_amount:,} KRW"
 
         # 성별 결정
         effective_gender = gender if gender in ("male", "female") else random.choice(["male", "female"])
@@ -89,7 +92,7 @@ class ShortsScenarioScriptDirector:
             "country_name": country_name,
             "lang": effective_lang,
             "gender": effective_gender,
-            "amount": amount,
+            "amount": effective_amount,
             "amount_formatted": amount_fmt,
             "speech_hook": speech_hook,
             "speech_hook_part1": speech_hook_p1,
