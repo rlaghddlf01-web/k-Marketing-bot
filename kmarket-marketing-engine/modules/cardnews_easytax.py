@@ -81,7 +81,7 @@ class CardnewsEasyTax:
                 "app_screen_type": card.get("app_screen_type"),
                 "gender": "m"
             }
-            ref_path = hero_image_path if s_idx in [2, 4] else None
+            ref_path = hero_image_path if s_idx > 1 else None
             top_img_path = active_media_gen.generate_theme_image(
                 lang=lang,
                 theme_id=theme_id,

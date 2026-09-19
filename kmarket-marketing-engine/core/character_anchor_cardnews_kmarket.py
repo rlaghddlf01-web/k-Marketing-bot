@@ -202,11 +202,12 @@ def build_kmarket_cardnews_scene_prompt(
     item_appliance_en = item_slide2
 
     if slide_idx == 1:
-        # 🌟 1번: 3.5m 와이드 거리 환경 샷 맨 앞머리(Token 0) 배치 ➔ 거리 배경 75% & 인물 20~25% 구도 보장
+        # 🌟 1번: 에스닉 골격 최전방(Token 0) ➔ 3.5m 거리 ➔ 환경 배경 75% & 인물 20~25%
         prompt = (
+            f"{char}, {continuity}. "
             f"Authentic candid lifestyle street photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken from 3.5 meters away, "
             f"wide environmental streetscape view, wide city street and storefront background occupying over 75% of the frame in full context of a sunny city residential neighborhood sidewalk in warm daytime sunlight. "
-            f"In the center of the frame, the protagonist {char} occupies only about 20% to 25% of the frame, happily receiving {item_desc_slide1} with both hands from a kind fellow international student friend of the same ethnicity. "
+            f"In the center of the frame, the protagonist occupies only about 20% to 25% of the frame, happily receiving {item_desc_slide1} with both hands from a kind fellow international student friend of the same ethnicity. "
             f"The fellow giver is viewed strictly from behind over the shoulder, with only their back, shoulders and hands holding the other side of the box, with zero facial features visible for the giver, keeping 100% full visual focus directly and exclusively on the protagonist, "
             f"wearing comfortable neat civilian casual clothes, a simple neat jacket or sweater, "
             f"with a beaming natural smile of pure joy and gratitude, looking happily at the giveaway item with trustworthy eye contact. "
@@ -216,40 +217,44 @@ def build_kmarket_cardnews_scene_prompt(
             f"natural outdoor daylight ambient lighting, realistic mobile phone camera sensor capture, natural mobile lifestyle snapshot"
         )
     elif slide_idx == 2:
-        # 🌟 2번: 4m 거리 극광각 룸 전경 ➔ 방/가구/주방 75~80% 와이드 지배 & 인물은 20~25% 원거리 자연스러운 전신 실사 스냅
+        # 🌟 2번: 에스닉 골격 최전방(Token 0) ➔ 4m 거리 ➔ 방/가구 80% & 인물 20%
         prompt = (
+            f"{char}, {continuity}. "
             f"Authentic candid wide environmental lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone snapshot taken from 4 meters away, "
             f"extreme wide full-room interior view, the cozy studio apartment room and furniture occupy over 80% of the entire frame, "
             f"generous open wide space showing authentic wooden kitchen cabinets, counter, linoleum floor, sunny window daylight, and ceiling in tack-sharp f/11 deep focus pan-focus across the entire room. "
-            f"In the middle-ground, the protagonist {continuity} {char} is a natural full standing figure occupying only about 20% of the frame, "
+            f"In the middle-ground, the protagonist is a natural full standing figure occupying only about 20% of the frame, "
             f"standing casually near the kitchen counter and table, smiling with warm genuine satisfaction admiring the furnished cozy room. "
             f"On the counter and desk, a real physical {item_appliance_en}, small refrigerator, and neat clean furniture are arranged in tack-sharp crisp focus. "
             f"Natural full-body perspective, distant camera view, raw unedited natural human skin texture, natural matte cotton clothes, real smartphone camera capture, authentic documentary photo"
         )
     elif slide_idx == 3:
-        # 3번: 150만원 절약 안도와 휴식 (배경 인테리어 선명 유지)
+        # 3번: 에스닉 골격 최전방(Token 0) ➔ 150만원 절약 안도와 휴식
         prompt = (
+            f"{char}, {continuity}. "
             f"{iphone_candid_framing}seated comfortably on a simple sofa or wooden chair in the warm cozy room, "
             f"holding a warm ceramic mug of tea or coffee with a peaceful, deeply relieved smile, "
-            f"the protagonist {continuity} {char} is wearing comfortable casual sweater, feeling proud and secure about saving over 1,500,000 KRW on living costs, "
+            f"wearing comfortable casual sweater, feeling proud and secure about saving over 1,500,000 KRW on living costs, "
             f"soft warm ambient interior lighting, clean cozy home background in tack sharp focus (f/11), "
             f"raw natural skin texture, matte finish, deep focus f/11 pan-focus, sharp clear room details"
         )
     elif slide_idx == 4:
-        # 4번: 가족 송금 또는 고향 생각 감동 (배경 인테리어 선명 유지)
+        # 4번: 에스닉 골격 최전방(Token 0) ➔ 가족 송금 또는 고향 생각 감동
         prompt = (
+            f"{char}, {continuity}. "
             f"{iphone_candid_framing}sitting naturally near a sunny window in the studio room, looking at a framed family photo on the desk with an emotional heartfelt grateful smile, "
-            f"the protagonist {continuity} {char} is wearing comfortable casual clothing, tears of pride and happiness in eyes, feeling accomplished supporting family while living well, "
+            f"wearing comfortable casual clothing, tears of pride and happiness in eyes, feeling accomplished supporting family while living well, "
             f"soft warm natural morning window light, realistic cozy room interior in tack sharp focus (f/11), "
             f"authentic raw human skin texture, matte finish, deep depth of field f/11 pan-focus"
         )
     elif slide_idx == 5:
-        # 🌟 5번: 3.5m 와이드 룸 전경 맨 앞머리(Token 0) 배치 ➔ 방 75% 이상 & 인물 20~25% 비율 + 은은한 엄지척(👍)
+        # 🌟 5번: 에스닉 골격 최전방(Token 0) ➔ 3.5m 거리 ➔ 방 75% & 인물 20~25% + 은은한 엄지척
         prompt = (
+            f"{char}, {continuity}. "
             f"Authentic candid wide environmental lifestyle photo shot on iPhone 15 Pro, casual everyday mobile phone photo taken from 3.5 meters away, "
             f"wide full room interior view with deep depth of field (f/11 aperture pan-focus), tack sharp focus across the entire room showing the furnished studio room, desk, drawers, bed, and appliances in crisp clarity. "
             f"The room interior and furniture occupy over 75% of the entire frame. "
-            f"The protagonist {continuity} {char} occupies only about 20% to 25% of the frame, a natural full standing figure situated in the cozy studio room, "
+            f"The protagonist occupies only about 20% to 25% of the frame, a natural full standing figure situated in the cozy studio room, "
             f"looking directly into the camera lens with an enthusiastic friendly smile, "
             f"giving a natural subtle thumbs-up gesture or welcoming open-hand gesture to the viewer, warmly welcoming and encouraging other fellow international students and expat friends to use K-Market for free giveaways, "
             f"wearing clean smart-casual clothes, a neat button-down shirt or stylish sweater, "

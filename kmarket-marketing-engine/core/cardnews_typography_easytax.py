@@ -72,11 +72,11 @@ class CardnewsTypographyEasyTax:
             norm_lang, EASYTAX_BRAND_SUB_I18N.get("en", "100% Safe Pay-After-Refund")
         )
 
-        # EasyTax 전용 브랜드 로고 헤더
+        # KTRS 브랜드 로고 헤더
         brand_logo_html = f"""
             <div class="brand-badge brand-easytax">
                 <span class="brand-icon">🏛️</span>
-                <span class="brand-text">EasyTax</span>
+                <span class="brand-text">KTRS</span>
                 <span class="brand-sub">{html.escape(brand_sub_text)}</span>
             </div>
         """

@@ -41,8 +41,8 @@ class PhoneScreenEmbedder:
 
         gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
-        # 다중 임계값 자동 스윕 (조명/그림자 차이에 영향받지 않는 견고한 탐색)
-        thresholds = [self.dark_threshold, 25, 30, 35]
+        # 다중 임계값 자동 스윕 (조명/반사광 차이에 영향받지 않는 견고한 탐색: 20~65)
+        thresholds = [self.dark_threshold, 25, 30, 35, 45, 55, 65]
         candidates = []
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 
@@ -61,8 +61,8 @@ class PhoneScreenEmbedder:
                 x = stats[i, cv2.CC_STAT_LEFT]
                 y = stats[i, cv2.CC_STAT_TOP]
 
-                # 외곽 테두리 비네팅/경계 그림자 배제
-                is_border = (x <= 2 and w < W * 0.3) or (y <= 2 and h < H * 0.2) or (x + w >= W - 2 and w < W * 0.3)
+                # 외곽 테두리 비네팅/경계 그림자 엄격 배제
+                is_border = (x <= 5 and w < W * 0.3) or (y <= 5 and h < H * 0.2) or (x + w >= W - 5 and w < W * 0.3) or (y + h >= H - 5 and h < H * 0.2)
                 if is_border and search_roi is None:
                     continue
 
@@ -83,16 +83,16 @@ class PhoneScreenEmbedder:
                 solidity = c_area / max(1.0, (rw * rh))
 
                 # 🎯 스마트폰 액정 고유의 물리/기하학적 특성 필터:
-                # 1. 세로 종횡비 (1.35 ~ 2.6, 16:9~20:9 액정)
-                # 2. 직사각형 충실도/볼록도 (solidity >= 0.80, 헝클어진 머리카락이나 옷깃 그림자는 0.3~0.6에 불과)
-                # 3. 화면 너비 (전체 폭의 8% ~ 45%)
-                # 4. 화면 높이 (전체 높이의 15% ~ 60%)
-                if 1.35 <= aspect <= 2.6 and solidity >= 0.80 and (W * 0.08 <= w <= W * 0.45) and (H * 0.15 <= h <= H * 0.60):
-                    score = solidity * 100.0 - abs(aspect - 1.95) * 10.0 + (area / 1000.0)
+                # 1. 세로 종횡비 (1.35 ~ 3.2, 16:9~21:9 최신 스마트폰 및 기울임 수용)
+                # 2. 직사각형 충실도/볼록도 (solidity >= 0.70, 손가락 파지/둥근 모서리 수용)
+                # 3. 화면 너비 (전체 폭의 7% ~ 50%)
+                # 4. 화면 높이 (전체 높이의 15% ~ 65%)
+                if 1.35 <= aspect <= 3.2 and solidity >= 0.70 and (W * 0.07 <= w <= W * 0.50) and (H * 0.15 <= h <= H * 0.65):
+                    score = solidity * 100.0 - abs(aspect - 2.0) * 10.0 + (area / 1000.0)
                     candidates.append((score, comp_mask, c, rect, (x, y, w, h)))
 
         if not candidates:
-            # 완화된 조건으로 2차 폴백 탐색
+            # 완화된 조건으로 2차 폴백 탐색 (단, 외곽 테두리 그림자 오인 및 최소 높이 미달은 엄격 차단)
             for thresh in thresholds:
                 mask = (gray < thresh).astype(np.uint8) * 255
                 mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
@@ -105,6 +105,11 @@ class PhoneScreenEmbedder:
                     h = stats[i, cv2.CC_STAT_HEIGHT]
                     x = stats[i, cv2.CC_STAT_LEFT]
                     y = stats[i, cv2.CC_STAT_TOP]
+
+                    is_border = (x <= 5 and w < W * 0.3) or (y <= 5 and h < H * 0.2) or (x + w >= W - 5 and w < W * 0.3) or (y + h >= H - 5 and h < H * 0.2)
+                    if is_border and search_roi is None:
+                        continue
+
                     comp_mask = (labels == i).astype(np.uint8) * 255
                     cnts, _ = cv2.findContours(comp_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                     if not cnts:
@@ -119,8 +124,8 @@ class PhoneScreenEmbedder:
                         continue
                     aspect = rh / float(rw)
                     solidity = c_area / max(1.0, (rw * rh))
-                    if 1.25 <= aspect <= 2.8 and solidity >= 0.75 and (W * 0.07 <= w <= W * 0.50):
-                        score = solidity * 100.0 - abs(aspect - 1.95) * 10.0 + (area / 1000.0)
+                    if 1.20 <= aspect <= 3.4 and solidity >= 0.60 and (W * 0.07 <= w <= W * 0.55) and (H * 0.12 <= h <= H * 0.70):
+                        score = solidity * 100.0 - abs(aspect - 2.0) * 10.0 + (area / 1000.0)
                         candidates.append((score, comp_mask, c, rect, (x, y, w, h)))
 
         if not candidates:

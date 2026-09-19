@@ -13,55 +13,61 @@ from typing import Dict
 # 🌍 8대 핵심 타깃 국가 에스닉 골격 앵커 (사용자 지정 원형)
 # ======================================================================
 COUNTRY_8_PHENOTYPES: Dict[str, str] = {
-    # 1. 베트남 (vi) - 남방 킨족(Kinh) 고유 골격 (조화로운 아몬드형 눈매 + 웜 카라멜 피부)
+    # 1. 베트남 (vi) - 남방 킨족(Kinh) 고유 골격: 부드러운 계란형 V라인 + 선명한 인폴드 쌍꺼풀 + 섬세한 작은 코 & 볼륨 입술 + 꿀빛 카라멜 피부
     "vi": (
-        "authentic Southern Vietnamese Kinh ethnicity, expressive gentle almond-shaped dark eyes "
-        "with clear natural double eyelids, warm honey-golden caramel skin tone, "
-        "naturally contoured soft lips, gentle rounded small nose bridge, slender jawline, "
-        "healthy dark brown wavy hair"
+        "authentic Southern Vietnamese Kinh ethnicity, soft oval face with softly defined subtle cheekbones and a slender slim V-line jawline, "
+        "clear distinct infold double eyelids with bright deep almond-shaped dark eyes and soft arched eyebrows, "
+        "delicate compact nose bridge with a softly rounded small tip, voluptuous soft natural lips, "
+        "radiant luminous honey-golden light caramel skin tone, clean smooth healthy skin"
     ),
-    # 2. 캄보디아 (km) - 크메르(Khmer) 고유 골격 (조화롭고 친근한 본토 크메르 골격)
+    # 2. 캄보디아 (km) - 크메르(Khmer) 고유 골격: 사각-하트형 턱뼈 윤곽 + 크고 깊은 둥근 눈(아웃라인 쌍꺼풀) + 넓은 콧볼 & 도톰한 입술 + 앰버 골든 브론즈 피부
     "km": (
-        "authentic Cambodian Khmer ethnicity, gentle expressive almond-shaped dark eyes with clear natural double eyelids, "
-        "neat natural eyebrows, warm healthy golden-tan skin tone, natural gentle smile, "
-        "gentle rounded nose, softly defined natural cheekbones, authentic Phnom Penh Southeast Asian appearance"
+        "authentic Cambodian Khmer ethnicity, strong solid square-heart face with distinct defined mandible jawline contour and three-dimensional structured facial bone structure, "
+        "large deep-set round eyes with thick prominent bold outline double eyelids and no epicanthic fold, "
+        "prominent wider rounded nose bridge, highly defined full voluptuous lips, "
+        "rich healthy amber-golden bronze tan skin tone, clean smooth healthy skin, Phnom Penh urban look"
     ),
-    # 3. 태국 (th) - 중남부 타이(Thai) 고유 골격 (온화한 아몬드형 눈매 + 자연스러운 미소)
+    # 3. 태국 (th) - 시암 타이(Thai) 고유 골격: 갸름한 하트형 + 시원한 큰 눈(인아웃 쌍꺼풀) + 곧고 좁은 콧망울 & 입꼬리 + 골든 허니 피부
     "th": (
-        "authentic Thai ethnicity, distinctive Thai facial features, expressive warm almond-shaped dark eyes with clear natural double eyelids "
-        "and natural dark lashes, warm golden-tan sun-kissed skin tone, friendly gentle lips, soft compact nose tip, "
-        "warm tropical complexion"
+        "authentic Thai ethnicity, sleek slender heart-shaped face with small delicate rounded chin and refined sophisticated facial proportions, "
+        "wide-open large expressive eyes with long dense dark eyelashes and glamorous in-out double eyelids, "
+        "straight refined high nose bridge with small narrow compact nose tip, elegant lips with naturally upturned lip corners, "
+        "bright warm radiant golden-honey complexion, clean smooth healthy skin"
     ),
-    # 4. 인도네시아 (id) - 자바/말레이계(Javanese) 고유 골격 (자연스러운 갈색 눈매 + 사워마탕 피부)
+    # 4. 인도네시아 (id) - 자바(Javanese) 고유 골격: 타원-직사각형 이마/턱선 + 온화한 갈색 눈(얇은 쌍꺼풀) + 둥근 콧망울 & 도톰 입술 + 전통 사워마탕 올리브 브라운 피부
     "id": (
-        "authentic Indonesian Javanese ethnicity, warm exotic light-brown tan skin tone, traditional sawo matang skin tone, "
-        "friendly expressive almond-shaped brown eyes with soft natural double eyelids, full soft lips, soft rounded nose bridge, "
-        "warm islander complexion"
+        "authentic Indonesian Javanese ethnicity, soft oval-rectangular face with gentle flat smooth forehead and soft rounded jawline, "
+        "warm gentle expressive brown eyes with soft natural thin double eyelids and dense natural eyebrows, "
+        "rounded nose bridge with gently sloping wider nasal base, soft full gentle lips, "
+        "traditional authentic sawo matang warm ochre-olive brown skin tone, clean smooth healthy skin"
     ),
-    # 5. 미얀마 (my) - 버마족(Bamar) 고유 골격 (부드러운 타원형 얼굴 + 온화한 눈매)
+    # 5. 미얀마 (my) - 버마족(Bamar) 고유 골격: 넓은 이마 둥근 계란형 + 사슴 같은 맑은 큰 눈(인폴드 쌍꺼풀) + 아담한 코 & 부드러운 입술 + 옐로우 골든 올리브 피부
     "my": (
-        "authentic Myanmar Bamar ethnicity, gentle oval face, gentle expressive dark brown eyes with clear natural double eyelids, "
-        "warm olive-tan golden skin tone, naturally shaped lips, soft peaceful facial features, "
-        "distinct Southeast Asian appearance"
+        "authentic Myanmar Bamar ethnicity, broad smooth forehead and soft round-oval face shape with rounded gentle jawline giving a peaceful warm impression, "
+        "large bright clear doe-like expressive eyes with soft gentle infold double eyelids and neat well-groomed arched eyebrows, "
+        "petite compact nose with a neatly rounded small nose tip, soft curved medium-full lips, "
+        "clear bright glowing yellow-golden olive skin tone, clean smooth healthy skin"
     ),
-    # 6. 네팔 (ne) - 히말라야/파하디(Himalayan) 고유 골격 (또렷하고 조화로운 눈매 + 높은 콧대)
+    # 6. 네팔 (ne) - 히말라야 파하디(Pahadi) 고유 골격: 각진 고산지대 역삼각 턱선 + 인도-티베트 융합 깊은 눈 + 높고 날렵한 직선 매부리 콧대 + 밀빛 올리브 피부
     "ne": (
-        "authentic Nepalese Himalayan Pahadi ethnicity, expressive clear dark eyes with natural double eyelids, "
-        "neat natural dark eyebrows, distinct straight high nose bridge, warm wheatish-olive skin tone, "
-        "defined natural facial bone structure"
+        "authentic Nepalese Himalayan Pahadi ethnicity, narrow angular high-altitude mountain bone structure with high defined forehead and three-dimensional inverted triangle tapered jawline, "
+        "deep-set Indo-Tibetan fusion expressive eyes with thick bold straight dark eyebrows and an intense clear gaze, "
+        "prominent highly elevated sharp aquiline straight nose bridge, sharply defined thin-to-medium lips, "
+        "warm wheatish-olive golden skin tone, clean smooth healthy skin"
     ),
-    # 7. 몽골 (mn) - 할하 유목민(Khalkha) 고유 골격 (자연스러운 광대 + 건강한 브론즈 피부)
+    # 7. 몽골 (mn) - 현대 울란바토르 도시인(Modern Urban Mongolian) 고유 골격: 높은 광대뼈 & 탄탄한 사각턱 + 가로로 긴 시원한 눈매 + 단단한 콧대 & 일자 입술 + 라이트 골든 피부
     "mn": (
-        "authentic Mongolian Khalkha ethnicity, natural defined high cheekbones, healthy sun-bronzed weathered tan skin "
-        "with slight natural reddish flush on cheeks from cold steppe wind, strong defined jawline, "
-        "warm expressive dark eyes with natural eyelids"
+        "authentic modern urban Mongolian from Ulaanbaatar, broad solid strong face with prominent well-defined high cheekbones and a firm straight solid square-oval jawline, "
+        "horizontally long sleek elongated cool expressive eyes with thin subtle hooded double eyelids, "
+        "straight solid firm nose bridge, neat clean straight-line lips, "
+        "clean smooth clear light-golden skin tone, clean smooth healthy skin, modern urban look"
     ),
-    # 8. 우즈베키스탄 (uz) - 튀르크-유라시아 골격 (검증 성공 앵커 유지)
+    # 8. 우즈베키스탄 (uz) - 튀르크-유라시안(Turkic-Eurasian) 고유 골격: 동서양 융합 타원형 + 딥셋 헤이즐 눈(아웃라인 쌍꺼풀) + 서구적 오뚝한 콧대 + 상아빛 올리브 피부
     "uz": (
-        "authentic Uzbek Central Asian Turkic-Eurasian ethnicity, distinctive Uzbek facial features, "
-        "prominent straight high nose bridge, deep-set expressive almond-shaped hazel-brown eyes with natural double eyelids, "
-        "soft defined cheekbones and elegant slim jawline, natural warm olive-tan skin, healthy dark brown hair, "
-        "authentic Tashkent Central Asian appearance"
+        "authentic Uzbek Central Asian Turkic-Eurasian ethnicity, East-West fusion Eurasian bone structure with slim sculpted refined Eurasian oval face, "
+        "deep-set expressive hazel-brown eyes with prominent Western-style distinct bold outline double eyelids and thick dark eyelashes, "
+        "prominently high straight elevated defined nose bridge, sculpted attractive defined lips, "
+        "fair bright warm ivory-olive skin tone, clean smooth healthy skin, Tashkent urban look"
     ),
     # ── 기타 보조 국가 (기존 호환성 유지) ──
     "kk": (
@@ -135,6 +141,7 @@ COUNTRY_8_NEGATIVE_ETHNIC: Dict[str, str] = {
         "multiple people, two people, extra person, bystander, partner"
     ),
     "mn": (
+        "red cheeks, rosy cheeks, flushed cheeks, heavy blush, rouge, clown makeup, painted face, face paint, sunburn, sunburned, red spots, "
         "Caucasian, white person, blonde hair, blue eyes, pale porcelain skin, K-pop style, "
         "bug eyes, bulging eyes, bulging eyeballs, sunken eyes, long neck, elongated neck, bobblehead, creepy smile, toothy grimace, "
         "weak jawline, double chin, multiple people, two people, extra person, bystander, partner"

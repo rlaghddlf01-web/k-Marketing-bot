@@ -264,5 +264,191 @@
         }
       ]
     }
+  },
+  "2026-09-19": {
+    "morning": {
+      "shorts": 0,
+      "cardnews": 0,
+      "details": []
+    },
+    "evening": {
+      "shorts": 0,
+      "cardnews": 0,
+      "details": []
+    },
+    "manual": {
+      "shorts": 0,
+      "cardnews": 23,
+      "details": [
+        {
+          "time": "08:52:01",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "09:01:55",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "09:12:38",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "09:22:39",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "09:33:19",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "th",
+          "success": true
+        },
+        {
+          "time": "09:44:02",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "id",
+          "success": true
+        },
+        {
+          "time": "09:53:56",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "mn",
+          "success": true
+        },
+        {
+          "time": "10:04:40",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "my",
+          "success": true
+        },
+        {
+          "time": "12:23:39",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "12:30:21",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "12:37:03",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "12:43:54",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "12:50:40",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "th",
+          "success": true
+        },
+        {
+          "time": "12:57:25",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "id",
+          "success": true
+        },
+        {
+          "time": "13:04:13",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "mn",
+          "success": true
+        },
+        {
+          "time": "13:10:59",
+          "brand": "kmarket",
+          "type": "cardnews",
+          "lang": "my",
+          "success": true
+        },
+        {
+          "time": "18:38:19",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "18:49:12",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "19:00:01",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "19:10:51",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "20:02:16",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "20:07:00",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "uz",
+          "success": false
+        },
+        {
+          "time": "20:17:51",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "20:34:09",
+          "brand": "easytax",
+          "type": "cardnews",
+          "lang": "vi",
+          "success": true
+        }
+      ]
+    }
   }
 }
