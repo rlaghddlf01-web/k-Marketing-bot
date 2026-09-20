@@ -320,13 +320,13 @@ class ShortsDynamicArtRenderer:
             cx = (1080 - cw) // 2
             cy = 1080  # 인물 가슴 부위
 
-            # 화이트 카드 배경 + 하늘색 네온 테두리
+            # 💎 [스마트폰 정면 액정 투과 글래스모피즘] 반투명 화이트 글래스 카드 (알파 65: 스마트폰 액정 화면 100% 투과)
             draw.rounded_rectangle(
                 [(cx, cy), (cx + cw, cy + ch)],
                 radius=28,
-                fill=(255, 255, 255, 250),
-                outline=(56, 189, 248, 255),
-                width=4
+                fill=(255, 255, 255, 65),
+                outline=(56, 189, 248, 180),
+                width=2
             )
 
             # 상단 캡슐 뱃지 (예: XIN CHÀO!)
@@ -424,20 +424,20 @@ class ShortsDynamicArtRenderer:
                 )
 
         elif layout_type == "phone_side_popup":
-            # 🎨 3) [레퍼런스 7.0~10.5s] 스마트폰 옆/좌측 미니 팝업 카드
+            # 🎨 3) [스마트폰 정면 액정 투과 글래스모피즘] 팝업 카드 (알파값 60~70 은은한 반투명 유리 효과)
             pw, ph = 380, 480
             px, py = 40, 960
 
-            # 다크 글래스 카드 배경
+            # 💎 은은한 반투명 다크 글래스 카드 배경 (알파 65: 스마트폰 액정 화면 100% 투과)
             draw.rounded_rectangle(
                 [(px, py), (px + pw, py + ph)],
                 radius=26,
-                fill=(15, 23, 42, 240),
-                outline=(52, 211, 153, 255),
-                width=3
+                fill=(15, 23, 42, 65),
+                outline=(52, 211, 153, 180),
+                width=2
             )
 
-            # 스텝 뱃지 (예: BƯỚC 1)
+            # 스텝 뱃지 (예: BƯỚC 1 / 반투명 캡슐)
             if badge_text:
                 self._draw_pill_badge(
                     draw=draw,
@@ -450,7 +450,7 @@ class ShortsDynamicArtRenderer:
                     lang=lang
                 )
 
-            # 메인 텍스트
+            # 메인 텍스트 (시인성을 위해 또렷한 화이트 + 은은한 텍스트 섀도우)
             if headline_lines:
                 curr_y = py + 70
                 for line_item in headline_lines:
@@ -471,26 +471,28 @@ class ShortsDynamicArtRenderer:
                     )
                     curr_y += 48
 
-            # 내부 미니 인증 카드
+            # 내부 미니 인증 카드 (반투명 프로스트 글래스 알파 40)
             inner_box = (px + 25, py + 180, pw - 50, 260)
             draw.rounded_rectangle(
                 [(inner_box[0], inner_box[1]), (inner_box[0] + inner_box[2], inner_box[1] + inner_box[3])],
                 radius=18,
-                fill=(30, 41, 59, 255),
-                outline=(56, 189, 248, 200),
-                width=2
+                fill=(255, 255, 255, 25),
+                outline=(56, 189, 248, 140),
+                width=1
             )
-            # 체크마크 & 성공 버튼
+            # 체크마크 & 성공 버튼 (반투명 네온 블루)
             btn_box = (inner_box[0] + 20, inner_box[1] + 180, inner_box[2] - 40, 50)
             draw.rounded_rectangle(
                 [(btn_box[0], btn_box[1]), (btn_box[0] + btn_box[2], btn_box[1] + btn_box[3])],
                 radius=25,
-                fill=(14, 165, 233, 255)
+                fill=(14, 165, 233, 160),
+                outline=(255, 255, 255, 180),
+                width=1
             )
             # 체크마크 벡터 그래픽
             chk_cx = btn_box[0] + 28
             chk_cy = btn_box[1] + 25
-            draw.ellipse([(chk_cx - 12, chk_cy - 12), (chk_cx + 12, chk_cy + 12)], fill=(255, 255, 255, 255))
+            draw.ellipse([(chk_cx - 12, chk_cy - 12), (chk_cx + 12, chk_cy + 12)], fill=(255, 255, 255, 230))
             draw.line([(chk_cx - 6, chk_cy), (chk_cx - 2, chk_cy + 4), (chk_cx + 6, chk_cy - 4)], fill=(14, 165, 233), width=3)
 
             btn_text_box = (btn_box[0] + 45, btn_box[1], btn_box[2] - 50, btn_box[3])
