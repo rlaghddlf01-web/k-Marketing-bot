@@ -143,6 +143,10 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         scenario = self.script_director.get_full_scenario(lang=lang, amount=amount)
         return scenario.get("speech_hook", "")
 
+    def produce_shorts(self, lang: Optional[str] = "vi", **kwargs) -> Dict[str, Any]:
+        """GoldenBatchProducer 및 배치 봇 호환용 alias"""
+        return self.produce(lang=lang, **kwargs)
+
     def produce(
         self,
         lang: Optional[str] = None,
@@ -226,7 +230,8 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             t2i_prompt = self.get_character_prompt(
                 lang=effective_lang,
                 custom_char_desc=scenario.get("character_desc"),
-                custom_bg_desc=scenario.get("background_desc")
+                custom_bg_desc=scenario.get("background_desc"),
+                gender=gender
             )
             pos_prompt = t2i_prompt["positive"]
             neg_prompt = t2i_prompt["negative"]

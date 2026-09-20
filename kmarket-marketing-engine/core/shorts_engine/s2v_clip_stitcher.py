@@ -46,31 +46,17 @@ class S2VClipStitcher:
     @staticmethod
     def split_speech_into_two_parts(speech_text: str) -> Tuple[str, str]:
         """
-        10초 분량의 대본을 1차(인사/공감 약 5초)와 2차(입금 인증 약 5초)로 지능형 2등분 분할
+        10초 분량의 대본을 1차(0~5초 연속 발화)와 2차(5~10초 연속 발화)로 50:50 정밀 균등 분할
         """
-        # 문장 분리 (. ! ? 또는 줄바꿈)
-        tokens = [s.strip() for s in re.split(r'([.!?\n]+)', speech_text) if s.strip()]
-        rebuilt = []
-        i = 0
-        while i < len(tokens):
-            s = tokens[i]
-            if i + 1 < len(tokens) and re.match(r'^[.!?\n]+$', tokens[i+1]):
-                s += tokens[i+1]
-                i += 2
-            else:
-                i += 1
-            rebuilt.append(s)
-
-        if len(rebuilt) >= 2:
-            mid = len(rebuilt) // 2
-            part1 = " ".join(rebuilt[:mid]).strip()
-            part2 = " ".join(rebuilt[mid:]).strip()
+        words = speech_text.strip().split()
+        if len(words) >= 4:
+            mid = len(words) // 2
+            part1 = " ".join(words[:mid]).strip()
+            part2 = " ".join(words[mid:]).strip()
             return part1, part2
-
-        # 1문장인 경우 단어 수로 균등 분할
-        words = speech_text.split()
-        mid = len(words) // 2
-        return " ".join(words[:mid]).strip(), " ".join(words[mid:]).strip()
+        
+        # 단어가 3개 이하인 경우 전체를 동일하게 유지
+        return speech_text.strip(), speech_text.strip()
 
     def extract_last_frame(self, video_path: str, output_image_path: str) -> str:
         """
@@ -181,18 +167,26 @@ class S2VClipStitcher:
         logger.info(f"✨ [무결점 연속 결합 완료] 10초+ 완제품 클립 생성: {output_stitched_path}")
         return output_stitched_path
 
-    def _generate_bounded_wav(self, text: str, lang: str, gender: str, prefix: str, max_dur: float = 4.85) -> str:
+    def _generate_bounded_wav(self, text: str, lang: str, gender: str, prefix: str, target_window_sec: float = 4.70, max_dur: Optional[float] = None) -> str:
         """
-        81프레임(5.06초) 비디오 윈도우 안에 안전하게 안착하도록
-        자연스러운 인간 대화 속도(+0%)로 음성 합성 (말 잘림 0% 및 수다쟁이 배속 원천 차단)
+        81프레임(5.06초) 비디오 윈도우 안에 안전하게 안착하며 4.0~4.70초 동안 쉼 없이 말을 하도록
+        지능형 템포 보정 음성 합성 (말 중간 멈춤 0% 및 81프레임 초과 0% 보장)
         """
+        target_sec = max_dur if max_dur is not None else target_window_sec
         wav = self.tts.generate_speech_wav(text=text, lang=lang, gender=gender, rate="+0%", filename_prefix=prefix)
         dur = self._get_video_duration(wav)
-        if dur > max_dur:
-            needed_boost = min(25, int(((dur / max_dur) - 1.0) * 100) + 3)
+        
+        # 1. 너무 길어서 target_sec를 초과하는 경우: 배속을 올려 4.5~4.70초 안쪽으로 정확히 맞춤
+        if dur > target_sec:
+            needed_boost = min(35, int(((dur / target_sec) - 1.0) * 100) + 5)
             rate = f"+{needed_boost}%"
-            logger.info(f"⏱️ [음성 템포 미세 조정] {dur:.2f}s > {max_dur}s -> rate={rate}로 자연스럽게 미세 보정")
+            logger.info(f"⏱️ [음성 템포 단축] {dur:.2f}s > {target_sec}s -> rate={rate}로 81프레임 안착 보정")
             wav = self.tts.generate_speech_wav(text=text, lang=lang, gender=gender, rate=rate, filename_prefix=f"{prefix}_adjusted")
+        # 2. 너무 짧아서 3.0초 미만인 경우: 여유 있는 호흡(-5~-10%)으로 늘려 5초 내내 자연스럽게 말하도록 보정
+        elif dur < 3.0 and len(text.strip()) > 0:
+            rate = "-8%"
+            logger.info(f"⏱️ [음성 템포 여유] {dur:.2f}s < 3.0s -> rate={rate}로 5초 꽉 차게 연속 발화 보정")
+            wav = self.tts.generate_speech_wav(text=text, lang=lang, gender=gender, rate=rate, filename_prefix=f"{prefix}_paced")
         return wav
 
     def render_seamless_dual_clip(
@@ -211,7 +205,7 @@ class S2VClipStitcher:
         """
         [완(Wan 2.2 S2V) 공식 권장 5초+5초 순수 GPU 독립 렌더링 파이프라인]
         1. 제미나이 5초 샷 1, 샷 2 대본 직결 (또는 지능형 2등분 분할)
-        2. 각각 약 5초 분량의 고음질 독립 WAV 음성 합성 (최대 4.75초 이내 발화 완결 보장)
+        2. 각각 약 5초 분량의 고음질 독립 WAV 음성 합성 (최대 4.70초 이내 발화 완결 보장)
         3. [1차 샷 5초]: 순수 81프레임 GPU 단독 렌더링 (약 36초 소요, CPU 오프로드 0MB)
         4. [VRAM 리셋]: 1차 완료 후 VRAM 완전 클린업 (14.7GB 가용 확보)
         5. [스마트 눈 선별]: 1차 영상 후반부에서 눈을 가장 크고 또렷하게 뜬 프레임 PNG 캡처
@@ -235,14 +229,14 @@ class S2VClipStitcher:
             lang=lang,
             gender=gender,
             prefix=f"easytax_hook_p1_{lang}_{dt_str}",
-            max_dur=4.75
+            target_window_sec=4.70
         )
         wav_part2 = self._generate_bounded_wav(
             text=part2_text,
             lang=lang,
             gender=gender,
             prefix=f"easytax_hook_p2_{lang}_{dt_str}",
-            max_dur=4.75
+            target_window_sec=4.70
         )
 
         audio_name_p1 = os.path.basename(wav_part1)

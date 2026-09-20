@@ -499,5 +499,142 @@
         }
       ]
     }
+  },
+  "2026-09-20": {
+    "morning": {
+      "shorts": 0,
+      "cardnews": 0,
+      "details": []
+    },
+    "evening": {
+      "shorts": 0,
+      "cardnews": 0,
+      "details": []
+    },
+    "manual": {
+      "shorts": 9,
+      "cardnews": 0,
+      "details": [
+        {
+          "time": "07:49:37",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "07:50:22",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "07:51:09",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "07:51:54",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "07:52:38",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "th",
+          "success": true
+        },
+        {
+          "time": "07:53:45",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "id",
+          "success": true
+        },
+        {
+          "time": "07:54:32",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "mn",
+          "success": true
+        },
+        {
+          "time": "07:55:18",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "my",
+          "success": true
+        },
+        {
+          "time": "09:17:11",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "vi",
+          "success": false
+        },
+        {
+          "time": "09:18:28",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "uz",
+          "success": false
+        },
+        {
+          "time": "09:19:46",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "km",
+          "success": false
+        },
+        {
+          "time": "09:21:06",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "ne",
+          "success": false
+        },
+        {
+          "time": "09:22:23",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "th",
+          "success": false
+        },
+        {
+          "time": "09:23:45",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "id",
+          "success": false
+        },
+        {
+          "time": "09:25:03",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "mn",
+          "success": false
+        },
+        {
+          "time": "09:26:21",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "my",
+          "success": false
+        },
+        {
+          "time": "09:52:08",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "vi",
+          "success": true
+        }
+      ]
+    }
   }
 }

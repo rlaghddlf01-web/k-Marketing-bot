@@ -47,14 +47,68 @@ from modules.free_stuff_notifier import FreeStuffNotifier
 from modules.guide_pdf_generator import GuidePDFGenerator
 from core.direct_uploader import DirectUploader
 from core.telegram_ai_community_manager import TelegramAICommunityManager
-from core.telegram_member_scraper import TelegramMemberScraper
-from core.telegram_outreach_poster import TelegramOutreachPoster
-from core.telegram_stealth_inviter import TelegramStealthInviter
-from modules.telegram_community_publisher import TelegramCommunityPublisher
-from core.golden_batch_producer import GoldenBatchProducer
+from datetime import datetime
 
-# 🌟 8대 황금 타깃 듀얼 브랜드 대량 생산 배치 프로듀서
-golden_batch_producer = GoldenBatchProducer()
+# 🌟 8대 황금 타깃 듀얼 브랜드 대량 생산 배치 프로듀서 (0.1초 즉시 기동을 위한 지연 로더 프록시)
+_golden_batch_producer = None
+
+def get_golden_batch_producer():
+    global _golden_batch_producer
+    if _golden_batch_producer is None:
+        from core.golden_batch_producer import GoldenBatchProducer
+        _golden_batch_producer = GoldenBatchProducer()
+    return _golden_batch_producer
+
+class LazyGoldenBatchProxy:
+    """대시보드 0.1초 즉시 기동을 위한 지연 로더 프록시"""
+    def get_today_production_summary(self):
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        default_summary = {
+            "today": today_str,
+            "total_shorts": 0,
+            "total_cardnews": 0,
+            "total_content": 0,
+            "morning_slot_done": False,
+            "evening_slot_done": False,
+            "golden_languages": GOLDEN_EIGHT_LANGUAGES
+        }
+        stats_file = DATA_DIR / "golden_batch_stats.json"
+        if not stats_file.exists():
+            return default_summary
+        try:
+            with open(stats_file, "r", encoding="utf-8") as f:
+                stats = json.load(f)
+            today_data = stats.get(today_str, {})
+            m_s = today_data.get("morning", {}).get("shorts", 0)
+            m_c = today_data.get("morning", {}).get("cardnews", 0)
+            e_s = today_data.get("evening", {}).get("shorts", 0)
+            e_c = today_data.get("evening", {}).get("cardnews", 0)
+            man_s = today_data.get("manual", {}).get("shorts", 0)
+            man_c = today_data.get("manual", {}).get("cardnews", 0)
+            tot_s = m_s + e_s + man_s
+            tot_c = m_c + e_c + man_c
+            return {
+                "today": today_str,
+                "total_shorts": tot_s,
+                "total_cardnews": tot_c,
+                "total_content": tot_s + tot_c,
+                "morning_slot_done": m_s > 0 or m_c > 0,
+                "evening_slot_done": e_s > 0 or e_c > 0,
+                "golden_languages": GOLDEN_EIGHT_LANGUAGES
+            }
+        except Exception:
+            return default_summary
+
+    def execute_slot(self, slot_name: str, brand: str = "all"):
+        return get_golden_batch_producer().execute_slot(slot_name=slot_name, brand=brand)
+
+    def produce_brand_shorts_batch(self, brand: str = "easytax", slot_name: str = "manual"):
+        return get_golden_batch_producer().produce_brand_shorts_batch(brand=brand, slot_name=slot_name)
+
+    def produce_brand_cardnews_batch(self, brand: str = "easytax", slot_name: str = "manual"):
+        return get_golden_batch_producer().produce_brand_cardnews_batch(brand=brand, slot_name=slot_name)
+
+golden_batch_producer = LazyGoldenBatchProxy()
 
 # 🌟 8대 황금 타깃 1일 2슬롯 24시간 무인 데몬 상태 관리
 golden_batch_daemon_running = {
@@ -94,23 +148,34 @@ def _golden_daemon_loop(brand: str):
             log_event(f"⚠️ [골든 데몬 예외] {e}", "warning")
             time.sleep(30)
 
-# 📲 텔레그램 24시간 커뮤니티 — 브랜드별 독립 인스턴스 (K-Market / EasyTax 완전 분리)
-telegram_ai_managers = {
-    "kmarket": TelegramAICommunityManager(brand="kmarket"),
-    "easytax": TelegramAICommunityManager(brand="easytax")
-}
-# [방법 1] 타 그룹 홍보 게시 엔진 (브랜드별 독립 세션)
-telegram_outreach_posters = {
-    "kmarket": TelegramOutreachPoster(brand="kmarket"),
-    "easytax": TelegramOutreachPoster(brand="easytax")
-}
-# [초대] 서브폰 스텔스 초대기 (브랜드별 독립 세션)
-telegram_stealth_inviters = {
-    "kmarket": TelegramStealthInviter(brand="kmarket"),
-    "easytax": TelegramStealthInviter(brand="easytax")
-}
-telegram_scraper = TelegramMemberScraper()
-telegram_publisher = TelegramCommunityPublisher()
+# 📲 텔레그램 24시간 커뮤니티 — 비동기 백그라운드 지연 초기화
+telegram_ai_managers = {}
+telegram_outreach_posters = {}
+telegram_stealth_inviters = {}
+telegram_scraper = None
+telegram_publisher = None
+
+def _init_telegram_background():
+    global telegram_ai_managers, telegram_outreach_posters, telegram_stealth_inviters, telegram_scraper, telegram_publisher
+    try:
+        from core.telegram_ai_community_manager import TelegramAICommunityManager
+        from core.telegram_outreach_poster import TelegramOutreachPoster
+        from core.telegram_stealth_inviter import TelegramStealthInviter
+        from core.telegram_member_scraper import TelegramMemberScraper
+        from modules.telegram_community_publisher import TelegramCommunityPublisher
+
+        telegram_ai_managers["kmarket"] = TelegramAICommunityManager(brand="kmarket")
+        telegram_ai_managers["easytax"] = TelegramAICommunityManager(brand="easytax")
+        telegram_outreach_posters["kmarket"] = TelegramOutreachPoster(brand="kmarket")
+        telegram_outreach_posters["easytax"] = TelegramOutreachPoster(brand="easytax")
+        telegram_stealth_inviters["kmarket"] = TelegramStealthInviter(brand="kmarket")
+        telegram_stealth_inviters["easytax"] = TelegramStealthInviter(brand="easytax")
+        telegram_scraper = TelegramMemberScraper()
+        telegram_publisher = TelegramCommunityPublisher()
+    except Exception as e:
+        print(f"⚠️ [텔레그램 초기화 경고] {e}")
+
+threading.Thread(target=_init_telegram_background, daemon=True).start()
 
 # 듀얼 봇 글로벌 상태
 kmarket_thread = None
@@ -894,21 +959,29 @@ class DashboardHandler(BaseHTTPRequestHandler):
         brand = payload.get("brand", "all").lower()
         content_type = payload.get("type", "all").lower()
 
+        from core.engine.generation_abort_guard import GenerationAbortGuard
+        GenerationAbortGuard.reset_stop_flag()
+
         def _batch_worker():
             try:
+                import importlib
+                import core.golden_batch_producer
+                importlib.reload(core.golden_batch_producer)
+                current_producer = core.golden_batch_producer.GoldenBatchProducer()
+
                 log_event(f"🌟 [골든 배치] {slot_name} ({brand} / {content_type}) 8개국 생산 가동...", "info")
                 if content_type == "shorts":
                     if brand in ["kmarket", "all"]:
-                        golden_batch_producer.produce_brand_shorts_batch("kmarket", slot_name)
+                        current_producer.produce_brand_shorts_batch("kmarket", slot_name)
                     if brand in ["easytax", "all"]:
-                        golden_batch_producer.produce_brand_shorts_batch("easytax", slot_name)
+                        current_producer.produce_brand_shorts_batch("easytax", slot_name)
                 elif content_type == "cardnews":
                     if brand in ["kmarket", "all"]:
-                        golden_batch_producer.produce_brand_cardnews_batch("kmarket", slot_name)
+                        current_producer.produce_brand_cardnews_batch("kmarket", slot_name)
                     if brand in ["easytax", "all"]:
-                        golden_batch_producer.produce_brand_cardnews_batch("easytax", slot_name)
+                        current_producer.produce_brand_cardnews_batch("easytax", slot_name)
                 else:
-                    golden_batch_producer.execute_slot(slot_name=slot_name, brand=brand)
+                    current_producer.execute_slot(slot_name=slot_name, brand=brand)
                 log_event(f"🎉 [골든 배치] {slot_name} ({brand}) 8개국 생산이 성공적으로 완료되었습니다!", "success")
             except Exception as e:
                 log_event(f"❌ [골든 배치 실패] {e}", "danger")
@@ -1315,6 +1388,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(res).encode("utf-8"))
 
     def _handle_get_ir_analytics(self, parsed_url=None):
+        import importlib
+        import core.supabase_manager
+        import core.ir_analytics
+        importlib.reload(core.supabase_manager)
+        importlib.reload(core.ir_analytics)
         from core.ir_analytics import IRAnalyticsEngine
         from core.supabase_manager import SupabaseManager
         query_url = parsed_url or urllib.parse.urlparse(self.path)
@@ -2022,16 +2100,42 @@ class DashboardHandler(BaseHTTPRequestHandler):
 def run_server(port: int = 8000):
     ThreadingHTTPServer.allow_reuse_address = True
     server_address = ("", port)
-    try:
-        httpd = ThreadingHTTPServer(server_address, DashboardHandler)
-    except OSError as e:
-        print(f"\n❌ [오류] 포트 {port}를 이미 다른 프로그램이 사용 중입니다: {e}")
-        print(f"기존에 실행 중인 창이나 프로세스를 확인해주세요.\n")
-        return
+    httpd = None
+    max_retries = 5
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            httpd = ThreadingHTTPServer(server_address, DashboardHandler)
+            break
+        except OSError as e:
+            if attempt < max_retries:
+                print(f"⚠️ [포트 {port} 대기 ({attempt}/{max_retries})] 기존 소켓 해제 대기 중... ({e})")
+                try:
+                    import subprocess
+                    subprocess.run(
+                        ["powershell", "-NoProfile", "-Command", f"Get-NetTCPConnection -LocalPort {port} -ErrorAction SilentlyContinue | ForEach-Object {{ Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }}"],
+                        capture_output=True,
+                        timeout=3
+                    )
+                except Exception:
+                    pass
+                time.sleep(1.0)
+            else:
+                print(f"\n❌ [오류] 포트 {port}를 이미 다른 프로그램이 사용 중입니다: {e}")
     print("\n========================================================")
     print("🛸 [Universal Expat Growth Engine] Local Web Control Center Started!")
     print(f"🌐 Browser URL: http://localhost:{port}")
     print("========================================================\n")
+
+    def _open_browser_auto():
+        time.sleep(0.3)
+        try:
+            import webbrowser
+            webbrowser.open(f"http://localhost:{port}")
+        except Exception:
+            pass
+    threading.Thread(target=_open_browser_auto, daemon=True).start()
+
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

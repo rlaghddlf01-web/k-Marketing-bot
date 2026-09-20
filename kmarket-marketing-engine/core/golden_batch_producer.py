@@ -26,10 +26,12 @@ from config import (
     DATA_DIR,
     OUTPUTS_DIR
 )
-from modules.shorts_easytax import ShortsEasyTax
-from modules.shorts_kmarket import ShortsKMarket
+from core.shorts_engine import EasyTaxShortsProducer, KMarketShortsProducer
 from core.engine.cardnews_batch_producer import CardNewsBatchProducer
 from modules.cardnews_kmarket import CardnewsKMarket
+from core.engine.comfy_process_manager import ComfyProcessManager
+from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+from core.engine.gpu_memory_flusher import GPUMemoryFlusher
 from core.db_manager import DBManager
 from core.supabase_manager import SupabaseManager
 
@@ -38,15 +40,15 @@ logger = logging.getLogger("GoldenBatchProducer")
 
 class GoldenBatchProducer:
     """
-    8대 황금 국가 전용 일괄 대량 생산 배치 마스터
+    8대 황금 국가 전용 일괄 대량 생산 배치 마스터 (RTX 로컬 GPU Wan 2.1 T2I & Wan 2.2 S2V 립싱크 100% 가동)
     """
     def __init__(self):
         self.db_mgr = DBManager()
         self.supabase_mgr = SupabaseManager(self.db_mgr)
         
-        # 4대 생산 공장 인스턴스화 (이지텍스: 신형 5장 풀사이즈 카드뉴스 파이프라인 연동)
-        self.shorts_easytax = ShortsEasyTax()
-        self.shorts_kmarket = ShortsKMarket()
+        # 4대 생산 공장 인스턴스화 (이지텍스 & 케이마켓: 신형 로컬 GPU Wan 2.2 숏폼 + 5장 풀사이즈 카드뉴스)
+        self.shorts_easytax = EasyTaxShortsProducer()
+        self.shorts_kmarket = KMarketShortsProducer()
         self.cardnews_easytax = CardNewsBatchProducer()
         self.cardnews_kmarket = CardnewsKMarket()
         
@@ -93,27 +95,39 @@ class GoldenBatchProducer:
 
     def produce_brand_shorts_batch(self, brand: str = "easytax", slot_name: str = "manual") -> Dict[str, Any]:
         """
-        특정 브랜드의 8대 황금 국가 숏폼 8편 일괄 생산
+        특정 브랜드의 8대 황금 국가 Wan 2.2 S2V 립싱크 숏폼 8편 일괄 생산 (RTX 로컬 GPU 풀로드)
         """
+        # 1. ComfyUI GPU 엔진 상태 점검 및 백그라운드 자동 기동
+        ComfyProcessManager.ensure_running(log_callback=logger.info)
+        GenerationAbortGuard.reset_stop_flag()
+
         producer = self.shorts_easytax if brand == "easytax" else self.shorts_kmarket
         brand_name = "EasyTax (KTRS 세무)" if brand == "easytax" else "K-Market (쇼핑몰)"
-        logger.info(f"🎬 [{brand_name}] 8대 황금 국가 숏폼 일괄 생산 시작 (슬롯: {slot_name})")
+        logger.info(f"🎬 [{brand_name}] 8대 황금 국가 Wan 2.2 S2V 립싱크 숏폼 일괄 생산 시작 (슬롯: {slot_name}, GPU 모드)")
         
         results = []
         success_count = 0
         
         for lang in GOLDEN_EIGHT_LANGUAGES:
+            # 🛑 [비상 정지 킬스위치 감시]
+            if GenerationAbortGuard.is_abort_requested():
+                logger.warning(f"🛑 [{brand_name} 숏폼 배치] 대시보드 정지 요청 감지 → 루프 즉각 탈출(Abort)!")
+                break
+
             info = GOLDEN_EIGHT_DETAILS.get(lang, {})
             flag = info.get("flag", "🌐")
             country_name = info.get("name", lang)
             
-            logger.info(f"   ▶ [{flag} {country_name} ({lang.upper()})] 숏폼 렌더링 시작...")
+            logger.info(f"   ▶ [{flag} {country_name} ({lang.upper()})] Wan 2.2 S2V 립싱크 숏폼 GPU 렌더링 시작...")
             try:
-                res = producer.produce_shorts(lang=lang)
+                res = producer.produce(lang=lang)
                 success_count += 1
                 results.append({"lang": lang, "success": True, "res": res})
                 self._record_batch_stat(slot_name, brand, "shorts", lang, True)
-                logger.info(f"   ✅ [{flag} {country_name}] 숏폼 완성 및 바탕화면 저장 완료")
+                logger.info(f"   ✅ [{flag} {country_name}] 숏폼 완성 및 바탕화면 저장 완료: {res.get('output_mp4', '')}")
+            except GenerationAbortedException:
+                logger.warning(f"🛑 [{flag} {country_name}] 사용자 정지로 숏폼 생성 중단")
+                break
             except Exception as e:
                 logger.error(f"   ❌ [{flag} {country_name}] 숏폼 렌더링 실패: {e}")
                 results.append({"lang": lang, "success": False, "error": str(e)})
@@ -123,7 +137,6 @@ class GoldenBatchProducer:
             
             # 🧹 [1개국 숏폼 생성 완료 즉각 VRAM 캐시 방출]
             try:
-                from core.engine.gpu_memory_flusher import GPUMemoryFlusher
                 GPUMemoryFlusher.flush_after_country(lang=lang, brand=brand, content_type="shorts")
             except Exception as fe:
                 logger.warning(f"VRAM Flush 경고 (작업 계속): {fe}")
@@ -139,27 +152,39 @@ class GoldenBatchProducer:
 
     def produce_brand_cardnews_batch(self, brand: str = "easytax", slot_name: str = "manual") -> Dict[str, Any]:
         """
-        특정 브랜드의 8대 황금 국가 5장 카드뉴스 8세트 일괄 생산
+        특정 브랜드의 8대 황금 국가 5장 카드뉴스 8세트 일괄 생산 (RTX 로컬 GPU 풀로드)
         """
+        # 1. ComfyUI GPU 엔진 상태 점검 및 백그라운드 자동 기동
+        ComfyProcessManager.ensure_running(log_callback=logger.info)
+        GenerationAbortGuard.reset_stop_flag()
+
         producer = self.cardnews_easytax if brand == "easytax" else self.cardnews_kmarket
         brand_name = "EasyTax (KTRS 세무)" if brand == "easytax" else "K-Market (쇼핑몰)"
-        logger.info(f"📰 [{brand_name}] 8대 황금 국가 5장 카드뉴스 일괄 생산 시작 (슬롯: {slot_name})")
+        logger.info(f"📰 [{brand_name}] 8대 황금 국가 5장 카드뉴스 일괄 생산 시작 (슬롯: {slot_name}, GPU 모드)")
         
         results = []
         success_count = 0
         
         for lang in GOLDEN_EIGHT_LANGUAGES:
+            # 🛑 [비상 정지 킬스위치 감시]
+            if GenerationAbortGuard.is_abort_requested():
+                logger.warning(f"🛑 [{brand_name} 카드뉴스 배치] 대시보드 정지 요청 감지 → 루프 즉각 탈출(Abort)!")
+                break
+
             info = GOLDEN_EIGHT_DETAILS.get(lang, {})
             flag = info.get("flag", "🌐")
             country_name = info.get("name", lang)
             
-            logger.info(f"   ▶ [{flag} {country_name} ({lang.upper()})] 5장 카드뉴스 합성 시작...")
+            logger.info(f"   ▶ [{flag} {country_name} ({lang.upper()})] 5장 카드뉴스 WAN T2I 합성 시작...")
             try:
                 res = producer.generate_carousel_cardnews(lang=lang)
                 success_count += 1
                 results.append({"lang": lang, "success": True, "res": res})
                 self._record_batch_stat(slot_name, brand, "cardnews", lang, True)
                 logger.info(f"   ✅ [{flag} {country_name}] 5장 카드뉴스 완성 및 바탕화면 저장 완료")
+            except GenerationAbortedException:
+                logger.warning(f"🛑 [{flag} {country_name}] 사용자 정지로 카드뉴스 생성 중단")
+                break
             except Exception as e:
                 logger.error(f"   ❌ [{flag} {country_name}] 카드뉴스 합성 실패: {e}")
                 results.append({"lang": lang, "success": False, "error": str(e)})
@@ -169,7 +194,6 @@ class GoldenBatchProducer:
             
             # 🧹 [1개국 카드뉴스 생성 완료 즉각 VRAM 캐시 방출]
             try:
-                from core.engine.gpu_memory_flusher import GPUMemoryFlusher
                 GPUMemoryFlusher.flush_after_country(lang=lang, brand=brand, content_type="cardnews")
             except Exception as fe:
                 logger.warning(f"VRAM Flush 경고 (작업 계속): {fe}")

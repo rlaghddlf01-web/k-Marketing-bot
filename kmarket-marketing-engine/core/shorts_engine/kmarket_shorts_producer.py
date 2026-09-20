@@ -119,9 +119,12 @@ class KMarketShortsProducer(BaseShortsProducer):
         bg_desc = cfg["bg_desc"]
 
         positive = (
-            f"candid authentic vertical iPhone mobile photo taken by a friend, {ethnic_desc}, {char_desc}, "
-            f"sitting comfortably in {bg_desc}, "
-            f"holding a sleek modern smartphone naturally in one hand at chest level, showing the vertical black display screen directly facing forward to camera, "
+            f"candid authentic vertical iPhone mobile photo taken by a friend, photographed from 3.5 meters away with natural smartphone camera lens, "
+            f"wide environmental distant cowboy shot, waist-up view showing complete upper body from head down past hips and belt, "
+            f"natural 8-head tall realistic adult human body proportions, natural slender neck and shoulders, "
+            f"subject occupies only 35% to 40% of the vertical frame with generous surrounding room space and open interior, {ethnic_desc}, {char_desc}, "
+            f"sitting comfortably in {bg_desc} at 3.5 meters distance, "
+            f"holding a sleek modern smartphone naturally in one hand at hip and waist level, showing the vertical black display screen directly facing forward to camera, "
             f"relaxed comfortable one-handed grip, the other arm resting naturally and still, "
             f"calm neutral resting face, lips completely closed together, mouth gently shut, strictly no smile, no teeth showing, "
             f"looking directly into the camera lens with sincere trustworthy friendly eye contact, "
@@ -131,6 +134,7 @@ class KMarketShortsProducer(BaseShortsProducer):
 
         negative = (
             f"{ethnic_neg}, "
+            "close-up, extreme close-up, cropped torso, bust shot, headshot, zoomed-in, person filling frame, subject taking up majority of frame, large face, tight framing, "
             "overexposed, blown out highlights, washed out, harsh white lighting, excessive brightness, pale bleached skin, "
             "beauty filter, airbrushed, porcelain skin, plastic skin, glamour lighting, studio flash, "
             "smiling, laughing, grinning, toothy smile, open mouth, parted lips, visible teeth, teeth, "
@@ -153,6 +157,10 @@ class KMarketShortsProducer(BaseShortsProducer):
             scenario=scenario or {"theme_name": "K-Market 0 Won Giveaway"}
         )
         return script_data.get("hook_0_10s", "K-Market 0 Won Free Giveaway")
+
+    def produce_shorts(self, lang: str = "vi", **kwargs) -> Dict[str, Any]:
+        """GoldenBatchProducer 및 배치 봇 호환용 alias"""
+        return self.produce(lang=lang, **kwargs)
 
     def produce(
         self,

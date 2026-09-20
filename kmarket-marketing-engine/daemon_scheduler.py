@@ -12,16 +12,6 @@ from core.notifier import Notifier
 from core.direct_uploader import DirectUploader
 from modules.reddit_kmarket import KMarketRedditHunter
 from modules.reddit_easytax import EasyTaxRedditHunter
-from modules.shorts_easytax import ShortsEasyTax
-from modules.shorts_kmarket import ShortsKMarket
-from modules.programmatic_seo import ProgrammaticSEO
-from modules.cardnews_generator import CardnewsGenerator
-from modules.free_stuff_notifier import FreeStuffNotifier
-from modules.guide_pdf_generator import GuidePDFGenerator
-from modules.social_publisher import SocialPublisher
-from modules.blog_kmarket import KMarketBlogPublisher
-from modules.blog_easytax import EasyTaxBlogPublisher
-from config import KMARKET_LANGUAGES, EASYTAX_LANGUAGES, get_next_golden_eight_language, GOLDEN_EIGHT_DETAILS, GOLDEN_EIGHT_LANGUAGES
 from core.golden_batch_producer import GoldenBatchProducer
 
 
@@ -54,8 +44,9 @@ class AutopilotDaemon:
         # 무인 모듈 인스턴스화 (K-Market / EasyTax 완전 분리)
         self.km_reddit = KMarketRedditHunter(self.db_mgr, self.supabase_mgr)
         self.tax_reddit = EasyTaxRedditHunter(self.db_mgr, self.supabase_mgr)
-        self.shorts_easytax = ShortsEasyTax()
-        self.shorts_kmarket = ShortsKMarket()
+        self.golden_batch_producer = GoldenBatchProducer()
+        self.shorts_easytax = self.golden_batch_producer.shorts_easytax
+        self.shorts_kmarket = self.golden_batch_producer.shorts_kmarket
         self.seo_engine = ProgrammaticSEO(self.db_mgr)
         self.cardnews_gen = CardnewsGenerator(self.db_mgr, self.router)
         self.free_notifier = FreeStuffNotifier(self.db_mgr, self.notifier)

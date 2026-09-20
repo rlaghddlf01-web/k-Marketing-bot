@@ -459,14 +459,24 @@ class SupabaseManager:
 
             period_start_utc_iso = period_start_kst.astimezone(datetime.timezone.utc).isoformat()
 
-            def parse_iso(ts_str):
+            def to_kst_datetime(ts_str):
                 if not ts_str:
-                    return None
+                    return now_kst
                 try:
-                    ts_str = str(ts_str).replace('Z', '+00:00')
-                    return datetime.datetime.fromisoformat(ts_str)
+                    s = str(ts_str).replace('Z', '+00:00')
+                    parsed = datetime.datetime.fromisoformat(s)
+                    if parsed.tzinfo is None:
+                        return parsed.replace(tzinfo=KST)
+                    else:
+                        kst_cand = parsed.astimezone(KST)
+                        # KST 시간이 +00:00로 잘못 표기되어 미래 시간으로 튀는 현상(+9h 이중 오프셋) 자동 보정
+                        if kst_cand > now_kst + datetime.timedelta(minutes=3):
+                            reverted = parsed.replace(tzinfo=KST)
+                            if reverted <= now_kst + datetime.timedelta(minutes=3):
+                                return reverted
+                        return kst_cand
                 except Exception:
-                    return None
+                    return now_kst
 
             brand_filter = (brand or "all").lower()
 
@@ -499,7 +509,7 @@ class SupabaseManager:
                 "ko": ("대한민국", "🇰🇷 한국어", "ko")
             }
 
-            # 1. kmarket_traffic_logs (K-Market 실시간 방문자 로그)
+            # 1. kmarket_traffic_logs (K-Market & EasyTax 실시간 방문자 로그 분기 집계)
             km_visitors_list = []
             tax_visitors_list = []
             km_sources_map = {}
@@ -509,109 +519,142 @@ class SupabaseManager:
             km_raw_timestamps = []
             tax_raw_timestamps = []
 
-            if brand_filter in ["all", "kmarket"]:
-                try:
-                    tot_res = self.client.table("kmarket_traffic_logs").select("id", count="exact").execute()
-                    km_total = tot_res.count or 0
-                    total_count += km_total
+            try:
+                tot_res = self.client.table("kmarket_traffic_logs").select("id", count="exact").execute()
+                total_count += (tot_res.count or 0)
 
-                    period_res = self.client.table("kmarket_traffic_logs") \
-                        .select("*") \
-                        .gte("created_at", period_start_utc_iso) \
-                        .order("created_at", desc=True) \
-                        .limit(800) \
-                        .execute()
+                period_res = self.client.table("kmarket_traffic_logs") \
+                    .select("*") \
+                    .gte("created_at", period_start_utc_iso) \
+                    .order("created_at", desc=True) \
+                    .limit(1000) \
+                    .execute()
 
-                    km_rows = period_res.data or []
-                    period_count += len(km_rows)
-                    km_period_count += len(km_rows)
+                all_traffic_rows = period_res.data or []
 
-                    for r in km_rows:
-                        ckey = (r.get("channel_key") or "").lower()
-                        cname = r.get("channel_name") or ""
-                        surl = r.get("source_url") or ""
-                        ref = (r.get("referrer") or "").lower()
-                        usrc = (r.get("utm_source") or "").lower()
-                        umed = (r.get("utm_medium") or "").lower()
+                for r in all_traffic_rows:
+                    ckey = (r.get("channel_key") or "").lower()
+                    cname = r.get("channel_name") or ""
+                    surl = r.get("source_url") or ""
+                    ref = (r.get("referrer") or "").lower()
+                    usrc = (r.get("utm_source") or "").lower()
+                    umed = (r.get("utm_medium") or "").lower()
 
-                        if "instagram" in ckey or usrc in ["ig", "instagram"] or "instagram" in ref:
-                            channel = "Instagram"
-                            ch_icon = "📸"
-                        elif "facebook" in ckey or usrc in ["fb", "facebook"] or "facebook" in ref or "fbclid" in surl:
-                            channel = "Facebook"
-                            ch_icon = "📘"
-                        elif "tiktok" in ckey or usrc in ["tiktok", "tt"] or "tiktok" in ref:
-                            channel = "TikTok"
-                            ch_icon = "🎵"
-                        elif "threads" in ckey or usrc == "threads" or "threads" in ref or "threads" in surl:
-                            channel = "Threads"
-                            ch_icon = "🧵"
-                        elif "telegram" in ckey or usrc == "telegram" or "t.me" in ref:
-                            channel = "Telegram"
-                            ch_icon = "📲"
-                        elif "reddit" in ckey or usrc == "reddit" or "reddit.com" in ref:
-                            channel = "Reddit"
-                            ch_icon = "🤖"
-                        elif "google" in ckey or "google" in usrc or "google" in ref:
-                            channel = "Google SEO"
-                            ch_icon = "🌐"
-                        elif "youtube" in ckey or "youtube" in usrc or "youtu.be" in ref:
-                            channel = "YouTube"
-                            ch_icon = "▶️"
-                        elif ckey == "direct" or "direct" in cname.lower() or not ref:
-                            channel = "Direct / 북마크"
-                            ch_icon = "🔗"
-                        else:
-                            channel = cname or ckey or "웹 방문"
-                            ch_icon = "🌐"
+                    # 서비스 판별 (EasyTax vs K-Market)
+                    is_easytax = (
+                        "ktrs-service" in surl.lower() or 
+                        "easy-tax" in surl.lower() or 
+                        "easytax" in surl.lower() or 
+                        "tax" in surl.lower() or
+                        "easytax" in cname.lower() or
+                        "이지텍스" in cname or
+                        "세무" in cname
+                    )
+                    record_brand = "easytax" if is_easytax else "kmarket"
 
-                        sources_map[channel] = sources_map.get(channel, 0) + 1
+                    # 브랜드 필터 적용
+                    if brand_filter != "all" and brand_filter != record_brand:
+                        continue
+
+                    period_count += 1
+                    if is_easytax:
+                        tax_period_count += 1
+                    else:
+                        km_period_count += 1
+
+                    if "instagram" in ckey or usrc in ["ig", "instagram"] or "instagram" in ref:
+                        channel = "Instagram"
+                        ch_icon = "📸"
+                    elif "facebook" in ckey or usrc in ["fb", "facebook"] or "facebook" in ref or "fbclid" in surl:
+                        channel = "Facebook"
+                        ch_icon = "📘"
+                    elif "tiktok" in ckey or usrc in ["tiktok", "tt"] or "tiktok" in ref:
+                        channel = "TikTok"
+                        ch_icon = "🎵"
+                    elif "threads" in ckey or usrc == "threads" or "threads" in ref or "threads" in surl:
+                        channel = "Threads"
+                        ch_icon = "🧵"
+                    elif "telegram" in ckey or usrc == "telegram" or "t.me" in ref:
+                        channel = "Telegram"
+                        ch_icon = "📲"
+                    elif "reddit" in ckey or usrc == "reddit" or "reddit.com" in ref:
+                        channel = "Reddit"
+                        ch_icon = "🤖"
+                    elif "google" in ckey or "google" in usrc or "google" in ref:
+                        channel = "Google SEO"
+                        ch_icon = "🌐"
+                    elif "youtube" in ckey or "youtube" in usrc or "youtu.be" in ref:
+                        channel = "YouTube"
+                        ch_icon = "▶️"
+                    elif ckey == "direct" or "direct" in cname.lower() or not ref:
+                        channel = "Direct / 북마크"
+                        ch_icon = "🔗"
+                    else:
+                        channel = cname or ckey or "웹 방문"
+                        ch_icon = "🌐"
+
+                    sources_map[channel] = sources_map.get(channel, 0) + 1
+                    if is_easytax:
+                        tax_sources_map[channel] = tax_sources_map.get(channel, 0) + 1
+                    else:
                         km_sources_map[channel] = km_sources_map.get(channel, 0) + 1
 
-                        lang_code = ""
-                        m = re.search(r"ktrs-market\.vercel\.app/([a-z]{2})", surl)
-                        if m:
-                            lang_code = m.group(1)
-                        elif "lang=" in surl:
-                            m2 = re.search(r"lang=([a-z]{2})", surl)
-                            if m2:
-                                lang_code = m2.group(1)
+                    lang_code = ""
+                    m = re.search(r"(?:ktrs-market|ktrs-service)\.vercel\.app/([a-z]{2})", surl)
+                    if m:
+                        lang_code = m.group(1)
+                    elif "lang=" in surl:
+                        m2 = re.search(r"lang=([a-z]{2})", surl)
+                        if m2:
+                            lang_code = m2.group(1)
 
-                        country_info = lang_name_map.get(lang_code, ("글로벌", f"/{lang_code}" if lang_code else "메인 홈", lang_code or "global"))
-                        c_name = country_info[0]
-                        lang_label = country_info[1]
-                        countries_map[c_name] = countries_map.get(c_name, 0) + 1
+                    country_info = lang_name_map.get(lang_code, ("글로벌", f"/{lang_code}" if lang_code else "메인 홈", lang_code or "global"))
+                    c_name = country_info[0]
+                    lang_label = country_info[1]
+                    countries_map[c_name] = countries_map.get(c_name, 0) + 1
+                    if is_easytax:
+                        tax_countries_map[c_name] = tax_countries_map.get(c_name, 0) + 1
+                    else:
                         km_countries_map[c_name] = km_countries_map.get(c_name, 0) + 1
 
-                        target_app = f"K-Market ({lang_label})"
-                        camp = r.get("utm_campaign") or ("바이럴 SNS 링크" if channel in ["Instagram", "Facebook", "Threads", "TikTok"] else "실시간 자연 유입")
+                    b_label = "EasyTax" if is_easytax else "K-Market"
+                    b_icon = "💰" if is_easytax else "🛒"
+                    target_app = f"{b_label} ({lang_label})"
+                    action_stage = "조특법 90% 세무 환급 조회 / 모의계산" if is_easytax else "실물 매물 탐색 / 번역 채팅 진입"
+                    camp = r.get("utm_campaign") or ("바이럴 SNS 링크" if channel in ["Instagram", "Facebook", "Threads", "TikTok"] else "실시간 자연 유입")
 
-                        dt = parse_iso(r.get("created_at"))
-                        dt_kst = dt.astimezone(KST) if dt else now_kst
-                        dt_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M:%S")
+                    dt_kst = to_kst_datetime(r.get("created_at"))
+                    dt_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M:%S")
 
-                        raw_timestamps.append(dt_kst)
+                    raw_timestamps.append(dt_kst)
+                    if is_easytax:
+                        tax_raw_timestamps.append(dt_kst)
+                    else:
                         km_raw_timestamps.append(dt_kst)
-                        v_obj = {
-                            "brand": "kmarket",
-                            "brand_label": "K-Market",
-                            "brand_icon": "🛒",
-                            "source_name": channel,
-                            "channel_icon": ch_icon,
-                            "medium": umed or "social",
-                            "campaign": camp,
-                            "country": c_name,
-                            "lang_label": lang_label,
-                            "target_app": target_app,
-                            "action_stage": "실물 매물 탐색 / 번역 채팅 진입",
-                            "ip": "클라우드 검증됨 (Vercel)",
-                            "created_at": dt_kst_str,
-                            "_dt": dt_kst
-                        }
-                        all_visitors.append(v_obj)
+
+                    v_obj = {
+                        "brand": record_brand,
+                        "brand_label": b_label,
+                        "brand_icon": b_icon,
+                        "source_name": channel,
+                        "channel_icon": ch_icon,
+                        "medium": umed or "social",
+                        "campaign": camp,
+                        "country": c_name,
+                        "lang_label": lang_label,
+                        "target_app": target_app,
+                        "action_stage": action_stage,
+                        "ip": "클라우드 검증됨 (Vercel)",
+                        "created_at": dt_kst_str,
+                        "_dt": dt_kst
+                    }
+                    all_visitors.append(v_obj)
+                    if is_easytax:
+                        tax_visitors_list.append(v_obj)
+                    else:
                         km_visitors_list.append(v_obj)
-                except Exception as e:
-                    logger.warning(f"Supabase kmarket_traffic_logs 조회 예외: {e}")
+            except Exception as e:
+                logger.warning(f"Supabase kmarket_traffic_logs 조회 예외: {e}")
 
             # 2. tax_applications (EasyTax 환급 신청 및 고의도 유입 로그)
             if brand_filter in ["all", "easytax"]:
@@ -674,8 +717,7 @@ class SupabaseManager:
                         target_app = f"EasyTax ({lang_label})"
                         camp = f"💰 예상환급 {refund_est:,.0f}원 모의계산 완료" if refund_est else "세금 환급 신청서 접수"
 
-                        dt = parse_iso(r.get("created_at"))
-                        dt_kst = dt.astimezone(KST) if dt else now_kst
+                        dt_kst = to_kst_datetime(r.get("created_at"))
                         dt_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M:%S")
 
                         raw_timestamps.append(dt_kst)
@@ -724,8 +766,7 @@ class SupabaseManager:
                     ch_icon = "📸" if "instagram" in plat.lower() else ("📘" if "facebook" in plat.lower() else ("🎵" if "tiktok" in plat.lower() else ("📲" if "telegram" in plat.lower() else ("🤖" if "reddit" in plat.lower() else ("🧵" if "threads" in plat.lower() else "🌐")))))
                     sources_map[plat] = sources_map.get(plat, 0) + 1
 
-                    dt = parse_iso(r.get("created_at"))
-                    dt_kst = dt.astimezone(KST) if dt else now_kst
+                    dt_kst = to_kst_datetime(r.get("created_at"))
                     dt_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M:%S")
 
                     raw_timestamps.append(dt_kst)

@@ -294,7 +294,8 @@ class GeminiShortsCopywriter:
         refund_formatted: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        🎬 [제미나이 100% 무인 자동화] 숏폼 22초 3단계 대본, 자막 및 배지 실시간 동적 창작
+        🎬 [제미나이 100% 자율 AI 디렉터] 숏폼 22초 5~6단 동적 씬 타임라인 자막, 네온 테두리, 배지 및 대본 실시간 창작
+        - 다운로드 폴더 고품질 레퍼런스처럼 22초 동안 화면 설명과 배너, 테두리, 하이라이트가 계속 역동적으로 전환
         """
         lang_info = LANGUAGES.get(lang, LANGUAGES["en"])
         theme_name = scenario.get("theme_name", scenario.get("theme_title", "Korea Guide"))
@@ -303,19 +304,35 @@ class GeminiShortsCopywriter:
         if service_id == "easytax":
             amount_str = refund_formatted or scenario.get("amount_str") or "3,100,000 KRW"
             prompt = f"""
-너는 세계 최고의 바이럴 숏폼 영상 감독이자 카피라이터야.
-한국에 거주하는 외국인 근로자(E-9/E-7)를 위해, 국세청 세금 환급(소득세 90% 감면) 22초 숏폼 대본과 자막을 [{lang_info['name']} ({lang_info['native_name']})] 언어로 직접 창작해라.
+너는 세계 최고의 바이럴 숏폼 영상 총괄 아트 디렉터이자 카피라이터야.
+한국에 거주하는 외국인 근로자(E-9/E-7)를 위해, 국세청 세금 환급(소득세 90% 감면) 22초 숏폼 대본과 [시간대별 6단 역동적 화면 자막 & 배지 & 카드 그래픽 설계도]를 [{lang_info['name']} ({lang_info['native_name']})] 언어로 100% 자율 창작해라.
 
 [타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
 [주제]: {theme_name} (환급 예상액: {amount_str})
 [페르소나]: {persona_name}
 
-### 22초 3단계 구성 규칙:
+### 🎬 22초 3단계 음성 발화 대본 규칙:
 1. 0~10초 (킬러 후킹): 매달 월급에서 떼인 세금을 KTRS로 {amount_str} 돌려받았다는 실제 감동과 놀라움 발화 (자연스러운 2문장 구어체)
 2. 10~18초 (앱 조작 안내): 앱에서 월급만 선택하면 환급금이 1초 만에 계산되어 나온다는 쉬운 조작법 설명 발화
-3. 18~22초 (안심 CTA): 선입금 0원, 통장에 돈 들어온 후 정산하는 100% 후불제이며 링크로 지금 무료 확인하라는 발화
-4. 상단 배너, 하단 자막(1단계/2단계), CTA 버튼, 마케팅 배지 2종을 반드시 순수 [{lang_info['name']}] 언어로 작성!
-5. ⚠️ 절대 화폐 규칙: 금액 단위는 반드시 '{amount_str}' 또는 '원(Won)'으로만 표기하고 외국 자국 통화로 환각 번역하지 말 것!
+3. 18~22초 (안심 CTA): 선입금 0원, 통장에 돈 들어온 후 정산하는 100% 후불제이며 프로필 링크로 지금 무료 확인하라는 발화
+
+### 💥 [핵심] 22초 6단 역동적 비주얼 아트 디렉팅 (dynamic_scenes) 규칙:
+영상이 진행되는 22초 동안 화면 설명이 멈춰있지 않고, 시간대별로 6가지 상이한 비주얼 레이아웃과 배지, 멀티컬러 텍스트, 이모지 스티커, 컨페티 파티클이 쉴 새 없이 전환되어야 한다!
+1. Scene 1 (0.0s ~ 3.5s) [layout_type: "center_white_card"]:
+   - 화면 중앙(가슴 부위) 화이트 글래스 카드 + 하늘색 네온 테두리 + 상단 캡슐 배지 + 타깃 국가 국기와 한국 국기(예: 🇻🇳 🇰🇷 또는 🇺🇿 🇰🇷) + 블루 하트(💙)
+2. Scene 2 (3.5s ~ 7.0s) [layout_type: "top_left_stacked"]:
+   - 좌상단 3단 멀티컬러 볼드 스택 텍스트 (예: 1단 초록, 2단 파랑 '90%', 3단 초록) + 상단 혜택 캡슐 배지
+3. Scene 3 (7.0s ~ 10.5s) [layout_type: "phone_side_popup"]:
+   - 스마트폰 옆 미니 다크 글래스 인증 팝업 카드 (스텝 배지 + 국세청 환급 안내 + 인증 성공 체크마크)
+4. Scene 4 (10.5s ~ 15.0s) [layout_type: "bottom_vibrant_card"]:
+   - 하단 로열 블루 와이드 카드 + 상단 상승 아이콘(📈) + 초대형 골드/화이트 환급액 ({amount_str}) + 주변 금화 코인(🪙) + 축하 컨페티 파티클(confetti: true)
+5. Scene 5 (15.0s ~ 18.5s) [layout_type: "trust_badge_card"]:
+   - 딥 앰버/에메랄드 안심 신뢰 카드 (선입금 0원, 통장 입금 후 안심 정산 100% 후불제)
+6. Scene 6 (18.5s ~ 22.0s) [layout_type: "ending_cta_card"]:
+   - 크림슨 레드 전환 카드 + 골드 글로우 테두리 (프로필 상단 채널 링크 즉시 확인 안내)
+
+⚠️ 모든 자막과 배지 텍스트는 반드시 순수 [{lang_info['name']}] 언어로 작성할 것!
+⚠️ 화폐 표기는 반드시 '{amount_str}' 또는 'Won'으로만 표기할 것!
 
 ### 아래 JSON 형식으로만 정확히 출력할 것:
 ```json
@@ -323,16 +340,124 @@ class GeminiShortsCopywriter:
   "hook_0_10s": "0~10초 인물 발화 대사 in {lang_info['name']}",
   "app_10_18s": "10~18초 앱 조작 발화 대사 in {lang_info['name']}",
   "cta_18_22s": "18~22초 CTA 발화 대사 in {lang_info['name']}",
-  "top_header": "상단 솔리드 배너 텍스트 in {lang_info['name']}",
-  "bottom_step1_title": "하단 1단계 자막 타이틀 in {lang_info['name']}",
-  "bottom_step1_sub": "하단 1단계 자막 서브 in {lang_info['name']}",
-  "bottom_step2_title": "하단 2단계 자막 타이틀 in {lang_info['name']}",
-  "bottom_step2_sub": "하단 2단계 자막 서브 in {lang_info['name']}",
-  "cta_button_text": "CTA 버튼 텍스트 in {lang_info['name']}",
-  "badge_primary": "메인 배지 (예: 90% 환급) in {lang_info['name']}",
-  "badge_secondary": "보조 배지 (예: 100% 후불제) in {lang_info['name']}",
-  "ending_card_title": "엔딩 카드 타이틀 in {lang_info['name']}",
-  "ending_card_sub": "엔딩 카드 서브타이틀 in {lang_info['name']}"
+  "top_header": "KTRS TAX REFUND • {amount_str}",
+  "cta_button_text": "CHECK NOW >",
+  "dynamic_scenes": [
+    {{
+      "scene_index": 1,
+      "start_sec": 0.0,
+      "end_sec": 3.5,
+      "layout_type": "center_white_card",
+      "badge": {{
+        "text": "인사/후킹 배지 in {lang_info['name']}",
+        "bg_color": [52, 211, 153],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "1행 인사/메인 헤드라인 in {lang_info['name']}", "color": [15, 23, 42]}},
+        {{"text": "2행 국가명/타깃 강조 in {lang_info['name']}", "color": [14, 165, 233]}}
+      ],
+      "sub_text": "서브 설명",
+      "decorations": {{
+        "emojis": ["국기1", "국기2"],
+        "bottom_heart": true,
+        "show_dots_pattern": true,
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 2,
+      "start_sec": 3.5,
+      "end_sec": 7.0,
+      "layout_type": "top_left_stacked",
+      "badge": {{
+        "text": "특별 혜택 in {lang_info['name']}",
+        "bg_color": [37, 99, 235],
+        "text_color": [255, 255, 255]
+      }},
+      "headline_lines": [
+        {{"text": "1단 혜택단어 (예: HOÀN)", "color": [34, 197, 94]}},
+        {{"text": "2단 90% (예: 90%)", "color": [59, 130, 246]}},
+        {{"text": "3단 세금단어 (예: THUẾ)", "color": [34, 197, 94]}}
+      ],
+      "sub_text": "조특법 제30조 90% 감면 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 3,
+      "start_sec": 7.0,
+      "end_sec": 10.5,
+      "layout_type": "phone_side_popup",
+      "badge": {{
+        "text": "1단계 in {lang_info['name']}",
+        "bg_color": [52, 211, 153],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "Korea Tax Refund Service", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "인증 완료 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 4,
+      "start_sec": 10.5,
+      "end_sec": 15.0,
+      "layout_type": "bottom_vibrant_card",
+      "badge": {{
+        "text": "총 환급액 in {lang_info['name']}",
+        "bg_color": [16, 185, 129],
+        "text_color": [255, 255, 255]
+      }},
+      "headline_lines": [
+        {{"text": "{amount_str}", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "국세청 통장 입금 확인 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": true
+      }}
+    }},
+    {{
+      "scene_index": 5,
+      "start_sec": 15.0,
+      "end_sec": 18.5,
+      "layout_type": "trust_badge_card",
+      "badge": {{
+        "text": "100% 후불제 in {lang_info['name']}",
+        "bg_color": [251, 146, 60],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "선입금 0원, 입금 후 정산", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "안심하고 신청하세요 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 6,
+      "start_sec": 18.5,
+      "end_sec": 22.0,
+      "layout_type": "ending_cta_card",
+      "badge": {{
+        "text": "지금 무료 확인 in {lang_info['name']}",
+        "bg_color": [250, 204, 21],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "프로필 상단 링크를 클릭하세요!", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "5년 누락 세금 소급 신청 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }}
+  ]
 }}
 ```
 """
@@ -340,20 +465,36 @@ class GeminiShortsCopywriter:
             item = scenario.get("item", "가구/가전")
             target_area = scenario.get("target", "대학가")
             prompt = f"""
-너는 세계 최고의 바이럴 숏폼 영상 감독이자 카피라이터야.
-한국에 거주하는 외국인 유학생 및 근로자를 위해, KTRS 마켓 0원 무료 나눔 22초 숏폼 대본과 자막을 [{lang_info['name']} ({lang_info['native_name']})] 언어로 직접 창작해라.
+너는 세계 최고의 바이럴 숏폼 영상 총괄 아트 디렉터이자 카피라이터야.
+한국에 거주하는 외국인 유학생 및 근로자를 위해, KTRS 마켓 0원 무료 나눔 22초 숏폼 대본과 [시간대별 6단 역동적 화면 자막 & 배지 & 카드 그래픽 설계도]를 [{lang_info['name']} ({lang_info['native_name']})] 언어로 100% 자율 창작해라.
 
 [타깃 언어]: {lang_info['name']} ({lang_info['native_name']})
 [주제/지역]: {theme_name} ({target_area})
 [무료 품목]: {item} (귀국 선배들이 남긴 100% 무료 나눔)
 [페르소나]: {persona_name}
 
-### 22초 3단계 구성 규칙:
+### 🎬 22초 3단계 음성 발화 대본 규칙:
 1. 0~10초 (킬러 후킹): 한국에서 깨끗한 {item}을 0원에 직접 무료로 나눔받았다는 감동 실화 발화 (자연스러운 2문장 구어체)
 2. 10~18초 (앱 조작 안내): KTRS 마켓 앱에서 0원 매물 피드를 보고 17개 언어 실시간 자동번역 채팅으로 약속 잡는 법 설명 발화
 3. 18~22초 (안심 CTA): 150만원 아끼는 꿀팁이며 프로필 링크에서 지금 바로 0원 매물을 확인하라는 발화
-4. 상단 배너, 하단 자막(1단계/2단계), CTA 버튼, 마케팅 배지 2종을 반드시 순수 [{lang_info['name']}] 언어로 작성!
-5. ⚠️ 절대 화폐 규칙: 반드시 '0원', '0 Won', '0 KRW'로만 표기할 것!
+
+### 💥 [핵심] 22초 6단 역동적 비주얼 아트 디렉팅 (dynamic_scenes) 규칙:
+영상이 진행되는 22초 동안 화면 설명이 멈춰있지 않고, 시간대별로 6가지 상이한 비주얼 레이아웃과 배지, 멀티컬러 텍스트, 이모지 스티커, 컨페티 파티클이 쉴 새 없이 전환되어야 한다!
+1. Scene 1 (0.0s ~ 3.5s) [layout_type: "center_white_card"]:
+   - 화면 중앙 화이트 글래스 카드 + 하늘색 네온 테두리 + 0원 무료나눔 배지 + 타깃 국가 국기와 한국 국기 + 블루 하트(💙)
+2. Scene 2 (3.5s ~ 7.0s) [layout_type: "top_left_stacked"]:
+   - 좌상단 3단 멀티컬러 볼드 스택 텍스트 (예: 1단 '0 WON', 2단 'FREE', 3단 'SHARING') + 150만원 절약 배지
+3. Scene 3 (7.0s ~ 10.5s) [layout_type: "phone_side_popup"]:
+   - 스마트폰 옆 미니 다크 글래스 인증 팝업 카드 (17개국어 실시간 번역 배지 + 모국어 1:1 직거래 채팅 + 예약 완료 체크마크)
+4. Scene 4 (10.5s ~ 15.0s) [layout_type: "bottom_vibrant_card"]:
+   - 하단 로열 블루 와이드 카드 + 상단 상승 아이콘(📈) + 초대형 0원/150만원 절약 텍스트 + 주변 금화 코인(🪙) + 축하 컨페티 파티클(confetti: true)
+5. Scene 5 (15.0s ~ 18.5s) [layout_type: "trust_badge_card"]:
+   - 딥 앰버 안심 직거래 카드 (귀국 선배들이 물려준 깨끗한 나눔 / 캠퍼스 인근 직거래)
+6. Scene 6 (18.5s ~ 22.0s) [layout_type: "ending_cta_card"]:
+   - 크림슨 레드 전환 카드 + 골드 글로우 테두리 (프로필 상단 링크에서 0원 매물 선착순 가져가기)
+
+⚠️ 모든 자막과 배지 텍스트는 반드시 순수 [{lang_info['name']}] 언어로 작성할 것!
+⚠️ 화폐 표기는 반드시 '0원', '0 Won', '0 KRW'로만 표기할 것!
 
 ### 아래 JSON 형식으로만 정확히 출력할 것:
 ```json
@@ -361,16 +502,124 @@ class GeminiShortsCopywriter:
   "hook_0_10s": "0~10초 인물 발화 대사 in {lang_info['name']}",
   "app_10_18s": "10~18초 앱 조작 발화 대사 in {lang_info['name']}",
   "cta_18_22s": "18~22초 CTA 발화 대사 in {lang_info['name']}",
-  "top_header": "상단 솔리드 배너 텍스트 in {lang_info['name']}",
-  "bottom_step1_title": "하단 1단계 자막 타이틀 in {lang_info['name']}",
-  "bottom_step1_sub": "하단 1단계 자막 서브 in {lang_info['name']}",
-  "bottom_step2_title": "하단 2단계 자막 타이틀 in {lang_info['name']}",
-  "bottom_step2_sub": "하단 2단계 자막 서브 in {lang_info['name']}",
-  "cta_button_text": "CTA 버튼 텍스트 in {lang_info['name']}",
-  "badge_primary": "메인 배지 (예: 0원 무료나눔) in {lang_info['name']}",
-  "badge_secondary": "보조 배지 (예: 직거래 안심) in {lang_info['name']}",
-  "ending_card_title": "엔딩 카드 타이틀 in {lang_info['name']}",
-  "ending_card_sub": "엔딩 카드 서브타이틀 in {lang_info['name']}"
+  "top_header": "100% FREE GIVEAWAY • K-MARKET",
+  "cta_button_text": "GET FREE ITEMS >",
+  "dynamic_scenes": [
+    {{
+      "scene_index": 1,
+      "start_sec": 0.0,
+      "end_sec": 3.5,
+      "layout_type": "center_white_card",
+      "badge": {{
+        "text": "0원 무료 나눔 in {lang_info['name']}",
+        "bg_color": [52, 211, 153],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "{item} 0원 나눔 in {lang_info['name']}", "color": [15, 23, 42]}},
+        {{"text": "한국 생활비 절약 in {lang_info['name']}", "color": [14, 165, 233]}}
+      ],
+      "sub_text": "귀국 선배들의 무료 나눔",
+      "decorations": {{
+        "emojis": ["국기1", "국기2"],
+        "bottom_heart": true,
+        "show_dots_pattern": true,
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 2,
+      "start_sec": 3.5,
+      "end_sec": 7.0,
+      "layout_type": "top_left_stacked",
+      "badge": {{
+        "text": "150만원 절약 in {lang_info['name']}",
+        "bg_color": [37, 99, 235],
+        "text_color": [255, 255, 255]
+      }},
+      "headline_lines": [
+        {{"text": "0 WON", "color": [250, 204, 21]}},
+        {{"text": "FREE", "color": [52, 211, 153]}},
+        {{"text": "SHARING", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "원룸 가구 0원 풀세팅 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 3,
+      "start_sec": 7.0,
+      "end_sec": 10.5,
+      "layout_type": "phone_side_popup",
+      "badge": {{
+        "text": "17개 언어 번역 in {lang_info['name']}",
+        "bg_color": [52, 211, 153],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "Real-time Chat", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "나눔 예약 완료 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 4,
+      "start_sec": 10.5,
+      "end_sec": 15.0,
+      "layout_type": "bottom_vibrant_card",
+      "badge": {{
+        "text": "100% 무료 나눔 in {lang_info['name']}",
+        "bg_color": [16, 185, 129],
+        "text_color": [255, 255, 255]
+      }},
+      "headline_lines": [
+        {{"text": "0 KRW / FREE", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "캠퍼스 근처 0원 피드 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": true
+      }}
+    }},
+    {{
+      "scene_index": 5,
+      "start_sec": 15.0,
+      "end_sec": 18.5,
+      "layout_type": "trust_badge_card",
+      "badge": {{
+        "text": "안심 직거래 in {lang_info['name']}",
+        "bg_color": [251, 146, 60],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "검증된 선배들의 깨끗한 물품", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "안전하게 직거래하세요 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }},
+    {{
+      "scene_index": 6,
+      "start_sec": 18.5,
+      "end_sec": 22.0,
+      "layout_type": "ending_cta_card",
+      "badge": {{
+        "text": "0원 매물 가져가기 in {lang_info['name']}",
+        "bg_color": [250, 204, 21],
+        "text_color": [15, 23, 42]
+      }},
+      "headline_lines": [
+        {{"text": "프로필 링크에서 지금 무료 신청!", "color": [255, 255, 255]}}
+      ],
+      "sub_text": "선착순 무료 나눔 in {lang_info['name']}",
+      "decorations": {{
+        "confetti": false
+      }}
+    }}
+  ]
 }}
 ```
 """
@@ -392,17 +641,31 @@ class GeminiShortsCopywriter:
                         if isinstance(v, str):
                             data[k] = self._clean_text(v)
 
-                    # easytax 서비스 시 대본 및 자막 속 금액 일치 검증
+                    # 🎯 [3대 요소 금액 100% 원천 동기화] 영수증 = 음성 대본 = 화면 설명/자막 = 상단 헤더
                     if service_id == "easytax" and amount_str:
                         import re
-                        for field in ["hook_0_10s", "app_10_18s", "bottom_step1_title", "bottom_step2_title"]:
+                        # 1. 음성 발화 대본 금액 동기화
+                        for field in ["hook_0_10s", "app_10_18s", "cta_18_22s"]:
                             if field in data and isinstance(data[field], str):
                                 data[field] = re.sub(r"\b\d{1,3}(,\d{3})+\s*(KRW|Won|원)?\b", amount_str, data[field], flags=re.IGNORECASE)
 
-                    logger.info(f"[{service_id.upper()}:{lang.upper()}] 🎉 제미나이 숏폼 22초 대본/자막 실시간 자동 창작 완료 (환급액: {amount_str})!")
+                        # 2. 상단 헤더 금액 동기화
+                        data["top_header"] = f"KTRS TAX REFUND • {amount_str}"
+
+                        # 3. 씬별 자막/헤드라인/설명문 금액 동기화
+                        if "dynamic_scenes" in data and isinstance(data["dynamic_scenes"], list):
+                            for sc in data["dynamic_scenes"]:
+                                if "headline_lines" in sc and isinstance(sc["headline_lines"], list):
+                                    for line in sc["headline_lines"]:
+                                        if "text" in line and isinstance(line["text"], str):
+                                            line["text"] = re.sub(r"\b\d{1,3}(,\d{3})+\s*(KRW|Won|원)?\b", amount_str, line["text"], flags=re.IGNORECASE)
+                                if "sub_text" in sc and isinstance(sc["sub_text"], str):
+                                    sc["sub_text"] = re.sub(r"\b\d{1,3}(,\d{3})+\s*(KRW|Won|원)?\b", amount_str, sc["sub_text"], flags=re.IGNORECASE)
+
+                    logger.info(f"[{service_id.upper()}:{lang.upper()}] 🎉 제미나이 숏폼 22초 6단 레퍼런스급 동적 씬 타임라인 자막/설계도 실시간 창작 완료 (3대 요소 100% 동기화 금액: {amount_str})!")
                     return data
         except Exception as e:
-            logger.warning(f"제미나이 숏폼 대본 생성 에러 ({e}), 기본 스크립트 폴백")
+            logger.warning(f"제미나이 숏폼 동적 대본 생성 에러 ({e}), 기본 스크립트 폴백")
 
         # 안전 폴백
         return self._fallback_script(service_id, lang, scenario, refund_formatted)
@@ -414,40 +677,145 @@ class GeminiShortsCopywriter:
         scenario: Dict[str, Any],
         refund_formatted: Optional[str] = None
     ) -> Dict[str, Any]:
-        """네트워크 장애 시 최소 안전 폴백"""
+        """네트워크 장애 시 최소 안전 폴백 (6단 레퍼런스급 동적 씬 포함)"""
+        lang_flags = {"vi": ["🇻🇳", "🇰🇷"], "uz": ["🇺🇿", "🇰🇷"], "km": ["🇰🇭", "🇰🇷"], "th": ["🇹🇭", "🇰🇷"], "id": ["🇮🇩", "🇰🇷"], "ph": ["🇵🇭", "🇰🇷"], "my": ["🇲🇲", "🇰🇷"]}
+        emojis = lang_flags.get(lang, ["🇰🇷", "✨"])
+
         if service_id == "easytax":
             amount_str = refund_formatted or "3,100,000 KRW"
             return {
                 "hook_0_10s": f"Did you know taxes deducted from your salary in Korea can be refunded? I just received {amount_str} back via KTRS!",
                 "app_10_18s": f"It is so simple! Just enter your salary in the app, and your estimated refund of {amount_str} appears instantly!",
                 "cta_18_22s": "Zero upfront fee, 100% pay after refund received! Click the link below to check your refund for free!",
-                "top_header": "90% INCOME TAX REFUND • KTRS",
-                "bottom_step1_title": f"{amount_str} SALARY TAX REFUND",
-                "bottom_step1_sub": "Check your deducted taxes in 1 minute",
-                "bottom_step2_title": "SALARY 2.5M • 3,100,000 WON REFUND",
-                "bottom_step2_sub": "Official NTS Tax Partner • Visa E-7, E-9",
+                "top_header": f"KTRS TAX REFUND • {amount_str}",
                 "cta_button_text": "CHECK FOR FREE >",
-                "badge_primary": "90% TAX REFUND",
-                "badge_secondary": "100% Pay Later",
-                "ending_card_title": "100% Safe Tax Refund",
-                "ending_card_sub": "National Tax Service Partner"
+                "dynamic_scenes": [
+                    {
+                        "scene_index": 1, "start_sec": 0.0, "end_sec": 3.5, "layout_type": "center_white_card",
+                        "badge": {"text": "XIN CHÀO!", "bg_color": [52, 211, 153], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": "CHÀO CÁC BẠN", "color": [15, 23, 42]},
+                            {"text": "VIỆT NAM!", "color": [14, 165, 233]}
+                        ],
+                        "sub_text": "Cơ hội nhận lại tiền thuế tại Hàn Quốc",
+                        "decorations": {"emojis": emojis, "bottom_heart": True, "show_dots_pattern": True, "confetti": False}
+                    },
+                    {
+                        "scene_index": 2, "start_sec": 3.5, "end_sec": 7.0, "layout_type": "top_left_stacked",
+                        "badge": {"text": "ƯU ĐÃI ĐẶC BIỆT", "bg_color": [37, 99, 235], "text_color": [255, 255, 255]},
+                        "headline_lines": [
+                            {"text": "HOÀN", "color": [34, 197, 94]},
+                            {"text": "90%", "color": [59, 130, 246]},
+                            {"text": "THUẾ", "color": [34, 197, 94]}
+                        ],
+                        "sub_text": "Điều 30 Luật Thuế: Giảm 90% thuế thu nhập",
+                        "decorations": {"confetti": False}
+                    },
+                    {
+                        "scene_index": 3, "start_sec": 7.0, "end_sec": 10.5, "layout_type": "phone_side_popup",
+                        "badge": {"text": "BƯỚC 1", "bg_color": [52, 211, 153], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": "Korea Tax Refund Service", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "Thành công",
+                        "decorations": {"confetti": False}
+                    },
+                    {
+                        "scene_index": 4, "start_sec": 10.5, "end_sec": 15.0, "layout_type": "bottom_vibrant_card",
+                        "badge": {"text": "TỔNG THU NHẬP", "bg_color": [16, 185, 129], "text_color": [255, 255, 255]},
+                        "headline_lines": [
+                            {"text": f"{amount_str} Won", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "Tiền chuyển thẳng vào tài khoản ngân hàng",
+                        "decorations": {"confetti": True}
+                    },
+                    {
+                        "scene_index": 5, "start_sec": 15.0, "end_sec": 18.5, "layout_type": "trust_badge_card",
+                        "badge": {"text": "100% HẬU MÃI", "bg_color": [251, 146, 60], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": "0 Won phí trước, nhận tiền mới trả", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "Dịch vụ thuế hợp pháp uy tín tại Hàn Quốc",
+                        "decorations": {"confetti": False}
+                    },
+                    {
+                        "scene_index": 6, "start_sec": 18.5, "end_sec": 22.0, "layout_type": "ending_cta_card",
+                        "badge": {"text": "KIỂM TRA MIỄN PHÍ", "bg_color": [250, 204, 21], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": "Nhấn vào link trang cá nhân ngay!", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "Tra cứu hoàn thuế trong vòng 1 phút",
+                        "decorations": {"confetti": False}
+                    }
+                ]
             }
         else:
-            item = scenario.get("item", "Home Goods")
+            item = scenario.get("item", "가구/가전")
             return {
                 "hook_0_10s": f"I just got {item} completely free for 0 Won in Korea! Check the K-Market app right now!",
                 "app_10_18s": "It is so easy! Browse daily 0 Won free item feeds and chat safely with 17-language real-time translation!",
                 "cta_18_22s": "Save over 1,500,000 Won on living costs! Click the link below to claim free items today!",
                 "top_header": "100% FREE GIVEAWAY • K-MARKET",
-                "bottom_step1_title": f"0 WON FREE {item.upper()}",
-                "bottom_step1_sub": "Direct handover near your campus & room",
-                "bottom_step2_title": "17-LANGUAGE AUTO-TRANSLATION CHAT",
-                "bottom_step2_sub": "Safe 1:1 direct meeting in Korea",
                 "cta_button_text": "GET FREE ITEMS >",
-                "badge_primary": "0 WON FREE",
-                "badge_secondary": "Direct Pickup",
-                "ending_card_title": "KTRS Market Free Community",
-                "ending_card_sub": "100% Free Sharing for Expats"
+                "dynamic_scenes": [
+                    {
+                        "scene_index": 1, "start_sec": 0.0, "end_sec": 3.5, "layout_type": "center_white_card",
+                        "badge": {"text": "0 WON GIVEAWAY", "bg_color": [52, 211, 153], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": f"0 WON {item.upper()}", "color": [15, 23, 42]},
+                            {"text": "FREE IN KOREA!", "color": [14, 165, 233]}
+                        ],
+                        "sub_text": "100% Free furniture and appliances",
+                        "decorations": {"emojis": emojis, "bottom_heart": True, "show_dots_pattern": True, "confetti": False}
+                    },
+                    {
+                        "scene_index": 2, "start_sec": 3.5, "end_sec": 7.0, "layout_type": "top_left_stacked",
+                        "badge": {"text": "SAVE 1.5M WON", "bg_color": [37, 99, 235], "text_color": [255, 255, 255]},
+                        "headline_lines": [
+                            {"text": "0 WON", "color": [250, 204, 21]},
+                            {"text": "FREE", "color": [52, 211, 153]},
+                            {"text": "SHARING", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "Furnish your room without paying money",
+                        "decorations": {"confetti": False}
+                    },
+                    {
+                        "scene_index": 3, "start_sec": 7.0, "end_sec": 10.5, "layout_type": "phone_side_popup",
+                        "badge": {"text": "17-LANG CHAT", "bg_color": [52, 211, 153], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": "Real-time AI Chat", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "Reservation Confirmed",
+                        "decorations": {"confetti": False}
+                    },
+                    {
+                        "scene_index": 4, "start_sec": 10.5, "end_sec": 15.0, "layout_type": "bottom_vibrant_card",
+                        "badge": {"text": "TOTAL SAVED", "bg_color": [16, 185, 129], "text_color": [255, 255, 255]},
+                        "headline_lines": [
+                            {"text": "0 KRW / FREE", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "Verified free items near your campus",
+                        "decorations": {"confetti": True}
+                    },
+                    {
+                        "scene_index": 5, "start_sec": 15.0, "end_sec": 18.5, "layout_type": "trust_badge_card",
+                        "badge": {"text": "SAFE TRADE", "bg_color": [251, 146, 60], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": "Clean items from graduating seniors", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "100% verified student community",
+                        "decorations": {"confetti": False}
+                    },
+                    {
+                        "scene_index": 6, "start_sec": 18.5, "end_sec": 22.0, "layout_type": "ending_cta_card",
+                        "badge": {"text": "CLAIM 0 WON ITEM", "bg_color": [250, 204, 21], "text_color": [15, 23, 42]},
+                        "headline_lines": [
+                            {"text": "Click the link in profile now!", "color": [255, 255, 255]}
+                        ],
+                        "sub_text": "First-come, first-served free giveaway",
+                        "decorations": {"confetti": False}
+                    }
+                ]
             }
 
     def format_guide_text(self, package: Dict[str, Any]) -> str:

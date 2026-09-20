@@ -129,8 +129,8 @@ class IRAnalyticsEngine:
             elif period == "weekly":
                 w_list = []
                 for i in range(7, -1, -1):
-                    w_start = today_date - datetime.timedelta(days=(i+1)*7)
-                    w_end = today_date - datetime.timedelta(days=i*7)
+                    w_end = today_date + datetime.timedelta(days=1) - datetime.timedelta(days=i*7)
+                    w_start = w_end - datetime.timedelta(days=7)
                     w_cond = f"created_at >= '{w_start}' AND created_at < '{w_end}'"
                     w_where = build_where(w_cond, brand_sql_m)
                     c.execute(f"SELECT COUNT(*) FROM marketing_history {w_where}")
@@ -272,8 +272,8 @@ class IRAnalyticsEngine:
 
         elif period == "weekly":
             for i in range(7, -1, -1):
-                w_start = today_start_kst - datetime.timedelta(days=(i+1)*7)
-                w_end = today_start_kst - datetime.timedelta(days=i*7)
+                w_end = today_start_kst + datetime.timedelta(days=1) - datetime.timedelta(days=i*7)
+                w_start = w_end - datetime.timedelta(days=7)
                 cnt = sum(1 for ts in raw_traffic_timestamps if ts and w_start <= ts < w_end)
                 label = "이번 주" if i == 0 else f"{i}주 전"
                 visitor_chart_data.append({"hour": label, "label": label, "count": cnt})

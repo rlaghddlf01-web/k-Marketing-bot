@@ -211,9 +211,9 @@ Do NOT always use the same living room! Dynamically select the setting that best
 
 - actor_outfit: neat realistic outfit matching the theme and chosen location (e.g. "stylish pastel casual t-shirt", "neat industrial polo work shirt", "comfortable travel jacket", "clean smart casual shirt")
 - actor_location: Korean summary of the chosen diverse setting (e.g. "인천공항 출국장 라운지 (캐리어 지참)", "화성 산업단지 공장 휴게실", "안산 감성 카페 창가 좌석", "따뜻한 원룸 거실")
-- character_desc: English prompt for Wan 2.1 T2I (ethnicity matching selected language, gender: "{target_gender}", age around 24~29, neat outfit, looking directly into camera lens with attentive eye contact, holding sleek smartphone naturally in one hand at waist level facing forward, lips completely closed together, mouth gently shut, strictly zero open mouth, absolutely zero teeth showing)
+- character_desc: English prompt for Wan 2.1 T2I (ethnicity matching selected language, gender: "{target_gender}", age around 24~29, neat outfit, photographed from 3.5 meters away with natural smartphone camera lens, wide environmental distant cowboy shot, waist-up view showing complete upper body from head down past hips and belt, subject occupies only 35% to 40% of the vertical frame with spacious surrounding room, looking directly into camera lens with attentive eye contact, holding sleek smartphone naturally in one hand at waist level facing forward, lips completely closed together, mouth gently shut, strictly zero open mouth, absolutely zero teeth showing)
 - background_desc: English prompt for the chosen diverse setting (e.g. airport departure lounge with luggage, sunny modern cafe table, clean industrial workshop breakroom, or cozy modern room with window light. NEVER write 'in Korea')
-- s2v_motion_prompt: English prompt for Wan 2.2 S2V (e.g. "a friendly foreign {target_gender} worker sitting or standing comfortably in the scene, holding a smartphone steadily in one hand facing forward to camera, looking directly into camera lens with attentive eye contact, stable hands, still posture, speaking sincerely and naturally with clear lip sync and subtle natural head movement, no rapid hand gestures, clean realistic motion")
+- s2v_motion_prompt: English prompt for Wan 2.2 S2V (e.g. "a friendly foreign {target_gender} worker sitting or standing comfortably in the scene at 3.5 meters distance, holding a smartphone steadily in one hand facing forward to camera, looking directly into camera lens with attentive eye contact, stable hands, still posture, speaking sincerely and naturally with clear lip sync and subtle natural head movement, no rapid hand gestures, clean realistic motion")
 
 [CRITICAL AMOUNT & REAL PHOTO INTEGRITY MANDATE]:
 - In speech_hook_part2, speech_hook, and bottom_step1_title, you MUST use the EXACT given refund amount "{refund_formatted}" won (e.g. "{refund_formatted} von" or "₩{refund_formatted}"). NEVER change this amount to 2,400,000 or any other number! It must match {refund_formatted} with 100% mathematical precision!
@@ -236,7 +236,7 @@ Return ONLY valid JSON matching this exact structure:
   "gender": "{target_gender}",
   "actor_outfit": "...",
   "actor_location": "...",
-  "character_desc": "a friendly 25-year-old {target_gender} worker in neat work shirt, holding smartphone facing forward, looking directly into camera...",
+  "character_desc": "a friendly 25-year-old {target_gender} worker in neat work shirt, photographed from 3.5 meters away, wide environmental distant cowboy shot, holding smartphone facing forward, looking directly into camera...",
   "background_desc": "warm cozy modern apartment room in Korea, soft ambient window daylight...",
   "s2v_motion_prompt": "a friendly {target_gender} worker holding smartphone steadily facing forward, looking directly into camera, speaking sincerely with clear lip sync, stable hands",
   "speech_hook_kr": "안녕하세요! 한국에서 일하는 ...",

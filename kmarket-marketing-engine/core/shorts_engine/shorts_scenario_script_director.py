@@ -61,8 +61,15 @@ class ShortsScenarioScriptDirector:
         effective_amount = amount if amount is not None else chosen_theme.get("refund_est", 3100000)
         amount_fmt = f"{effective_amount:,} KRW"
 
-        # 성별 결정
-        effective_gender = gender if gender in ("male", "female") else random.choice(["male", "female"])
+        # 성별 결정 (국가별 에스닉 기본 성별 우선 동기화)
+        from config import GOLDEN_EIGHT_DETAILS
+        default_country_gender = "female"
+        if effective_lang in ["uz", "km", "id", "kk", "my", "th", "ne", "mn"]:
+            default_country_gender = "male"
+        elif effective_lang in ["vi", "tl"]:
+            default_country_gender = "female"
+
+        effective_gender = gender if gender in ("male", "female") else default_country_gender
 
         # 2. 구글 제미나이 실시간 22초 3단계 대본, 자막 및 배지 직작문 호출
         script_data = self.copywriter.generate_shorts_script(
@@ -78,15 +85,15 @@ class ShortsScenarioScriptDirector:
         speech_cta = script_data.get("cta_18_22s", "")
         full_speech = f"{speech_hook} {speech_app} {speech_cta}".strip()
 
-        # 1씬 5초+5초 립싱크 듀얼 클립 분할 호환
-        sentences = [s.strip() for s in speech_hook.replace("!", "!|").replace(".", ".|").replace("?", "?|").split("|") if s.strip()]
-        if len(sentences) >= 2:
-            mid = len(sentences) // 2
-            speech_hook_p1 = " ".join(sentences[:mid])
-            speech_hook_p2 = " ".join(sentences[mid:])
+        # 1씬 5초+5초 립싱크 듀얼 클립 분할: 5초(81프레임) 꽉 차게 단어 수 기준 50:50 정밀 균등 분할
+        words = speech_hook.split()
+        if len(words) >= 4:
+            mid = len(words) // 2
+            speech_hook_p1 = " ".join(words[:mid]).strip()
+            speech_hook_p2 = " ".join(words[mid:]).strip()
         else:
             speech_hook_p1 = speech_hook
-            speech_hook_p2 = ""
+            speech_hook_p2 = speech_hook
 
         return {
             "country_name": country_name,
@@ -102,13 +109,8 @@ class ShortsScenarioScriptDirector:
             "full_speech": full_speech,
             "visual_direction": {
                 "top_header": script_data.get("top_header", "90% INCOME TAX REFUND • KTRS"),
-                "bottom_step1_title": script_data.get("bottom_step1_title", f"{amount_fmt} REFUND"),
-                "bottom_step1_sub": script_data.get("bottom_step1_sub", "1-Minute Free Check"),
-                "bottom_step2_title": script_data.get("bottom_step2_title", f"TAX REFUND {amount_fmt}"),
-                "bottom_step2_sub": script_data.get("bottom_step2_sub", "National Tax Service"),
-                "domain_text": "ktrs-service.vercel.app",
+                "domain_text": "ktrs-service.vercel.app" if effective_lang != "kmarket" else "ktrs-market.vercel.app",
                 "cta_button_text": script_data.get("cta_button_text", "CHECK FOR FREE >"),
-                "badge_primary": script_data.get("badge_primary", "90% TAX REFUND"),
-                "badge_secondary": script_data.get("badge_secondary", "100% Pay Later")
+                "dynamic_scenes": script_data.get("dynamic_scenes", [])
             }
         }

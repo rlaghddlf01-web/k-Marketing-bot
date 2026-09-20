@@ -10,21 +10,18 @@ ShortsVideoFactory - [숏폼 비디오 통합 파사드(Facade) 오케스트레�
 
 import logging
 from typing import Dict, Any, Optional, List
-from modules.shorts_easytax import ShortsEasyTax
-from modules.shorts_kmarket import ShortsKMarket
+from core.shorts_engine import EasyTaxShortsProducer, KMarketShortsProducer
 
 logger = logging.getLogger("ShortsVideoFactory")
 
 
 class ShortsVideoFactory:
     """
-    🎬 숏폼 비디오 무인 공장 통합 파사드
-    - 하위 호환성을 유지하며 실제 로직은 각 전담 팩토리 모듈로 100% 위임
+    🎬 숏폼 비디오 무인 공장 통합 파사드 (신형 로컬 GPU Wan 2.2 S2V 엔진 연동)
     """
     def __init__(self, *args, **kwargs):
-        # 하위 호환성: db_mgr, router, gemini, tts 등 레거시 인자 무시
-        self.shorts_easytax = ShortsEasyTax()
-        self.shorts_kmarket = ShortsKMarket()
+        self.shorts_easytax = EasyTaxShortsProducer()
+        self.shorts_kmarket = KMarketShortsProducer()
 
     def produce_shorts(
         self,
@@ -32,14 +29,13 @@ class ShortsVideoFactory:
         lang: str = "vi",
         target_langs: Optional[List[str]] = None,
         force_mode: Optional[str] = None,
-        engine_mode: str = "gemini"
+        engine_mode: str = "gpu"
     ) -> Dict[str, Any]:
-        """서비스 ID에 따라 전담 숏폼 공장으로 즉시 분기 위임"""
+        """서비스 ID에 따라 전담 신형 GPU 숏폼 공장으로 즉시 분기 위임"""
         service_id = service_id.lower()
-        # target_langs가 있으면 첫 번째 언어를 lang으로 사용
         if target_langs and len(target_langs) > 0 and lang == "vi":
             lang = target_langs[0]
         if service_id == "kmarket":
-            return self.shorts_kmarket.produce_shorts(lang=lang, force_mode=force_mode, engine_mode=engine_mode)
+            return self.shorts_kmarket.produce(lang=lang)
         else:
-            return self.shorts_easytax.produce_shorts(lang=lang, engine_mode=engine_mode)
+            return self.shorts_easytax.produce(lang=lang)

@@ -88,20 +88,87 @@ class GPUMemoryFlusher:
         }
 
     @classmethod
+    def get_gpu_temperature(cls) -> Optional[int]:
+        """nvidia-smi를 통해 GPU 실시간 온도(°C)를 조회합니다."""
+        try:
+            import subprocess
+            out = subprocess.check_output(
+                ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"],
+                text=True,
+                timeout=3
+            ).strip()
+            if out:
+                return int(out.split("\n")[0].strip())
+        except Exception:
+            pass
+        return None
+
+    @classmethod
+    def cooldown_gpu(
+        cls,
+        duration_sec: int = 60,
+        target_temp_c: int = 58,
+        brand: str = "easytax",
+        lang: str = "vi"
+    ):
+        """
+        1개국 숏폼 생성 완료 후 GPU 보호를 위해 1분(60초) 동안 쿨다운 인터벌을 부여합니다.
+        - 실시간 온도를 모니터링하며 50°C대로 냉각 유도
+        - 비상 정지(GenerationAbortGuard) 실시간 감시
+        """
+        import time
+        from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+
+        cur_temp = cls.get_gpu_temperature()
+        temp_str = f"{cur_temp}°C" if cur_temp is not None else "측정불가"
+        logger.info(f"❄️ [GPU 쿨다운 시작] 1개국 숏폼 완료! 그래픽카드 보호를 위해 1분({duration_sec}초) 휴식 인터벌을 시작합니다 (현재 온도: {temp_str} ➔ 목표: {target_temp_c}°C 이하)")
+
+        start_time = time.time()
+        while time.time() - start_time < duration_sec:
+            if GenerationAbortGuard.is_abort_requested():
+                logger.warning("🛑 [GPU 쿨다운 중단] 사용자 정지 요청 감지")
+                raise GenerationAbortedException("사용자 정지 요청으로 쿨다운이 중단되었습니다.")
+            
+            elapsed = int(time.time() - start_time)
+            remaining = duration_sec - elapsed
+            
+            # 15초마다 쿨링 경과 안내 로그
+            if elapsed > 0 and elapsed % 15 == 0:
+                temp_now = cls.get_gpu_temperature()
+                temp_now_str = f"{temp_now}°C" if temp_now is not None else ""
+                logger.info(f"   🧊 [GPU 쿨링 중] {elapsed}초 경과 ({remaining}초 남음) | 현재 GPU 온도: {temp_now_str}")
+
+            time.sleep(1.0)
+
+        final_temp = cls.get_gpu_temperature()
+        final_temp_str = f"{final_temp}°C" if final_temp is not None else "정상"
+        logger.info(f"🎉 [GPU 쿨다운 완료] 1분 휴식 완료! 그래픽카드가 {final_temp_str}로 안전하게 냉각되었습니다. 다음 국가 렌더링을 시작합니다.\n")
+
+    @classmethod
     def flush_after_country(
         cls,
         lang: str,
         brand: str = "easytax",
         content_type: str = "cardnews",
-        host: str = "http://127.0.0.1:8188"
+        host: str = "http://127.0.0.1:8188",
+        cooldown_shorts_sec: int = 60
     ) -> Dict[str, Any]:
         """
-        1개국 완제품 생성 완료 직후 호출되는 국가 전용 캐시 방출 훅
+        1개국 완제품 생성 완료 직후 호출되는 국가 전용 캐시 방출 및 GPU 쿨다운 훅
         """
         brand_name = "EasyTax" if brand.lower() == "easytax" else "K-Market"
         type_name = "5장 카드뉴스" if content_type.lower() == "cardnews" else "숏폼 비디오"
         
-        logger.info(f"✨ [{brand_name}] [{lang.upper()}] {type_name} 1개국 완료! ➔ 0초 VRAM 캐시 삭제 실행...")
+        logger.info(f"✨ [{brand_name}] [{lang.upper()}] {type_name} 1개국 완료! ➔ VRAM 캐시 즉각 방출 실행...")
         res = cls.flush_gpu_vram(host=host, unload_models=False)
-        logger.info(f"🚀 [{brand_name}] [{lang.upper()}] 메모리 초기화 완료! 다음 국가 생성에 100% 가용 VRAM 투입 준비 완료.")
+
+        # 숏폼 영상 생성 후 1분간 GPU 쿨다운 휴식 부여
+        if content_type.lower() == "shorts":
+            cls.cooldown_gpu(duration_sec=cooldown_shorts_sec, brand=brand, lang=lang)
+        elif content_type.lower() == "cardnews":
+            # 카드뉴스는 3초 미세 휴식
+            import time
+            time.sleep(3.0)
+
+        logger.info(f"🚀 [{brand_name}] [{lang.upper()}] 준비 완료! 다음 국가 생성에 100% 가용 VRAM 투입 시작.")
         return res

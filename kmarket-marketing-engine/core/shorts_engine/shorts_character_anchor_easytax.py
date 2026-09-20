@@ -55,13 +55,13 @@ def build_shorts_t2i_character_prompt(
         persona_anchor_desc=persona_desc
     )
 
-    # 2. 🎯 [최전방 공통 화각 가드레일]: 카드뉴스 1번과 100% 동일한 3.0m 카우보이 화각 (인물 45~50% 차지)
+    # 2. 🎯 [최전방 공통 화각 가드레일]: 3.5m 원거리 카우보이 화각 (인물 35~40% 차지, 배경 80% 이상 개방)
     iphone_candid_framing = (
         "authentic candid snapshot shot on iPhone 15 Pro, casual everyday mobile phone photo taken by a friend, "
-        "photographed from 3.0 meters away with natural smartphone camera lens, "
-        "wide environmental cowboy shot, waist-up view showing the complete upper body from head down past hips and belt, "
+        "photographed from 3.5 meters away with natural smartphone camera lens, "
+        "wide environmental distant cowboy shot, waist-up view showing the complete upper body from head down past hips and belt, "
         "natural 8-head tall realistic adult human body proportions, natural slender neck and shoulders, "
-        "subject occupies about 45% to 50% of the vertical frame with generous open room space around, "
+        "subject occupies only about 35% to 40% of the vertical frame with generous open room space and surrounding interior around, "
         "tack sharp deep pan-focus across the entire background (f/11 aperture) with all background details and furniture completely in sharp crisp focus with zero blur, "
     )
 
@@ -74,23 +74,24 @@ def build_shorts_t2i_character_prompt(
         "calm confident pleasant gentle resting smile, looking directly into the camera lens with authentic trustworthy eye contact celebrating huge tax refund relief. "
     )
 
-    # 5. 긍정 프롬프트 최종 조립 (카드뉴스 1번 골든 구조 100% 이식)
+    # 5. 긍정 프롬프트 최종 조립 (3.5m 원거리 구도)
     positive = (
         f"candid authentic {iphone_candid_framing}of {char}. "
-        f"seated comfortably on a modern fabric living room sofa with one arm resting naturally on the sofa armrest, "
+        f"seated comfortably on a modern fabric living room sofa at 3.5 meters distance with one arm resting naturally on the sofa armrest, "
         f"and the other hand holding a sleek modern smartphone vertically at hip and waist level, "
         f"presenting the clean front vertical black AMOLED display screen turned facing directly forward toward the camera, crisp smartphone screen bezel. "
-        f"Authentic wooden bookshelves, indoor plants, textured wallpaper, sofa cushions, and clear window sunlight occupying over 75% of the frame. "
+        f"Authentic wooden bookshelves, indoor plants, textured wallpaper, sofa cushions, and clear window sunlight occupying over 80% of the frame. "
         f"{uniform_clothing}. "
         f"{closed_mouth_mandate}"
         f"Raw unedited natural human skin texture with subtle real pores and natural imperfections, matte skin finish, "
         f"natural everyday room ambient lighting, realistic mobile phone camera sensor capture, authentic candid mobile photo shot on iPhone 15 Pro, NO beauty filter."
     )
 
-    # 6. 부정 프롬프트 (카드뉴스 1번 골든 네거티브 + 치아/열린 입 차단 100% 결합)
+    # 6. 부정 프롬프트 (얼빡샷/클로즈업 및 치아/열린 입 차단 100% 결합)
     negative = build_easytax_cardnews_negative_prompt(
         lang=lang,
         extra=(
+            "close-up, extreme close-up, cropped torso, bust shot, headshot, zoomed-in, person filling frame, subject taking up majority of frame, large face, tight framing, "
             "empty hands, no phone in hand, smartphone in pocket, holding nothing, "
             "open mouth, parted lips, slightly open mouth, half-open mouth, open lips, visible teeth, showing teeth, teeth, smiling with teeth, grinning, laughing, "
             "holding phone with two hands, typing on phone, text messaging, phone resting on table, phone resting on lap, "
