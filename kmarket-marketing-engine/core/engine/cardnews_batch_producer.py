@@ -67,7 +67,8 @@ class CardNewsBatchProducer:
         amount: int = 3100000,
         custom_hero_image: Optional[Image.Image] = None,
         preferred_gender: Optional[str] = None,
-        master_seed: Optional[int] = None
+        master_seed: Optional[int] = None,
+        abort_scope: Optional[str] = None
     ) -> Dict[str, Any]:
         """5장 카드뉴스 세트 및 SNS 가이드 일괄 생산"""
         # 1. 시나리오 기획 로드 (60대 테마 및 단일 환급액 100% 동기화)
@@ -123,9 +124,9 @@ class CardNewsBatchProducer:
 
             # 🛑 [비상 정지 킬스위치 감시] 대시보드 정지 요청 시 즉각 루프 올스톱(Abort)
             from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
-            if GenerationAbortGuard.is_abort_requested():
-                logger.warning(f"🛑 [EasyTax Slide {s_idx}] 대시보드 정지 요청 감지 → 전체 루프 즉각 탈출(Abort)!")
-                raise GenerationAbortedException("대시보드 정지 요청으로 EasyTax 카드뉴스 생성이 즉각 중단되었습니다.")
+            if GenerationAbortGuard.is_abort_requested(scope=abort_scope):
+                logger.warning(f"🛑 [EasyTax Slide {s_idx}] 정지 요청({abort_scope or '전역'}) 감지 → 전체 루프 즉각 탈출(Abort)!")
+                raise GenerationAbortedException("정지 요청으로 EasyTax 카드뉴스 생성이 즉각 중단되었습니다.")
 
             if s_idx == 1 and custom_hero_image is not None:
                 base_photo = custom_hero_image
@@ -135,9 +136,14 @@ class CardNewsBatchProducer:
                     s_idx=s_idx,
                     card_data=card,
                     fallback_img=fallback_img,
-                    master_seed=master_seed
+                    master_seed=master_seed,
+                    abort_scope=abort_scope
                 )
+                # ⏸️ [GPU 안전 가드레일: 슬라이드 간 쿨다운 & 화면 렌더링 양보]
+                from core.engine.gpu_memory_flusher import GPUMemoryFlusher
+                GPUMemoryFlusher.yield_slide_cooldown(yield_sec=2.5)
             base_photos[s_idx] = base_photo
+
 
         # 5. [2단계] 합성 + 텍스트 오버레이 + 저장
         logger.info("🖌️ [Phase 2] 합성 및 텍스트 오버레이...")
@@ -194,7 +200,8 @@ class CardNewsBatchProducer:
         s_idx: int,
         card_data: Dict[str, Any],
         fallback_img: Image.Image,
-        master_seed: int = 2026
+        master_seed: int = 2026,
+        abort_scope: Optional[str] = None
     ) -> Image.Image:
         """
         슬라이드별 씬 사진을 WAN T2I로 독립 생성 (동일 캐릭터 앵커 + 동일 마스터 시드):
@@ -202,8 +209,8 @@ class CardNewsBatchProducer:
         - 60% 황금비율 미디엄 샷 적용 + 씬별 100% 다른 의상/배경/포즈 연출
         """
         from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
-        if GenerationAbortGuard.is_abort_requested():
-            raise GenerationAbortedException(f"[Slide {s_idx}] 대시보드 정지 요청으로 생성을 취소합니다.")
+        if GenerationAbortGuard.is_abort_requested(scope=abort_scope):
+            raise GenerationAbortedException(f"[Slide {s_idx}] 정지 요청({abort_scope or '전역'})으로 생성을 취소합니다.")
 
         if not self._wan_available:
             logger.info(f"[Slide {s_idx}] ComfyUI 미실행 → 마스터 베이스 사진 적용")
@@ -230,15 +237,16 @@ class CardNewsBatchProducer:
                 width=width,
                 height=height,
                 seed=master_seed,
-                prefix=prefix
+                prefix=prefix,
+                abort_scope=abort_scope
             )
 
             generated_img = Image.open(generated_path).convert("RGB")
             logger.info(f"✅ [Slide {s_idx}] WAN 생성 완료: {generated_path}")
             return generated_img
         except Exception as e:
-            if isinstance(e, GenerationAbortedException) or GenerationAbortGuard.is_abort_requested():
-                logger.warning(f"🛑 [Slide {s_idx}] 대시보드 정지 감지 → Fallback 무시 및 루프 즉각 올스톱!")
+            if isinstance(e, GenerationAbortedException) or GenerationAbortGuard.is_abort_requested(scope=abort_scope):
+                logger.warning(f"🛑 [Slide {s_idx}] 정지 요청 감지 → Fallback 무시 및 루프 즉각 올스톱!")
                 raise
             logger.error(f"❌ [Slide {s_idx}] WAN 생성 실패 ({e}) → 1번 주인공 마스터 베이스 사진 안전 유지")
             return fallback_img

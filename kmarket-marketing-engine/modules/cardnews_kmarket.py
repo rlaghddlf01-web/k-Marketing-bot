@@ -82,12 +82,13 @@ class CardnewsKMarket:
         except Exception as e:
             logger.warning(f"metadata.json 저장 경고: {e}")
 
-        # 🧹 [1개국 K-Market 카드뉴스 완료 즉각 VRAM 캐시 방출]
+        # 🧹 [1개국 K-Market 카드뉴스 완료 즉각 VRAM 및 모델 완전 방출]
         try:
             from core.engine.gpu_memory_flusher import GPUMemoryFlusher
-            GPUMemoryFlusher.flush_gpu_vram(unload_models=False)
+            GPUMemoryFlusher.flush_gpu_vram(unload_models=True)
         except Exception:
             pass
+
 
         return {
             "success": True,

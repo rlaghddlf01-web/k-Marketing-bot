@@ -49,8 +49,8 @@ class ScenarioDirectorCardnewsEasyTax:
         cat = theme.get("cat", "")
         theme_id = theme.get("id", "")
 
-        # 🎯 [대표님 절대 지침] 남성 4 : 여성 6 황금 성비 가중치 선택 (선호 성별 지정 시 우선 반영)
-        target_gender = preferred_gender if preferred_gender in ["female", "male"] else random.choices(["female", "male"], weights=[60, 40], k=1)[0]
+        # 🎯 [성별 50:50 완벽 랜덤 균등 분배]
+        target_gender = preferred_gender if preferred_gender in ["female", "male"] else random.choices(["female", "male"], weights=[50, 50], k=1)[0]
 
         # 1. D-2 유학생 타깃
         if "d-2" in target or "유학" in target or "student" in theme_id:

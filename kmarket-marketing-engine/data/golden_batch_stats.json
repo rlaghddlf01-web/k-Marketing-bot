@@ -512,8 +512,8 @@
       "details": []
     },
     "manual": {
-      "shorts": 9,
-      "cardnews": 0,
+      "shorts": 16,
+      "cardnews": 1,
       "details": [
         {
           "time": "07:49:37",
@@ -631,6 +631,69 @@
           "time": "09:52:08",
           "brand": "easytax",
           "type": "shorts",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "12:48:20",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "vi",
+          "success": true
+        },
+        {
+          "time": "13:12:46",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "uz",
+          "success": true
+        },
+        {
+          "time": "13:37:20",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "km",
+          "success": true
+        },
+        {
+          "time": "14:01:59",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "ne",
+          "success": true
+        },
+        {
+          "time": "14:26:33",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "th",
+          "success": true
+        },
+        {
+          "time": "14:51:10",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "id",
+          "success": true
+        },
+        {
+          "time": "15:15:50",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "mn",
+          "success": false
+        },
+        {
+          "time": "15:40:32",
+          "brand": "easytax",
+          "type": "shorts",
+          "lang": "my",
+          "success": true
+        },
+        {
+          "time": "16:02:26",
+          "brand": "kmarket",
+          "type": "cardnews",
           "lang": "vi",
           "success": true
         }

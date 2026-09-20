@@ -774,8 +774,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._handle_easytax_stop()
         elif path == "/api/all/start":
             self._handle_all_start()
-        elif path == "/api/all/stop" or path == "/api/emergency/stop" or path == "/api/factory/stop":
+        elif path == "/api/all/stop" or path == "/api/emergency/stop":
             self._handle_all_stop()
+        elif path == "/api/factory/stop":
+            self._handle_factory_stop(payload)
         elif path.startswith("/api/channel/start/"):
             module_name = path.split("/")[-1]
             self._handle_channel_start(module_name)
@@ -1014,9 +1016,21 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self._set_headers("application/json")
         self.wfile.write(json.dumps(res, ensure_ascii=False).encode("utf-8"))
 
+    def _handle_factory_stop(self, payload: dict):
+        """웹 대시보드 원클릭 팩토리 콘텐츠 제작 중단 처리 (타 채널 영향 없는 격리 중단)"""
+        job_id = payload.get("job_id") if isinstance(payload, dict) else None
+        brand = payload.get("brand") if isinstance(payload, dict) else None
+        factory_service.stop_factory_task(job_id=job_id, brand=brand)
+        target_desc = f"작업({job_id})" if job_id else (f"[{brand.upper()}] 브랜드 팩토리" if brand else "원클릭 팩토리 전체")
+        msg = f"🛑 {target_desc} 작업에 정지 신호를 발송했습니다."
+        self._set_headers("application/json")
+        self.wfile.write(json.dumps({"success": True, "message": msg}, ensure_ascii=False).encode("utf-8"))
+
     def _handle_channel_start(self, module_name: str):
         global running_channels
         if not running_channels.get(module_name, False):
+            from core.engine.generation_abort_guard import GenerationAbortGuard
+            GenerationAbortGuard.reset_stop_flag(scope=f"channel_{module_name}")
             running_channels[module_name] = True
             threading.Thread(target=channel_continuous_worker, args=(module_name,), daemon=True).start()
             msg = f"🚀 [{module_name}] 24시간 연속 무인 자율 공장이 가동되었습니다!"
@@ -1029,16 +1043,16 @@ class DashboardHandler(BaseHTTPRequestHandler):
         global running_channels
         running_channels[module_name] = False
         from core.engine.generation_abort_guard import GenerationAbortGuard
-        GenerationAbortGuard.trigger_global_stop(reason=f"[{module_name}] 채널 정지")
-        factory_service.stop_factory_task()
-        msg = f"⏹️ [{module_name}] 무인 가동 및 GPU 작업이 즉시 정지되었습니다."
+        # 🛡️ [원천 격리] 단일 채널 정지는 오직 해당 채널 스코프만 격리 중단 (타 채널 및 원클릭 팩토리 영향 0%)
+        GenerationAbortGuard.trigger_stop(scope=f"channel_{module_name}", reason=f"[{module_name}] 단일 채널 정지", interrupt_gpu=False)
+        msg = f"⏹️ [{module_name}] 채널 무인 가동이 정지되었습니다. (진행 중인 숏폼/타 채널 작업은 무결하게 유지됩니다)"
         self._set_headers("application/json")
         self.wfile.write(json.dumps({"success": True, "message": msg, "running_channels": running_channels}).encode("utf-8"))
 
     def _handle_kmarket_start(self):
         global kmarket_thread, kmarket_running, running_channels
         from core.engine.generation_abort_guard import GenerationAbortGuard
-        GenerationAbortGuard.reset_stop_flag()
+        GenerationAbortGuard.reset_stop_flag(scope="brand_kmarket")
         kmarket_running = True
         if not kmarket_thread or not kmarket_thread.is_alive():
             kmarket_thread = threading.Thread(target=kmarket_worker, daemon=True)
@@ -1062,16 +1076,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if "kmarket" in telegram_ai_managers:
             telegram_ai_managers["kmarket"].stop_background_daemon()
         from core.engine.generation_abort_guard import GenerationAbortGuard
-        GenerationAbortGuard.trigger_global_stop(reason="K-Market 전체 정지")
-        factory_service.stop_factory_task()
-        res = {"success": True, "message": "⏹️ K-Market 10대 채널 및 GPU 실시간 연산 정지 완료."}
+        # 🛡️ K-Market 브랜드 스코프 격리 정지 (EasyTax 작업은 전혀 영향받지 않음)
+        GenerationAbortGuard.trigger_stop(scope="brand_kmarket", reason="K-Market 전체 정지", interrupt_gpu=False)
+        factory_service.stop_factory_task(brand="kmarket")
+        res = {"success": True, "message": "⏹️ K-Market 10대 채널 및 전용 팩토리 연산 정지 완료 (EasyTax 작업 영향 없음)."}
         self._set_headers("application/json")
         self.wfile.write(json.dumps(res).encode("utf-8"))
 
     def _handle_easytax_start(self):
         global easytax_thread, easytax_running, running_channels
         from core.engine.generation_abort_guard import GenerationAbortGuard
-        GenerationAbortGuard.reset_stop_flag()
+        GenerationAbortGuard.reset_stop_flag(scope="brand_easytax")
         easytax_running = True
         if not easytax_thread or not easytax_thread.is_alive():
             easytax_thread = threading.Thread(target=easytax_worker, daemon=True)
@@ -1095,9 +1110,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if "easytax" in telegram_ai_managers:
             telegram_ai_managers["easytax"].stop_background_daemon()
         from core.engine.generation_abort_guard import GenerationAbortGuard
-        GenerationAbortGuard.trigger_global_stop(reason="EasyTax 전체 정지")
-        factory_service.stop_factory_task()
-        res = {"success": True, "message": "⏹️ EasyTax 10대 채널 및 GPU 실시간 연산 정지 완료."}
+        # 🛡️ EasyTax 브랜드 스코프 격리 정지 (K-Market 작업은 전혀 영향받지 않음)
+        GenerationAbortGuard.trigger_stop(scope="brand_easytax", reason="EasyTax 전체 정지", interrupt_gpu=False)
+        factory_service.stop_factory_task(brand="easytax")
+        res = {"success": True, "message": "⏹️ EasyTax 10대 채널 및 전용 팩토리 연산 정지 완료 (K-Market 작업 영향 없음)."}
         self._set_headers("application/json")
         self.wfile.write(json.dumps(res).encode("utf-8"))
 

@@ -192,11 +192,18 @@ class GoldenBatchProducer:
                 
             time.sleep(1.0)
             
-            # 🧹 [1개국 카드뉴스 생성 완료 즉각 VRAM 캐시 방출]
+            # 🧹 [1개국 카드뉴스 생성 완료 즉각 VRAM 캐시 방출 및 10초 쿨다운]
             try:
-                GPUMemoryFlusher.flush_after_country(lang=lang, brand=brand, content_type="cardnews")
+                GPUMemoryFlusher.flush_after_country(
+                    lang=lang,
+                    brand=brand,
+                    content_type="cardnews",
+                    cooldown_cardnews_sec=10,
+                    unload_models=True
+                )
             except Exception as fe:
                 logger.warning(f"VRAM Flush 경고 (작업 계속): {fe}")
+
             
         return {
             "brand": brand,

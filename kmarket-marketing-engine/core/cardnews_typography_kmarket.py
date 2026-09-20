@@ -403,7 +403,10 @@ class CardnewsTypographyKMarket:
         """Playwright Chromium으로 HTML을 1080x1350 투명 RGBA 이미지로 렌더링"""
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(
+                    headless=True,
+                    args=["--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"]
+                )
                 page = browser.new_page(
                     viewport={"width": self.viewport_w, "height": self.viewport_h},
                     device_scale_factor=self.scale_factor
@@ -412,6 +415,7 @@ class CardnewsTypographyKMarket:
                 page.wait_for_timeout(100)
                 png_bytes = page.screenshot(type="png", omit_background=True)
                 browser.close()
+
 
             overlay_img = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
             if overlay_img.size != (1080, 1350):

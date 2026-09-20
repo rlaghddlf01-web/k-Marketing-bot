@@ -508,7 +508,10 @@ class KMarketCardNewsAppCapturer:
         screenshot_bytes = None
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(
+                    headless=True,
+                    args=["--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"]
+                )
                 page = browser.new_page(
                     viewport={"width": self.viewport_w, "height": self.viewport_h},
                     device_scale_factor=self.scale_factor
@@ -517,6 +520,7 @@ class KMarketCardNewsAppCapturer:
                 page.wait_for_timeout(300)
                 screenshot_bytes = page.screenshot(type="png", full_page=False)
                 browser.close()
+
         except Exception as e:
             logger.error(f"[Slide 3] Playwright 캡처 실패: {e}")
 
@@ -744,7 +748,10 @@ class KMarketCardNewsAppCapturer:
         screenshot_bytes = None
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(
+                    headless=True,
+                    args=["--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"]
+                )
                 page = browser.new_page(
                     viewport={"width": self.viewport_w, "height": self.viewport_h},
                     device_scale_factor=self.scale_factor
@@ -753,6 +760,7 @@ class KMarketCardNewsAppCapturer:
                 page.wait_for_timeout(300)
                 screenshot_bytes = page.screenshot(type="png", full_page=False)
                 browser.close()
+
         except Exception as e:
             logger.error(f"[Slide 4] Playwright 캡처 실패: {e}")
 

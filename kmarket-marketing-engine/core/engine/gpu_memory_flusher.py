@@ -145,30 +145,74 @@ class GPUMemoryFlusher:
         logger.info(f"🎉 [GPU 쿨다운 완료] 1분 휴식 완료! 그래픽카드가 {final_temp_str}로 안전하게 냉각되었습니다. 다음 국가 렌더링을 시작합니다.\n")
 
     @classmethod
+    def yield_slide_cooldown(
+        cls,
+        yield_sec: float = 2.5,
+        host: str = "http://127.0.0.1:8188"
+    ):
+        """
+        슬라이드 1장 T2I 생성 완료 직후 GPU 제어권을 Windows 화면 렌더링(DWM)에 양보하고 VRAM 캐시를 정리합니다.
+        - WDDM 2초 TDR 타임아웃 방지
+        - PyTorch CUDA 캐시(torch.cuda.empty_cache()) 방출
+        - ComfyUI VRAM 캐시(/free, unload_models=False) 방출
+        - yield_sec(기본 2.5초) 동안 Sleep으로 화면 프리징 완벽 차단
+        """
+        import time
+        try:
+            import torch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:
+            pass
+
+        cls.flush_gpu_vram(host=host, unload_models=False)
+        logger.info(f"⏸️ [슬라이드 간 쿨다운] GPU 제어권 Windows 화면(DWM)에 {yield_sec}초간 양보 & VRAM 캐시 정리 완료")
+        time.sleep(yield_sec)
+
+    @classmethod
     def flush_after_country(
         cls,
         lang: str,
         brand: str = "easytax",
         content_type: str = "cardnews",
         host: str = "http://127.0.0.1:8188",
-        cooldown_shorts_sec: int = 60
+        cooldown_shorts_sec: int = 60,
+        cooldown_cardnews_sec: int = 10,
+        unload_models: bool = True
     ) -> Dict[str, Any]:
         """
         1개국 완제품 생성 완료 직후 호출되는 국가 전용 캐시 방출 및 GPU 쿨다운 훅
+        - 카드뉴스: 10초 쿨다운 및 ComfyUI 모델 언로드(/free, unload_models=True)로 GPU 온도 안정화
+        - 숏폼: 60초 쿨다운
         """
+        import time
+        from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
+
         brand_name = "EasyTax" if brand.lower() == "easytax" else "K-Market"
         type_name = "5장 카드뉴스" if content_type.lower() == "cardnews" else "숏폼 비디오"
         
-        logger.info(f"✨ [{brand_name}] [{lang.upper()}] {type_name} 1개국 완료! ➔ VRAM 캐시 즉각 방출 실행...")
-        res = cls.flush_gpu_vram(host=host, unload_models=False)
+        logger.info(f"✨ [{brand_name}] [{lang.upper()}] {type_name} 1개국 완료! ➔ VRAM 및 모델 완전 방출(unload_models={unload_models}) 실행...")
+        res = cls.flush_gpu_vram(host=host, unload_models=unload_models)
 
         # 숏폼 영상 생성 후 1분간 GPU 쿨다운 휴식 부여
         if content_type.lower() == "shorts":
             cls.cooldown_gpu(duration_sec=cooldown_shorts_sec, brand=brand, lang=lang)
         elif content_type.lower() == "cardnews":
-            # 카드뉴스는 3초 미세 휴식
-            import time
-            time.sleep(3.0)
+            cur_temp = cls.get_gpu_temperature()
+            temp_str = f"{cur_temp}°C" if cur_temp is not None else "정상"
+            logger.info(f"❄️ [GPU 쿨다운] [{brand_name}] {lang.upper()} 카드뉴스 완료! 언어 간 {cooldown_cardnews_sec}초 안전 쿨다운을 진행합니다 (현재 GPU 온도: {temp_str})...")
+            
+            start_t = time.time()
+            while time.time() - start_t < cooldown_cardnews_sec:
+                if GenerationAbortGuard.is_abort_requested():
+                    logger.warning("🛑 [GPU 쿨다운 중단] 사용자 정지 요청 감지")
+                    raise GenerationAbortedException("사용자 정지 요청으로 쿨다운이 중단되었습니다.")
+                time.sleep(1.0)
+                
+            after_temp = cls.get_gpu_temperature()
+            after_temp_str = f"{after_temp}°C" if after_temp is not None else "정상"
+            logger.info(f"🎉 [GPU 쿨다운 완료] {cooldown_cardnews_sec}초 휴식 완료 (GPU 온도: {after_temp_str})! 다음 언어 생성을 시작합니다.\n")
 
         logger.info(f"🚀 [{brand_name}] [{lang.upper()}] 준비 완료! 다음 국가 생성에 100% 가용 VRAM 투입 시작.")
         return res
+

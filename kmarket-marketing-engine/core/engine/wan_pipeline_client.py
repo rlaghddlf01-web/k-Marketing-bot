@@ -67,7 +67,8 @@ class WanPipelineClient:
         prompt_dict: Dict[str, Any],
         prefix: str,
         timeout_sec: int = 1800,
-        check_vram_safety: bool = False
+        check_vram_safety: bool = False,
+        abort_scope: Optional[str] = None
     ) -> List[str]:
         """ComfyUI에 작업을 제출하고 완료될 때까지 대기 후 생성된 이미지 경로 반환"""
         from core.engine.vram_safety_guard import VRAMSafetyGuard, VRAMSafetyException
@@ -101,11 +102,12 @@ class WanPipelineClient:
         while time.time() - start_time < timeout_sec:
             time.sleep(1)
 
-            # 🛑 [비상 정지 킬스위치 감시] 대시보드에서 정지 요청 시 즉시 루프 탈출 및 GPU 인터럽트
+            # 🛑 [비상 정지 킬스위치 감시] 대시보드 정지 신호 감지 시 즉시 루프 탈출 (타 채널 간섭 없는 스코프 격리)
             from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
-            if GenerationAbortGuard.is_abort_requested():
-                GenerationAbortGuard.trigger_global_stop(host=self.host, reason="WAN 대기 중 대시보드 정지 신호 감지")
-                raise GenerationAbortedException("대시보드 정지 요청으로 WAN 연산이 즉시 중단되었습니다.")
+            effective_scope = abort_scope or prefix
+            if GenerationAbortGuard.is_abort_requested(scope=effective_scope):
+                logger.warning(f"🛑 [WAN 대기 감시] 작업 중단 신호 감지 (스코프: {effective_scope})")
+                raise GenerationAbortedException(f"대시보드 정지 요청({effective_scope})으로 WAN 연산이 즉시 중단되었습니다.")
 
             # 🛡️ [VRAM 안전 가드레일 2단계: 실시간 런타임 킬스위치]
             if check_vram_safety and log_path and os.path.exists(log_path):
@@ -134,7 +136,7 @@ class WanPipelineClient:
                     logger.debug(f"VRAM 로그 모니터링 예외 (무시): {e}")
 
             try:
-                with urllib.request.urlopen(f"{self.host}/history/{prompt_id}") as resp:
+                with urllib.request.urlopen(f"{self.host}/history/{prompt_id}", timeout=5) as resp:
                     hist = json.loads(resp.read().decode('utf-8'))
                     if prompt_id in hist:
                         status = hist[prompt_id].get("status", {})
@@ -143,7 +145,7 @@ class WanPipelineClient:
                             break
                         if status.get("status_str") == "error":
                             msgs = str(status.get("messages", ""))
-                            if "execution_interrupted" in msgs or GenerationAbortGuard.is_abort_requested():
+                            if "execution_interrupted" in msgs or GenerationAbortGuard.is_abort_requested(scope=effective_scope):
                                 raise GenerationAbortedException("ComfyUI 실행이 중단(Interrupted)되었습니다.")
                             raise RuntimeError(f"ComfyUI Job Error: {status.get('messages')}")
             except urllib.error.URLError:
@@ -174,7 +176,8 @@ class WanPipelineClient:
         width: int = 832,
         height: int = 1216,
         seed: Optional[int] = None,
-        prefix: str = "wan_t2i_master"
+        prefix: str = "wan_t2i_master",
+        abort_scope: Optional[str] = None
     ) -> str:
         """Wan 2.1 14B Q4_0 1-Frame Native T2I 고화질 마스터 사진 생성"""
         if seed is None:
@@ -212,7 +215,7 @@ class WanPipelineClient:
             "10": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": prefix}}
         }
 
-        frames = self.submit_and_wait(workflow, prefix=prefix)
+        frames = self.submit_and_wait(workflow, prefix=prefix, abort_scope=abort_scope)
         if not frames:
             raise RuntimeError("Wan 2.1 T2I 마스터 컷 생성에 실패했습니다.")
         return frames[0]
@@ -226,7 +229,8 @@ class WanPipelineClient:
         width: int = 832,
         height: int = 1216,
         seed: Optional[int] = None,
-        prefix: str = "wan_img2img"
+        prefix: str = "wan_img2img",
+        abort_scope: Optional[str] = None
     ) -> str:
         """
         WAN img2img - 동일 인물 유지 씬 전환기:
@@ -292,7 +296,7 @@ class WanPipelineClient:
             "10": {"class_type": "SaveImage",  "inputs": {"images": ["9", 0], "filename_prefix": prefix}}
         }
 
-        frames = self.submit_and_wait(workflow, prefix=prefix)
+        frames = self.submit_and_wait(workflow, prefix=prefix, abort_scope=abort_scope)
         if not frames:
             raise RuntimeError("WAN img2img 동일 인물 씬 전환 생성 실패")
         return frames[0]
@@ -305,7 +309,8 @@ class WanPipelineClient:
         width: int = 832,
         height: int = 1216,
         seed: Optional[int] = None,
-        prefix: str = "wan_face_inpaint"
+        prefix: str = "wan_face_inpaint",
+        abort_scope: Optional[str] = None
     ) -> str:
         """
         알리바바 Wan 2.1 공식 논문 기반 얼굴 100% 보존 인페인팅:
@@ -353,7 +358,7 @@ class WanPipelineClient:
         )
 
         # 3. 제출 및 대기
-        frames = self.submit_and_wait(workflow, prefix=prefix)
+        frames = self.submit_and_wait(workflow, prefix=prefix, abort_scope=abort_scope)
         if not frames:
             raise RuntimeError("WAN 얼굴 보존 인페인팅 생성 실패")
         return frames[0]
@@ -369,7 +374,8 @@ class WanPipelineClient:
         width: int = 384,
         height: int = 672,
         frames: int = 49,
-        prefix: str = "s2v_run"
+        prefix: str = "s2v_run",
+        abort_scope: Optional[str] = None
     ) -> str:
         """Wan 2.2 S2V 립싱크 렌더링 후 MP4 완성 파일 생성 (384x672 @ 16fps, 49프레임 = 3.06초, 14B 16GB GPU 100% VRAM 단독 탑재 규격)"""
         neg = negative_text or "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景"
@@ -405,7 +411,7 @@ class WanPipelineClient:
             "9": {"class_type": "SaveImage", "inputs": {"images": ["8", 0], "filename_prefix": prefix}}
         }
 
-        generated_frames = self.submit_and_wait(workflow, prefix=prefix, check_vram_safety=True)
+        generated_frames = self.submit_and_wait(workflow, prefix=prefix, check_vram_safety=True, abort_scope=abort_scope)
         if not generated_frames:
             raise RuntimeError("Wan 2.2 S2V 렌더링 프레임이 생성되지 않았습니다.")
 

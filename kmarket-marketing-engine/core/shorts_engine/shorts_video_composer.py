@@ -12,9 +12,11 @@ ShortsVideoComposer - 🎬 [1080x1920 세로 풀HD 고화질 마케팅 비디오
 import os
 import subprocess
 import logging
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 import imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
+
 
 logger = logging.getLogger("ShortsVideoComposer")
 
@@ -305,94 +307,30 @@ class ShortsVideoComposer:
     ) -> str:
         """
         18초~22초 구간에 들어갈 안심 신뢰 보증 및 최종 CTA 세로 풀HD 비디오 클립 생성
+        - 사전 제작된 8대 국가 완제품 1080x1920 고화질 에셋(assets/templates/easytax_ending_cta_{lang}.png) 직접 로드
+        - 폰트 깨짐 0%, 영어 오류 0% 무결점 보장
         """
-        img = Image.new("RGBA", (1080, 1920), (15, 23, 42, 255))
-        draw = ImageDraw.Draw(img)
+        app_dir = Path(__file__).resolve().parent.parent.parent
+        template_asset = app_dir / "assets" / "templates" / f"easytax_ending_cta_{lang}.png"
+        lang_asset = app_dir / "assets" / f"lang_{lang}" / "easytax_ending_cta_1080x1920.png"
 
-        font_large = self._load_font(46, bold=True, lang=lang)
-        font_mid = self._load_font(34, bold=True, lang=lang)
-        font_small = self._load_font(26, bold=False, lang=lang)
-        font_cta = self._load_font(40, bold=True, lang=lang)
+        # 1. 완제품 에셋 경로 결정 (없을 경우 자동 실시간 생성 보장)
+        if template_asset.exists():
+            input_image_path = str(template_asset)
+        elif lang_asset.exists():
+            input_image_path = str(lang_asset)
+        else:
+            logger.info(f"🎨 [{lang.upper()}] 엔딩 에셋 누락 감지 ➔ Playwright Google HarfBuzz 무결점 에셋 자동 즉시 생성...")
+            from core.shorts_engine.easytax_ending_asset_producer import EasytaxEndingAssetProducer
+            producer = EasytaxEndingAssetProducer()
+            input_image_path = producer.render_and_save(lang=lang, domain_text=domain_text)
 
-        CTA_LANG_MAP = {
-            "vi": {
-                "sub": "DỊCH VỤ THUẾ QUỐC GIA KTRS",
-                "title": "An Tâm Hoàn Thuế 100%",
-                "f1_t": "100% Hậu Mãi", "f1_d": "Chỉ thanh toán phí sau khi nhận tiền vào tài khoản",
-                "f2_t": "0 Won Phí Trước", "f2_d": "Không thu bất kỳ khoản phí đặt cọc nào",
-                "f3_t": "Ủy Quyền Chính Thức", "f3_d": "Đại lý thuế hợp pháp của Cục Thuế Hàn Quốc",
-                "domain_lbl": "Trang web tra cứu miễn phí:",
-                "btn": "KIỂM TRA MIỄN PHÍ >"
-            },
-            "uz": {
-                "sub": "KTRS DAVLAT SOLIQ XIZMATI",
-                "title": "100% Qonuniy Soliq Qaytarish",
-                "f1_t": "100% Oldindan To'lov Yo'q", "f1_d": "Faqat pul hisobga tushgach to'laysiz",
-                "f2_t": "0 Von Boshlang'ich To'lov", "f2_d": "Hech qanday oldindan to'lov olinmaydi",
-                "f3_t": "Rasmiy Litsenziya", "f3_d": "Koreya Davlat Soliq Xizmati akkreditatsiyasi",
-                "domain_lbl": "Rasmiy bepul tekshirish sayti:",
-                "btn": "HOZIROQ TEKSHIRING >"
-            },
-            "km": {
-                "sub": "សេវាកម្មពន្ធ KTRS កូរ៉េ",
-                "title": "បង្វិលពន្ធដោយសុវត្ថិភាព 100%",
-                "f1_t": "សេវាគិតក្រោយ 100%", "f1_d": "ទូទាត់តែក្រោយពេលលុយចូលគណនី",
-                "f2_t": "មិនបង់មុន 0 វ៉ុន", "f2_d": "មិនទាមទារប្រាក់កក់ជាមុនឡើយ",
-                "f3_t": "ភ្នាក់ងារពន្ធផ្លូវការ", "f3_d": "ទទួលស្គាល់ដោយនាយកដ្ឋានពន្ធដារកូរ៉េ",
-                "domain_lbl": "គេហទំព័រផ្លូវការ:",
-                "btn": "ពិនិត្យឥតគិតថ្លៃ >"
-            }
-        }
-        card_info = CTA_LANG_MAP.get(lang, {
-            "sub": "KTRS TAX REFUND SERVICE",
-            "title": "100% Safe Tax Refund",
-            "f1_t": "100% Success Fee Only", "f1_d": "Pay only after receiving your refund in account",
-            "f2_t": "Zero Upfront Fees", "f2_d": "No advance deposits or hidden charges",
-            "f3_t": "Certified Tax Agent", "f3_d": "Licensed National Tax Service partner in Korea",
-            "domain_lbl": "Official free inquiry website:",
-            "btn": cta_button_text or "CHECK NOW >"
-        })
-
-        # 1. 상단 타이틀
-        draw.text((100, 320), card_info["sub"], fill=(245, 158, 11), font=font_small)
-        draw.text((100, 375), card_info["title"], fill=(255, 255, 255), font=font_large)
-
-        # 2. 신뢰 카드 3개 박스
-        features = [
-            (card_info["f1_t"], card_info["f1_d"]),
-            (card_info["f2_t"], card_info["f2_d"]),
-            (card_info["f3_t"], card_info["f3_d"])
-        ]
-        box_y = 530
-        for title, desc in features:
-            draw.rounded_rectangle([(100, box_y), (980, box_y + 160)], radius=24, fill=(30, 41, 59, 250), outline=(51, 65, 85, 200), width=2)
-            draw.text((140, box_y + 35), title, fill=(255, 255, 255), font=font_mid)
-            draw.text((140, box_y + 90), desc, fill=(148, 163, 184), font=font_small)
-            box_y += 190
-
-        # 3. 도메인 안내 박스
-        draw.rounded_rectangle([(100, 1280), (980, 1400)], radius=24, fill=(30, 41, 59, 230), outline=(245, 158, 11, 200), width=2)
-        draw.text((140, 1305), card_info["domain_lbl"], fill=(148, 163, 184), font=font_small)
-        draw.text((140, 1345), domain_text, fill=(245, 158, 11), font=font_mid)
-
-        # 4. 하단 펄스 CTA 버튼
-        btn_y = 1580
-        draw.rounded_rectangle([(100, btn_y), (980, btn_y + 130)], radius=65, fill=(234, 88, 12, 255))
-        final_btn_txt = card_info["btn"]
-        bbox = draw.textbbox((0, 0), final_btn_txt, font=font_cta)
-        tw = bbox[2] - bbox[0]
-        th = bbox[3] - bbox[1]
-        tx = 100 + (880 - tw) // 2
-        ty = btn_y + (130 - th) // 2 - 4
-        draw.text((tx, ty), final_btn_txt, fill=(255, 255, 255), font=font_cta)
-
-        temp_png = output_path + ".temp.png"
-        img.save(temp_png, "PNG")
+        logger.info(f"🎬 [{lang.upper()}] 완제품 엔딩 에셋 직결 로드: {os.path.basename(input_image_path)} (시간: {duration_sec:.2f}s)")
 
         cmd = [
             self.ffmpeg_exe, "-y",
             "-loop", "1",
-            "-i", temp_png,
+            "-i", input_image_path,
             "-t", str(duration_sec),
             "-vf", "fps=30,format=yuv420p",
             "-c:v", "libx264",
@@ -401,12 +339,8 @@ class ShortsVideoComposer:
             output_path
         ]
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if os.path.exists(temp_png):
-            try:
-                os.remove(temp_png)
-            except Exception:
-                pass
         return output_path
+
 
     def _get_video_duration(self, video_path: str) -> float:
         """비디오 파일의 실제 재생 시간(초)을 정밀 추출"""
@@ -499,13 +433,22 @@ class ShortsVideoComposer:
                 lang=lang,
                 top_header_text=top_header_text
             )
+            s_start = float(sc.get("start_sec", idx * 3.5))
+            s_end = float(sc.get("end_sec", (idx + 1) * 3.5))
+            # 🛡️ 엔딩 신뢰 카드(18~22초) 구간에 자막 오버레이가 겹쳐서 가리는 현상 100% 원천 차단
+            app_end_time = dur_person + dur_app
+            if s_start >= app_end_time:
+                continue
+            s_end = min(s_end, app_end_time)
+
             generated_scene_pngs.append({
                 "png_path": sc_png,
-                "start_sec": float(sc.get("start_sec", idx * 3.5)),
-                "end_sec": float(sc.get("end_sec", (idx + 1) * 3.5))
+                "start_sec": s_start,
+                "end_sec": s_end
             })
 
         logger.info(f"✨ [ShortsVideoComposer] 제미나이 {len(generated_scene_pngs)}단 동적 씬 오버레이 렌더링 완료!")
+
 
         # 5. FFmpeg 복합 필터 구성 (동적 타임라인 오버레이 체이닝)
         use_multi_audio = bool(scene_audios and scene_audios.get("hook") and scene_audios.get("app") and scene_audios.get("cta"))

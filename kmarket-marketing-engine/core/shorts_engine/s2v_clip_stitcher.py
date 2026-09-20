@@ -200,7 +200,8 @@ class S2VClipStitcher:
         motion_prompt: str,
         seed: int = 2026,
         speech_hook_part1: Optional[str] = None,
-        speech_hook_part2: Optional[str] = None
+        speech_hook_part2: Optional[str] = None,
+        abort_scope: Optional[str] = None
     ) -> Tuple[str, str]:
         """
         [완(Wan 2.2 S2V) 공식 권장 5초+5초 순수 GPU 독립 렌더링 파이프라인]
@@ -259,7 +260,8 @@ class S2VClipStitcher:
             height=672,
             frames=81,
             seed=seed,
-            prefix=prefix_p1
+            prefix=prefix_p1,
+            abort_scope=abort_scope
         )
 
         # 4. [1차 완료 후 VRAM 완전 클린업]
@@ -305,7 +307,8 @@ class S2VClipStitcher:
             height=672,
             frames=81,
             seed=seed + 1,
-            prefix=prefix_p2
+            prefix=prefix_p2,
+            abort_scope=abort_scope
         )
 
         # 7. [2차 완료 후 VRAM 완전 클린업]

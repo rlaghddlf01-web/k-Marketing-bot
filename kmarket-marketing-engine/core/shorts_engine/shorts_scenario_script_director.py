@@ -61,15 +61,11 @@ class ShortsScenarioScriptDirector:
         effective_amount = amount if amount is not None else chosen_theme.get("refund_est", 3100000)
         amount_fmt = f"{effective_amount:,} KRW"
 
-        # 성별 결정 (국가별 에스닉 기본 성별 우선 동기화)
-        from config import GOLDEN_EIGHT_DETAILS
-        default_country_gender = "female"
-        if effective_lang in ["uz", "km", "id", "kk", "my", "th", "ne", "mn"]:
-            default_country_gender = "male"
-        elif effective_lang in ["vi", "tl"]:
-            default_country_gender = "female"
-
-        effective_gender = gender if gender in ("male", "female") else default_country_gender
+        # 🎯 [성별 50:50 완벽 랜덤 균등 분배]
+        if gender in ("male", "female"):
+            effective_gender = gender
+        else:
+            effective_gender = random.choice(["male", "female"])
 
         # 2. 구글 제미나이 실시간 22초 3단계 대본, 자막 및 배지 직작문 호출
         script_data = self.copywriter.generate_shorts_script(

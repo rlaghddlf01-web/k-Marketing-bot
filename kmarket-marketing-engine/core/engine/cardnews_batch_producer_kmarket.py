@@ -146,7 +146,11 @@ class CardNewsBatchProducerKMarket:
                     fallback_img=fallback_img,
                     master_seed=slide_seed
                 )
+                # ⏸️ [GPU 안전 가드레일: 슬라이드 간 쿨다운 & 화면 렌더링 양보]
+                from core.engine.gpu_memory_flusher import GPUMemoryFlusher
+                GPUMemoryFlusher.yield_slide_cooldown(yield_sec=2.5)
             base_photos[s_idx] = base_photo
+
 
         # 6. [2단계] 풀블리드 합성 + 하단 그라디언트 스크림 + 매거진 타이포그래피 오버레이
         logger.info("🖌️ [Phase 2] K-Market 1080x1350 풀블리드 합성 및 텍스트 오버레이...")

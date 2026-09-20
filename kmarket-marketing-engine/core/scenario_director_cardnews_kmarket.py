@@ -48,8 +48,8 @@ class ScenarioDirectorCardnewsKMarket:
         cat = theme.get("cat", "")
         theme_id = theme.get("id", "")
 
-        # 🎯 [대표님 절대 지침] 남성 4 : 여성 6 황금 성비 가중치 선택
-        target_gender = random.choices(["female", "male"], weights=[60, 40], k=1)[0]
+        # 🎯 [성별 50:50 완벽 랜덤 균등 분배]
+        target_gender = random.choices(["female", "male"], weights=[50, 50], k=1)[0]
 
         # 1. 대학가 캠퍼스 타깃 (연세대, 고려대, 성균관대 등)
         if cat == "campus" or "univ" in theme_id or "대학" in target:

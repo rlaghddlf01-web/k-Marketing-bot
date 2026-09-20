@@ -62,6 +62,7 @@ class FactoryService:
                 resolved_amount = random.choice(REALISTIC_AMOUNTS)
 
         job_id = f"{brand}_{mode}_{lang}_{int(resolved_amount)}"
+        task_scope = f"factory_{job_id}"
         
         with self.lock:
             if self.active_jobs.get(job_id, False):
@@ -72,13 +73,13 @@ class FactoryService:
             self.active_jobs[job_id] = True
 
         from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
-        GenerationAbortGuard.reset_stop_flag()
+        GenerationAbortGuard.reset_stop_flag(scope=task_scope)
 
         def _worker():
             try:
                 brand_label = "EasyTax (세금 환급)" if brand == "easytax" else "K-Market (생활 커뮤니티)"
                 mode_label = "1080x1350 카드뉴스" if mode == "cardnews" else "22초 완성 숏폼"
-                self._log(f"🚀 [원클릭 팩토리] {brand_label} {mode_label} ({lang.upper()}) 제작을 시작합니다...", "info")
+                self._log(f"🚀 [원클릭 팩토리] {brand_label} {mode_label} ({lang.upper()}) 제작을 시작합니다... (스코프: {task_scope})", "info")
 
                 output_path = ""
                 if brand == "easytax":
@@ -98,7 +99,7 @@ class FactoryService:
 
                         from core.engine.cardnews_batch_producer import CardNewsBatchProducer
                         producer = CardNewsBatchProducer()
-                        res = producer.produce_full_set(lang=lang, amount=resolved_amount)
+                        res = producer.produce_full_set(lang=lang, amount=resolved_amount, abort_scope=task_scope)
                         output_path = res.get("folder_path", "")
                         self._log(f"🎉 [EasyTax 5장 카드뉴스 세트 완성] 환급액: {res.get('refund_formatted')} | 저장 폴더: {output_path}", "success")
                         return
@@ -130,7 +131,7 @@ class FactoryService:
                         target_lang = None if (lang == "auto" or not lang) else lang
                         display_lang = "🤖 제미나이 자동 추천 (8개국)" if target_lang is None else lang.upper()
                         self._log(f"🎬 [EasyTax 숏폼] 1080p 고화질 숏폼 & SNS 배포팩 제작 시작 (타깃: {display_lang}, 금액: ₩{resolved_amount:,})", "info")
-                        res = producer.produce(lang=target_lang, amount=resolved_amount)
+                        res = producer.produce(lang=target_lang, amount=resolved_amount, abort_scope=task_scope)
                         output_path = res.get("output_mp4", "")
                         folder_path = res.get("folder_path", "")
                         self._log(f"🎉 [EasyTax 숏폼 완제품 & SNS 배포팩 완성] 폴더: {folder_path}", "success")
@@ -157,7 +158,7 @@ class FactoryService:
                         from core.shorts_engine import KMarketShortsProducer
                         producer = KMarketShortsProducer()
                         self._log(f"🎬 [K-Market 숏폼] 1080p 고화질 숏폼 & SNS 배포팩 제작 시작 (언어: {lang.upper()})", "info")
-                        res = producer.produce(lang=lang)
+                        res = producer.produce(lang=lang, abort_scope=task_scope)
                         output_path = res.get("output_mp4", "")
                         folder_path = res.get("folder_path", "")
                         self._log(f"🎉 [K-Market 숏폼 완제품 & SNS 배포팩 완성] 폴더: {folder_path}", "success")
@@ -168,7 +169,7 @@ class FactoryService:
                 self._log(f"🎉 [원클릭 팩토리] {brand_label} {mode_label} 완성! 바탕화면 저장 완료: {output_path}", "success")
 
             except GenerationAbortedException:
-                self._log("⏹️ [원클릭 팩토리] 사용자의 정지 요청으로 작업이 즉시 안전하게 중단되었습니다.", "warning")
+                self._log(f"⏹️ [원클릭 팩토리] 작업({task_scope})이 정지 요청으로 즉시 안전하게 중단되었습니다.", "warning")
             except Exception as e:
                 err_msg = str(e)
                 traceback.print_exc()
@@ -185,12 +186,26 @@ class FactoryService:
             "message": f"[{brand.upper()}] {mode.upper()} ({lang.upper()}) 원클릭 제작 작업이 백그라운드에서 시작되었습니다."
         }
 
-    def stop_factory_task(self):
-        """진행 중인 팩토리 작업 전체 즉시 중단 및 GPU 킬스위치 실행"""
+    def stop_factory_task(self, job_id: Optional[str] = None, brand: Optional[str] = None):
+        """진행 중인 팩토리 작업 중단 (job_id 또는 brand 지정 시 해당 스코프만 격리 중단, 미지정 시 전체 팩토리 정지)"""
         from core.engine.generation_abort_guard import GenerationAbortGuard
-        GenerationAbortGuard.trigger_global_stop(reason="대시보드 원클릭 팩토리 비상 정지")
+        
         with self.lock:
-            for jid in list(self.active_jobs.keys()):
-                self.active_jobs[jid] = False
-        self._log("🛑 [원클릭 팩토리] 모든 활성 제작 작업에 비상 정지 신호를 발송하고 작업을 중단했습니다.", "warning")
+            if job_id:
+                target_scope = f"factory_{job_id}"
+                GenerationAbortGuard.trigger_stop(scope=target_scope, reason=f"팩토리 작업({job_id}) 정지", interrupt_gpu=True)
+                self.active_jobs[job_id] = False
+                self._log(f"🛑 [원클릭 팩토리] 개별 제작 작업({job_id})에 정지 신호를 발송했습니다.", "warning")
+            elif brand:
+                target_scope = f"factory_{brand}"
+                GenerationAbortGuard.trigger_stop(scope=target_scope, reason=f"팩토리 브랜드({brand}) 정지", interrupt_gpu=True)
+                for jid in list(self.active_jobs.keys()):
+                    if jid.startswith(f"{brand}_"):
+                        self.active_jobs[jid] = False
+                self._log(f"🛑 [원클릭 팩토리] [{brand.upper()}] 제작 작업에 정지 신호를 발송했습니다.", "warning")
+            else:
+                GenerationAbortGuard.trigger_stop(scope="factory", reason="대시보드 원클릭 팩토리 전체 정지", interrupt_gpu=True)
+                for jid in list(self.active_jobs.keys()):
+                    self.active_jobs[jid] = False
+                self._log("🛑 [원클릭 팩토리] 모든 활성 제작 작업에 정지 신호를 발송하고 작업을 중단했습니다.", "warning")
 

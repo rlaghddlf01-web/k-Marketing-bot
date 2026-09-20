@@ -30,75 +30,75 @@ logger = logging.getLogger("EasyTaxShortsProducer")
 class EasyTaxShortsProducer(BaseShortsProducer):
     """이지텍스 세금 환급 숏폼 자동 생산 엔진"""
 
-    # 8개국 국가별 에스닉 및 페르소나 정의
+    # 8개국 국가별 에스닉 및 남/여 듀얼 페르소나 정의 (50:50 균등 분배)
     COUNTRY_CONFIG = {
         "vi": {
             "name": "Vietnam",
-            "gender": "female",
-            "char_desc": "a lovely 25-year-old Vietnamese woman, friendly calm face, gentle dark eyes, sleek black ponytail, casual neat navy blue top",
+            "char_desc_female": "a lovely 25-year-old Vietnamese woman, friendly calm face, gentle dark eyes, sleek black ponytail, casual neat navy blue top",
+            "char_desc_male": "a handsome 26-year-old Vietnamese young man, friendly calm face, gentle dark eyes, short neat black hair, clean-shaven, casual dark navy polo shirt",
             "bg_desc": "modern warm cozy Seoul apartment living room, wooden bookshelf, soft indoor daylight",
             "default_amount": 3100000,
         },
         "km": {
             "name": "Cambodia",
-            "gender": "male",
-            "char_desc": "a handsome 27-year-old Cambodian young man, warm dark eyes, clean-shaven smooth skin, strictly no beard, no mustache, neat modern haircut, casual dark grey shirt",
+            "char_desc_male": "a handsome 27-year-old Cambodian young man, warm dark eyes, clean-shaven smooth skin, strictly no beard, no mustache, neat modern haircut, casual dark grey shirt",
+            "char_desc_female": "a lovely 25-year-old Cambodian young woman, warm dark eyes, gentle friendly smile, neat black tied hair, casual comfortable sky-blue blouse",
             "bg_desc": "bright modern Seoul studio apartment, neat wooden shelves, soft natural window light",
             "default_amount": 2450000,
         },
         "id": {
             "name": "Indonesia",
-            "gender": "male",
-            "char_desc": "a handsome 28-year-old Indonesian young man, calm pleasant expression, clean-shaven, short neat black hair, casual navy blue polo shirt",
+            "char_desc_male": "a handsome 28-year-old Indonesian young man, calm pleasant expression, clean-shaven, short neat black hair, casual navy blue polo shirt",
+            "char_desc_female": "a pleasant 25-year-old Indonesian young woman, calm friendly expression, gentle dark eyes, neat straight black hair, casual beige collared blouse",
             "bg_desc": "modern cozy living room with indoor green plants, soft warm lighting",
             "default_amount": 1420000,
         },
         "kk": {
             "name": "Kazakhstan",
-            "gender": "male",
-            "char_desc": "a handsome 29-year-old Kazakh man, Central Asian features, calm confident expression, short black hair, casual dark olive bomber jacket",
+            "char_desc_male": "a handsome 29-year-old Kazakh man, Central Asian features, calm confident expression, short black hair, casual dark olive bomber jacket",
+            "char_desc_female": "a charming 26-year-old Kazakh young woman, Central Asian features, high cheekbones, gentle hazel-brown eyes, sleek dark hair, casual comfortable knit sweater",
             "bg_desc": "modern clean apartment living room, grey sofa, warm indoor lamp light",
             "default_amount": 2150000,
         },
         "tl": {
             "name": "Philippines",
-            "gender": "female",
-            "char_desc": "a pleasant 26-year-old Filipina woman, calm composed expression, neat casual dark striped blouse, clean tied hair",
+            "char_desc_female": "a pleasant 26-year-old Filipina woman, calm composed expression, neat casual dark striped blouse, clean tied hair",
+            "char_desc_male": "a handsome 27-year-old Filipino young man, friendly warm smile, clean-shaven, short neat black hair, casual dark blue shirt",
             "bg_desc": "bright cozy apartment interior, modern desk with notebook, sunny window",
             "default_amount": 2780000,
         },
         "uz": {
             "name": "Uzbekistan",
-            "gender": "male",
-            "char_desc": "a handsome 27-year-old Uzbek man, friendly attractive face, clean-shaven, calm confident look, navy blue crewneck sweater",
+            "char_desc_male": "a handsome 27-year-old Uzbek man, friendly attractive face, clean-shaven, calm confident look, navy blue crewneck sweater",
+            "char_desc_female": "a beautiful 25-year-old Uzbek young woman, gentle hazel eyes, distinctive Central Asian elegance, calm sweet smile, neat dark hair, casual soft cream cardigan",
             "bg_desc": "comfortable modern living room, warm indoor atmosphere, bookshelf",
             "default_amount": 2600000,
         },
         "my": {
             "name": "Myanmar",
-            "gender": "male",
-            "char_desc": "a polite 26-year-old Myanmar young man, kind composed face, clean-shaven smooth skin, neat dark hair, casual dark blue collared shirt",
+            "char_desc_male": "a polite 26-year-old Myanmar young man, kind composed face, clean-shaven smooth skin, neat dark hair, casual dark blue collared shirt",
+            "char_desc_female": "a gracious 24-year-old Myanmar young woman, kind polite smile, gentle expressive eyes, neat black hair in a low bun, casual light pastel blue top",
             "bg_desc": "peaceful modern apartment living room, warm sunlight, clean interior",
             "default_amount": 2300000,
         },
         "th": {
             "name": "Thailand",
-            "gender": "male",
-            "char_desc": "a cheerful 27-year-old Thai young man, calm pleasant expression, clean-shaven, neat modern haircut, casual charcoal grey sweatshirt",
+            "char_desc_male": "a cheerful 27-year-old Thai young man, calm pleasant expression, clean-shaven, neat modern haircut, casual charcoal grey sweatshirt",
+            "char_desc_female": "a bright 25-year-old Thai young woman, warm cheerful smile, gentle brown eyes, shoulder-length neat black hair, casual pastel yellow knit",
             "bg_desc": "modern warm living space, soft background lighting, cozy atmosphere",
             "default_amount": 2500000,
         },
         "ne": {
             "name": "Nepal",
-            "gender": "male",
-            "char_desc": "a warm 27-year-old Nepalese young man, friendly expressive face, clean-shaven, neat dark hair, casual comfortable navy blue sweater",
+            "char_desc_male": "a warm 27-year-old Nepalese young man, friendly expressive face, clean-shaven, neat dark hair, casual comfortable navy blue sweater",
+            "char_desc_female": "a warm 25-year-old Nepalese young woman, kind expressive eyes, sweet gentle smile, neat dark braided or tied hair, casual comfortable burgundy sweater",
             "bg_desc": "clean sunny apartment living room, neat bookshelf, warm indoor lighting",
             "default_amount": 2200000,
         },
         "mn": {
             "name": "Mongolia",
-            "gender": "male",
-            "char_desc": "a strong 28-year-old Mongolian young man, healthy sun-bronzed appearance, clean-shaven, modern short haircut, casual dark fleece jacket",
+            "char_desc_male": "a strong 28-year-old Mongolian young man, healthy sun-bronzed appearance, clean-shaven, modern short haircut, casual dark fleece jacket",
+            "char_desc_female": "a charming 26-year-old Mongolian young woman, distinct East Asian facial structure, clear bright eyes, healthy glowing skin, neat black ponytail, casual cozy fleece jacket",
             "bg_desc": "cozy modern Seoul studio apartment, soft warm ambient window light",
             "default_amount": 2650000,
         }
@@ -121,14 +121,16 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         age_group_ko: str = "20대 후반",
         **kwargs
     ) -> Dict[str, str]:
-        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (카드뉴스 에스닉 앵커 100% 연동)"""
+        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (성별 50:50 듀얼 페르소나 연동)"""
         from core.shorts_engine.shorts_character_anchor_easytax import build_shorts_t2i_character_prompt
         cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
+        char_desc_key = f"char_desc_{gender}"
+        default_char = cfg.get(char_desc_key, cfg.get("char_desc_female", cfg.get("char_desc_male", "")))
         return build_shorts_t2i_character_prompt(
             lang=lang,
             custom_char_desc=custom_char_desc,
             custom_bg_desc=custom_bg_desc,
-            default_char_desc=cfg.get("char_desc", ""),
+            default_char_desc=default_char,
             default_bg_desc=cfg.get("bg_desc", ""),
             gender=gender,
             age_group_ko=age_group_ko
@@ -155,6 +157,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         seed: int = 2026,
         theme_id: Optional[str] = None,
         gender: Optional[str] = None,
+        abort_scope: Optional[str] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """EasyTax 완제품 22초 하이브리드 숏폼 비디오 원클릭 생산 (제미나이 언어/인물/대본 올인원 디렉팅)"""
@@ -167,7 +170,7 @@ class EasyTaxShortsProducer(BaseShortsProducer):
         cfg = self.COUNTRY_CONFIG.get(effective_lang, self.COUNTRY_CONFIG["vi"])
         country_name = scenario.get("country_name", cfg["name"])
         effective_amount = amount or scenario.get("amount", cfg["default_amount"])
-        gender = scenario.get("gender", cfg.get("gender", "female"))
+        gender = scenario.get("gender", random.choice(["female", "male"]))
 
         speech_hook = scenario["speech_hook"]
         full_speech = scenario["full_speech"]
@@ -254,7 +257,8 @@ class EasyTaxShortsProducer(BaseShortsProducer):
                     width=832,
                     height=1216,
                     seed=current_seed,
-                    prefix=f"shorts_easytax_ugc_{effective_lang}"
+                    prefix=f"shorts_easytax_ugc_{effective_lang}",
+                    abort_scope=abort_scope
                 )
                 master_img = Image.open(gen_path)
                 master_save_path = out_folder / f"01_master_t2i_{effective_lang}.png"
@@ -294,7 +298,8 @@ class EasyTaxShortsProducer(BaseShortsProducer):
             motion_prompt=s2v_motion_prompt,
             seed=seed,
             speech_hook_part1=scenario.get("speech_hook_part1"),
-            speech_hook_part2=scenario.get("speech_hook_part2")
+            speech_hook_part2=scenario.get("speech_hook_part2"),
+            abort_scope=abort_scope
         )
 
         # 6. [Step 4] EasyTax 웹앱 시뮬레이션 고화질 직결 (말이 끝남과 동시에 영상 정지)

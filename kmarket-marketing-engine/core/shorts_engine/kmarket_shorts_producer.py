@@ -109,13 +109,23 @@ class KMarketShortsProducer(BaseShortsProducer):
         self.ui_template = RemittanceTemplate()
         self.copywriter = GeminiShortsCopywriter(service_id="kmarket")
 
-    def get_character_prompt(self, lang: str, **kwargs) -> Dict[str, str]:
+    def get_character_prompt(self, lang: str, gender: Optional[str] = None, **kwargs) -> Dict[str, str]:
         """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (8개국 고유 골격 + iPhone 실사 질감 + 한 손 그립 + 닫힌 입술)"""
         from core.character_phenotype_definitions import get_character_phenotype, get_negative_phenotype
         cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
         ethnic_desc = get_character_phenotype(lang)
         ethnic_neg = get_negative_phenotype(lang)
+        
+        # 🎯 [성별 50:50 완벽 랜덤 균등 분배] 기존 인물 정의 100% 보존하면서 성별 전환
+        effective_gender = gender if gender in ("male", "female") else random.choice(["male", "female"])
+        gender_en = "man" if effective_gender == "male" else "woman"
         char_desc = cfg["char_desc"]
+        # 기존 설명에서 성별 키워드만 정밀 매핑 (인물 스타일/나이/분위기 100% 보존)
+        if effective_gender == "female":
+            char_desc = char_desc.replace("young man", "young woman").replace("man", "woman").replace("polo shirt", "comfortable neat top").replace("bomber jacket", "casual jacket")
+        else:
+            char_desc = char_desc.replace("young woman", "young man").replace("woman", "man").replace("blouse", "neat shirt").replace("top", "polo shirt")
+            
         bg_desc = cfg["bg_desc"]
 
         positive = (
@@ -167,12 +177,17 @@ class KMarketShortsProducer(BaseShortsProducer):
         lang: str = "vi",
         theme_index: Optional[int] = None,
         custom_hero_image: Optional[Image.Image] = None,
-        seed: Optional[int] = None
+        seed: Optional[int] = None,
+        gender: Optional[str] = None,
+        abort_scope: Optional[str] = None
     ) -> Dict[str, Any]:
         """케이마켓 1080p 상용급 숏폼 동영상 1회 완제 생산"""
         cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
         country_name = cfg["name"]
         effective_theme = theme_index if theme_index is not None else cfg["default_theme"]
+
+        # 🎯 [성별 50:50 완벽 랜덤 균등 분배]
+        effective_gender = gender if gender in ("male", "female") else random.choice(["male", "female"])
 
         # 테마 메타데이터 로드
         scenario = self.scenario_director.get_shorts_scenario(lang=lang, theme_index=effective_theme)
@@ -193,7 +208,7 @@ class KMarketShortsProducer(BaseShortsProducer):
         out_folder = self.output_base / f"케이마켓_{country_name}_{theme_title}_{dt_str}"
         out_folder.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"🚀 [케이마켓 숏폼] 생산 시작: {country_name} ({lang.upper()}) | 테마: {theme_title}")
+        logger.info(f"🚀 [케이마켓 숏폼] 생산 시작: {country_name} ({lang.upper()}) | 성별: {effective_gender} | 테마: {theme_title}")
 
         # 1. ComfyUI 엔진 확인
         self.ensure_engine_ready()
@@ -204,18 +219,19 @@ class KMarketShortsProducer(BaseShortsProducer):
             logger.info("🌟 [Step 1] 전달받은 마스터 인물 사진 사용")
         else:
             # 🎯 [100% 숏폼 독자 프롬프트] 카드뉴스 의존성 완전 분리: 1인칭 한 손 그립 + 립싱크용 닫힌 입술 적용
-            t2i_prompt = self.get_character_prompt(lang=lang, theme_title=theme_title)
+            t2i_prompt = self.get_character_prompt(lang=lang, gender=effective_gender, theme_title=theme_title)
             pos_prompt = t2i_prompt["positive"]
             neg_prompt = t2i_prompt["negative"]
 
-            logger.info(f"🎨 [Step 1] 자연스러운 숏폼 UGC 씬 사진 생성 (한 손 그립, 입술 닫힘, seed={seed})")
+            logger.info(f"🎨 [Step 1] 자연스러운 숏폼 UGC 씬 사진 생성 (성별={effective_gender}, 한 손 그립, 입술 닫힘, seed={seed})")
             gen_path = self.wan_client.generate_t2i_master(
                 positive_prompt=pos_prompt,
                 negative_prompt=neg_prompt,
                 width=832,
                 height=1216,
                 seed=seed,
-                prefix=f"shorts_kmarket_ugc_{lang}"
+                prefix=f"shorts_kmarket_ugc_{lang}",
+                abort_scope=abort_scope
             )
             master_img = Image.open(gen_path)
             master_save_path = out_folder / f"01_master_t2i_{lang}.png"
@@ -247,7 +263,7 @@ class KMarketShortsProducer(BaseShortsProducer):
         wav_path = self.tts.generate_speech_wav(
             text=speech_text,
             lang=lang,
-            gender=cfg.get("gender", "male"),
+            gender=effective_gender,
             rate="+0%",  # 🎯 차분하고 편안한 보통 대화 속도 (수다쟁이 입 파닥거림 원천 차단)
             filename_prefix=f"kmarket_audio_{lang}"
         )
@@ -266,7 +282,8 @@ class KMarketShortsProducer(BaseShortsProducer):
             audio_name=audio_name,
             prompt_text=f"a cheerful friendly person holding smartphone, talking enthusiastically to camera with natural gentle smile, clear lip sync, stable hands",
             output_mp4_path=raw_video_path,
-            prefix=f"kmarket_s2v_{lang}"
+            prefix=f"kmarket_s2v_{lang}",
+            abort_scope=abort_scope
         )
 
         # 5. [Step 4] 1080x1920 세로 풀HD 업스케일 & 마케팅 오버레이 결합
