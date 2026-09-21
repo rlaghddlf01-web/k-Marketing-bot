@@ -207,13 +207,14 @@ Respond ONLY in valid JSON format:
 4. Write like a warm, knowledgeable expat peer. ZERO commercial intent."""
 
         else:
-            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH SUGGESTION (NO URLS, 100% SAFE):
+            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH & PROFILE PINNED GUIDE SUGGESTION (NO RAW URLS, 100% SAFE):
 1. Provide 80% genuinely accurate legal/tax facts and official advice first tailored directly to the OP's specific situation.
-2. At the very end of your comment, add ONE natural, friendly sentence suggesting them to search on Google:
-   - "If you want to check your estimated refund amount for free, just search 'KTRS tax' or 'Korea Tax Refund Service' on Google."
-   - "There is an official foreigner tax service in Korea that calculates this — search 'KTRS tax' on Google to find their portal."
+2. At the very end of your comment, add ONE natural, friendly sentence suggesting them to search on Google or check your profile pinned post:
+   - "If you want to check your estimated refund amount for free, search 'KTRS tax' on Google (I also posted a complete Article 30 and refund guide on my profile)."
+   - "There's an official foreigner tax service in Korea that calculates this — search 'KTRS tax' on Google or check the pinned post on my profile."
+   - "If you're unsure about your paystub deductions, search 'KTRS tax' on Google to calculate your eligible refund."
 3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
-4. ONLY suggest searching the exact keyword 'KTRS tax' or 'Korea Tax Refund Service' on Google."""
+4. Keep the suggestion professional, empathetic, and helpful."""
 
         prompt = f"""You are a knowledgeable, trusted, and empathetic expat tax advisory peer in South Korea, answering a foreign worker or student's question on Reddit about taxes, ARC, salary deductions, Hometax, or tax refunds.
 

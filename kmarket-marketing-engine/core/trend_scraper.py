@@ -236,18 +236,26 @@ class ViralTrendScraper:
         countries = self.hashtag_db.get("countries", {})
         lang_data = countries.get(lang, countries.get("en", {}))
 
-        # 1. 대한민국 외국인 근로자 필수 초타깃 태그
-        if service_id == "easytax":
-            worker_tags = ["#E9비자", "#외국인근로자", "#세금환급", "#E9visa", "#TaxRefundKorea", "#소득세감면"]
-        else:
-            worker_tags = ["#0원나눔", "#외국인근로자", "#E9비자", "#한국생활", "#무료나눔", "#FreeGiveaway"]
-
         in_korea_tags = lang_data.get("in_korea_common", ["#lifeinkorea", "#expatsinkorea"])
         service_tags = lang_data.get(service_id, ["#kmarket", "#koreatips"])
         district_tags = lang_data.get("hot_districts", [])
 
-        # 대시보드 매트릭스와 100% 동일하게 전체 태그 결합 (중복 제거)
-        combined = worker_tags[:3] + in_korea_tags + service_tags + district_tags + worker_tags[3:]
+        # 1. 대한민국 외국인 근로자 필수 초타깃 태그 (한국어는 한글 태그, 외국어는 글로벌 영문 태그 분기)
+        lang_clean = (lang or "en").lower().strip()
+        if lang_clean == "ko":
+            if service_id == "easytax":
+                worker_tags = ["#E9비자", "#외국인근로자", "#세금환급", "#소득세감면", "#외국인연말정산"]
+            else:
+                worker_tags = ["#0원나눔", "#외국인근로자", "#E9비자", "#한국생활", "#무료나눔", "#외국인중고거래"]
+            combined = worker_tags[:3] + in_korea_tags + service_tags + district_tags + worker_tags[3:]
+        else:
+            if service_id == "easytax":
+                worker_tags = ["#E9visa", "#TaxRefundKorea", "#LifeInKorea", "#WorkInKorea", "#SouthKorea", "#fyp"]
+            else:
+                worker_tags = ["#FreeGiveaway", "#LivingInKorea", "#LifeInKorea", "#StudyInKorea", "#ExpatsInKorea", "#fyp"]
+            # 현지어 태그를 1순위로 배치하고, 글로벌 공통 태그 결합
+            combined = in_korea_tags + service_tags + district_tags + worker_tags
+
         unique_tags = list(dict.fromkeys(combined))
         if count and count > 0:
             return unique_tags[:count]

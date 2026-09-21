@@ -195,13 +195,14 @@ Respond ONLY in valid JSON format:
 4. Write like chatting with a close foreign friend. ZERO commercial intent."""
 
         else:
-            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH SUGGESTION (NO URLS, 100% SAFE):
+            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH & PROFILE PINNED GUIDE SUGGESTION (NO RAW URLS, 100% SAFE):
 1. Provide 80% genuinely helpful, practical advice first tailored to the OP's situation.
-2. At the very end of your comment, add ONE casual, friendly recommendation to search on Google:
-   - "If you need $0 free furniture or moving sale items from other expats, try searching 'k-market korea' or 'KTRS market' on Google."
-   - "There's an expat secondhand and community platform in Korea with auto-translation — search 'k-market korea' or 'KTRS market' on Google to check it out."
+2. At the very end of your comment, add ONE casual, friendly recommendation to search on Google or check your profile pinned post:
+   - "If you need $0 free furniture or moving sale items from other expats, try searching 'k-market korea' on Google (I also wrote a full guide pinned on my profile)."
+   - "There's an expat secondhand and community platform in Korea with auto-translation — search 'k-market korea' on Google or check the pinned post on my profile."
+   - "If you're moving out or need studio essentials, search 'k-market korea' on Google to check other students' moving sales."
 3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
-4. ONLY suggest searching the exact keyword 'k-market korea' or 'KTRS market' on Google."""
+4. Keep the suggestion warm, friendly, and non-intrusive."""
 
         prompt = f"""You are an experienced, helpful, and friendly senior foreign resident / expat living in South Korea, answering another foreigner's question on Reddit about moving, buying/selling used items, finding free giveaways, or studio living tips.
 
