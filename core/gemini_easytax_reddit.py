@@ -1,0 +1,278 @@
+"""
+EasyTaxGeminiReddit - 💰 EasyTax 레딧 외국인 세금/비자 질문 3단계 간접 홍보 답변 전담 AI 엔진
+- Level 1 (순수 팩트, 40%): 브랜드 0%, 100% 법적 팩트만
+- Level 2 (간접 유도, 40%): "AI 시뮬레이션 해보는 사이트가 있던데" 식
+- Level 3 (브랜드 멘션, 20%): 프로필 참고 유도
+"""
+
+import re
+import json
+import random
+import logging
+from typing import Dict, Any, Optional
+from config import GEMINI_API_KEY_EASYTAX, DATA_DIR, LANGUAGES
+from core.supabase_manager import SupabaseManager
+
+logger = logging.getLogger("EasyTaxGeminiReddit")
+
+# 80:20 황금 비율 (구글 검색 유도 80% vs 순수 정보 20%)
+_PROMO_LEVELS = {
+    1: 0.20,  # 순수 법적 팩트/도움 (브랜드 0%, URL 0개)
+    2: 0.80,  # 자연스러운 구글 'EasyTax Korea' / '이지텍스' 검색 유도 (노링크)
+}
+
+
+def _choose_promo_level() -> int:
+    """가중치 기반 레벨 선택 (구글 검색 유도 80%)"""
+    return 2 if random.random() < 0.80 else 1
+
+
+class EasyTaxGeminiReddit:
+    """EasyTax 전용 레딧 50:50 세무 법률 및 구글 검색 유도 답변기"""
+    def __init__(self, supabase_mgr: Optional[SupabaseManager] = None):
+        self.supabase_mgr = supabase_mgr or SupabaseManager()
+        self.client = None
+        self._init_gemini()
+        self.easytax_rules = self._load_json(DATA_DIR / "easytax_rules.json")
+
+    @staticmethod
+    def _eradicate_urls(text: str) -> str:
+        """
+        🚨 레딧 섀도우밴/차단 0% 보장:
+        모든 형태의 raw URL(http, https, www, .com, .app, .kr 등) 및 마크다운 링크를
+        물리적으로 100% 탐지하여 구글 자연 검색어('KTRS tax')로 강제 치환
+        """
+        # 1. 마크다운 링크 [anchor](url) -> anchor (search 'KTRS tax' on Google)
+        text = re.sub(r'\[([^\]]+)\]\((?:https?://|www\.)[^\)]+\)', r"\1 (search 'KTRS tax' on Google)", text)
+        # 2. 일반 raw URL (http://..., https://...)
+        text = re.sub(r'https?://\S+', "search 'KTRS tax' on Google", text)
+        # 3. www. 시작 주소
+        text = re.sub(r'www\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', "search 'KTRS tax' on Google", text)
+        # 4. 도메인 잔존 텍스트 박멸 (vercel.app, ktrs.kr 등)
+        text = re.sub(r'\b[a-zA-Z0-9-]+\.(?:vercel\.app|app|co\.kr|kr|com|net|org)\b(?:\/\S*)?', "search 'KTRS tax' on Google", text)
+        return text.strip()
+
+    def _init_gemini(self):
+        from config import (
+            GEMINI_FREE_API_KEY_EASYTAX, GEMINI_API_KEY_EASYTAX_BLOG,
+            GEMINI_API_KEY_EASYTAX, GEMINI_API_KEY
+        )
+        keys = [
+            GEMINI_FREE_API_KEY_EASYTAX,
+            GEMINI_API_KEY_EASYTAX_BLOG,
+            GEMINI_API_KEY_EASYTAX,
+            GEMINI_API_KEY
+        ]
+        from google import genai
+        for k in keys:
+            if k:
+                try:
+                    self.client = genai.Client(api_key=k)
+                    logger.info("EasyTax 레딧 전용 Gemini Client 초기화 성공")
+                    return
+                except Exception as e:
+                    logger.warning(f"EasyTax 레딧 Gemini 초기화 시도 실패: {e}")
+        self.client = None
+
+
+    def _load_json(self, path) -> Any:
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return {}
+
+    def classify_easytax_reddit_intent(self, post_title: str, post_body: str) -> Dict[str, Any]:
+        """
+        💰 [EasyTax 외국인 세무/비자 질문 정밀 시맨틱 인텐트 판별기]
+        1. 룰 기반 네거티브/포지티브 단어 경계(\b) 사전 필터링 (영화 택시운전사, 교통 택시 등 원천 차단)
+        2. Gemini 3.1 Flash-Lite AI를 통한 실시간 문맥 인텐트 검증
+        3. AI 장애 시 무결성 보장 Fallback 룰 엔진
+        """
+        combined = f"{post_title} {post_body}".lower()
+
+        # 1. 강력한 네거티브 패턴 검사 (영화, 택시, 프로그래밍 문법 등)
+        negative_patterns = [
+            r"\btaxi\b", r"\btaxicab\b", r"\bsyntax\b", r"\btaxidermy\b", r"\btaxonomy\b"
+        ]
+        strong_tax_phrases = [
+            "tax refund", "tax return", "income tax", "withholding tax",
+            "year-end", "year end", "article 30", "hometax", "pension refund",
+            "national pension", "종합소득세", "연말정산", "경정청구", "세무서", "3.3%"
+        ]
+        has_strong_tax = any(p in combined for p in strong_tax_phrases)
+        if not has_strong_tax:
+            for neg in negative_patterns:
+                if re.search(neg, combined, re.IGNORECASE):
+                    return {
+                        "is_relevant": False,
+                        "category": "general_living",
+                        "reason": "영화/교통 택시 또는 문법(syntax) 단어로 세무 무관"
+                    }
+
+        # 2. 제미나이 AI 실시간 문맥 인텐트 판별
+        if self.client:
+            prompt = f"""You are an AI semantic intent classifier for an expat tax advisory service in South Korea.
+Analyze the following Reddit post title and body to determine if the user is genuinely asking about or discussing:
+- Korean taxes, income tax, tax returns, year-end tax settlement (연말정산)
+- 3.3% freelance withholding tax refund (종합소득세)
+- Article 30 / tax treaty exemptions (e.g. E-2, E-1 native teachers)
+- Retroactive 5-year tax refund (경정청구)
+- Korean National Pension lump-sum refund upon leaving Korea
+- Korean salary paystub tax deductions, tax bracket, or Hometax (국세청 홈택스)
+
+CRITICAL NEGATIVE FILTER:
+Do NOT classify posts about movies (e.g., 'Taxi Driver'), taxis/cabs, transportation, general travel, non-tax visa questions (e.g., university admission, finding an apartment, cafes), shopping, or programming syntax as tax-related.
+
+[Post Title]: {post_title}
+[Post Body]: {post_body}
+
+Respond ONLY in valid JSON format:
+{{
+  "is_relevant": true or false,
+  "category": "tax_refund" | "article_30" | "freelance_3_3" | "year_end" | "pension_refund" | "general_living",
+  "reason": "short explanation in Korean"
+}}
+"""
+            for model_name in ['gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+                try:
+                    resp = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                    if resp and resp.text:
+                        raw = resp.text.strip()
+                        if raw.startswith("```"):
+                            raw = raw.split("```")[1]
+                            if raw.startswith("json"):
+                                raw = raw[4:]
+                        data = json.loads(raw.strip())
+                        logger.info(f"🧠 [EasyTax AI 인텐트 판별] '{post_title[:40]}' -> is_relevant={data.get('is_relevant')} ({data.get('category')})")
+                        return data
+                except Exception as e:
+                    logger.debug(f"인텐트 판별 Gemini {model_name} 실패: {e}")
+                    continue
+
+        # 3. Fallback: 정규식 단어 경계 기반 규칙 판별
+        tax_patterns = [
+            (r"\barticle\s*30\b", "article_30"),
+            (r"\b3\.3%?\b", "freelance_3_3"),
+            (r"\b(pension\s*refund|national\s*pension)\b", "pension_refund"),
+            (r"\b(year[- ]?end|연말정산)\b", "year_end"),
+            (r"\b(tax\s*refund|tax\s*return|overpaid\s*tax|경정청구|종합소득세|환급)\b", "tax_refund"),
+            (r"\b(income\s*tax|withholding|hometax|paystub|salary\s*deduction)\b", "tax_refund"),
+        ]
+        for pattern, cat in tax_patterns:
+            if re.search(pattern, combined, re.IGNORECASE):
+                return {
+                    "is_relevant": True,
+                    "category": cat,
+                    "reason": f"세무 핵심 키워드 매칭 ({cat})"
+                }
+
+        return {
+            "is_relevant": False,
+            "category": "general_living",
+            "reason": "세무/비자 환급 관련 인텐트 없음"
+        }
+
+    def generate_reddit_response(self, post_title: str, post_body: str, target_lang: str = "en", landing_url: str = "") -> str:
+
+        """EasyTax 전용 50:50 세무 정보 & 구글 검색 유도 답변 생성"""
+        lang_info = LANGUAGES.get(target_lang, LANGUAGES["en"])
+        promo_level = _choose_promo_level()
+
+        few_shots = self.supabase_mgr.fetch_golden_few_shots("easytax", target_lang, min_score=80.0, limit=2)
+        proven_scripts = []
+        if hasattr(self.supabase_mgr, "fetch_easytax_proven_scripts"):
+            try:
+                proven_scripts = self.supabase_mgr.fetch_easytax_proven_scripts(limit=2)
+            except Exception:
+                proven_scripts = []
+
+        few_shot_prompt = ""
+        if few_shots:
+            few_shot_prompt = "\n\n### [High-Performing Examples]:\n" + "\n\n".join(few_shots)
+        if proven_scripts:
+            proven_texts = [f"- {ps.get('script_text')}" for ps in proven_scripts]
+            few_shot_prompt += "\n\n### [Proven Examples]:\n" + "\n".join(proven_texts)
+
+        tax_facts_str = json.dumps(self.easytax_rules, ensure_ascii=False)
+
+        # 홍보 레벨별 프롬프트 분기 (50:50)
+        if promo_level == 1:
+            promo_instruction = """### TYPE 1 — 100% PURE LEGAL & TAX HELP (NO PROMOTION, NO SEARCH SUGGESTION):
+1. DO NOT mention ANY brand, app, service, search keyword, or company name.
+2. Provide 100% accurate, objective legal/tax explanations citing official Korean Tax Law & NTS (국세청) guidelines.
+3. Guide the user on exact official steps through Hometax or regional tax offices.
+4. Write like a warm, knowledgeable expat peer. ZERO commercial intent."""
+
+        else:
+            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH & PROFILE PINNED GUIDE SUGGESTION (NO RAW URLS, 100% SAFE):
+1. Provide 80% genuinely accurate legal/tax facts and official advice first tailored directly to the OP's specific situation.
+2. At the very end of your comment, add ONE natural, friendly sentence suggesting them to search on Google or check your profile pinned post:
+   - "If you want to check your estimated refund amount for free, search 'KTRS tax' on Google (I also posted a complete Article 30 and refund guide on my profile)."
+   - "There's an official foreigner tax service in Korea that calculates this — search 'KTRS tax' on Google or check the pinned post on my profile."
+   - "If you're unsure about your paystub deductions, search 'KTRS tax' on Google to calculate your eligible refund."
+3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
+4. Keep the suggestion professional, empathetic, and helpful."""
+
+        prompt = f"""You are a knowledgeable, trusted, and empathetic expat tax advisory peer in South Korea, answering a foreign worker or student's question on Reddit about taxes, ARC, salary deductions, Hometax, or tax refunds.
+
+[Target Language]: {lang_info['name']} ({lang_info['native_name']})
+[Verified Korean Tax Law Facts]: {tax_facts_str}
+{few_shot_prompt}
+
+[Reddit Post Title]: {post_title}
+[Reddit Post Body]: {post_body}
+
+{promo_instruction}
+
+### GENERAL RULES:
+1. Write 100% fluently and naturally in {lang_info['name']}.
+2. Key legal facts to cite when relevant:
+   - E-2 / Native Teachers: Article 30 of Korea-US/UK Tax Treaty, 2-year income tax exemption
+   - D-2 / Students: 3.3% withholding refund via May General Income Tax return (종합소득세)
+   - E-9 / Factory Workers: SME 90% income tax reduction, 5-year retroactive refund (경정청구)
+   - Departing Korea: Year-end settlement + National Pension lump-sum refund
+3. NEVER promise fake instant cash. State that amounts depend on official NTS records.
+4. Keep it concise (3-6 sentences).
+5. Professional yet warm peer tone. No sales pitch.
+6. DO NOT use bullet points — write like a normal Reddit comment.
+"""
+        if self.client:
+            for model_name in ['gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+                try:
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt
+                    )
+                    if response and response.text:
+                        result = self._eradicate_urls(response.text.strip())
+                        logger.info(f"💰 [EasyTax Reddit AI] Level {promo_level} 답변 생성 완료 ({model_name})")
+                        return result
+                except Exception as e:
+                    logger.debug(f"EasyTax Gemini 모델 {model_name} 실패, 다음 시도: {e}")
+                    continue
+
+
+        # Level 1 순수 팩트 기반 Fallback
+        lower_q = f"{post_title} {post_body}".lower()
+        if any(w in lower_q for w in ["e-2", "teacher", "epik", "hagwon", "teaching", "article 30"]):
+            return (
+                "Under Article 30 of the Korea-US/UK Tax Treaty and the Restriction of Special Taxation Act, "
+                "qualifying native English teachers on E-2/E-1 visas are eligible for full income tax exemption for their first 2 years in Korea. "
+                "If your school withheld income tax during this period, you can claim it back through a year-end tax settlement or by filing at your local tax office. "
+                "Bring your passport, ARC, employment contract, and pay stubs. The process is straightforward once you have the documents."
+            )
+        elif any(w in lower_q for w in ["d-2", "student", "part-time", "3.3%", "restaurant", "translation"]):
+            return (
+                "The 3.3% deducted from your part-time pay is freelance withholding tax. Since most student annual incomes fall below the basic exemption threshold, "
+                "you can claim back up to 100% of that 3.3% through the May General Income Tax return (종합소득세 신고). "
+                "You can do it yourself on Hometax, but the interface is only in Korean. The local tax office (세무서) staff are usually helpful if you go in person."
+            )
+        else:
+            return (
+                "Under Korean Tax Law, foreign employees in SMEs and qualifying workers can receive substantial income tax reductions "
+                "and reclaim overpaid taxes from the past 5 years through an official retroactive filing (경정청구). "
+                "Your first step would be to check your withholding tax records on Hometax (국세청 홈택스) or visit your nearest tax office with your ARC and pay stubs."
+            )

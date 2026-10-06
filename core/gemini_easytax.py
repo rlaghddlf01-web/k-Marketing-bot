@@ -1,0 +1,41 @@
+"""
+EasyTaxGeminiEngine - 💰 EasyTax 전용 경량 Facade 오케스트레이터
+- Blog: EasyTaxGeminiBlog (1회 한국어 마스터 글 + 동양인 사진 2장 집필)
+- Reddit: EasyTaxGeminiReddit (80:20 법적 팩트 답변)
+- Shorts: EasyTaxGeminiShorts (30초 숏폼 대본)
+"""
+
+import logging
+from typing import Dict, Any, Optional
+from core.supabase_manager import SupabaseManager
+from core.gemini_easytax_blog import EasyTaxGeminiBlog
+from core.gemini_easytax_reddit import EasyTaxGeminiReddit
+from core.gemini_easytax_shorts import EasyTaxGeminiShorts
+
+logger = logging.getLogger("EasyTaxGeminiEngine")
+
+class EasyTaxGeminiEngine:
+    """EasyTax 전용 통합 Facade 엔진"""
+    def __init__(self, supabase_mgr: Optional[SupabaseManager] = None):
+        self.supabase_mgr = supabase_mgr or SupabaseManager()
+        self.blog_engine = EasyTaxGeminiBlog(self.supabase_mgr)
+        self.reddit_engine = EasyTaxGeminiReddit(self.supabase_mgr)
+        self.shorts_engine = EasyTaxGeminiShorts(self.supabase_mgr)
+
+    def write_master_korean_article(self, directive_pkg: Dict[str, Any], landing_url: str = "", hashtags: str = "", thumb_url: str = "", thumb_url_1: str = "", thumb_url_2: str = "") -> Dict[str, str]:
+        """한국어 2,000자 최고급 마스터 칼럼 1회 집필 (본문 상단 대표 사진 1장)"""
+        return self.blog_engine.write_master_korean_article(directive_pkg, landing_url, hashtags, thumb_url, thumb_url_1, thumb_url_2)
+
+    def write_full_blog_article(self, directive_pkg: Dict[str, Any], target_lang: str = "ko", landing_url: str = "", hashtags: str = "", thumb_url: str = "") -> Dict[str, str]:
+        """하위 호환성 유지"""
+        return self.blog_engine.write_master_korean_article(directive_pkg, landing_url, hashtags, thumb_url, thumb_url)
+
+    def generate_reddit_reply(self, post_data: Dict[str, Any]) -> Optional[Dict[str, str]]:
+        return self.reddit_engine.generate_reddit_reply(post_data)
+
+    def classify_easytax_reddit_intent(self, post_title: str, post_body: str) -> Dict[str, Any]:
+        return self.reddit_engine.classify_easytax_reddit_intent(post_title, post_body)
+
+    def generate_shorts_script(self, *args, **kwargs) -> Dict[str, Any]:
+        return self.shorts_engine.generate_shorts_script(*args, **kwargs)
+
