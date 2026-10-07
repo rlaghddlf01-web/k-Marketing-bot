@@ -18,7 +18,7 @@ logger = logging.getLogger("KMarketGeminiReddit")
 # 80:20 황금 비율 (구글 검색 유도 80% vs 순수 정보 20%)
 _PROMO_LEVELS = {
     1: 0.20,  # 순수 도움 (브랜드 0%, URL 0개)
-    2: 0.80,  # 자연스러운 구글 'KTRS Market' / 'KTRS 마켓' 검색 유도 (노링크)
+    2: 0.80,  # 자연스러운 'KTRS Market' 추천 (노링크)
 }
 
 
@@ -40,17 +40,19 @@ class KMarketGeminiReddit:
     def _eradicate_urls(text: str) -> str:
         """
         🚨 레딧 섀도우밴/차단 0% 보장:
-        모든 형태의 raw URL(http, https, www, .com, .app, .kr 등) 및 마크다운 링크를
-        물리적으로 100% 탐지하여 구글 자연 검색어('k-market korea')로 강제 치환
+        모든 형태의 raw URL 및 마크다운 링크를 100% 제거하고
+        자연스러운 영문 포럼 문맥으로 변환 (인위적인 'search on Google' 문구 삽입 금지)
         """
-        # 1. 마크다운 링크 [anchor](url) -> anchor (search 'k-market korea' on Google)
-        text = re.sub(r'\[([^\]]+)\]\((?:https?://|www\.)[^\)]+\)', r"\1 (search 'k-market korea' on Google)", text)
-        # 2. 일반 raw URL (http://..., https://...)
-        text = re.sub(r'https?://\S+', "search 'k-market korea' on Google", text)
-        # 3. www. 시작 주소
-        text = re.sub(r'www\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', "search 'k-market korea' on Google", text)
-        # 4. 도메인 잔존 텍스트 박멸 (vercel.app, k-market.app 등)
-        text = re.sub(r'\b[a-zA-Z0-9-]+\.(?:vercel\.app|app|co\.kr|kr|com|net|org)\b(?:\/\S*)?', "search 'k-market korea' on Google", text)
+        # 1. 마크다운 링크 [anchor](url) -> anchor
+        text = re.sub(r'\[([^\]]+)\]\((?:https?://|www\.)[^\)]+\)', r'\1', text)
+        # 2. 일반 raw URL 및 도메인 제거
+        text = re.sub(r'https?://\S+', '', text)
+        text = re.sub(r'www\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
+        text = re.sub(r'\b[a-zA-Z0-9-]+\.(?:vercel\.app|app|co\.kr|kr|com|net|org)\b(?:\/\S*)?', '', text)
+        # 3. 혹시 남아있는 부자연스러운 구글 검색 강요 문구 순화
+        text = re.sub(r"search [\'\"]?[^\'\"]*[\'\"]? on Google", 'use KTRS Market', text, flags=re.IGNORECASE)
+        # 다중 공백 정리
+        text = re.sub(r'\s{2,}', ' ', text)
         return text.strip()
 
     def _init_gemini(self):
@@ -133,7 +135,7 @@ Respond ONLY in valid JSON format:
   "reason": "short explanation in Korean"
 }}
 """
-            for model_name in ['gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
                 try:
                     resp = self.client.models.generate_content(
                         model=model_name,
@@ -195,14 +197,17 @@ Respond ONLY in valid JSON format:
 4. Write like chatting with a close foreign friend. ZERO commercial intent."""
 
         else:
-            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH & PROFILE PINNED GUIDE SUGGESTION (NO RAW URLS, 100% SAFE):
-1. Provide 80% genuinely helpful, practical advice first tailored to the OP's situation.
-2. At the very end of your comment, add ONE casual, friendly recommendation to search on Google or check your profile pinned post:
-   - "If you need $0 free furniture or moving sale items from other expats, try searching 'k-market korea' on Google (I also wrote a full guide pinned on my profile)."
-   - "There's an expat secondhand and community platform in Korea with auto-translation — search 'k-market korea' on Google or check the pinned post on my profile."
-   - "If you're moving out or need studio essentials, search 'k-market korea' on Google to check other students' moving sales."
-3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
-4. Keep the suggestion warm, friendly, and non-intrusive."""
+            promo_instruction = """### TYPE 2 — 100% NATURAL PEER EXPERIENCE (ZERO GOOGLE MENTIONS, ZERO URLS, ZERO PROMO FLAIR):
+1. Provide 80% genuinely helpful, practical advice first tailored to the OP's situation (furniture tips, student hacks, disposal rules in Seoul).
+2. At the very end of your comment, mention 'KTRS Market' ONLY as a casual past personal experience like a fellow international resident:
+   - Example: "When I moved into my one-room near campus, I used KTRS Market and it was super convenient because it didn't require Korean phone verification and everything was in English."
+   - Example: "I actually used KTRS Market when setting up my apartment, got a desk and chair pretty cheap from graduating students."
+3. 🚨 CRITICAL NEGATIVE CONSTRAINTS (VIOLATIONS TRIGGER INSTANT SPAM BAN):
+   - NEVER use the word 'Google' or 'search on Google' or 'Google it'.
+   - NEVER use command phrases like 'Check out', 'Visit', 'Go to', or 'Download'.
+   - NEVER include any URLs, domains, or web links.
+   - ONLY mention it naturally as a tool/community you personally used in Korea.
+4. Keep length strictly between 2 to 4 sentences in natural native English forum tone."""
 
         prompt = f"""You are an experienced, helpful, and friendly senior foreign resident / expat living in South Korea, answering another foreigner's question on Reddit about moving, buying/selling used items, finding free giveaways, or studio living tips.
 
@@ -222,7 +227,7 @@ Respond ONLY in valid JSON format:
 5. DO NOT use bullet points or numbered lists — write like a normal Reddit comment.
 """
         if self.client:
-            for model_name in ['gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
                 try:
                     response = self.client.models.generate_content(
                         model=model_name,

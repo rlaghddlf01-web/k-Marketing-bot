@@ -478,12 +478,22 @@ class CardnewsMultiPublisher:
         lang = card_data.get("lang", "ko")
         timestamp = int(time.time())
 
-        # 1. 5대 플랫폼별 알고리즘 맞춤 자동 송출
-        ig_res = self.instagram.publish(card_data)
-        fb_res = self.facebook.publish(card_data)
-        rd_res = self.reddit.publish(card_data)
-        th_res = self.threads.publish(card_data)
-        tg_res = self.telegram.publish(card_data)
+        # 🛑 [대표님 긴급 수칙] 외부 API 송출 차단 모드 검사
+        from config import BLOCK_EXTERNAL_API_DISPATCH, ENABLE_EXTERNAL_API_DISPATCH
+        if BLOCK_EXTERNAL_API_DISPATCH or not ENABLE_EXTERNAL_API_DISPATCH:
+            logger.warning(f"🛑 [API 송출 차단 모드] 대표님 긴급 차단 지시에 따라 카드뉴스 외부 API 송출을 전면 생략합니다. (로컬 메타데이터/카드 보관 완료)")
+            ig_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+            fb_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+            rd_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+            th_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+            tg_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+        else:
+            # 1. 5대 플랫폼별 알고리즘 맞춤 자동 송출
+            ig_res = self.instagram.publish(card_data)
+            fb_res = self.facebook.publish(card_data)
+            rd_res = self.reddit.publish(card_data)
+            th_res = self.threads.publish(card_data)
+            tg_res = self.telegram.publish(card_data)
 
         results = {
             "service_id": service_id,

@@ -18,7 +18,7 @@ logger = logging.getLogger("EasyTaxGeminiReddit")
 # 80:20 황금 비율 (구글 검색 유도 80% vs 순수 정보 20%)
 _PROMO_LEVELS = {
     1: 0.20,  # 순수 법적 팩트/도움 (브랜드 0%, URL 0개)
-    2: 0.80,  # 자연스러운 구글 'EasyTax Korea' / '이지텍스' 검색 유도 (노링크)
+    2: 0.80,  # 자연스러운 'Korea Tax Refund Service (KTRS)' 추천 (노링크)
 }
 
 
@@ -39,17 +39,19 @@ class EasyTaxGeminiReddit:
     def _eradicate_urls(text: str) -> str:
         """
         🚨 레딧 섀도우밴/차단 0% 보장:
-        모든 형태의 raw URL(http, https, www, .com, .app, .kr 등) 및 마크다운 링크를
-        물리적으로 100% 탐지하여 구글 자연 검색어('KTRS tax')로 강제 치환
+        모든 형태의 raw URL 및 마크다운 링크를 100% 제거하고
+        자연스러운 영문 포럼 문맥으로 변환 (인위적인 'search on Google' 문구 삽입 금지)
         """
-        # 1. 마크다운 링크 [anchor](url) -> anchor (search 'KTRS tax' on Google)
-        text = re.sub(r'\[([^\]]+)\]\((?:https?://|www\.)[^\)]+\)', r"\1 (search 'KTRS tax' on Google)", text)
-        # 2. 일반 raw URL (http://..., https://...)
-        text = re.sub(r'https?://\S+', "search 'KTRS tax' on Google", text)
-        # 3. www. 시작 주소
-        text = re.sub(r'www\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', "search 'KTRS tax' on Google", text)
-        # 4. 도메인 잔존 텍스트 박멸 (vercel.app, ktrs.kr 등)
-        text = re.sub(r'\b[a-zA-Z0-9-]+\.(?:vercel\.app|app|co\.kr|kr|com|net|org)\b(?:\/\S*)?', "search 'KTRS tax' on Google", text)
+        # 1. 마크다운 링크 [anchor](url) -> anchor
+        text = re.sub(r'\[([^\]]+)\]\((?:https?://|www\.)[^\)]+\)', r'\1', text)
+        # 2. 일반 raw URL 및 도메인 제거
+        text = re.sub(r'https?://\S+', '', text)
+        text = re.sub(r'www\.[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
+        text = re.sub(r'\b[a-zA-Z0-9-]+\.(?:vercel\.app|app|co\.kr|kr|com|net|org)\b(?:\/\S*)?', '', text)
+        # 3. 혹시 남아있는 부자연스러운 구글 검색 강요 문구 순화
+        text = re.sub(r"search [\'\"]?[^\'\"]*[\'\"]? on Google", 'use Korea Tax Refund Service (KTRS)', text, flags=re.IGNORECASE)
+        # 다중 공백 정리
+        text = re.sub(r'\s{2,}', ' ', text)
         return text.strip()
 
     def _init_gemini(self):
@@ -133,7 +135,7 @@ Respond ONLY in valid JSON format:
   "reason": "short explanation in Korean"
 }}
 """
-            for model_name in ['gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
                 try:
                     resp = self.client.models.generate_content(
                         model=model_name,
@@ -207,14 +209,17 @@ Respond ONLY in valid JSON format:
 4. Write like a warm, knowledgeable expat peer. ZERO commercial intent."""
 
         else:
-            promo_instruction = """### TYPE 2 — NATURAL GOOGLE SEARCH & PROFILE PINNED GUIDE SUGGESTION (NO RAW URLS, 100% SAFE):
+            promo_instruction = """### TYPE 2 — 100% NATURAL PEER EXPERIENCE (ZERO GOOGLE MENTIONS, ZERO URLS, ZERO PROMO FLAIR):
 1. Provide 80% genuinely accurate legal/tax facts and official advice first tailored directly to the OP's specific situation.
-2. At the very end of your comment, add ONE natural, friendly sentence suggesting them to search on Google or check your profile pinned post:
-   - "If you want to check your estimated refund amount for free, search 'KTRS tax' on Google (I also posted a complete Article 30 and refund guide on my profile)."
-   - "There's an official foreigner tax service in Korea that calculates this — search 'KTRS tax' on Google or check the pinned post on my profile."
-   - "If you're unsure about your paystub deductions, search 'KTRS tax' on Google to calculate your eligible refund."
-3. NEVER post any raw clickable URLs or links (http/https/www/dot-com).
-4. Keep the suggestion professional, empathetic, and helpful."""
+2. At the very end of your comment, mention 'Korea Tax Refund Service (KTRS)' ONLY as a casual past personal experience like a fellow foreigner living in Korea:
+   - Example: "When I filed my taxes in Korea without speaking fluent Korean, I used Korea Tax Refund Service (KTRS) and it was really convenient because it was all in English without needing complex Korean certs."
+   - Example: "I used Korea Tax Refund Service (KTRS) to calculate my estimated refund before submitting documents to HR, saved me a bunch of headache."
+3. 🚨 CRITICAL NEGATIVE CONSTRAINTS (VIOLATIONS TRIGGER INSTANT SPAM BAN):
+   - NEVER use the word 'Google' or 'search on Google' or 'Google it'.
+   - NEVER use command phrases like 'Check out', 'Visit', 'Go to', or 'Download'.
+   - NEVER include any URLs, domains, or web links.
+   - ONLY mention it naturally as a service/calculator you personally used in Korea.
+4. Keep length strictly between 2 to 4 sentences in natural native English forum tone."""
 
         prompt = f"""You are a knowledgeable, trusted, and empathetic expat tax advisory peer in South Korea, answering a foreign worker or student's question on Reddit about taxes, ARC, salary deductions, Hometax, or tax refunds.
 
@@ -240,7 +245,7 @@ Respond ONLY in valid JSON format:
 6. DO NOT use bullet points — write like a normal Reddit comment.
 """
         if self.client:
-            for model_name in ['gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
                 try:
                     response = self.client.models.generate_content(
                         model=model_name,

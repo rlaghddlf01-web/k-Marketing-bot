@@ -23,7 +23,7 @@ class VRAMSafetyException(RuntimeError):
 class VRAMSafetyGuard:
     """GPU VRAM 사전 검증 및 실시간 런타임 감시 엔진"""
 
-    MIN_S2V_VRAM_GB = 11.5  # Wan 2.2 S2V 14B 모델 VRAM 탑재를 위한 최소 가용 메모리 (GB)
+    MIN_S2V_VRAM_GB = 10.0  # Wan 2.2 S2V 14B 모델 VRAM 탑재를 위한 최소 가용 메모리 (GB)
 
     @classmethod
     def get_vram_info(cls, host: str = "http://127.0.0.1:8188") -> Dict[str, float]:

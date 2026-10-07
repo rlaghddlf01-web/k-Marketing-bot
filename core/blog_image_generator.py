@@ -138,9 +138,9 @@ class BlogImageGenerator:
             import base64
             client = self._get_genai_client()
 
-            # ✅ 구매한 플랜 초저가 이미지 모델 사용 (gemini-flash-lite-latest-image)
+            # ✅ 구매한 플랜 초저가 이미지 모델 사용 (gemini-3.1-flash-lite-image)
             response = client.models.generate_content(
-                model="gemini-flash-lite-latest-image",
+                model="gemini-3.1-flash-lite-image",
                 contents=prompt,
                 config=genai_types.GenerateContentConfig(
                     response_modalities=["IMAGE", "TEXT"]

@@ -67,22 +67,9 @@ class BlogScheduler:
         log = on_log or (lambda msg, lvl="info": logger.info(msg))
         service_tag = "K-Market" if self.service_id == "kmarket" else "EasyTax"
         
-        log(f"🚀 [{service_tag} 블로그] 대한민국 표준시(KST) 하루 3회 (09:00 / 13:00 / 19:00) 안심 스케줄러 가동!", "success")
+        log(f"🚀 [{service_tag} 블로그] 대한민국 표준시(KST) 하루 3회 (09:00 / 13:00 / 19:00) 안심 스케줄러 대기 시작 (정시 도달 시에만 발행)", "success")
 
-        # 1. 최초 가동 시 1회 즉시 발행
-        if is_running_checker():
-            try:
-                now_kst = get_now_kst()
-                slot_key = f"{now_kst.strftime('%Y-%m-%d')}_{now_kst.hour}"
-                self.last_published_slot = slot_key
-                
-                log(f"⚡ [{service_tag} 블로그] 무인 가동 초기 1회 즉시 발행 시작...", "info")
-                msg = self.publish_fn()
-                log(f"✅ [{service_tag} 블로그 #초기발행] {msg}", "success")
-            except Exception as e:
-                log(f"❌ [{service_tag} 블로그] 초기 발행 실패: {e}", "error")
-
-        # 2. 다음 골든타임까지 대기하며 하루 3회 정시 실행 루프
+        # 2. 다음 골든타임까지 대기하며 정해진 정시에만 정확히 1회씩 발행
         while is_running_checker():
             wait_seconds = self.get_seconds_until_next_run()
             next_time_str = (get_now_kst() + datetime.timedelta(seconds=wait_seconds)).strftime("%m월 %d일 %H:%M")

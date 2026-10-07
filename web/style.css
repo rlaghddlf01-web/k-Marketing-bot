@@ -1,40 +1,41 @@
 /* ======================================================================
-   🛸 Universal Expat Growth Engine - Neo-Dark & Vivid Highlight Theme
-   (Inspired by Premium B2B Admin Console: Midnight Navy + Vivid Purple + Hot Orange + Neon Gold)
+   🛸 Universal Expat Growth Engine - Clean Modern White Theme
+   (Crisp White + High Contrast Slate + Vivid Accent Highlights)
    ====================================================================== */
 
 :root {
-    /* 🌌 Backgrounds: Deep Midnight Navy & Sleek Panels */
-    --bg-main: #0B0D17;
-    --bg-sidebar: #0F1222;
-    --bg-card: #13172E;
-    --bg-card-hover: #1A1F3D;
-    --bg-card-nested: #1A1F3D;
+    /* 🌌 Backgrounds: Crisp Pure White & Pale Soft Latte Panels */
+    --bg-main: #FFFFFF;
+    --bg-sidebar: #FAF7F2;
+    --bg-card: #F6F1EA;
+    --bg-card-hover: #ECE4D8;
+    --bg-card-nested: #FFFFFF;
+    --bg-card-inset: #FAF7F2;
     
     /* 🧵 Borders & Dividers */
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-card: #22294E;
+    --border-color: #E8E0D5;
+    --border-card: #E5DDD1;
     --border-focus: #7C3AED;
     
-    /* 🖋️ Typography */
-    --text-primary: #FFFFFF;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
+    /* 🖋️ Typography (Deep Espresso Charcoal) */
+    --text-primary: #1E1B18;
+    --text-secondary: #4A443E;
+    --text-muted: #6E665E;
     
-    /* 🚀 Eye-Catching Vivid Highlights */
+    /* 🚀 Vivid Accent Highlights */
     --accent-purple: #7C3AED;
-    --accent-purple-glow: rgba(124, 58, 237, 0.4);
-    --accent-orange-grad: linear-gradient(135deg, #FF6B35, #FF3D00);
-    --accent-orange-glow: rgba(255, 61, 0, 0.35);
-    --accent-yellow: #FACC15;
-    --accent-cyan: #06B6D4;
-    --accent-green: #10B981;
-    --accent-red: #EF4444;
+    --accent-purple-glow: rgba(124, 58, 237, 0.25);
+    --accent-orange-grad: linear-gradient(135deg, #FF6B35, #EA580C);
+    --accent-orange-glow: rgba(234, 88, 12, 0.25);
+    --accent-yellow: #D97706;
+    --accent-cyan: #0284C7;
+    --accent-green: #059669;
+    --accent-red: #DC2626;
     
-    /* ☁️ Deep Sleek Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+    /* ☁️ 3D Soft Latte Depth Shadows */
+    --shadow-sm: 0 2px 8px rgba(110, 85, 65, 0.06), 0 1px 3px rgba(110, 85, 65, 0.04);
+    --shadow-md: 0 6px 20px rgba(110, 85, 65, 0.09), 0 2px 6px rgba(110, 85, 65, 0.04);
+    --shadow-lg: 0 12px 32px rgba(110, 85, 65, 0.13), 0 4px 10px rgba(110, 85, 65, 0.06);
 }
 
 /* 🟢 안정적이고 깔끔한 상태 표시기 */
@@ -42,24 +43,25 @@
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: #64748b;
+    background: #94A3B8;
     display: inline-block;
     transition: all 0.2s ease;
 }
 .status-dot.active {
     background: #10B981;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 
 .sidebar-status-card {
-    background: #13172E;
-    border: 1px solid #22294E;
+    background: #F6F1EA;
+    border: 1px solid var(--border-card);
     border-radius: 12px;
     padding: 12px;
+    box-shadow: var(--shadow-sm);
     transition: all 0.2s ease;
 }
 .sidebar-status-card.running {
-    background: rgba(16, 185, 129, 0.08) !important;
+    background: rgba(16, 185, 129, 0.06) !important;
     border-color: #10B981 !important;
 }
 
@@ -71,30 +73,30 @@
     border-radius: 6px;
     font-size: 11px;
     font-weight: 700;
-    background: rgba(255, 255, 255, 0.06);
-    color: #94a3b8;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #F1F5F9;
+    color: #475569;
+    border: 1px solid #E2E8F0;
     transition: all 0.2s ease;
 }
 
 .mod-badge.running {
-    background: rgba(16, 185, 129, 0.18) !important;
-    color: #10B981 !important;
-    border: 1px solid rgba(16, 185, 129, 0.45) !important;
-    font-weight: 700 !important;
-}
-
-.mod-badge.done {
-    background: rgba(16, 185, 129, 0.18) !important;
-    color: #34D399 !important;
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #059669 !important;
     border: 1px solid rgba(16, 185, 129, 0.4) !important;
     font-weight: 700 !important;
 }
 
+.mod-badge.done {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    font-weight: 700 !important;
+}
+
 .mod-badge.stopped {
-    background: rgba(239, 68, 68, 0.16) !important;
-    color: #F87171 !important;
-    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #DC2626 !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
     font-weight: 700 !important;
 }
 
@@ -130,14 +132,32 @@ html, body {
     width: 270px;
     min-width: 270px;
     max-width: 270px;
+    height: 100vh;
+    max-height: 100vh;
     flex-shrink: 0;
     background-color: var(--bg-sidebar);
     border-right: 1px solid var(--border-color);
-    padding: 24px 18px;
+    padding: 24px 18px 40px 18px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    overflow-y: auto;
+    overflow-x: hidden;
     z-index: 10;
+}
+
+/* 좌측 사이드바 전용 슬릭 스크롤바 */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
 }
 
 .logo-area {
@@ -165,7 +185,7 @@ html, body {
     font-size: 17px;
     font-weight: 800;
     letter-spacing: -0.5px;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 .logo-sub {
@@ -178,7 +198,8 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    flex-grow: 1;
+    flex-shrink: 0;
+    margin-bottom: 20px;
 }
 
 .nav-item {
@@ -188,7 +209,7 @@ html, body {
     padding: 11px 16px;
     background: transparent;
     border: none;
-    color: #94A3B8;
+    color: #475569;
     font-size: 13.5px;
     font-weight: 600;
     border-radius: 10px;
@@ -198,8 +219,8 @@ html, body {
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #FFFFFF;
+    background: #F1F5F9;
+    color: #0F172A;
 }
 
 /* 🌟 스크린샷과 동일한 비비드 퍼플 액티브 탭 */
@@ -212,12 +233,13 @@ html, body {
 
 /* Sidebar Bot Controls */
 .sidebar-status-card {
-    background: #13172E;
+    background: #F8FAFC;
     border: 1px solid var(--border-card);
     padding: 14px;
     border-radius: 14px;
     margin-bottom: 10px;
     box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
 }
 
 .status-header {
@@ -226,7 +248,7 @@ html, body {
     gap: 8px;
     margin-bottom: 6px;
     font-size: 12px;
-    color: #94A3B8;
+    color: #475569;
     font-weight: 700;
 }
 
@@ -234,13 +256,13 @@ html, body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #64748B;
+    background-color: #94A3B8;
     display: inline-block;
 }
 
 .status-dot.active {
     background-color: var(--accent-green);
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 
 /* ======================================================================
@@ -260,12 +282,17 @@ html, body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    background: #F6F1EA;
+    border: 1px solid #E5DDD1;
+    border-radius: 16px;
+    padding: 20px 26px;
+    box-shadow: var(--shadow-md);
 }
 
 .page-title {
     font-size: 22px;
     font-weight: 800;
-    color: #FFFFFF;
+    color: var(--text-primary);
     letter-spacing: -0.5px;
 }
 
@@ -276,9 +303,9 @@ html, body {
 }
 
 .badge-season {
-    background: rgba(250, 204, 21, 0.15);
-    border: 1px solid rgba(250, 204, 21, 0.35);
-    color: #FACC15;
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    color: #92400E;
     padding: 7px 14px;
     border-radius: 10px;
     font-size: 12px;
@@ -286,9 +313,9 @@ html, body {
 }
 
 .badge-google {
-    background: rgba(6, 182, 212, 0.15);
-    border: 1px solid rgba(6, 182, 212, 0.35);
-    color: #22D3EE;
+    background: #E0F2FE;
+    border: 1px solid #BAE6FD;
+    color: #0369A1;
     padding: 7px 14px;
     border-radius: 10px;
     font-size: 12px;
@@ -298,11 +325,11 @@ html, body {
 }
 
 .badge-google:hover {
-    background: rgba(6, 182, 212, 0.25);
+    background: #BAE6FD;
 }
 
 /* ======================================================================
-   Top Metric Cards (스크린샷 스타일의 선명한 숫자 카드)
+   Top Metric Cards (연한 카페라떼 3D 입체 숫자 카드)
    ====================================================================== */
 .stats-grid {
     display: grid;
@@ -312,20 +339,21 @@ html, body {
 }
 
 .stat-card {
-    background: #13172E;
+    background: var(--bg-card);
     border: 1px solid var(--border-card);
     padding: 16px 20px;
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     gap: 16px;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.25s ease;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    border-color: #3B447A;
+    transform: translateY(-4px);
+    border-color: #D6CABA;
+    box-shadow: var(--shadow-lg);
 }
 
 .stat-icon {
@@ -338,11 +366,11 @@ html, body {
     font-size: 20px;
 }
 
-.stat-icon.purple { background: rgba(124, 58, 237, 0.2); color: #A78BFA; }
-.stat-icon.green { background: rgba(16, 185, 129, 0.2); color: #34D399; }
-.stat-icon.blue { background: rgba(6, 182, 212, 0.2); color: #22D3EE; }
-.stat-icon.orange { background: rgba(255, 107, 53, 0.2); color: #FF6B35; }
-.stat-icon.gold { background: rgba(250, 204, 21, 0.2); color: #FACC15; }
+.stat-icon.purple { background: #F3E8FF; color: #7C3AED; }
+.stat-icon.green { background: #ECFDF5; color: #059669; }
+.stat-icon.blue { background: #E0F2FE; color: #0284C7; }
+.stat-icon.orange { background: #FFF7ED; color: #EA580C; }
+.stat-icon.gold { background: #FEF3C7; color: #D97706; }
 
 .stat-label {
     font-size: 11.5px;
@@ -354,7 +382,7 @@ html, body {
     font-size: 22px;
     font-weight: 800;
     margin-top: 2px;
-    color: #FFFFFF;
+    color: var(--text-primary);
     letter-spacing: -0.5px;
 }
 
@@ -367,9 +395,9 @@ html, body {
    Sections & Action Panels
    ====================================================================== */
 .section-card {
-    background: #13172E;
+    background: #FAF7F2;
     border: 1px solid var(--border-card);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 24px;
     margin-bottom: 24px;
     box-shadow: var(--shadow-md);
@@ -378,7 +406,7 @@ html, body {
 .section-title {
     font-size: 17px;
     font-weight: 800;
-    color: #FFFFFF;
+    color: var(--text-primary);
     margin-bottom: 6px;
 }
 
@@ -388,7 +416,7 @@ html, body {
     margin-bottom: 20px;
 }
 
-/* Grid & Cards */
+/* Grid & Cards (3D Soft Latte Cards) */
 .action-grid, .platform-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -396,20 +424,21 @@ html, body {
 }
 
 .action-card, .platform-card {
-    background: #0F1326;
+    background: var(--bg-card);
     border: 1px solid var(--border-card);
     border-radius: 14px;
     padding: 18px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: all 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.25s ease;
+    box-shadow: var(--shadow-md);
 }
 
 .action-card:hover, .platform-card:hover {
-    transform: translateY(-2px);
-    border-color: #3B447A;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    transform: translateY(-4px);
+    border-color: #D6CABA;
+    box-shadow: var(--shadow-lg);
 }
 
 .action-header, .platform-header {
@@ -539,17 +568,29 @@ html, body {
     text-decoration: none;
 }
 
-/* 🌟 K-Market 메인 CTA 버튼: 핫 오렌지 그라데이션 */
-.btn-primary, .btn-action, .btn-kmarket {
-    background: linear-gradient(135deg, #FF6B35, #FF3D00) !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 4px 14px rgba(255, 61, 0, 0.35);
+/* 🌟 범용 기본 프라이머리 버튼 (개별 브랜드 컬러 커스텀 오버라이드 허용) */
+.btn-primary {
+    background: linear-gradient(135deg, #4F46E5, #4338CA);
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
 }
 
-.btn-primary:hover, .btn-action:hover, .btn-kmarket:hover {
-    background: linear-gradient(135deg, #FF5722, #E63900) !important;
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4338CA, #3730A3);
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(255, 61, 0, 0.5);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+}
+
+.btn-action {
+    background: #FAF7F2;
+    border: 1px solid #E5DDD1;
+    color: #4A443E;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.btn-action:hover {
+    background: #EFE8DE;
+    transform: translateY(-1px);
 }
 
 /* 👑 EasyTax 전용: 프리미엄 럭셔리 황금(Gold) 버튼 */
@@ -568,28 +609,30 @@ html, body {
 }
 
 .btn-secondary {
-    background: #1A1F3D;
-    border: 1px solid #2B3466;
-    color: #FFFFFF;
+    background: #F3EFE8;
+    border: 1px solid #E0DAD0;
+    color: #334155;
 }
 
 .btn-secondary:hover {
-    background: #232B54;
-    border-color: #3B478C;
+    background: #EAE4D8;
+    border-color: #D3CABF;
+    color: #0F172A;
 }
 
-/* 🛑 정지/중지 버튼: 붉은색 계열 경고 톤 */
+/* 🛑 정지/중지 버튼: 소프트 로즈 베이지 경고 톤 */
 .btn-stop {
-    background: #1E1B2E !important;
-    border: 1px solid #EF4444 !important;
-    color: #FCA5A5 !important;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    background: #FEF2F2 !important;
+    border: 1px solid #FECACA !important;
+    color: #DC2626 !important;
+    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.1);
 }
 
 .btn-stop:hover {
     background: #DC2626 !important;
+    border-color: #DC2626 !important;
     color: #FFFFFF !important;
-    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
     transform: translateY(-1px);
 }
 
@@ -608,15 +651,17 @@ html, body {
 }
 
 .btn-master-stop {
-    background: #1A1F3D !important;
-    border: 1px solid #64748B !important;
-    color: #CBD5E1 !important;
+    background: #FEF2F2 !important;
+    border: 1px solid #FCA5A5 !important;
+    color: #DC2626 !important;
+    font-weight: 700 !important;
 }
 
 .btn-master-stop:hover {
-    background: #991B1B !important;
-    border-color: #EF4444 !important;
+    background: #DC2626 !important;
+    border-color: #B91C1C !important;
     color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 .btn-block {
@@ -633,17 +678,17 @@ html, body {
     display: block;
     font-size: 12.5px;
     font-weight: 700;
-    color: #CBD5E1;
+    color: #334155;
     margin-bottom: 6px;
 }
 
 .form-control {
     width: 100%;
     padding: 10px 14px;
-    background: #0F1326;
-    border: 1.5px solid #22294E;
+    background: #FFFFFF;
+    border: 1.5px solid #E2DDD2;
     border-radius: 10px;
-    color: #FFFFFF;
+    color: #0F172A;
     font-size: 13.5px;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -651,7 +696,7 @@ html, body {
 
 .form-control:focus {
     border-color: #7C3AED;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .form-row {
@@ -680,17 +725,17 @@ html, body {
 .chart-title {
     font-size: 14.5px;
     font-weight: 800;
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 .chart-badge {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #F5F1E8;
+    border: 1px solid #E5DFD3;
     padding: 4px 10px;
     border-radius: 8px;
     font-size: 11px;
     font-weight: 700;
-    color: #94A3B8;
+    color: #64748B;
 }
 
 .chart-hint {
@@ -735,7 +780,7 @@ html, body {
 .bar-badge {
     font-size: 10px;
     font-weight: 700;
-    color: #94A3B8;
+    color: #64748B;
 }
 
 .bar-label {
@@ -752,13 +797,14 @@ html, body {
     display: flex;
     justify-content: space-between;
     font-size: 12px;
+    color: #334155;
     margin-bottom: 6px;
 }
 
 .progress-track {
     width: 100%;
     height: 8px;
-    background: #0B0D17;
+    background: #EDE8DE;
     border-radius: 4px;
     overflow: hidden;
 }
@@ -770,18 +816,19 @@ html, body {
 }
 
 /* ======================================================================
-   Terminal Log Window
+   Terminal Log Window (Warm Paper Slate Console)
    ====================================================================== */
 .terminal-window {
-    background: #080A12;
-    border: 1px solid #1E2545;
+    background: #F8F6F0;
+    border: 1px solid #E8E3DA;
     border-radius: 14px;
     padding: 16px;
-    color: #E2E8F0;
+    color: #1E293B;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 12px;
     max-height: 280px;
     overflow-y: auto;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
 .terminal-header {
@@ -809,10 +856,10 @@ html, body {
     margin-right: 8px;
 }
 
-.log-line.info { color: #E2E8F0; }
-.log-line.success { color: #34D399; }
-.log-line.error { color: #F87171; }
-.log-line.warning { color: #FCD34D; }
+.log-line.info { color: #334155; }
+.log-line.success { color: #059669; }
+.log-line.error { color: #DC2626; }
+.log-line.warning { color: #D97706; }
 
 /* ======================================================================
    Toast Notification (Bottom Center Fixed, Screen Squeeze Protection)
@@ -877,18 +924,18 @@ html, body {
 .period-btn, .filter-tab {
     padding: 6px 14px;
     border-radius: 8px;
-    background: #0F1326;
-    border: 1px solid #22294E;
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
     font-size: 12px;
     font-weight: 700;
-    color: #94A3B8;
+    color: #475569;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .period-btn:hover, .filter-tab:hover {
-    background: #1A1F3D;
-    color: #FFFFFF;
+    background: #E2E8F0;
+    color: #0F172A;
 }
 
 .period-btn.active, .filter-tab.active {
@@ -909,27 +956,27 @@ html, body {
 }
 
 .gallery-card {
-    background: #13172E;
-    border: 1px solid #22294E;
+    background: #FFFFFF;
+    border: 1px solid var(--border-card);
     border-radius: 14px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-sm);
 }
 
 .gallery-card:hover {
     transform: translateY(-4px);
     border-color: #7C3AED;
-    box-shadow: 0 10px 28px rgba(124, 58, 237, 0.25);
+    box-shadow: var(--shadow-md);
 }
 
 .gallery-thumb-wrapper {
     position: relative;
     width: 100%;
     height: 220px;
-    background: #080A14;
+    background: #F1F5F9;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -954,7 +1001,7 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1E1B4B, #0F172A);
+    background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
     padding: 16px;
 }
 
@@ -965,8 +1012,8 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #0D1126;
-    color: #94A3B8;
+    background: #F8FAFC;
+    color: #64748B;
 }
 
 .gallery-info {
@@ -980,7 +1027,7 @@ html, body {
 .gallery-title {
     font-size: 13.5px;
     font-weight: 700;
-    color: #FFFFFF;
+    color: var(--text-primary);
     margin-bottom: 4px;
     word-break: break-all;
     display: -webkit-box;
@@ -1005,9 +1052,9 @@ html, body {
 .gallery-filter-btn {
     padding: 7px 14px;
     border-radius: 8px;
-    background: #13172E;
-    border: 1px solid #22294E;
-    color: #94A3B8;
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: #475569;
     font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
@@ -1015,8 +1062,8 @@ html, body {
 }
 
 .gallery-filter-btn:hover {
-    background: #1A1F3D;
-    color: #FFFFFF;
+    background: #E2E8F0;
+    color: #0F172A;
 }
 
 .gallery-filter-btn.active {
@@ -1067,7 +1114,7 @@ html, body {
 .chart-title {
     font-size: 15px;
     font-weight: 700;
-    color: #F8FAFC;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -1151,13 +1198,13 @@ html, body {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    color: #e2e8f0;
+    color: #334155;
 }
 
 .progress-track {
     width: 100%;
     height: 8px;
-    background: rgba(255, 255, 255, 0.05);
+    background: #EDE8DE;
     border-radius: 999px;
     overflow: hidden;
 }
@@ -1169,11 +1216,11 @@ html, body {
 }
 
 /* ======================================================================
-   📟 Terminal Box (고정 높이 320px & 내부 오토 스크롤 전담)
+   📟 Terminal Box (Warm Paper Slate Console)
    ====================================================================== */
 .terminal-box {
-    background: #080B18 !important;
-    border: 1px solid #1E2548 !important;
+    background: #F8F6F0 !important;
+    border: 1px solid #E8E3DA !important;
     border-radius: 10px !important;
     padding: 14px 16px !important;
     height: 320px !important;
@@ -1187,8 +1234,9 @@ html, body {
     font-family: 'Consolas', 'Courier New', monospace !important;
     font-size: 12px !important;
     line-height: 1.5 !important;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03) !important;
     box-sizing: border-box !important;
+    color: #1E293B !important;
 }
 
 .terminal-box::-webkit-scrollbar {
@@ -1196,16 +1244,16 @@ html, body {
 }
 
 .terminal-box::-webkit-scrollbar-track {
-    background: #080B18;
+    background: #F8F6F0;
 }
 
 .terminal-box::-webkit-scrollbar-thumb {
-    background: #2B3566;
+    background: #D8D2C5;
     border-radius: 3px;
 }
 
 .terminal-box::-webkit-scrollbar-thumb:hover {
-    background: #3B4888;
+    background: #C4BCAC;
 }
 
 .log-line {
@@ -1215,18 +1263,90 @@ html, body {
 }
 
 .log-line.info {
-    color: #94A3B8;
+    color: #334155;
 }
 
 .log-line.success {
-    color: #34D399;
+    color: #059669;
 }
 
 .log-line.warning {
-    color: #F59E0B;
+    color: #D97706;
 }
 
 .log-line.error {
-    color: #EF4444;
+    color: #DC2626;
 }
+
+/* ======================================================================
+   🚨 Emergency Guard & Live Mission Sentinel Styling
+   ====================================================================== */
+@keyframes pulseAlert {
+    0%, 100% {
+        box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2);
+        border-color: #F43F5E;
+    }
+    50% {
+        box-shadow: 0 8px 30px rgba(244, 63, 94, 0.45);
+        border-color: #BE123C;
+    }
+}
+
+@keyframes shakeBell {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-15deg); }
+    40% { transform: rotate(15deg); }
+    60% { transform: rotate(-10deg); }
+    80% { transform: rotate(10deg); }
+}
+
+.emergency-alert-box {
+    transition: all 0.3s ease;
+}
+
+.all-clear-box {
+    transition: all 0.3s ease;
+}
+
+.all-clear-box:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.15);
+    border-color: #4ADE80;
+}
+
+/* ======================================================================
+   🎮 GPU Live Rendering Sentinel & Dynamic Visual Effects
+   ====================================================================== */
+@keyframes gpuPulseBorder {
+    0% {
+        box-shadow: 0 4px 15px rgba(236, 72, 153, 0.25);
+        border-color: #EC4899;
+    }
+    50% {
+        box-shadow: 0 8px 30px rgba(139, 92, 246, 0.45), 0 0 20px rgba(236, 72, 153, 0.3);
+        border-color: #8B5CF6;
+    }
+    100% {
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+        border-color: #F59E0B;
+    }
+}
+
+@keyframes floatIcon {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(-6px) scale(1.08);
+    }
+}
+
+.gpu-rendering-active-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gpu-rendering-active-card:hover {
+    transform: translateY(-3px);
+}
+
+
 

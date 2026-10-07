@@ -56,6 +56,7 @@ class KMarketGeminiBlog:
 
 [본문 대표 사진 태그]: `![{topic_title}]({img_url})`
 [랜딩 링크]: {landing_url}
+[바이럴 해시태그]: {hashtags}
 
 다음 구조를 완벽하게 갖춘 마크다운 전문을 작성해 주십시오:
 1. 매력적이고 유용한 대제목 (# 제목)
@@ -65,7 +66,7 @@ class KMarketGeminiBlog:
 5. 본론 2: 신품 구매 vs KTRS Market 알뜰 직거래 비용 비교표 (매트리스, 전자레인지, 책상, 밥솥 등)
 6. 본론 3: 외국인을 위한 100% 안전 직거래 3대 수칙 (ARC 인증, 지하철역 대면 거래, 17개국 자동번역 채팅)
 7. 하단 CTA 버튼: `👉 [지금 바로 내 주변 0원 나눔 및 알뜰 매물 확인하기 ({landing_url})]({landing_url})`
-(주의: 해시태그는 파이썬 엔진에서 실시간 트렌드로 자동 결합되므로 본문 작성에만 집중하십시오)
+8. 최하단 실시간 바이럴 해시태그
 
 [비주얼 프롬프트 지침]:
 - visual_prompt 필드에는 본문 속 스토리/장면(예: 화창한 한강 자전거 도로 라이딩, 대학 도서관 노트북 타이핑, 아파트/기숙사 정문 앞 훈훈한 중고 직거래, 깔끔한 주방 가전 세팅 등)을 가장 생동감 있게 묘사하는 Imagen 3 전용 영문 프롬프트 1문장을 작성하십시오. (반드시 realistic Asian features, photorealistic, 16:9 포함)
@@ -81,7 +82,7 @@ class KMarketGeminiBlog:
         if self.client:
             try:
                 result = self.client.models.generate_content(
-                    model='gemini-flash-lite-latest',
+                    model='gemini-3.1-flash-lite',
                     contents=prompt
                 )
                 text = result.text.strip()

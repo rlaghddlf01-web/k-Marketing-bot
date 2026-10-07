@@ -42,3 +42,8 @@ gfpgan/
 *.safetensors
 *.bin
 *.pth
+
+# Local browser profiles & outputs
+data/reddit_profiles/
+outputs/
+*.bat

@@ -25,6 +25,24 @@ class RedditConnector:
             "profile_url": "https://www.reddit.com/user/Plenty_Code6288/comments/",
             "target_content": "r/korea, r/Living_in_Korea 세금 환급/3.3% 알바 질문 감지 및 조특법 팩트 답변",
             "diagnostic": "u/Plenty_Code6288 계정 조특법 30조 팩트 답변 & 26개 서브레딧 감시 정상 가동 중"
+        },
+        "aura": {
+            "username": "u/seoul_chloe_",
+            "profile_url": "https://www.reddit.com/user/seoul_chloe_/comments/",
+            "target_content": "r/Language_Exchange, r/Korean, r/koreatravel 글로벌 여성 언어교환/서울여행/K-데이팅 스텔스 답변",
+            "diagnostic": "u/seoul_chloe_ 계정 12대 서브레딧 2단계 족집게 필터링 및 80:20 스텔스 마케팅 정상 가동 중"
+        },
+        "insurance": {
+            "username": "u/seoul_health_guide",
+            "profile_url": "https://www.reddit.com/user/seoul_health_guide/comments/",
+            "target_content": "r/Living_in_Korea, r/korea 외국인 직장인/유학생 NHIS vs 실손 + MRI/도수 80~90% 환급 + 30개사 비교 Q&A 답변",
+            "diagnostic": "u/seoul_health_guide 계정 10대 서브레딧 2단계 족집게 스텔스 헌터 및 구글 검색어 '보험 리밸런스' 유도 정상 가동 중"
+        },
+        "stock": {
+            "username": "u/AlphaQuant_Lab",
+            "profile_url": "https://www.reddit.com/user/AlphaQuant_Lab/comments/",
+            "target_content": "r/stocks, r/wallstreetbets, r/options 기관 수급/외인 매수/AI 퀀트 4대 모달 실전 분석 & 80:20 스텔스 답변",
+            "diagnostic": "u/AlphaQuant_Lab 계정 10대 서브레딧 2단계 족집게 스텔스 헌터 및 구글 검색어 'StockMaster AI' 유도 정상 가동 중"
         }
     }
 

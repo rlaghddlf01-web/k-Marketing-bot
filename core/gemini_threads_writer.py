@@ -160,7 +160,7 @@ class GeminiThreadsWriter:
 
         try:
             res = self.client.models.generate_content(
-                model='gemini-flash-lite-latest',
+                model='gemini-3.1-flash-lite',
                 contents=prompt
             )
             raw = res.text.strip()

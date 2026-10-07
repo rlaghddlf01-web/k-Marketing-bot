@@ -67,7 +67,7 @@ class GeminiMediaGenerator:
         demo_desc = scenario_plan.get("persona_desc", "Asian expat young worker or student in South Korea")
         action = scenario_plan.get("action_prompt", "looking at smartphone with happy genuine smile")
         
-        # ★ [대표님 절대 지침] 40% 웨이스트 샷 & 100% 무결점 실사 사진 렌더링
+        # ★ [대표님 절대 지침] 세계 최고의 바이럴 사진작가 실사 헌법 & 100% 무결점 사진 렌더링
         is_two_shot = any(k in action.lower() for k in ["two-shot", "two diverse", "two people", "exchanging", "facing each other"])
         if is_two_shot:
             human_centric_mandate = (
@@ -75,15 +75,17 @@ class GeminiMediaGenerator:
                 "You are a master documentary photographer. Both foreign resident protagonists are completely visible "
                 "from the waist up, standing facing each other in 3/4 profile. Both of their expressive, smiling faces "
                 "and warm eye contact MUST be fully visible and uncropped. The clean item/box being handed over and exchanged between them is clearly held. "
-                "Zero anatomical errors, authentic skin textures, genuine warm human interaction, natural street lighting, 8k masterpiece."
+                "Zero anatomical errors, authentic skin textures, genuine warm human interaction, natural Korean street lighting, 8k masterpiece."
             )
         else:
             human_centric_mandate = (
-                ", [CRITICAL DIRECTING MANDATE: 40% MEDIUM WAIST-UP SHOT & 60% CLEAN OPEN SPACE]: "
-                "Photographed from 3.5 meters away on iPhone 15 Pro, casual everyday mobile phone photo taken by a friend. "
-                "The human protagonist is positioned on the right side of the frame occupying about 40% of the vertical frame in a natural waist-up view down to the belt line. "
-                "The left 60% of the frame MUST remain clean and open with ample negative background space. "
-                "Zero anatomical errors, natural matte skin texture, authentic candid mobile photo, strictly NO extreme close-up, NO cropped head."
+                ", [CRITICAL DIRECTING MANDATE: WORLD-CLASS VIRAL PHOTOGRAPHY - 100% ERROR-FREE AUTHENTIC PORTRAIT]: "
+                "You are the world's greatest viral documentary portrait photographer. "
+                "The human protagonist is the absolute primary focal subject of this photo. "
+                "The person's expressive face, eyes, genuine smile, and upper body MUST occupy at least 70-80% of the frame. "
+                "The photo MUST look 100% like a real live photograph with zero anatomical errors, natural skin textures, and genuine human emotions. "
+                "Sharp portrait focus on the person's face and eyes. Any smartphone prop must be held upright in normal vertical orientation, small, and NEVER cover or block the person's face. "
+                "Do NOT draw fake unreadable text or inverted numbers on smartphone screens; keep screen display clean or blank."
             )
 
         continuity_prefix = ""
@@ -93,7 +95,7 @@ class GeminiMediaGenerator:
                 ref_image = Image.open(reference_image_path)
                 continuity_prefix = (
                     "[CRITICAL CHARACTER CONTINUITY MANDATE]: "
-                    "The protagonist in this image MUST be the EXACT SAME person as shown in the provided reference image. "
+                    "The protagonist in this image MUST be the EXACT SAME Asian person as shown in the provided reference image. "
                     "Keep identical facial features, identical hairstyle, identical eye shape, identical skin tone, and identical outfit styling. "
                     "Only change the character's facial expression, action, and environment according to this scene: "
                 )
@@ -101,12 +103,13 @@ class GeminiMediaGenerator:
                 logger.warning(f"참조 이미지 로드 실패: {e}")
                 ref_image = None
 
-        if any(keyword in action for keyword in ["a real", "authentic", "Authentic", "Cinematic", "master reference"]):
+        if any(action.startswith(prefix) for prefix in ["Cinematic", "Ultra close-up", "Extreme close-up", "Professional"]):
             prompt = f"{continuity_prefix}{action}{human_centric_mandate}, Aspect ratio {aspect_ratio}, masterpiece photography, photorealistic 4k."
         else:
             prompt = (
-                f"{continuity_prefix}Hyper-realistic authentic documentary portrait of a person ({demo_desc}), {action}{human_centric_mandate}. "
-                f"Authentic natural skin texture, cinematic natural lighting, 8k resolution, "
+                f"{continuity_prefix}Hyper-realistic authentic documentary portrait of an Asian person ({demo_desc}), {action}{human_centric_mandate}. "
+                f"Realistic East Asian and Southeast Asian facial features, authentic natural Asian skin texture, "
+                f"cinematic natural outdoor/indoor lighting, 8k resolution, "
                 f"natural facial expression, genuine emotions, clear visible face and upper body. "
                 f"Aspect ratio {aspect_ratio}, masterpiece photography."
             )
@@ -127,7 +130,7 @@ class GeminiMediaGenerator:
                 # 멀티모달 인풋 구성: 참조 이미지가 있으면 [prompt, ref_image], 없으면 prompt 단독
                 contents_payload = [prompt, ref_image] if ref_image else prompt
                 result = self.client.models.generate_content(
-                    model='gemini-flash-lite-latest-image',
+                    model='gemini-3.1-flash-lite-image',
                     contents=contents_payload
                 )
                 # 실제 이미지 바이너리 추출 및 저장

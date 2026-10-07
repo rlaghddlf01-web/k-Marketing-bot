@@ -146,7 +146,7 @@ Output JSON:"""
 
             try:
                 res = client.models.generate_content(
-                    model='gemini-flash-lite-latest',
+                    model='gemini-3.1-flash-lite',
                     contents=prompt
                 )
                 return self._parse_json_response(res.text, master_article)
@@ -174,7 +174,7 @@ Output JSON:"""
         try:
             client_fallback = self._get_fallback_client()
             res = client_fallback.models.generate_content(
-                model='gemini-flash-lite-latest',
+                model='gemini-3.1-flash-lite',
                 contents=prompt
             )
             logger.info(f"✅ [{lang_code}] 유료 키 비상 폴백 번역 성공!")

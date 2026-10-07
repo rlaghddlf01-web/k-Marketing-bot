@@ -98,22 +98,9 @@ class ChannelScheduler:
             log(f"🚀 [{self.channel_name}] KST {mode_desc} 정기 자율 헌터 가동!", "success")
         else:
             slots_str = ", ".join([f"{h:02d}:{m:02d}" for h, m in self.slots])
-            log(f"🚀 [{self.channel_name}] KST 하루 {len(self.slots)}회 ({slots_str}) 안심 스케줄러 가동!", "success")
+            log(f"🚀 [{self.channel_name}] KST 하루 {len(self.slots)}회 ({slots_str}) 안심 스케줄러 대기 시작 (정시 도달 시에만 발행)", "success")
 
-        # 1. 최초 가동 시 1회 즉시 실행
-        if is_running_checker():
-            try:
-                now_kst = get_now_kst()
-                slot_key = f"{now_kst.strftime('%Y-%m-%d')}_{now_kst.hour}_{now_kst.minute}"
-                self.last_published_slot = slot_key
-                
-                log(f"⚡ [{self.channel_name}] 무인 가동 초기 1회 즉시 스캔/발행 시작...", "info")
-                msg = self.publish_fn()
-                log(f"✅ [{self.channel_name} #초기실행] {msg}", "success")
-            except Exception as e:
-                log(f"❌ [{self.channel_name}] 초기 실행 실패: {e}", "error")
-
-        # 2. 다음 예정 시각까지 대기하며 실행 루프
+        # 2. 다음 예정 시각까지 대기하며 정해진 시각에만 실행 루프
         while is_running_checker():
             wait_seconds = self.get_seconds_until_next_run()
             next_dt = get_now_kst() + datetime.timedelta(seconds=wait_seconds)

@@ -177,11 +177,8 @@ class AccountHealthMonitor:
     # ──────────────────────────────────────────
 
     def can_post_promo(self, daily_limit: int) -> bool:
-        """홍보 댓글을 올릴 수 있는지 확인"""
+        """홍보 댓글을 올릴 수 있는지 확인 (Zero-URL 원칙: 링크가 없으므로 카르마 제한 없이 즉시 허용)"""
         self._check_daily_reset()
-        if self.is_warmup_phase():
-            logger.info(f"🛡️ 워밍업 단계 (카르마 {self.get_karma()} < {WARMUP_KARMA_THRESHOLD}) — 홍보 댓글 차단")
-            return False
         if self.is_in_cooldown():
             logger.info(f"🛡️ 쿨다운 중 — 홍보 댓글 차단 (해제: {self.state.get('cooldown_until')})")
             return False
@@ -291,3 +288,8 @@ class AccountHealthMonitor:
             "total_posted": self.state.get("total_comments_posted", 0),
             "total_deleted": self.state.get("deleted_comments_count", 0),
         }
+
+    def get_status(self) -> Dict[str, Any]:
+        """get_status_summary 별칭"""
+        return self.get_status_summary()
+

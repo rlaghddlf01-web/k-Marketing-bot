@@ -183,15 +183,30 @@ class RedditSafetyOrchestrator:
                     u_res = self.organic.run_upvote_session(count=upvote_cnt)
                     results["upvotes"] = u_res.get("upvoted", 0)
 
+                    # 비홍보 도움 댓글 1건 (아침 세션)
+                    if self.health.can_post_organic(DAILY_REDDIT_ORGANIC_LIMIT):
+                        time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
+                        c_res = self.organic.run_organic_comment_session(count=1)
+                        results["organic_comments"] = c_res.get("commented", 0)
+
                 # 2. 오전 활성 (기본 10:00 ±30분)
                 elif slot_id == "slot_10":
-                    c_cnt = random.randint(2, 3)
-                    if is_weekend: c_cnt = max(1, c_cnt - 1)
-                    c_res = self.organic.run_organic_comment_session(count=c_cnt)
-                    results["organic_comments"] = c_res.get("commented", 0)
+                    # 🎯 노링크 구글 검색 유도 팩트 댓글 1건 (오전)
+                    if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
+                        try:
+                            logger.info(f"🚀 [{self.service_id}] 오전 활성 질문 맞춤 구글 검색 유도 댓글 실행...")
+                            p_cnt = self._promo_handler()
+                            results["promo_comments"] = p_cnt
+                        except Exception as e:
+                            logger.error(f"홍보 댓글 실행 에러: {e}")
+
+                    # 비홍보 도움 댓글 1건
+                    if self.health.can_post_organic(DAILY_REDDIT_ORGANIC_LIMIT):
+                        time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
+                        c_res = self.organic.run_organic_comment_session(count=1)
+                        results["organic_comments"] = c_res.get("commented", 0)
 
                     time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
-
                     u_cnt = random.randint(3, 5)
                     u_res = self.organic.run_upvote_session(count=u_cnt)
                     results["upvotes"] = u_res.get("upvoted", 0)
@@ -204,7 +219,7 @@ class RedditSafetyOrchestrator:
 
                     time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
 
-                    # 🎯 노링크 구글 검색 유도 팩트 댓글 실행 (일일 안전 한도 내)
+                    # 🎯 노링크 구글 검색 유도 팩트 댓글 1건 (점심 골든타임)
                     if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
                         try:
                             logger.info(f"🚀 [{self.service_id}] 점심 골든타임 질문 맞춤 구글 검색 유도 댓글 실행...")
@@ -215,26 +230,29 @@ class RedditSafetyOrchestrator:
 
                 # 4. 오후 활성 (기본 16:00 ±30분)
                 elif slot_id == "slot_16":
-                    c_cnt = random.randint(2, 3)
-                    if is_weekend: c_cnt = max(1, c_cnt - 1)
-                    c_res = self.organic.run_organic_comment_session(count=c_cnt)
-                    results["organic_comments"] = c_res.get("commented", 0)
+                    # 🎯 노링크 구글 검색 유도 팩트 댓글 1건 (오후)
+                    if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
+                        try:
+                            logger.info(f"🚀 [{self.service_id}] 오후 활성 질문 맞춤 구글 검색 유도 댓글 실행...")
+                            p_cnt = self._promo_handler()
+                            results["promo_comments"] = p_cnt
+                        except Exception as e:
+                            logger.error(f"홍보 댓글 실행 에러: {e}")
+
+                    # 비홍보 도움 댓글 1건
+                    if self.health.can_post_organic(DAILY_REDDIT_ORGANIC_LIMIT):
+                        time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
+                        c_res = self.organic.run_organic_comment_session(count=1)
+                        results["organic_comments"] = c_res.get("commented", 0)
 
                     time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
-
                     u_cnt = random.randint(2, 3)
                     u_res = self.organic.run_upvote_session(count=u_cnt)
                     results["upvotes"] = u_res.get("upvoted", 0)
 
                 # 5. 저녁 피크 (기본 20:00 ±30분)
                 elif slot_id == "slot_20":
-                    c_cnt = random.randint(1, 2)
-                    c_res = self.organic.run_organic_comment_session(count=c_cnt)
-                    results["organic_comments"] = c_res.get("commented", 0)
-
-                    time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
-
-                    # 🎯 노링크 구글 검색 유도 팩트 댓글 실행 (일일 안전 한도 내)
+                    # 🎯 노링크 구글 검색 유도 팩트 댓글 1건 (저녁 피크)
                     if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
                         try:
                             logger.info(f"🚀 [{self.service_id}] 저녁 피크 질문 맞춤 구글 검색 유도 댓글 실행...")
@@ -243,8 +261,13 @@ class RedditSafetyOrchestrator:
                         except Exception as e:
                             logger.error(f"홍보 댓글 실행 에러: {e}")
 
-                    time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
+                    # 비홍보 도움 댓글 1건
+                    if self.health.can_post_organic(DAILY_REDDIT_ORGANIC_LIMIT):
+                        time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
+                        c_res = self.organic.run_organic_comment_session(count=1)
+                        results["organic_comments"] = c_res.get("commented", 0)
 
+                    time.sleep(random.randint(ORGANIC_DELAY_MIN_SEC, ORGANIC_DELAY_MAX_SEC))
                     u_cnt = random.randint(2, 3)
                     u_res = self.organic.run_upvote_session(count=u_cnt)
                     results["upvotes"] = u_res.get("upvoted", 0)
@@ -343,20 +366,16 @@ class RedditSafetyOrchestrator:
 
         time.sleep(random.randint(REPLY_DELAY_MIN_SEC, REPLY_DELAY_MAX_SEC))
 
-        # 5. 홍보/간접유도 댓글 세션 (카르마 100점 돌파 후 50:50 비율로 가동)
-        if not self.health.is_warmup_phase():
-            if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
-                try:
-                    logger.info("🚀 [카르마 100점 돌파 완료] 50:50 간접 홍보 댓글 세션 가동...")
-                    promo_count = self._promo_handler()
-                    results["promo_comments"] = promo_count
-                except Exception as e:
-                    logger.error(f"홍보 댓글 세션 에러: {e}")
-            elif not self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
-                results["skipped_reason"] = "daily_limit_or_cooldown"
-        else:
-            results["skipped_reason"] = "warmup_organic_only"
-            logger.info(f"🌱 [1단계 워밍업 집중 육성] 카르마 {self.health.get_karma()}/{WARMUP_KARMA_THRESHOLD} — 링크 없는 순수 정보성 댓글+좋아요로 카르마 파밍 중!")
+        # 5. Zero-URL 스텔스 검색유도 댓글 세션 (직접 URL 0%이므로 신규 계정도 100% 안전하게 즉시 가동)
+        if self._promo_handler and self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
+            try:
+                logger.info(f"🚀 [{self.service_id}] Zero-URL 스텔스 검색유도 댓글 세션 가동...")
+                promo_count = self._promo_handler()
+                results["promo_comments"] = promo_count
+            except Exception as e:
+                logger.error(f"홍보 댓글 세션 에러: {e}")
+        elif not self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
+            results["skipped_reason"] = "daily_limit_or_cooldown" 
 
         return results
 

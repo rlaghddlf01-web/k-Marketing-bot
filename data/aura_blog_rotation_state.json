@@ -1,0 +1,1288 @@
+{
+  "current_topic_index": 1,
+  "last_topic_id": 37,
+  "last_run_time": "2026-10-06 10:57:33",
+  "last_title": "소개팅 첫 만남 10분, 어색한 침묵을 깨는 스몰토크 질문법",
+  "published_count": 26,
+  "history": [
+    {
+      "topic_id": 28,
+      "title": "연남동 소개팅 맛집 4곳, 실패 없는 퓨전 한식 다이닝 리스트",
+      "title_naver": "연남동 소개팅 맛집 4곳, 실패 없는 퓨전 한식 다이닝 리스트",
+      "title_tistory": "연남동 소개팅 코스 완벽 가이드: 분위기 좋은 퓨전 한식 맛집 4선",
+      "title_kakao": "성공률 200% 보장, 홍대 연남동에서 가장 설레는 퓨전 한식 데이트",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_028_date_spots_20261006_105647.webp",
+      "published_at": "2026-10-06 10:57:33",
+      "publish_results": {
+        "topic_id": 28,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-028",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 맛집 4곳, 실패 없는 퓨전 한식 다이닝 리스트",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224432725806&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=17280",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "연남동 소개팅 코스 완벽 가이드: 분위기 좋은 퓨전 한식 맛집 4선",
+            "url": "https://aura-magazine.tistory.com/12",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "아우라AI데이팅"
+            ]
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 27,
+      "title": "연남동 소개팅 맛집 고민 끝! 퇴근 후 실패 없는 성공률 200% 데이트 코스 5",
+      "title_naver": "연남동 소개팅 맛집 고민 끝! 퇴근 후 실패 없는 성공률 200% 데이트 코스 5",
+      "title_tistory": "연남동 소개팅 장소 총정리: 직장인 평일 저녁 여유로운 분위기의 맛집과 카페 추천",
+      "title_kakao": "퇴근 후 연남동, 어색함은 줄이고 설렘은 더하는 완벽한 평일 데이트 가이드",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_027_date_spots_20261003_094509.webp",
+      "published_at": "2026-10-03 09:46:09",
+      "publish_results": {
+        "topic_id": 27,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-027",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 맛집 고민 끝! 퇴근 후 실패 없는 성공률 200% 데이트 코스 5",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224430114166&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=17413",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 26,
+      "title": "연남동 소개팅 실패 없는 맛집 & 코스 3단계 완벽 가이드",
+      "title_naver": "연남동 소개팅 실패 없는 맛집 & 코스 3단계 완벽 가이드",
+      "title_tistory": "연남동 소개팅 장소 추천: 분위기부터 동선까지 성공률 200% 만드는 필승 코스",
+      "title_kakao": "연남동에서 첫 만남을 앞둔 당신에게, 실패 없는 '성공 치트키' 3가지",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_026_date_spots_20261002_190014.webp",
+      "published_at": "2026-10-02 19:02:01",
+      "publish_results": {
+        "topic_id": 26,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-026",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 실패 없는 맛집 & 코스 3단계 완벽 가이드",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224429673519&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=15992",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "연남동 소개팅 장소 추천: 분위기부터 동선까지 성공률 200% 만드는 필승 코스",
+            "url": "https://aura-magazine.tistory.com/10",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 25,
+      "title": "연남동 소개팅 맛집 성공률 200% 올리는 이색 데이트 코스 리스트",
+      "title_naver": "연남동 소개팅 맛집 성공률 200% 올리는 이색 데이트 코스 리스트",
+      "title_tistory": "연남동 소개팅 장소 추천: 분위기 좋은 맛집부터 술집까지 완벽 정리",
+      "title_kakao": "연남동에서 첫 만남? 실패 없는 데이트를 위한 힙한 감성 한 스푼",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_025_date_spots_20261002_150023.webp",
+      "published_at": "2026-10-02 15:03:28",
+      "publish_results": {
+        "topic_id": 25,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-025",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 맛집 성공률 200% 올리는 이색 데이트 코스 리스트",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224429432425&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=16623",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 24,
+      "title": "연남동 소개팅 맛집 실패 없는 필승 코스 3곳 (분위기 끝판왕)",
+      "title_naver": "연남동 소개팅 맛집 실패 없는 필승 코스 3곳 (분위기 끝판왕)",
+      "title_tistory": "연남동 소개팅 장소 및 코스 추천: 실패 없는 분위기 맛집 완벽 정리",
+      "title_kakao": "연남동 골목에서 시작되는 설렘, 실패 없는 소개팅을 위한 3가지 골든 타임",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_024_date_spots_20260923_185315.webp",
+      "published_at": "2026-09-23 18:54:14",
+      "publish_results": {
+        "topic_id": 24,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-024",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 맛집 실패 없는 필승 코스 3곳 (분위기 끝판왕)",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224421174717&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=15949",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 23,
+      "title": "연남동 소개팅 맛집 BEST 4, 비 오는 날에도 완벽한 실내 데이트 코스",
+      "title_naver": "연남동 소개팅 맛집 BEST 4, 비 오는 날에도 완벽한 실내 데이트 코스",
+      "title_tistory": "연남동 소개팅 장소 및 코스 추천: 날씨 상관없이 성공하는 실내 데이트 가이드",
+      "title_kakao": "창밖엔 빗소리, 우리 사이엔 설렘. 연남동 로맨틱 실내 데이트 4곳",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_023_date_spots_20260923_182152.webp",
+      "published_at": "2026-09-23 18:22:50",
+      "publish_results": {
+        "topic_id": 23,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-023",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 맛집 BEST 4, 비 오는 날에도 완벽한 실내 데이트 코스",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224421152649&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=17813",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 22,
+      "title": "연남동 소개팅 2차, 분위기 깡패 감성 바 리스트 (실패 없는 코스)",
+      "title_naver": "연남동 소개팅 2차, 분위기 깡패 감성 바 리스트 (실패 없는 코스)",
+      "title_tistory": "연남동 소개팅 맛집부터 2차 술집까지: 성공률 200% 데이트 코스 완벽 가이드",
+      "title_kakao": "1차 식사로 끝내긴 아쉽잖아요? 우리 사이를 좁혀줄 연남동 밤의 온도",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_022_date_spots_20260923_175022.webp",
+      "published_at": "2026-09-23 17:51:26",
+      "publish_results": {
+        "topic_id": 22,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-022",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 2차, 분위기 깡패 감성 바 리스트 (실패 없는 코스)",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224421128001&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=15378",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 21,
+      "title": "강남역 소개팅 성공률 200% 올리는 조용한 카페 TOP 5 (실패 없는 데이트 코스)",
+      "title_naver": "강남역 소개팅 성공률 200% 올리는 조용한 카페 TOP 5 (실패 없는 데이트 코스)",
+      "title_tistory": "[2026 가이드] 강남역/신논현역 대화하기 편한 조용한 카페 5곳 핵심 정리",
+      "title_kakao": "강남역/신논현역 대화하기 편한 조용한 카페 5곳에 대한 솔직한 이야기",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_021_date_spots_20260923_171902.webp",
+      "published_at": "2026-09-23 17:19:57",
+      "publish_results": {
+        "topic_id": 21,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-021",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "강남역 소개팅 성공률 200% 올리는 조용한 카페 TOP 5 (실패 없는 데이트 코스)",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224421099707&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=16850",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 20,
+      "title": "연남동 소개팅 맛집, 룸식당에서 성공률 200% 올리는 데이트 필승법",
+      "title_naver": "연남동 소개팅 맛집, 룸식당에서 성공률 200% 올리는 데이트 필승법",
+      "title_tistory": "연남동 소개팅 장소 및 코스 추천: 조용한 룸식당과 실패 없는 데이트 동선 완벽 가이드",
+      "title_kakao": "연남동에서 첫 만남, 우리 둘만 아는 비밀스러운 대화가 필요할 때",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_020_date_spots_20260923_164734.webp",
+      "published_at": "2026-09-23 16:48:36",
+      "publish_results": {
+        "topic_id": 20,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-020",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 맛집, 룸식당에서 성공률 200% 올리는 데이트 필승법",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224421070464&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=15490",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 19,
+      "title": "연남동 소개팅 맛집 BEST 5, 첫 만남 성공률 200% 높이는 분위기 맛집 리스트",
+      "title_naver": "연남동 소개팅 맛집 BEST 5, 첫 만남 성공률 200% 높이는 분위기 맛집 리스트",
+      "title_tistory": "연남동 소개팅 장소 추천: 대화하기 좋은 조용한 와인바와 예약 꿀팁 가이드",
+      "title_kakao": "연남동에서 첫 만남을 고민한다면? 실패 없는 로맨틱 와인바 5곳의 비밀",
+      "category": "date_spots",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_019_date_spots_20260923_161612.webp",
+      "published_at": "2026-09-23 16:17:07",
+      "publish_results": {
+        "topic_id": 19,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-019",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "연남동 소개팅 맛집 BEST 5, 첫 만남 성공률 200% 높이는 분위기 맛집 리스트",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224421039643&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=18470",
+            "tags": [
+              "연남동소개팅",
+              "연남동소개팅맛집",
+              "연남동소개팅장소",
+              "연남동소개팅카페",
+              "연남동소개팅술집",
+              "연남동소개팅추천",
+              "연남동소개팅코스",
+              "연남동소개팅디시"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 18,
+      "title": "소개팅 카톡 첫 대화, AI가 분석한 성공률 90% 대화법 3가지",
+      "title_naver": "소개팅 카톡 첫 대화, AI가 분석한 성공률 90% 대화법 3가지",
+      "title_tistory": "소개팅 카톡 첫 인사부터 대화 이어가기까지: 성공률 90%를 만드는 데이터 기반 전략",
+      "title_kakao": "연락만 하면 뚝 끊기는 당신을 위해, 소개팅 카톡에서 호감 사는 마법의 패턴",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_018_kakaotalk_signals_20260923_154448.webp",
+      "published_at": "2026-09-23 15:45:45",
+      "publish_results": {
+        "topic_id": 18,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-018",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡 첫 대화, AI가 분석한 성공률 90% 대화법 3가지",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224421006858&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=15493",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 17,
+      "title": "소개팅 카톡, 나만 질문하는 상황? 계속 이어가야 할까? (손절 타이밍)",
+      "title_naver": "소개팅 카톡, 나만 질문하는 상황? 계속 이어가야 할까? (손절 타이밍)",
+      "title_tistory": "소개팅 카톡 첫 대화부터 노잼이라면? 대화가 안 이어질 때 체크리스트",
+      "title_kakao": "당신만 노력하는 관계는 사랑이 아니에요, '카톡 질문 지옥'에서 탈출하는 법",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_017_kakaotalk_signals_20260923_151327.webp",
+      "published_at": "2026-09-23 15:14:23",
+      "publish_results": {
+        "topic_id": 17,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-017",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡, 나만 질문하는 상황? 계속 이어가야 할까? (손절 타이밍)",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224420973583&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=15628",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 16,
+      "title": "소개팅 카톡 '잘 자' 한마디, 설렘일까 예의일까? 썸 타는 사이 밤 대화법 완벽 정리",
+      "title_naver": "소개팅 카톡 '잘 자' 한마디, 설렘일까 예의일까? 썸 타는 사이 밤 대화법 완벽 정리",
+      "title_tistory": "소개팅 카톡 첫 인사부터 밤 대화까지, 썸의 온도를 높이는 카톡 전략 5가지",
+      "title_kakao": "오늘 밤, 당신의 카톡이 멈추지 않기를 바란다면: 썸의 마침표 '잘 자'의 기술",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_016_kakaotalk_signals_20260923_144203.webp",
+      "published_at": "2026-09-23 14:43:03",
+      "publish_results": {
+        "topic_id": 16,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-016",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡 '잘 자' 한마디, 설렘일까 예의일까? 썸 타는 사이 밤 대화법 완벽 정리",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224420938847&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=17606",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 15,
+      "title": "소개팅 카톡 첫 대화, 설렘은 유지하고 노잼은 피하는 3가지 황금 템포 전략",
+      "title_naver": "소개팅 카톡 첫 대화, 설렘은 유지하고 노잼은 피하는 3가지 황금 템포 전략",
+      "title_tistory": "소개팅 카톡 대화 및 답장 텀 가이드: 밀당 없이 호감도 올리는 대화의 기술",
+      "title_kakao": "연락하는 게 숙제인가요? 썸을 부르는 소개팅 카톡의 온도 조절법",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_015_kakaotalk_signals_20260923_103505.webp",
+      "published_at": "2026-09-23 10:36:01",
+      "publish_results": {
+        "topic_id": 15,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-015",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡 첫 대화, 설렘은 유지하고 노잼은 피하는 3가지 황금 템포 전략",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224420683699&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=15341",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "error",
+            "message": "로그인 만료 (1회 로그인 스크립트 실행 필요)"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 12,
+      "title": "소개팅 카톡 약속 잡기, 거절 없는 자연스러운 빌드업 4단계",
+      "title_naver": "소개팅 카톡 약속 잡기, 거절 없는 자연스러운 빌드업 4단계",
+      "title_tistory": "소개팅 카톡 첫 대화부터 주말 약속 성공까지, 실전 대화 빌드업 가이드",
+      "title_kakao": "주말에 뭐 하세요? 라는 질문 대신, 상대의 마음을 여는 카톡 한 끗 차이",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_012_kakaotalk_signals_20260921_122302.webp",
+      "published_at": "2026-09-21 12:24:00",
+      "publish_results": {
+        "topic_id": 12,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-012",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡 약속 잡기, 거절 없는 자연스러운 빌드업 4단계",
+            "url": "https://nid.naver.com/nidlogin.login?mode=form&url=https%3A%2F%2Fblog.naver.com%2Fzkfnth01%3FRedirect=%26categoryNo=",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "소개팅 카톡 첫 대화부터 주말 약속 성공까지, 실전 대화 빌드업 가이드",
+            "url": "https://aura-magazine.tistory.com/manage/posts/",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "brunch": {
+            "status": "success",
+            "platform": "brunch",
+            "title": "주말에 뭐 하세요? 라는 질문 대신, 상대의 마음을 여는 카톡 한 끗 차이",
+            "post_url": "https://brunch.co.kr",
+            "archive_file": "brunch_draft_topic_012.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 11,
+      "title": "소개팅 카톡 첫 대화, 상대방 프사와 상메만 봐도 성공률 200% 올리는 법",
+      "title_naver": "소개팅 카톡 첫 대화, 상대방 프사와 상메만 봐도 성공률 200% 올리는 법",
+      "title_tistory": "소개팅 카톡 대화 및 첫 인사 가이드: 프로필로 상대방 성향 완벽 분석하기",
+      "title_kakao": "프사 하나로 다 안다고? 썸남썸녀의 속마음을 읽는 카톡 심리학",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_011_kakaotalk_signals_20260921_122030.webp",
+      "published_at": "2026-09-21 12:21:28",
+      "publish_results": {
+        "topic_id": 11,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-011",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡 첫 대화, 상대방 프사와 상메만 봐도 성공률 200% 올리는 법",
+            "url": "https://nid.naver.com/nidlogin.login?mode=form&url=https%3A%2F%2Fblog.naver.com%2Fzkfnth01%3FRedirect=%26categoryNo=",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "success",
+            "platform": "brunch",
+            "title": "프사 하나로 다 안다고? 썸남썸녀의 속마음을 읽는 카톡 심리학",
+            "post_url": "https://brunch.co.kr",
+            "archive_file": "brunch_draft_topic_011.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 10,
+      "title": "소개팅 카톡, 이것만 안 해도 성공? 정 떨어지는 최악의 말투 BEST 3",
+      "title_naver": "소개팅 카톡, 이것만 안 해도 성공? 정 떨어지는 최악의 말투 BEST 3",
+      "title_tistory": "소개팅 카톡 첫 인사부터 대화까지, 상대방의 마음을 식게 만드는 비호감 대화법 총정리",
+      "title_kakao": "그 사람이 답장을 안 하는 이유, 혹시 당신의 '카톡 말투'가 문제였을까?",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_010_kakaotalk_signals_20260921_115742.webp",
+      "published_at": "2026-09-21 11:58:34",
+      "publish_results": {
+        "topic_id": 10,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-010",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "error",
+            "blog_id": "zkfnth01",
+            "message": "Page.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"button:has-text('발행')\")\n"
+          },
+          "tistory": {
+            "status": "session_expired",
+            "message": "티스토리 카카오 세션 만료. python brands/aura/aura_tistory_login.py 1회 실행 필요",
+            "blog_name": "aura-magazine"
+          },
+          "brunch": {
+            "status": "success",
+            "platform": "brunch",
+            "title": "그 사람이 답장을 안 하는 이유, 혹시 당신의 '카톡 말투'가 문제였을까?",
+            "post_url": "https://brunch.co.kr",
+            "archive_file": "brunch_draft_topic_010.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 9,
+      "title": "소개팅 전날 카톡, 할까 말까? 분위기 망치지 않는 대화의 온도 조절법",
+      "title_naver": "소개팅 전날 카톡, 할까 말까? 분위기 망치지 않는 대화의 온도 조절법",
+      "title_tistory": "소개팅 전날 카톡 대화 가이드: 첫 인사부터 대화 텀, 주제 선정까지 실전 전략",
+      "title_kakao": "우리 내일 만날까? 설레는 소개팅 전날, 카톡으로 다 망치고 있다면 필독",
+      "category": "kakaotalk_signals",
+      "image_url": "https://ncflciezowwpnknuutko.supabase.co/storage/v1/object/public/aura-media/magazines/aura_topic_009_kakaotalk_signals_20260920_221450.webp",
+      "published_at": "2026-09-20 22:15:58",
+      "publish_results": {
+        "topic_id": 9,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-topic-009",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 전날 카톡, 할까 말까? 분위기 망치지 않는 대화의 온도 조절법",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224418044472&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=12155",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "소개팅 전날 카톡 대화 가이드: 첫 인사부터 대화 텀, 주제 선정까지 실전 전략",
+            "url": "https://aura-magazine.tistory.com/manage/posts/",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "brunch": {
+            "status": "success",
+            "platform": "brunch",
+            "title": "우리 내일 만날까? 설레는 소개팅 전날, 카톡으로 다 망치고 있다면 필독",
+            "post_url": "https://brunch.co.kr",
+            "archive_file": "brunch_draft_topic_009.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 8,
+      "title": "소개팅 카톡 이모티콘 적게 쓰면 비호감? 카톡 말투로 알아보는 상대방 속마음 5가지",
+      "title_naver": "소개팅 카톡 이모티콘 적게 쓰면 비호감? 카톡 말투로 알아보는 상대방 속마음 5가지",
+      "title_tistory": "소개팅 카톡 대화법: 이모티콘 빈도와 물결표(~)로 분석하는 상대방의 호감도 시그널",
+      "title_kakao": "당신과의 카톡, 그 사람이 이모티콘을 쓰지 않는 진짜 이유",
+      "category": "kakaotalk_signals",
+      "image_url": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=1200&auto=format&fit=crop&q=80",
+      "published_at": "2026-09-20 16:14:17",
+      "publish_results": {
+        "topic_id": 8,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-8-1789888432",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡 이모티콘 적게 쓰면 비호감? 카톡 말투로 알아보는 상대방 속마음 5가지",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224417790777&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=13706",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "소개팅 카톡 대화법: 이모티콘 빈도와 물결표(~)로 분석하는 상대방의 호감도 시그널",
+            "url": "https://aura-magazine.tistory.com/manage/posts/",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "brunch": {
+            "status": "pending_review",
+            "mode": "author_review_pending",
+            "title": "당신과의 카톡, 그 사람이 이모티콘을 쓰지 않는 진짜 이유",
+            "message": "카카오 브런치스토리 작가 심사 승인 대기 중 (신청서 심사 승인 완료 시 즉시 오픈, 현재 전용 원고 보관 완료)",
+            "archive_file": "brunch_draft_topic_008.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 1,
+      "title": "소개팅 첫 카톡 읽씹 방지! 호감도 급상승 첫인사 멘트 5가지",
+      "title_naver": "소개팅 첫 카톡 읽씹 방지! 호감도 급상승 첫인사 멘트 5가지",
+      "title_tistory": "소개팅 첫 카톡 대화 성공 가이드: 자연스러운 핑퐁을 만드는 5가지 필승 전략",
+      "title_kakao": "당신의 카톡이 '읽씹' 당하는 이유, 첫인사부터 다시 설계하세요",
+      "category": "kakaotalk_signals",
+      "image_url": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=1200&auto=format&fit=crop&q=80",
+      "published_at": "2026-09-20 15:22:50",
+      "publish_results": {
+        "topic_id": 1,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-1-1789885346",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 첫 카톡 읽씹 방지! 호감도 급상승 첫인사 멘트 5가지",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224417755092&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=12347",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "소개팅 첫 카톡 대화 성공 가이드: 자연스러운 핑퐁을 만드는 5가지 필승 전략",
+            "url": "https://aura-magazine.tistory.com/manage/posts/",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "brunch": {
+            "status": "pending_review",
+            "mode": "author_review_pending",
+            "title": "당신의 카톡이 '읽씹' 당하는 이유, 첫인사부터 다시 설계하세요",
+            "message": "카카오 브런치스토리 작가 심사 승인 대기 중 (신청서 심사 승인 완료 시 즉시 오픈, 현재 전용 원고 보관 완료)",
+            "archive_file": "brunch_draft_topic_001.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 1,
+      "title": "소개팅 카톡 첫인사, 읽씹 당하지 않는 호감형 멘트 5가지",
+      "title_naver": "소개팅 카톡 첫인사, 읽씹 당하지 않는 호감형 멘트 5가지",
+      "title_tistory": "소개팅 카톡 첫 대화 성공법: 노잼 탈출하는 대화의 기술과 실전 예시",
+      "title_kakao": "“안녕하세요”만 보내고 계신가요? 썸을 부르는 소개팅 첫 카톡의 마법",
+      "category": "kakaotalk_signals",
+      "image_url": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=1200&auto=format&fit=crop&q=80",
+      "published_at": "2026-09-20 15:17:21",
+      "publish_results": {
+        "topic_id": 1,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-1-1789885016",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 카톡 첫인사, 읽씹 당하지 않는 호감형 멘트 5가지",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224417751399&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=12948",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "소개팅 카톡 첫 대화 성공법: 노잼 탈출하는 대화의 기술과 실전 예시",
+            "url": "https://aura-magazine.tistory.com/manage/posts/",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "brunch": {
+            "status": "pending_review",
+            "mode": "author_review_pending",
+            "title": "“안녕하세요”만 보내고 계신가요? 썸을 부르는 소개팅 첫 카톡의 마법",
+            "message": "카카오 브런치스토리 작가 심사 승인 대기 중 (신청서 심사 승인 완료 시 즉시 오픈, 현재 전용 원고 보관 완료)",
+            "archive_file": "brunch_draft_topic_001.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 1,
+      "title": "소개팅 첫 카톡 읽씹 걱정 끝! 호감도 높이는 첫인사 멘트 5가지",
+      "title_naver": "소개팅 첫 카톡 읽씹 걱정 끝! 호감도 높이는 첫인사 멘트 5가지",
+      "title_tistory": "소개팅 카톡 첫 대화 공략: 읽씹 방지하는 대화법 및 멘트 총정리",
+      "title_kakao": "그 사람의 답장이 빨라지는 마법, 소개팅 첫 카톡의 정석",
+      "category": "kakaotalk_signals",
+      "image_url": "/outputs/aura/blog_images/aura_topic_001_kakaotalk_signals_20260920_145836.webp",
+      "published_at": "2026-09-20 14:59:24",
+      "publish_results": {
+        "topic_id": 1,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-1-1789883942",
+            "translations_count": 2,
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "blog_id": "zkfnth01",
+            "title": "소개팅 첫 카톡 읽씹 걱정 끝! 호감도 높이는 첫인사 멘트 5가지",
+            "url": "https://blog.naver.com/PostView.naver?blogId=zkfnth01&Redirect=View&logNo=224417739300&categoryNo=1&isAfterWrite=true&isMrblogPost=false&isHappyBeanLeverage=true&contentLength=16809",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "tistory": {
+            "status": "success",
+            "blog_name": "aura-magazine",
+            "title": "소개팅 카톡 첫 대화 공략: 읽씹 방지하는 대화법 및 멘트 총정리",
+            "url": "https://aura-magazine.tistory.com/manage/posts/",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ]
+          },
+          "brunch": {
+            "status": "pending_review",
+            "mode": "author_review_pending",
+            "title": "그 사람의 답장이 빨라지는 마법, 소개팅 첫 카톡의 정석",
+            "message": "카카오 브런치스토리 작가 심사 승인 대기 중 (신청서 심사 승인 완료 시 즉시 오픈, 현재 전용 원고 보관 완료)",
+            "archive_file": "brunch_draft_topic_001.json"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 4,
+      "title": "소개팅 카톡 읽씹 vs 안읽씹, 상대방 속마음과 재연락 필승 전략",
+      "title_naver": "소개팅 카톡 읽씹 vs 안읽씹, 상대방 속마음과 재연락 필승 전략",
+      "title_tistory": "소개팅 카톡 대화 가이드: 읽씹과 안읽씹의 심리 분석 및 관계 회복 솔루션",
+      "title_kakao": "기다리는 카톡은 오지 않고, 내 마음만 타들어갈 때: 읽씹과 안읽씹의 온도 차이",
+      "category": "kakaotalk_signals",
+      "image_url": "/outputs/aura/blog_images/aura_topic_004_kakaotalk_signals_20260920_134103.webp",
+      "published_at": "2026-09-20 13:41:42",
+      "publish_results": {
+        "topic_id": 4,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-4-1789879301",
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "mode": "dry_run",
+            "blog_id": "",
+            "title": "소개팅 카톡 읽씹 vs 안읽씹, 상대방 속마음과 재연락 필승 전략",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ],
+            "images_count": 1,
+            "url": "https://blog.naver.com//999999"
+          },
+          "tistory": {
+            "status": "success",
+            "mode": "dry_run",
+            "blog_name": "",
+            "title": "소개팅 카톡 대화 가이드: 읽씹과 안읽씹의 심리 분석 및 관계 회복 솔루션",
+            "url": "https://.tistory.com/test-preview",
+            "tags": "소개팅카톡첫대화,소개팅카톡,소개팅카톡대화,소개팅카톡텀,소개팅카톡주제,소개팅카톡답장,소개팅카톡첫인사,소개팅카톡노잼"
+          },
+          "brunch": {
+            "status": "success",
+            "mode": "dry_run",
+            "title": "기다리는 카톡은 오지 않고, 내 마음만 타들어갈 때: 읽씹과 안읽씹의 온도 차이",
+            "subtitle": "소개팅 후 뚝 끊긴 카톡, 읽씹과 안읽씹 사이에서 고민 중인가요? 당신의 멘탈을 지키고 다시 대화의 물꼬를 트는 실전 심리 전략을 공개합니다.",
+            "url": "https://brunch.co.kr/@expert_author/999"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 3,
+      "title": "소개팅 당일 밤 선톡, 먼저 보내면 손해일까? 타이밍 완벽 정리",
+      "title_naver": "소개팅 당일 밤 선톡, 먼저 보내면 손해일까? 타이밍 완벽 정리",
+      "title_tistory": "소개팅 카톡 첫 인사와 대화의 기술: 호감도 높이는 타이밍과 멘트 총정리",
+      "title_kakao": "집에 가는 길, 그 사람에게 먼저 카톡을 보낼까 말까 고민된다면",
+      "category": "kakaotalk_signals",
+      "image_url": "/outputs/aura/blog_images/aura_topic_003_kakaotalk_signals_20260920_133443.webp",
+      "published_at": "2026-09-20 13:34:50",
+      "publish_results": {
+        "topic_id": 3,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-3-1789878889",
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "mode": "dry_run",
+            "blog_id": "",
+            "title": "소개팅 당일 밤 선톡, 먼저 보내면 손해일까? 타이밍 완벽 정리",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ],
+            "images_count": 1,
+            "url": "https://blog.naver.com//999999"
+          },
+          "tistory": {
+            "status": "success",
+            "mode": "dry_run",
+            "blog_name": "",
+            "title": "소개팅 카톡 첫 인사와 대화의 기술: 호감도 높이는 타이밍과 멘트 총정리",
+            "url": "https://.tistory.com/test-preview",
+            "tags": "소개팅카톡첫대화,소개팅카톡,소개팅카톡대화,소개팅카톡텀,소개팅카톡주제,소개팅카톡답장,소개팅카톡첫인사,소개팅카톡노잼"
+          },
+          "brunch": {
+            "status": "success",
+            "mode": "dry_run",
+            "title": "집에 가는 길, 그 사람에게 먼저 카톡을 보낼까 말까 고민된다면",
+            "subtitle": "소개팅 후 집에 돌아온 밤, 먼저 연락할지 말지 고민하며 폰만 들여다보고 있나요? 2030 연애 고민을 해결할 완벽한 선톡 타이밍과 대화법을 공개합니다.",
+            "url": "https://brunch.co.kr/@expert_author/999"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 2,
+      "title": "소개팅 후 카톡 답장 1시간, 이거 썸인가요? 상대방 심리 완벽 분석",
+      "title_naver": "소개팅 후 카톡 답장 1시간, 이거 썸인가요? 상대방 심리 완벽 분석",
+      "title_tistory": "소개팅 카톡 답장 텀 1시간의 진짜 의미: 심리학적 분석과 대화 전략 총정리",
+      "title_kakao": "1시간 뒤에 오는 카톡, 설렘일까 예의일까? 당신이 몰랐던 소개팅 카톡의 온도",
+      "category": "kakaotalk_signals",
+      "image_url": "/outputs/aura/blog_images/aura_topic_002_kakaotalk_signals_20260920_131831.webp",
+      "published_at": "2026-09-20 13:18:36",
+      "publish_results": {
+        "topic_id": 2,
+        "channels": {
+          "aura_app": {
+            "status": "success",
+            "feed_post_id": "mag-2-1789877915",
+            "lounge_url": "https://aura-ai-dating.vercel.app/"
+          },
+          "naver_blog": {
+            "status": "success",
+            "mode": "dry_run",
+            "blog_id": "",
+            "title": "소개팅 후 카톡 답장 1시간, 이거 썸인가요? 상대방 심리 완벽 분석",
+            "tags": [
+              "소개팅카톡첫대화",
+              "소개팅카톡",
+              "소개팅카톡대화",
+              "소개팅카톡텀",
+              "소개팅카톡주제",
+              "소개팅카톡답장",
+              "소개팅카톡첫인사",
+              "소개팅카톡노잼"
+            ],
+            "images_count": 1,
+            "url": "https://blog.naver.com//999999"
+          },
+          "tistory": {
+            "status": "success",
+            "mode": "dry_run",
+            "blog_name": "",
+            "title": "소개팅 카톡 답장 텀 1시간의 진짜 의미: 심리학적 분석과 대화 전략 총정리",
+            "url": "https://.tistory.com/test-preview",
+            "tags": "소개팅카톡첫대화,소개팅카톡,소개팅카톡대화,소개팅카톡텀,소개팅카톡주제,소개팅카톡답장,소개팅카톡첫인사,소개팅카톡노잼"
+          },
+          "brunch": {
+            "status": "success",
+            "mode": "dry_run",
+            "title": "1시간 뒤에 오는 카톡, 설렘일까 예의일까? 당신이 몰랐던 소개팅 카톡의 온도",
+            "subtitle": "소개팅 후 1시간 간격으로 오는 카톡, 밀당일까 무관심일까? 2030 연애 고민을 해결할 심리 분석과 Aura AI의 대화 코칭 솔루션을 지금 확인하세요.",
+            "url": "https://brunch.co.kr/@expert_author/999"
+          }
+        }
+      }
+    },
+    {
+      "topic_id": 1,
+      "title": "소개팅 카톡 첫 대화, 읽씹 피하는 호감형 첫인사 멘트 5가지(feat. 대화 이어가는 법)",
+      "category": "kakaotalk_signals",
+      "image_url": "/outputs/aura/blog_images/aura_topic_001_kakaotalk_signals_20260920_130206.webp",
+      "published_at": "2026-09-20 13:02:11"
+    }
+  ]
+}

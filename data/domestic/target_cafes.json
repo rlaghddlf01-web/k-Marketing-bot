@@ -1,0 +1,55 @@
+{
+  "naver_cafes": [
+    {
+      "id": "cafe_remon",
+      "name": "레몬테라스",
+      "category": "lifestyle",
+      "apps": ["insurance", "aura"],
+      "last_posted": null
+    },
+    {
+      "id": "cafe_moms",
+      "name": "맘스홀릭",
+      "category": "parenting",
+      "apps": ["insurance"],
+      "last_posted": null
+    },
+    {
+      "id": "cafe_stock_ant",
+      "name": "개미주식연구소",
+      "category": "finance",
+      "apps": ["stock"],
+      "last_posted": null
+    },
+    {
+      "id": "cafe_2030_dating",
+      "name": "2030 싱글즈 모임",
+      "category": "social",
+      "apps": ["aura"],
+      "last_posted": null
+    }
+  ],
+  "daum_cafes": [
+    {
+      "id": "daum_zzan",
+      "name": "짠돌이 절약 카페",
+      "category": "finance",
+      "apps": ["insurance", "stock"],
+      "last_posted": null
+    },
+    {
+      "id": "daum_leejong",
+      "name": "이종격투기",
+      "category": "general",
+      "apps": ["stock", "aura"],
+      "last_posted": null
+    },
+    {
+      "id": "daum_women",
+      "name": "여성시대",
+      "category": "general",
+      "apps": ["aura", "insurance"],
+      "last_posted": null
+    }
+  ]
+}

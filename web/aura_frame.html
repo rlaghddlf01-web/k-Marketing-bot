@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura AI 데이팅 - 9:16 실시간 자막 영상통화 iFrame 프리뷰</title>
+  <!-- Google Fonts & Pretendard -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: radial-gradient(circle at 50% 20%, #1a1610 0%, #08080a 70%, #030304 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      color: #f1f5f9;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* Top Branding Header */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #E5A934 60%, #b8821d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .brand-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(229, 169, 52, 0.12);
+      border: 1px solid rgba(229, 169, 52, 0.35);
+      color: #E5A934;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    /* 9:16 Smartphone Mockup (Titanium Edition) */
+    .phone-container {
+      position: relative;
+      width: 410px;
+      height: 840px;
+      background: #09090b;
+      border-radius: 54px;
+      padding: 13px;
+      box-shadow: 
+        0 30px 90px rgba(0, 0, 0, 0.85), 
+        0 0 50px rgba(229, 169, 52, 0.18),
+        0 0 0 3px #27272a,
+        inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .phone-container:hover {
+      box-shadow: 
+        0 35px 100px rgba(0, 0, 0, 0.95), 
+        0 0 70px rgba(229, 169, 52, 0.28),
+        0 0 0 3px #E5A934,
+        inset 0 0 0 2px rgba(255, 255, 255, 0.15);
+    }
+
+    /* Screen Inner Bezels */
+    .phone-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 42px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Dynamic Island / Notch */
+    .dynamic-island {
+      position: absolute;
+      top: 13px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 115px;
+      height: 28px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
+    }
+    .camera-lens {
+      width: 10px;
+      height: 10px;
+      background: #111827;
+      border-radius: 50%;
+      border: 1px solid #1f2937;
+      box-shadow: inset 0 0 3px #3b82f6;
+    }
+    .sensor {
+      width: 8px;
+      height: 8px;
+      background: #18181b;
+      border-radius: 50%;
+    }
+
+    /* Real Status Bar */
+    .status-bar {
+      position: absolute;
+      top: 14px;
+      left: 0;
+      right: 0;
+      padding: 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      z-index: 45;
+      pointer-events: none;
+    }
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Real Genuine Aura Video Chat iFrame */
+    .aura-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #09090b;
+    }
+
+    /* Bottom Home Indicator Bar */
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 135px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 10px;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* Control Toolbar */
+    .toolbar {
+      margin-top: 26px;
+      display: flex;
+      gap: 12px;
+      background: rgba(18, 18, 22, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .tool-btn {
+      background: #27272a;
+      color: #f1f5f9;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .tool-btn:hover {
+      background: #E5A934;
+      color: #000;
+      border-color: #E5A934;
+      box-shadow: 0 0 15px rgba(229, 169, 52, 0.4);
+    }
+    .tool-btn.active {
+      background: #E5A934;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand Header -->
+  <div class="brand-header">
+    <div class="brand-title">
+      <span>✨ Aura AI 데이팅</span>
+    </div>
+    <div class="brand-desc">
+      주제 2: 4개국어 실시간 자막 영상통화 UI (Aura Native Web iFrame)
+    </div>
+    <div class="badge-pill">
+      <span>🟢 LIVE IFRAME CONNECTED</span>
+      <span>•</span>
+      <span>1080 × 1920 (9:16 규격)</span>
+    </div>
+  </div>
+
+  <!-- 9:16 Smartphone Container -->
+  <div class="phone-container">
+    <div class="phone-screen">
+      <!-- iOS Status Bar -->
+      <div class="status-bar">
+        <span>09:41</span>
+        <div class="status-icons">
+          <!-- Signal Icon -->
+          <svg width="15" height="11" viewBox="0 0 17 11" fill="currentColor">
+            <rect x="0" y="8" width="2.5" height="3" rx="0.5"/>
+            <rect x="4" y="5.5" width="2.5" height="5.5" rx="0.5"/>
+            <rect x="8" y="3" width="2.5" height="8" rx="0.5"/>
+            <rect x="12" y="0" width="2.5" height="11" rx="0.5"/>
+          </svg>
+          <!-- 5G text -->
+          <span style="font-size: 10px; font-weight: 700; margin-left: 2px;">5G</span>
+          <!-- Battery Icon -->
+          <svg width="22" height="11" viewBox="0 0 25 12" fill="currentColor" style="margin-left: 3px;">
+            <rect x="0.5" y="0.5" width="20" height="11" rx="3" stroke="currentColor" fill="none"/>
+            <rect x="2" y="2" width="16" height="8" rx="1.5"/>
+            <path d="M22 4C22.6 4.3 23 4.8 23 5.5C23 6.2 22.6 6.7 22 7V4Z" fill="currentColor"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Dynamic Island Notch -->
+      <div class="dynamic-island">
+        <div class="camera-lens"></div>
+        <div class="sensor"></div>
+      </div>
+
+      <!-- Genuine Aura Video Chat iFrame -->
+      <iframe 
+        id="auraChatFrame" 
+        class="aura-iframe" 
+        src="/aura_video_chat.html"
+        title="Aura Live Video Chat"
+        allow="camera; microphone; autoplay"
+      ></iframe>
+
+      <!-- iOS Home Indicator -->
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Toolbar -->
+  <div class="toolbar">
+    <button class="tool-btn" onclick="reloadIframe()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+      아이프레임 새로고침
+    </button>
+    <button class="tool-btn" onclick="openDirect()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      단독 뷰 열기
+    </button>
+  </div>
+
+  <script>
+    function reloadIframe() {
+      const frame = document.getElementById('auraChatFrame');
+      frame.src = frame.src;
+    }
+    function openDirect() {
+      window.open('/aura_video_chat.html', '_blank');
+    }
+  </script>
+
+</body>
+</html>

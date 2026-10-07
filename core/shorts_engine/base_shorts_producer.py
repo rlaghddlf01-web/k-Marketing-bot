@@ -64,9 +64,9 @@ class BaseShortsProducer(ABC):
         scaled_w = int(W * scale)
         scaled_img = embedded_img.resize((scaled_w, target_h), Image.Resampling.LANCZOS)
         
-        # 스마트폰이 좌측이나 중앙에 위치할 수 있으므로 안전 크롭 계산
+        # 인물이 항상 정중앙에 위치하도록 Center Crop 적용
         if scaled_w > target_w:
-            crop_left = max(0, min(20, scaled_w - target_w))
+            crop_left = (scaled_w - target_w) // 2
             framed_img = scaled_img.crop((crop_left, 0, crop_left + target_w, target_h))
         else:
             framed_img = scaled_img.resize((target_w, target_h), Image.Resampling.LANCZOS)

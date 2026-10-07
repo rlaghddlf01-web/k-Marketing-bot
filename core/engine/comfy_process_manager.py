@@ -69,8 +69,7 @@ class ComfyProcessManager:
             str(main_py),
             "--windows-standalone-build",
             "--fast", "fp16_accumulation",
-            "--use-sage-attention",
-            "--disable-smart-memory"
+            "--use-sage-attention"
         ]
 
         msg_start = "🚀 [ComfyUI 자율 매니저] ComfyUI GPU 엔진을 백그라운드에서 자동 기동합니다 (창 없이 조용히 실행)..."
@@ -79,7 +78,7 @@ class ComfyProcessManager:
             log_callback(msg_start, "info")
 
         try:
-            creation_flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+            creation_flags = (subprocess.CREATE_NO_WINDOW | getattr(subprocess, 'DETACHED_PROCESS', 8)) if sys.platform == "win32" else 0
             log_path = cls.COMFY_DIR / "comfyui_stdout.log"
             cls._log_file = open(log_path, "a", encoding="utf-8")
             cls._process = subprocess.Popen(

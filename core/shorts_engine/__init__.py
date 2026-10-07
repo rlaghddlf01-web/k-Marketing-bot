@@ -11,10 +11,12 @@ from .base_shorts_producer import BaseShortsProducer
 from .shorts_video_composer import ShortsVideoComposer
 from .easytax_shorts_producer import EasyTaxShortsProducer
 from .kmarket_shorts_producer import KMarketShortsProducer
+from .aura_shorts_producer import AuraShortsProducer
 
 __all__ = [
     "BaseShortsProducer",
     "ShortsVideoComposer",
     "EasyTaxShortsProducer",
     "KMarketShortsProducer",
+    "AuraShortsProducer",
 ]

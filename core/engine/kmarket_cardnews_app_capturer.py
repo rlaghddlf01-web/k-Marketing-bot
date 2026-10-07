@@ -37,7 +37,7 @@ def _get_local_image_data_uri(filename: str) -> str:
     return ""
 
 
-# 17개국 언어별 품목 다국어 명칭 (100% 1인 직접 수령 소형 가전/생활용품 + 탭/시간 다국어 지원)
+# 17개국 언어별 품목 다국어 명칭 (100% 1인 직접 수령 소형 가전/생활용품)
 ITEM_I18N: Dict[str, Dict[str, str]] = {
     "uz": {
         "microwave": "Hashamatli Kompakt Mikroto'lqinli Pech (0 Von Bepul)",
@@ -51,31 +51,9 @@ ITEM_I18N: Dict[str, Dict[str, str]] = {
         "seller": "Yaqin qo'shni (Sinchon)",
         "free_badge": "0 VON BEPUL",
         "trans_badge": "17 tilda real vaqtda 1:1 avto-tarjima",
-        "tab_appliances": "⚡ Maishiy",
-        "tab_furniture": "🛋️ Mebel",
-        "time_min": "daqiqa oldin",
         "desc": "Koreyadagi vatandoshlar uchun bepul ulashilmoqda. Holati a'lo darajada, toza saqlangan. Bugun olib ketishingiz mumkin!",
         "chat_btn": "1:1 Xavfsiz Chatda Bog'lanish (Avto-tarjima)",
         "manner_temp": "37.5℃ Iliq Harorat"
-    },
-    "vi": {
-        "microwave": "Lò Vi Sóng Mini Cao Cấp (Miễn Phí 0 Won)",
-        "rice_cooker": "Nồi Cơm Điện Thông Minh A+ (0 Won)",
-        "airfryer": "Nồi Chiên Không Dầu Cao Cấp (0 Won)",
-        "vacuum": "Máy Hút Bụi Không Dây Thông Minh (0 Won)",
-        "heater": "Máy Sưởi Gốm Mini Tiết Kiệm Điện (0 Won)",
-        "toaster": "Máy Nướng Bánh Mì Tiện Lợi (0 Won)",
-        "kettle": "Ấm Đun Nước Siêu Tốc Inox (0 Won)",
-        "fan": "Quạt Bàn Mini Tiết Kiệm Điện (0 Won)",
-        "seller": "Hàng xóm thân thiện (Sinchon)",
-        "free_badge": "0 WON MIỄN PHÍ",
-        "trans_badge": "Dịch tự động 1:1 thời gian thực 17 ngôn ngữ",
-        "tab_appliances": "⚡ Đồ điện tử",
-        "tab_furniture": "🛋️ Nội thất",
-        "time_min": "phút trước",
-        "desc": "Tặng miễn phí cho các bạn du học sinh, lao động tại Hàn Quốc. Đồ còn rất mới và sạch sẽ, có thể nhận ngay hôm nay!",
-        "chat_btn": "Chat 1:1 Trực Tiếp An Toàn (Tự động dịch)",
-        "manner_temp": "Nhiệt độ 37.5℃"
     },
     "km": {
         "microwave": "ម៉ាស៊ីនមីក្រូវ៉េវស្អាត (០ វ៉ុន ឥតគិតថ្លៃ)",
@@ -89,107 +67,25 @@ ITEM_I18N: Dict[str, Dict[str, str]] = {
         "seller": "អ្នកជិតខាង (Sinchon)",
         "free_badge": "០ វ៉ុន ឥតគិតថ្លៃ",
         "trans_badge": "ការបកប្រែស្វ័យប្រវត្តិ ១:១ ក្នុង ១៧ ភាសា",
-        "tab_appliances": "⚡ គ្រឿងអគ្គិសនី",
-        "tab_furniture": "🛋️ គ្រឿងសង្ហារឹម",
-        "time_min": "នាទីមុន",
         "desc": "ចែកជូនដោយឥតគិតថ្លៃសម្រាប់បងប្អូនពលករ និងសិស្សនៅកូរ៉េ។ គុណភាពនៅល្អស្អាតខ្លាំង អាចមកយកបានថ្ងៃនេះ!",
         "chat_btn": "ជជែកផ្ទាល់ ១:១ ប្រកបដោយសុវត្ថិភាព (បកប្រែស្វ័យប្រវត្តិ)",
         "manner_temp": "សីតុណ្ហភាព 37.5℃"
     },
-    "th": {
-        "microwave": "ไมโครเวฟมินิสภาพดีเยี่ยม (0 วอน ฟรี)",
-        "rice_cooker": "หม้อหุงข้าวดิจิตอล (0 วอน ฟรี)",
-        "airfryer": "หม้อทอดไร้น้ำมันขนาดใหญ่ (0 วอน)",
-        "vacuum": "เครื่องดูดฝุ่นไร้สายพลังไซโคลน (0 วอน)",
-        "heater": "ฮีตเตอร์เซรามิกมินิ (0 วอน)",
-        "toaster": "เครื่องปิ้งขนมปัง (0 วอน)",
-        "kettle": "กาต้มน้ำไฟฟ้าสแตนเลส (0 วอน)",
-        "fan": "พัดลมตั้งโต๊ะประหยัดไฟ (0 วอน)",
-        "seller": "เพื่อนบ้านใจดี (Sinchon)",
-        "free_badge": "0 วอน ฟรี",
-        "trans_badge": "แปลภาษาอัตโนมัติแบบเรียลไทม์ 17 ภาษา",
-        "tab_appliances": "⚡ เครื่องใช้ไฟฟ้า",
-        "tab_furniture": "🛋️ เฟอร์นิเจอร์",
-        "time_min": "นาทีที่แล้ว",
-        "desc": "แจกฟรีสำหรับเพื่อนๆ แรงงานและนักเรียนในเกาหลี สภาพดี สะอาด พร้อมรับทันทีวันนี้!",
-        "chat_btn": "แชตตรง 1:1 ปลอดภัย (แปลอัตโนมัติ)",
-        "manner_temp": "อุณหภูมิ 37.5℃"
-    },
-    "id": {
-        "microwave": "Microwave Mini Kondisi Mulus (0 Won Gratis)",
-        "rice_cooker": "Rice Cooker Elektrik Pintar (0 Won Gratis)",
-        "airfryer": "Air Fryer Digital Kapasitas Besar (0 Won)",
-        "vacuum": "Vacuum Cleaner Stick Nirkabel (0 Won)",
-        "heater": "Pemanas Ruangan Keramik Mini (0 Won)",
-        "toaster": "Pemanggang Roti Praktis (0 Won)",
-        "kettle": "Teko Listrik Stainless Steel (0 Won)",
-        "fan": "Kipas Angin Meja Tenang (0 Won)",
-        "seller": "Tetangga Ramah (Sinchon)",
-        "free_badge": "0 WON GRATIS",
-        "trans_badge": "Terjemahan Otomatis Real-Time 17 Bahasa",
-        "tab_appliances": "⚡ Elektronik",
-        "tab_furniture": "🛋️ Mebel",
-        "time_min": "menit lalu",
-        "desc": "Dibagikan gratis untuk teman-teman pekerja dan pelajar di Korea. Kondisi sangat bagus dan bersih, bisa diambil hari ini!",
-        "chat_btn": "Chat 1:1 Langsung Aman (Auto-Terjemahan)",
-        "manner_temp": "Suhu 37.5℃"
-    },
-    "my": {
-        "microwave": "မိုက်ခရိုဝေ့ဗ် အခြေအနေကောင်း (၀ ဝမ် အခမဲ့)",
-        "rice_cooker": "လျှပ်စစ်ထမင်းပေါင်းအိုး (၀ ဝမ် အခမဲ့)",
-        "airfryer": "လေပူကြော်အိုးကြီး (၀ ဝမ်)",
-        "vacuum": "ကြိုးမဲ့ ဖုန်စုပ်စက် (၀ ဝမ် အခမဲ့)",
-        "heater": "အပူပေးစက် အသေး (၀ ဝမ်)",
-        "toaster": "ပေါင်မုန့်မီးကင်စက် (၀ ဝမ်)",
-        "kettle": "စတီး ရေနွေးအိုး (၀ ဝမ်)",
-        "fan": "စားပွဲတင် ပန်ကာ အသေး (၀ ဝမ်)",
-        "seller": "အိမ်နီးချင်း မိတ်ဆွေ (Sinchon)",
-        "free_badge": "၀ ဝမ် အခမဲ့",
-        "trans_badge": "ဘာသာစကား ၁၇ မျိုးဖြင့် တိုက်ရိုက် ဘာသာပြန်ချက်",
-        "tab_appliances": "⚡ လျှပ်စစ်ပစ္စည်း",
-        "tab_furniture": "🛋️ ပရိဘောဂ",
-        "time_min": "မိနစ်အလိုက",
-        "desc": "ကိုရီးယားရှိ မြန်မာလုပ်သားများနှင့် ကျောင်းသားများအတွက် အခမဲ့ မျှဝေပေးပါသည်။ အခြေအနေ အလွန်သန့်ရှင်းကောင်းမွန်ပြီး ယနေ့ လာယူနိုင်ပါသည်!",
-        "chat_btn": "၁:၁ စိတ်ချရသော စကားပြောခန်း (အလိုအလျောက် ဘာသာပြန်)",
-        "manner_temp": "အပူချိန် 37.5℃"
-    },
-    "ne": {
-        "microwave": "माइक्रोवेभ उत्कृष्ट अवस्थामा (० वोन नि:शुल्क)",
-        "rice_cooker": "इलेक्ट्रिक राइस कुकर (० वोन नि:शुल्क)",
-        "airfryer": "डिजिटल एयर फ्रायर (० वोन)",
-        "vacuum": "वायरलेस भ्याकुम क्लिनर (० वोन)",
-        "heater": "सिरेमिक मिनी हिटर (० वोन)",
-        "toaster": "ब्रेड टोस्टर (० वोन)",
-        "kettle": "स्टेनलेस इलेक्ट्रिक केतली (० वोन)",
-        "fan": "डेस्क कुलिंग फ्यान (० वोन)",
-        "seller": "मित्रवत छिमेकी (Sinchon)",
-        "free_badge": "० वोन नि:शुल्क",
-        "trans_badge": "१७ भाषाहरूमा वास्तविक समय स्वतः अनुवाद",
-        "tab_appliances": "⚡ उपकरणहरू",
-        "tab_furniture": "🛋️ फर्निचर",
-        "time_min": "मिनेट अघि",
-        "desc": "कोरियामा रहेका नेपाली साथीहरू र विद्यार्थीहरूका लागि नि:शुल्क। धेरै राम्रो र सफा अवस्थामा, आजै लिन सकिन्छ!",
-        "chat_btn": "१:१ सुरक्षित च्याट (स्वतः अनुवाद)",
-        "manner_temp": "तापक्रम ३७.५℃"
-    },
-    "mn": {
-        "microwave": "Богино долгионы зуух (0 вон үнэгүй)",
-        "rice_cooker": "Цахилгаан будаа агшаагч (0 вон)",
-        "airfryer": "Шарах шүүгээ (0 вон)",
-        "vacuum": "Утасгүй тоос сорогч (0 вон)",
-        "heater": "Керамик халаагуур (0 вон)",
-        "toaster": "Талх шарагч (0 вон)",
-        "kettle": "Цахилгаан данх (0 вон)",
-        "fan": "Ширээний сэнс (0 вон)",
-        "seller": "Эелдэг хөрш (Sinchon)",
-        "free_badge": "0 ВОН ҮНЭГҮЙ",
-        "trans_badge": "17 хэлний бодит цагийн автомат орчуулга",
-        "tab_appliances": "⚡ Цахилгаан",
-        "tab_furniture": "🛋️ Тавилга",
-        "time_min": "минутын өмнө",
-        "desc": "Солонгос дахь монгол оюутан, ажилчдад үнэгүй өгнө. Маш цэвэрхэн, өнөөдөр ирж авах боломжтой!",
-        "chat_btn": "1:1 Шууд найдвартай чат (Автомат орчуулга)",
-        "manner_temp": "Хэм 37.5℃"
+    "vi": {
+        "microwave": "Lò Vi Sóng Mini Cao Cấp (Miễn Phí 0 Won)",
+        "rice_cooker": "Nồi Cơm Điện Thông Minh A+ (0 Won)",
+        "airfryer": "Nồi Chiên Không Dầu Cao Cấp (0 Won)",
+        "vacuum": "Máy Hút Bụi Không Dây Thông Minh (0 Won)",
+        "heater": "Máy Sưởi Gốm Mini Tiết Kiệm Điện (0 Won)",
+        "toaster": "Máy Nướng Bánh Mì Tiện Lợi (0 Won)",
+        "kettle": "Ấm Đun Nước Siêu Tốc Inox (0 Won)",
+        "fan": "Quạt Bàn Mini Tiết Kiệm Điện (0 Won)",
+        "seller": "Hàng xóm thân thiện (Sinchon)",
+        "free_badge": "0 WON MIỄN PHÍ",
+        "trans_badge": "Dịch tự động 1:1 thời gian thực 17 ngôn ngữ",
+        "desc": "Tặng miễn phí cho các bạn du học sinh, lao động tại Hàn Quốc. Đồ còn rất mới và sạch sẽ, có thể nhận ngay hôm nay!",
+        "chat_btn": "Chat 1:1 Trực Tiếp An Toàn (Tự động dịch)",
+        "manner_temp": "Nhiệt độ 37.5℃"
     },
     "ko": {
         "microwave": "소형 전자레인지 상태 A급 (0원 무료나눔)",
@@ -203,9 +99,6 @@ ITEM_I18N: Dict[str, Dict[str, str]] = {
         "seller": "이웃 주민 (신촌 연세대 앞)",
         "free_badge": "0원 무료나눔",
         "trans_badge": "17개국어 실시간 1:1 자동번역 작동 중",
-        "tab_appliances": "⚡ 가전",
-        "tab_furniture": "🛋️ 가구",
-        "time_min": "분 전",
         "desc": "외국인 유학생이나 근로자분들 한국 정착에 도움되시길 바라며 0원에 무료 나눔합니다. 상태 A급이고 깨끗합니다!",
         "chat_btn": "1:1 실시간 자동번역 채팅 시작하기",
         "manner_temp": "매너온도 37.5℃"
@@ -222,9 +115,6 @@ ITEM_I18N: Dict[str, Dict[str, str]] = {
         "seller": "Campus Neighbor (Sinchon)",
         "free_badge": "0 KRW FREE",
         "trans_badge": "17 Languages Real-Time Auto-Translation",
-        "tab_appliances": "⚡ Appliances",
-        "tab_furniture": "🛋️ Furniture",
-        "time_min": "mins ago",
         "desc": "Giving away for free to support international students and expat workers in Korea. In great condition, pick up today!",
         "chat_btn": "Start 1:1 Auto-Translated Chat",
         "manner_temp": "Manner 37.5℃"
@@ -299,13 +189,7 @@ class KMarketCardNewsAppCapturer:
             ]
         return items_list
 
-    def capture_giveaway_feed(
-        self,
-        lang: str = "uz",
-        item_name: str = "",
-        force_refresh: bool = False,
-        dynamic_title: Optional[str] = None
-    ) -> Image.Image:
+    def capture_giveaway_feed(self, lang: str = "uz", item_name: str = "", force_refresh: bool = False) -> Image.Image:
         """
         📱 [3번 슬라이드 전용] 실제 케이마켓 0원 무료나눔 매물 피드 순정 화면 (1080x1350)
         - 외부 Unsplash 의존 100% 제거 -> 로컬 고화질 Base64 직주입 (엑박 0%, 검은 화면 0%)
@@ -343,26 +227,17 @@ class KMarketCardNewsAppCapturer:
             main_items = ["microwave", "rice_cooker", "airfryer", "kettle"]
 
         cached_file = self.cache_dir / f"kmarket_feed_pure_{feed_tag}_{lang.lower()}_1080x1350.png"
-        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000 and not dynamic_title:
+        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000:
             logger.info(f"[{lang.upper()}] 📦 캐시된 0원 매물 피드({feed_tag}) 순정 캡처 재사용: {cached_file.name}")
             return Image.open(cached_file).convert("RGB")
 
-        time_suffix = i18n.get("time_min", "mins ago")
-        locs = [
-            f"Sinchon, Seoul • 5 {time_suffix}",
-            f"Yeonnam, Seoul • 12 {time_suffix}",
-            f"Sillim, Seoul • 25 {time_suffix}",
-            f"Ansan, Gyeonggi • 40 {time_suffix}"
-        ]
+        locs = ["Sinchon, Seul • 5 daqiqa oldin", "Yeonnam, Seul • 12 daqiqa oldin", "Sillim, Seul • 25 daqiqa oldin", "Ansan, Gyeonggi • 40 daqiqa oldin"]
         chats = [7, 4, 3, 5]
 
         feed_items = []
         for idx, k in enumerate(main_items):
             img_b64 = _get_local_image_data_uri(f"{k}.jpg")
-            if idx == 0 and dynamic_title:
-                title = dynamic_title
-            else:
-                title = i18n.get(k, f"{k.replace('_', ' ').title()} (0 KRW)")
+            title = i18n.get(k, f"{k.replace('_', ' ').title()} (0 KRW)")
             feed_items.append({
                 "img": img_b64,
                 "title": title,
@@ -495,8 +370,8 @@ class KMarketCardNewsAppCapturer:
             </div>
             <div class="tab-bar">
                 <div class="tab-active">🎁 {i18n['free_badge']}</div>
-                <div class="tab-sub">{i18n.get('tab_appliances', '⚡ Appliances')}</div>
-                <div class="tab-sub">{i18n.get('tab_furniture', '🛋️ Furniture')}</div>
+                <div class="tab-sub">⚡ Maishiy</div>
+                <div class="tab-sub">🛋️ Mebel</div>
                 <div class="tab-sub">📍 3km</div>
             </div>
             <div class="feed-container">
@@ -508,10 +383,7 @@ class KMarketCardNewsAppCapturer:
         screenshot_bytes = None
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(
-                    headless=True,
-                    args=["--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"]
-                )
+                browser = p.chromium.launch(headless=True)
                 page = browser.new_page(
                     viewport={"width": self.viewport_w, "height": self.viewport_h},
                     device_scale_factor=self.scale_factor
@@ -520,7 +392,6 @@ class KMarketCardNewsAppCapturer:
                 page.wait_for_timeout(300)
                 screenshot_bytes = page.screenshot(type="png", full_page=False)
                 browser.close()
-
         except Exception as e:
             logger.error(f"[Slide 3] Playwright 캡처 실패: {e}")
 
@@ -541,9 +412,7 @@ class KMarketCardNewsAppCapturer:
         lang: str = "uz",
         item_name: str = "전자레인지",
         target_area: str = "신촌",
-        force_refresh: bool = False,
-        dynamic_title: Optional[str] = None,
-        dynamic_desc: Optional[str] = None
+        force_refresh: bool = False
     ) -> Image.Image:
         """
         💬 [4번 슬라이드 전용] 실제 케이마켓 0원 매물 상세 & 17개 언어 실시간 직거래 순정 화면 (1080x1350)
@@ -588,12 +457,8 @@ class KMarketCardNewsAppCapturer:
             title_text = i18n.get("microwave", "Hashamatli Kompakt Mikroto'lqinli Pech (0 Von Bepul)")
             item_tag = "microwave"
 
-        if dynamic_title:
-            title_text = dynamic_title
-        desc_text = dynamic_desc if dynamic_desc else i18n.get('desc', '')
-
         cached_file = self.cache_dir / f"kmarket_detail_{item_tag}_{lang.lower()}_1080x1350.png"
-        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000 and not dynamic_title:
+        if not force_refresh and cached_file.exists() and cached_file.stat().st_size > 50000:
             logger.info(f"[{lang.upper()}] 📦 캐시된 매물 상세({item_tag}) 순정 캡처 재사용: {cached_file.name}")
             return Image.open(cached_file).convert("RGB")
 
@@ -729,7 +594,7 @@ class KMarketCardNewsAppCapturer:
                     <span class="manner-badge">{i18n['manner_temp']}</span>
                 </div>
                 <div class="item-title">{title_text}</div>
-                <div class="item-desc">{desc_text}</div>
+                <div class="item-desc">{i18n['desc']}</div>
                 <div class="trans-banner">
                     <span class="trans-icon">🌐</span>
                     <span class="trans-text">{i18n['trans_badge']}</span>
@@ -748,10 +613,7 @@ class KMarketCardNewsAppCapturer:
         screenshot_bytes = None
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(
-                    headless=True,
-                    args=["--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"]
-                )
+                browser = p.chromium.launch(headless=True)
                 page = browser.new_page(
                     viewport={"width": self.viewport_w, "height": self.viewport_h},
                     device_scale_factor=self.scale_factor
@@ -760,7 +622,6 @@ class KMarketCardNewsAppCapturer:
                 page.wait_for_timeout(300)
                 screenshot_bytes = page.screenshot(type="png", full_page=False)
                 browser.close()
-
         except Exception as e:
             logger.error(f"[Slide 4] Playwright 캡처 실패: {e}")
 

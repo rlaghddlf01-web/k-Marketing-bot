@@ -1,0 +1,84 @@
+================================================================================
+📌 [KTRS 공식] 2개 앱 공식 명칭 및 구글 검색 키워드 총정리 (메모장 보관용)
+================================================================================
+작성일시: 2026-10-07
+용도: 레딧, 유튜브, 틱톡, 인스타, 블로그 등 모든 마케팅 봇/카피라이터의 기준 문서
+주의: 개발 폴더명(EasyTaxRefund)과 실제 서비스명은 완전히 다름! "EasyTax" 영구 사용 금지!
+
+────────────────────────────────────────────────────────────────────────────────
+🛒 [앱 1: 외국인 중고거래 & 무빙세일 플랫폼]
+────────────────────────────────────────────────────────────────────────────────
+■ 실제 배포 사이트:
+   👉 https://ktrs-market.vercel.app
+
+■ 바탕화면 소스 폴더:
+   👉 C:\Users\zkfnt\Desktop\k-market-main
+
+■ 소스코드 공식 타이틀 (SEO):
+   "KTRS 마켓 (KTRS-Market) | 외국인 0원 무료 나눔 & 중고거래 무빙세일"
+
+■ 공식 브랜드 표기명:
+   - 영문: KTRS Market (또는 KTRS-Market)
+   - 한국어: KTRS 마켓
+
+■ 🎯 구글에서 실제로 검색해야 하는 키워드:
+   1) 영문 (레딧 / 글로벌 타겟):
+      👉 "KTRS Market"
+      👉 "KTRS-Market"
+   2) 한국어:
+      👉 "KTRS 마켓"
+
+■ 레딧/SNS 홍보 실제 문구 예시:
+   "When I moved into my one-room near campus, I used KTRS Market and it was super convenient because it didn't require Korean phone verification and everything was in English."
+   (외국인이 구글에 'KTRS Market' 검색 시 ktrs-market.vercel.app 1등 노출 확인 완료)
+
+
+────────────────────────────────────────────────────────────────────────────────
+💰 [앱 2: 외국인 소득세 & 세무 환급 플랫폼]
+────────────────────────────────────────────────────────────────────────────────
+■ 실제 배포 사이트:
+   👉 https://ktrs-service.vercel.app
+
+■ 바탕화면 소스 폴더:
+   👉 C:\Users\zkfnt\Desktop\EasyTaxRefund-main
+
+■ 소스코드 공식 타이틀 (SEO / Header / PWA):
+   "Korea Tax Refund Service (KTRS) | 대한민국 외국인 세금 환급 서비스"
+   (헤더 로고: KTRS Korea Tax Refund Service)
+
+■ 공식 브랜드 표기명:
+   - 영문 정식: Korea Tax Refund Service (약칭: KTRS)
+   - 영문 서브: KTRS Tax Refund
+   - 한국어 정식: 대한민국 외국인 세금 환급 서비스 (약칭: KTRS 세금 환급)
+
+■ 🚨 [절대 주의] 왜 "EasyTax"를 쓰면 안 되는가?:
+   - "EasyTax"는 개발 당시 임시 프로젝트 폴더명일 뿐, 사이트 어디에도 EasyTax라는 표기가 없음.
+   - 구글에 "EasyTax"나 "EasyTax Korea"를 검색하면 전혀 다른 타사 관광객 쇼핑 환급 업체(easytaxrefund.co.kr)가 1등으로 떠서 고객을 전부 빼앗김!
+   - 따라서 모든 마케팅과 글에서 "EasyTax" 명칭은 완전 영구 삭제 처리함!
+
+■ 🎯 구글에서 실제로 검색해야 하는 키워드:
+   1) 영문 메인 (레딧 / 글로벌 타겟):
+      👉 "Korea Tax Refund Service"
+      👉 "KTRS Tax Refund"
+      👉 "KTRS Service"
+   2) 한국어 메인:
+      👉 "KTRS 세금 환급"
+      👉 "KTRS 외국인 환급"
+
+■ 레딧/SNS 홍보 실제 문구 예시:
+   "When I had to file my taxes in Korea without speaking fluent Korean, I used Korea Tax Refund Service (KTRS) and it was really convenient because it was all in English without needing complex Korean certs."
+   (외국인이 구글에 'Korea Tax Refund Service' 또는 'KTRS Tax Refund' 검색 시 포털 접속 유도)
+
+
+────────────────────────────────────────────────────────────────────────────────
+📊 [요약 비교표]
+────────────────────────────────────────────────────────────────────────────────
+항목               | 중고거래 앱                   | 세무 환급 앱
+------------------+------------------------------+----------------------------------
+공식 영문명       | KTRS Market                  | Korea Tax Refund Service (KTRS)
+공식 한국어명     | KTRS 마켓                    | KTRS 세금 환급
+배포 도메인       | ktrs-market.vercel.app       | ktrs-service.vercel.app
+구글 영문 검색어  | KTRS Market                  | Korea Tax Refund Service / KTRS Tax Refund
+구글 한국어 검색어| KTRS 마켓                    | KTRS 세금 환급
+금지된 오표기     | K-Market, KMarket            | EasyTax, EasyTax Korea
+================================================================================

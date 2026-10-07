@@ -221,7 +221,7 @@ STRICT GUIDELINES:
             api_key = os.getenv("GEMINI_API_KEY_KMARKET") or os.getenv("GEMINI_FREE_API_KEY_KMARKET") or os.getenv("GEMINI_API_KEY")
             client = genai.Client(api_key=api_key)
             res = client.models.generate_content(
-                model='gemini-flash-lite-latest',
+                model='gemini-3.1-flash-lite',
                 contents=prompt
             )
             return res.text.strip()

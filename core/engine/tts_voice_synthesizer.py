@@ -4,11 +4,9 @@ TTSVoiceSynthesizer - 🎙️ [Edge-TTS 다국어 16kHz 무손실 음향 생성�
 - 숏폼 81프레임(5.06초 @ 16fps) 호흡 및 발화 속도 최적화
 - 한국어, 베트남어, 우즈베크어, 러시아어 등 다국어 신경망 보이스 자동 매핑
 - FFmpeg 기반 16kHz Mono WAV 무손실 변환 (Wav2Vec2 음성 인코더 100% 호환)
-- 파일 락 회피 및 핸들 플러시 안정화 가드레일 내장
 """
 
 import os
-import time
 import asyncio
 import subprocess
 from pathlib import Path
@@ -29,7 +27,7 @@ VOICE_MAP: Dict[str, Dict[str, str]] = {
     "tl": {"female": "fil-PH-BlessicaNeural", "male": "fil-PH-AngeloNeural"},
     "my": {"female": "my-MM-NilarNeural", "male": "my-MM-ThihaNeural"},
     "ru": {"female": "ru-RU-SvetlanaNeural", "male": "ru-RU-DmitryNeural"},
-    "mn": {"female": "mn-MN-YesuiNeural", "male": "mn-MN-BataaNeural"},
+    "mn": {"female": "ru-RU-SvetlanaNeural", "male": "ru-RU-DmitryNeural"},
     "en": {"female": "en-US-JennyNeural", "male": "en-US-GuyNeural"},
     "zh": {"female": "zh-CN-XiaoxiaoNeural", "male": "zh-CN-YunjianNeural"},
     "ne": {"female": "ne-NP-HemkalaNeural", "male": "ne-NP-SagarNeural"},
@@ -42,10 +40,8 @@ class TTSVoiceSynthesizer:
     """다국어 숏폼 음성 합성 엔진 (성별 일치 보장)"""
 
     def __init__(self, output_dir: Optional[str] = None):
-        from config import DATA_DIR
-        default_dir = str(DATA_DIR / "tts_cache")
         self.ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
-        self.output_dir = output_dir or default_dir
+        self.output_dir = output_dir or r"D:\ComfyUI_Wan_Engine\ComfyUI\input"
         os.makedirs(self.output_dir, exist_ok=True)
 
     def generate_speech_wav(
@@ -54,6 +50,7 @@ class TTSVoiceSynthesizer:
         lang: str = "ko",
         gender: str = "female",
         rate: str = "+0%",
+        pitch: Optional[str] = None,
         target_duration: Optional[float] = None,
         filename_prefix: str = "speech"
     ) -> str:
@@ -61,6 +58,7 @@ class TTSVoiceSynthesizer:
         인물 성별(gender)과 국가 언어(lang)에 100% 일치하는 신경망 보이스로 합성
         target_duration이 지정된 경우 해당 초로 길이 보정, None인 경우 자연스러운 전체 발화 길이 유지
         """
+        # 성별 정규화 (male vs female)
         gender_clean = "male" if str(gender).lower() in ["male", "m", "man", "남", "남성"] else "female"
         lang_voices = VOICE_MAP.get(lang, VOICE_MAP.get("ko"))
 
@@ -76,7 +74,10 @@ class TTSVoiceSynthesizer:
         async def _run_tts():
             for attempt in range(3):
                 try:
-                    comm = edge_tts.Communicate(text, voice, rate=rate)
+                    kwargs = {"rate": rate}
+                    if pitch:
+                        kwargs["pitch"] = pitch
+                    comm = edge_tts.Communicate(text, voice, **kwargs)
                     await comm.save(mp3_path)
                     if os.path.exists(mp3_path) and os.path.getsize(mp3_path) > 0:
                         return
@@ -87,10 +88,7 @@ class TTSVoiceSynthesizer:
 
         asyncio.run(_run_tts())
 
-        # 🛡️ [파일 핸들 플러시 안정화 대기]
-        time.sleep(0.3)
-
-        # FFmpeg를 이용한 16kHz mono WAV 변환 및 길이 보정 (최대 3회 재시도 가드레일)
+        # FFmpeg를 이용한 16kHz mono WAV 변환 및 길이 보정
         cmd = [
             self.ffmpeg_exe, "-y",
             "-i", mp3_path,
@@ -101,13 +99,38 @@ class TTSVoiceSynthesizer:
             cmd.extend(["-t", str(target_duration)])
         cmd.append(wav_path)
 
-        for attempt in range(3):
-            try:
-                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                break
-            except subprocess.CalledProcessError as e:
-                if attempt == 2:
-                    raise e
-                time.sleep(0.5)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # 🎯 [무음 정밀 제거: Silence Stripping] 선두/후두 무음을 0ms 단위로 정밀 제거하여 0프레임 음성 개시 보장
+        try:
+            self._strip_silence(wav_path, threshold_ratio=0.02, pad_ms=10)
+        except Exception:
+            pass
 
         return wav_path
+
+    @staticmethod
+    def _strip_silence(wav_path: str, threshold_ratio: float = 0.02, pad_ms: int = 10):
+        """WAV 파일의 선두/후두 무음을 감지하여 첫 음절이 0초에 즉시 시작되도록 정밀 트리밍"""
+        import numpy as np
+        from scipy.io import wavfile
+
+        sr, data = wavfile.read(wav_path)
+        if len(data) == 0:
+            return
+
+        mono_data = np.mean(data, axis=1) if len(data.shape) > 1 else data
+        peak = np.max(np.abs(mono_data))
+        if peak < 100:
+            return
+
+        thresh = max(100, int(peak * threshold_ratio))
+        non_silent = np.where(np.abs(mono_data) > thresh)[0]
+
+        if len(non_silent) > 0:
+            pad_samples = int(sr * (pad_ms / 1000.0))
+            start_idx = max(0, non_silent[0] - pad_samples)
+            end_idx = min(len(data), non_silent[-1] + pad_samples)
+            trimmed_data = data[start_idx:end_idx]
+            wavfile.write(wav_path, sr, trimmed_data)
+

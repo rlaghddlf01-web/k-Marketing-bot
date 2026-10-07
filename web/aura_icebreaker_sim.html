@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, height=1920, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aura AI 데이팅 - 6번 주제 [AI 첫대화 비서] 실시간 iFrame 시뮬레이션</title>
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            aura: {
+              gold: '#E5A934',
+              goldDark: '#b8821d',
+              pink: '#EC4899',
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #050507;
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      color: #fff;
+    }
+    /* Luxury Smartphone Frame: 960px x 1820px centered */
+    .phone-chassis {
+      position: absolute;
+      top: 50px;
+      left: 60px;
+      width: 960px;
+      height: 1820px;
+      background: #09090b;
+      border-radius: 68px;
+      padding: 16px;
+      box-shadow: 
+        0 40px 100px rgba(0, 0, 0, 0.95), 
+        0 0 60px rgba(229, 169, 52, 0.2),
+        0 0 0 4px #27272a,
+        inset 0 0 0 3px rgba(255, 255, 255, 0.12);
+    }
+    .phone-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 54px;
+      overflow: hidden;
+      background: #000000;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .aura-logo {
+      background: linear-gradient(135deg, #FFF3D1 0%, #E5A934 50%, #C98718 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 16px rgba(229, 169, 52, 0.45));
+    }
+    .glass-card {
+      background: rgba(18, 18, 24, 0.85);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .glass-pill {
+      background: rgba(15, 15, 20, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .glow-gold {
+      box-shadow: 0 0 30px rgba(229, 169, 52, 0.5);
+    }
+    .chat-bubble-mine {
+      background: linear-gradient(135deg, #E5A934 0%, #d49826 100%);
+      color: #000000;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(229, 169, 52, 0.35);
+      border-radius: 26px;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble-theirs {
+      background: #18181b;
+      color: #f4f4f5;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      border-radius: 26px;
+      border-bottom-left-radius: 4px;
+    }
+    @keyframes tap-pulse {
+      0% { transform: scale(0.85); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.5; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
+    .tap-indicator {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(229, 169, 52, 0.6);
+      border: 3px solid #fff;
+      pointer-events: none;
+      animation: tap-pulse 0.5s ease-out forwards;
+      z-index: 100;
+    }
+    @keyframes pop-up {
+      0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-pop-up {
+      animation: pop-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white select-none">
+
+  <!-- Luxury Ambient Background Glows -->
+  <div class="absolute w-[800px] h-[800px] rounded-full bg-amber-500/10 blur-[150px] -top-32 -left-32 pointer-events-none"></div>
+  <div class="absolute w-[800px] h-[800px] rounded-full bg-pink-600/10 blur-[150px] -bottom-32 -right-32 pointer-events-none"></div>
+
+  <!-- 9:16 Smartphone Container -->
+  <div class="phone-chassis">
+    <div class="phone-screen">
+
+      <!-- 1. Top iPhone Status Bar -->
+      <div class="w-full h-16 pt-3 px-10 flex items-center justify-between z-50 text-white text-xl font-bold tracking-tight bg-black">
+        <span>09:41</span>
+        <!-- Dynamic Island Notch -->
+        <div class="w-48 h-9 bg-zinc-950 rounded-full flex items-center justify-center gap-2.5 border border-zinc-800/80 shadow-inner">
+          <div class="w-3 h-3 rounded-full bg-zinc-800"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-[11px] text-zinc-400 font-semibold tracking-tight">Aura AI 비서</span>
+        </div>
+        <div class="flex items-center gap-2.5 text-lg">
+          <span>5G</span>
+          <!-- WiFi Icon -->
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.74 0 7.15 1.48 9.69 3.88L12 18.57 2.31 11.38C4.85 8.98 8.26 7.5 12 7.5z"/></svg>
+          <!-- Battery Icon -->
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16 4H8C6.9 4 6 4.9 6 6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H8V6h8v12z"/></svg>
+        </div>
+      </div>
+
+      <!-- 2. Chat Room Top Navigation Header -->
+      <header class="w-full h-22 px-7 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-md flex items-center justify-between z-40">
+        <div class="flex items-center gap-4">
+          <button class="text-2xl text-zinc-300">←</button>
+          <!-- Avatar Profile -->
+          <div class="relative">
+            <img 
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80" 
+              alt="User Avatar"
+              class="w-14 h-14 rounded-full object-cover border-2 border-amber-500/80"
+            />
+            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-black"></span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h2 class="text-2xl font-extrabold text-white tracking-tight">정석대로</h2>
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-400 text-xs font-bold border border-pink-500/30">매칭률 98%</span>
+            </div>
+            <p class="text-zinc-400 text-sm font-medium mt-0.5">답장 텀 1분 이내 • 관심사: 독서 / 영화 / 성수동 맛집</p>
+          </div>
+        </div>
+        <!-- Right: AI Safe Care & Call Icons -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold text-xs">
+            <span>🛡️ 안심 탈출</span>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-amber-400 text-xl">
+            📹
+          </div>
+        </div>
+      </header>
+
+      <!-- 3. AI Realtime Smart Match & Translation Info Banner -->
+      <div class="w-full px-7 pt-3">
+        <div class="w-full bg-gradient-to-r from-amber-500/15 via-pink-500/15 to-purple-500/15 border border-amber-500/40 rounded-2xl p-3.5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">✨</span>
+            <div>
+              <h4 class="text-amber-300 text-base font-bold">Aura AI 첫대화 어시스턴트 가동 중</h4>
+              <p class="text-zinc-300 text-xs mt-0.5">상대 프로필/취향을 분석하여 읽씹 없는 최적의 첫마디를 1-Click 추천합니다.</p>
+            </div>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-amber-500 text-black text-xs font-extrabold tracking-wider">AI ACTIVE</span>
+        </div>
+      </div>
+
+      <!-- 4. Main Chat Scrollable Messages Canvas -->
+      <div id="chatScrollArea" class="flex-1 px-7 py-5 overflow-y-auto space-y-5 flex flex-col justify-start">
+        
+        <!-- System Notification: Matched! -->
+        <div class="text-center py-1">
+          <span class="px-4 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-zinc-400 text-sm font-medium">
+            🎉 정석대로님과 Aura VIP 매칭이 성사되었습니다!
+          </span>
+        </div>
+
+        <!-- Message 1 (Mine: Gold Bubble) -->
+        <div id="msgRow1" class="hidden flex justify-end items-end gap-2.5 animate-pop-up">
+          <span class="text-xs text-zinc-500 font-medium mb-1">오전 10:02</span>
+          <div class="chat-bubble-mine max-w-[700px] p-5 text-xl leading-relaxed">
+            안녕하세요, 정석대로님! 프로필 보니 저랑 독서랑 영화 보는 거 좋아하시는 게 완전 똑같네요! 혹시 최근에 가장 재밌게 보신 책이나 영화 있으세요? 😊
+          </div>
+        </div>
+
+        <!-- Message 2 (Theirs: Gray Bubble) -->
+        <div id="msgRow2" class="hidden flex justify-start items-end gap-2.5 animate-pop-up">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover border border-zinc-700 mb-1" />
+          <div class="chat-bubble-theirs max-w-[700px] p-5 text-xl leading-relaxed">
+            안녕하세요! ㅎㅎ 저 최근에 소설책 하나 읽었는데 너무 몰입돼서 밤새워서 다 읽었어요 ㅋㅋㅋ
+          </div>
+          <span class="text-xs text-zinc-500 font-medium mb-1">오전 10:02</span>
+        </div>
+
+        <!-- Message 3 (Mine: 2nd Gold Bubble) -->
+        <div id="msgRow3" class="hidden flex justify-end items-end gap-2.5 animate-pop-up">
+          <span class="text-xs text-zinc-500 font-medium mb-1">오전 10:03</span>
+          <div class="chat-bubble-mine max-w-[700px] p-5 text-xl leading-relaxed">
+            헐 어떤 책인데요?! 저도 한번 빠지면 새벽까지 못 자는데 너무 궁금해요 ㅋㅋㅋ
+          </div>
+        </div>
+
+        <!-- Message 4 (Theirs: 2nd Gray Bubble) -->
+        <div id="msgRow4" class="hidden flex justify-start items-end gap-2.5 animate-pop-up">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover border border-zinc-700 mb-1" />
+          <div class="chat-bubble-theirs max-w-[700px] p-5 text-xl leading-relaxed">
+            '불편한 편의점'이요! 읽다가 혼자 몰래 찔찔 울었잖아요 ㅠㅠ ㅋㅋㅋ
+          </div>
+          <span class="text-xs text-zinc-500 font-medium mb-1">오전 10:03</span>
+        </div>
+
+        <!-- Message 5 (Mine: 3rd Gold Bubble) -->
+        <div id="msgRow5" class="hidden flex justify-end items-end gap-2.5 animate-pop-up">
+          <span class="text-xs text-zinc-500 font-medium mb-1">오전 10:03</span>
+          <div class="chat-bubble-mine max-w-[700px] p-5 text-xl leading-relaxed">
+            대박 저도 그거 보고 오열했잖아요 ㅋㅋㅋ 완전 따뜻한 F 감성이시네요!
+          </div>
+        </div>
+
+        <!-- Message 6 (Theirs: Strong Chemistry & High Interest) -->
+        <div id="msgRow6" class="hidden flex justify-start items-end gap-2.5 animate-pop-up">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover border border-amber-500/80 mb-1" />
+          <div class="chat-bubble-theirs max-w-[700px] p-5 text-xl leading-relaxed border-2 border-amber-500/80 bg-zinc-900 shadow-2xl">
+            맞아요 저 완전 파워 F예요 ㅋㅋㅋ 처음 대화하는데 이렇게 티키타카 잘 맞는 분 진짜 오랜만이에요 ✨<br><br>
+            <span class="text-amber-400 font-extrabold text-2xl">대화 너무 재밌어요! 앞으로 자주 연락해요 ㅎㅎ 😊</span>
+          </div>
+          <span class="text-xs text-zinc-500 font-medium mb-1">오전 10:04</span>
+        </div>
+
+        <!-- Final Match Climax Card -->
+        <div id="finalClimaxCard" class="hidden animate-pop-up my-3 p-6 rounded-3xl bg-gradient-to-r from-pink-600/30 via-amber-500/30 to-purple-600/30 border-2 border-amber-400 glow-gold text-center space-y-2.5">
+          <div class="text-4xl">💖 ✨ 💬</div>
+          <h3 class="text-3xl font-black text-amber-300">대화 호감도 99% • 티키타카 성공!</h3>
+          <p class="text-zinc-200 text-lg font-semibold">Aura AI 맞춤형 첫대화 비서로 읽씹 0% & 자연스러운 대화 이어짐</p>
+        </div>
+
+      </div>
+
+      <!-- 5. AI Icebreaker Recommendations Overlay Panel -->
+      <div id="aiRecomContainer" class="px-7 pb-3 transition-all duration-300 z-40">
+        
+        <!-- Phase 1 Recommendations (3 Cards) -->
+        <div id="recomSet1" class="space-y-2">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-2 text-amber-400 text-sm font-bold">
+              <span>✨</span><span>Aura AI 첫대화 추천 문구 (3종)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/40">1-CLICK SEND</span>
+          </div>
+
+          <div id="card1_1" class="p-3.5 rounded-2xl bg-zinc-900/90 border-2 border-amber-500/70 flex items-center justify-between gap-3 cursor-pointer shadow-xl transition-all">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black text-sm flex items-center justify-center flex-shrink-0">1</span>
+              <p class="text-white text-sm font-semibold leading-snug">안녕하세요, 정석대로님! 프로필 보니 저랑 독서랑 영화 취향이 완전 똑같네요! 최근 재밌게 보신 것 있으세요? 😊</p>
+            </div>
+            <span class="text-amber-400 text-xl font-bold flex-shrink-0">➤</span>
+          </div>
+
+          <div id="card1_2" class="p-3 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex items-center justify-between gap-3 opacity-70">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-zinc-800 text-zinc-400 font-bold text-xs flex items-center justify-center flex-shrink-0">2</span>
+              <p class="text-zinc-300 text-xs font-medium truncate">반가워요! 저도 맛집 정말 좋아하는데, 혹시 정석대로님만의 성수동 인생 맛집 있으신가요?</p>
+            </div>
+          </div>
+
+          <div id="card1_3" class="p-3 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex items-center justify-between gap-3 opacity-70">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-zinc-800 text-zinc-400 font-bold text-xs flex items-center justify-center flex-shrink-0">3</span>
+              <p class="text-zinc-300 text-xs font-medium truncate">독서, 영화, 미식까지 공통점이 정말 많네요! 취향 통하는 분 만나서 너무 반갑습니다 :)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 2 Recommendation -->
+        <div id="recomSet2" class="hidden space-y-2">
+          <div class="flex items-center gap-2 text-amber-400 text-sm font-bold px-1">
+            <span>✨</span><span>Aura AI 센스 만점 2차 질문 추천</span>
+          </div>
+          <div id="card2_1" class="p-3.5 rounded-2xl bg-zinc-900/90 border-2 border-amber-500/80 flex items-center justify-between gap-3 shadow-xl transition-all">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black text-xs flex items-center justify-center flex-shrink-0">AI</span>
+              <p class="text-white text-sm font-semibold">헐 어떤 책인데요?! 저도 한번 빠지면 새벽까지 못 자는데 너무 궁금해요 ㅋㅋㅋ</p>
+            </div>
+            <span class="text-amber-400 text-xl font-bold flex-shrink-0">➤</span>
+          </div>
+        </div>
+
+        <!-- Phase 3 Recommendation -->
+        <div id="recomSet3" class="hidden space-y-2">
+          <div class="flex items-center gap-2 text-pink-400 text-sm font-bold px-1">
+            <span>✨</span><span>Aura AI 폭풍 공감 리액션 추천</span>
+          </div>
+          <div id="card3_1" class="p-3.5 rounded-2xl bg-zinc-900/90 border-2 border-pink-500/80 flex items-center justify-between gap-3 shadow-xl transition-all">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-full bg-pink-500 text-white font-black text-xs flex items-center justify-center flex-shrink-0">AI</span>
+              <p class="text-white text-sm font-semibold">대박 저도 그거 보고 오열했잖아요 ㅋㅋㅋ 완전 따뜻한 F 감성이시네요!</p>
+            </div>
+            <span class="text-pink-400 text-xl font-bold flex-shrink-0">➤</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 6. Bottom Input Bar -->
+      <footer class="w-full h-24 px-7 pb-4 border-t border-zinc-800/80 bg-zinc-950 flex items-center justify-between gap-3 z-40">
+        <div id="inputBox" class="flex-1 h-14 rounded-full bg-zinc-900 border border-zinc-800 px-5 flex items-center justify-between gap-3 transition-all">
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <span class="text-xl text-amber-400">✨</span>
+            <span id="inputText" class="text-zinc-500 text-base font-medium truncate">메시지를 입력하세요...</span>
+          </div>
+          <span class="text-zinc-500 text-xl">🎙️</span>
+        </div>
+        <button id="sendActionBtn" class="w-14 h-14 rounded-full bg-zinc-800 text-zinc-400 flex items-center justify-center text-2xl transition-all shadow-lg">
+          ➤
+        </button>
+      </footer>
+
+      <!-- Interactive Touch Pointer -->
+      <div id="touchPointer" class="hidden pointer-events-none fixed z-[150]">
+        <div class="tap-indicator"></div>
+        <div class="text-4xl -mt-5 -ml-5">👆</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Timeline Animation Controller -->
+  <script>
+    function tapElement(el) {
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const tp = document.getElementById('touchPointer');
+      tp.style.left = x + 'px';
+      tp.style.top = y + 'px';
+      tp.classList.remove('hidden');
+      setTimeout(() => {
+        tp.classList.add('hidden');
+      }, 500);
+    }
+
+    function scrollBottom() {
+      const el = document.getElementById('chatScrollArea');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    window.startFullSimulation = function() {
+      const recom1 = document.getElementById('recomSet1');
+      const recom2 = document.getElementById('recomSet2');
+      const recom3 = document.getElementById('recomSet3');
+      const card1_1 = document.getElementById('card1_1');
+      const card2_1 = document.getElementById('card2_1');
+      const card3_1 = document.getElementById('card3_1');
+
+      const msg1 = document.getElementById('msgRow1');
+      const msg2 = document.getElementById('msgRow2');
+      const msg3 = document.getElementById('msgRow3');
+      const msg4 = document.getElementById('msgRow4');
+      const msg5 = document.getElementById('msgRow5');
+      const msg6 = document.getElementById('msgRow6');
+      const climax = document.getElementById('finalClimaxCard');
+
+      const inputBox = document.getElementById('inputBox');
+      const inputText = document.getElementById('inputText');
+      const sendBtn = document.getElementById('sendActionBtn');
+
+      // [0.8s]: Touch Tap 1st AI Recommendation (Exact center of card1_1)
+      setTimeout(() => {
+        tapElement(card1_1);
+        card1_1.classList.add('bg-amber-500/30', 'border-amber-400', 'scale-[0.98]');
+      }, 800);
+
+      // [1.2s]: Auto-Type into input box
+      setTimeout(() => {
+        inputBox.classList.add('border-amber-500', 'bg-zinc-800');
+        inputText.innerText = "안녕하세요, 정석대로님! 프로필 보니 저랑 독서랑...";
+        inputText.classList.remove('text-zinc-500');
+        inputText.classList.add('text-white', 'font-bold');
+        sendBtn.classList.remove('bg-zinc-800', 'text-zinc-400');
+        sendBtn.classList.add('bg-amber-500', 'text-black', 'glow-gold', 'scale-105');
+      }, 1200);
+
+      // [1.6s]: Send Message 1
+      setTimeout(() => {
+        recom1.classList.add('hidden');
+        inputBox.classList.remove('border-amber-500', 'bg-zinc-800');
+        inputText.innerText = "메시지를 입력하세요...";
+        inputText.classList.remove('text-white', 'font-bold');
+        inputText.classList.add('text-zinc-500');
+        sendBtn.classList.remove('bg-amber-500', 'text-black', 'glow-gold', 'scale-105');
+        sendBtn.classList.add('bg-zinc-800', 'text-zinc-400');
+
+        msg1.classList.remove('hidden');
+        scrollBottom();
+      }, 1600);
+
+      // [2.5s]: Partner Replies (Message 2)
+      setTimeout(() => {
+        msg2.classList.remove('hidden');
+        scrollBottom();
+      }, 2500);
+
+      // [3.0s]: 2nd AI Recommendation Appears
+      setTimeout(() => {
+        recom2.classList.remove('hidden');
+      }, 3000);
+
+      // [3.6s]: Touch Tap 2nd Recommendation (Exact center of card2_1)
+      setTimeout(() => {
+        tapElement(card2_1);
+        card2_1.classList.add('bg-amber-500/30', 'border-amber-400', 'scale-[0.98]');
+      }, 3600);
+
+      // [4.0s]: Send Message 3
+      setTimeout(() => {
+        recom2.classList.add('hidden');
+        msg3.classList.remove('hidden');
+        scrollBottom();
+      }, 4000);
+
+      // [4.8s]: Partner 2nd Reply (Message 4)
+      setTimeout(() => {
+        msg4.classList.remove('hidden');
+        scrollBottom();
+      }, 4800);
+
+      // [5.3s]: 3rd AI Recommendation Appears
+      setTimeout(() => {
+        recom3.classList.remove('hidden');
+      }, 5300);
+
+      // [5.8s]: Touch Tap 3rd Recommendation (Exact center of card3_1)
+      setTimeout(() => {
+        tapElement(card3_1);
+        card3_1.classList.add('bg-pink-500/30', 'border-pink-400', 'scale-[0.98]');
+      }, 5800);
+
+      // [6.2s]: Send Message 5
+      setTimeout(() => {
+        recom3.classList.add('hidden');
+        msg5.classList.remove('hidden');
+        scrollBottom();
+      }, 6200);
+
+      // [7.0s]: Partner Date Proposal (Message 6)!
+      setTimeout(() => {
+        msg6.classList.remove('hidden');
+        scrollBottom();
+      }, 7000);
+
+      // [7.8s]: Final Match Climax Card!
+      setTimeout(() => {
+        climax.classList.remove('hidden');
+        scrollBottom();
+      }, 7800);
+    };
+
+    // Auto start on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(window.startFullSimulation, 400);
+    });
+  </script>
+</body>
+</html>

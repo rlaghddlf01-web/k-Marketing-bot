@@ -89,7 +89,7 @@ class RedditOrganicEngine:
             try:
                 read_sec = random.randint(3, 10)
                 res = self.driver.upvote_post(post["url"], read_sec=read_sec)
-                if res.get("success"):
+                if res.get("verified", False) or res.get("success", False):
                     self.health.record_upvote()
                     result["upvoted"] += 1
                     logger.info(f"👍 업보트 완료: '{post['title'][:50]}...'")
@@ -177,7 +177,7 @@ class RedditOrganicEngine:
 
                 # 댓글 게시
                 res = self.driver.post_comment_humanlike(post["url"], comment)
-                if res.get("success"):
+                if res.get("verified", False) or res.get("success", False):
                     self.health.record_organic_comment()
                     result["commented"] += 1
                     logger.info(f"💬 비홍보 댓글 등록 완료: '{post['title'][:50]}...'")

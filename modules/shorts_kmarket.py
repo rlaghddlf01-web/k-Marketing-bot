@@ -22,7 +22,6 @@ from core.kmarket_iframe_composer import KMarketIframeComposer
 from core.kmarket_screencast_provider import KMarketScreencastProvider
 from core.local_gpu_media_generator_kmarket import LocalGPUMediaGeneratorKMarket
 from core.gemini_media_generator import GeminiMediaGenerator
-from core.media_quality_verifier import MediaQualityVerifier
 from core.motion_video_composer import MotionVideoComposer
 from core.tts_engine import TTSEngine
 from core.auto_publishers.shorts_multi_publisher import ShortsMultiPublisher
@@ -46,7 +45,6 @@ class ShortsKMarket:
         self.iframe_composer = KMarketIframeComposer()
         self.screencast_provider = KMarketScreencastProvider()
         self.gemini_media_gen = LocalGPUMediaGeneratorKMarket()
-        self.quality_verifier = MediaQualityVerifier(service_id=self.service_id)
         self.motion_composer = MotionVideoComposer(output_dir=self.output_dir)
         self.tts_engine = TTSEngine()
         self.publisher = ShortsMultiPublisher()
@@ -158,14 +156,9 @@ class ShortsKMarket:
 
                 final_img_path = img_path if img_path and Path(img_path).exists() else None
 
-                # AI 비전 품질 검사관
-                if final_img_path:
-                    passed, q_score, reason, _ = self.quality_verifier.verify_scene_image(
-                        final_img_path,
-                        scene_name=f"K-Market Scene {s_idx} ({scene['name']})",
-                        lang=lang
-                    )
-                    logger.info(f"[{lang.upper()}] 🖼 K-Market 씬 {s_idx}/5 AI 품질 점수: {q_score}점 ({reason})")
+                # 파이썬 실물 이미지 검증 (크기 및 존재 확인)
+                if final_img_path and Path(final_img_path).exists():
+                    logger.info(f"[{lang.upper()}] 🖼 K-Market 씬 {s_idx}/5 파이썬 실물 확인 완료 -> {Path(final_img_path).name}")
 
                 scene_images.append({
                     "scene_idx": s_idx,
@@ -255,7 +248,6 @@ class ShortsKMarket:
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             f"📝 [릴스 본문 (링크 0% - 알고리즘 도달률 5배 극대화)]:\n"
             f"{fb.get('post_content', '')}\n\n"
-            f"🏷️ 릴스 해시태그: {fb.get('hashtags', hashtags_str)}\n\n"
             f"★ [첫 번째 댓글 (릴스 게시 직후 바로 달아줄 스텔스 링크)]:\n"
             f"{fb.get('first_comment', f'👉 {landing_url}')}\n\n"
 

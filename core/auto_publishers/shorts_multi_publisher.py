@@ -343,11 +343,20 @@ class ShortsMultiPublisher:
 
         logger.info(f"🚀 [4대 채널 멀티 배포기 가동] {service_id.upper()}/{lang.upper()} - {title[:30]}")
 
-        # 1. 4대 플랫폼 독립 배포 디스패치
-        yt_res = self.youtube.publish(video_data)
-        ig_res = self.instagram.publish(video_data)
-        fb_res = self.facebook.publish(video_data)
-        tt_res = self.tiktok.publish(video_data)
+        # 🛑 [대표님 긴급 수칙] 외부 API 송출 차단 모드 검사
+        from config import BLOCK_EXTERNAL_API_DISPATCH, ENABLE_EXTERNAL_API_DISPATCH
+        if BLOCK_EXTERNAL_API_DISPATCH or not ENABLE_EXTERNAL_API_DISPATCH:
+            logger.warning(f"🛑 [API 송출 차단 모드] 대표님 긴급 차단 지시에 따라 숏폼 외부 API 송출을 전면 생략합니다. (로컬 메타데이터/영상 보관 완료)")
+            yt_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+            ig_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+            fb_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+            tt_res = {"status": "blocked", "message": "API 송출 차단 활성화"}
+        else:
+            # 1. 4대 플랫폼 독립 배포 디스패치
+            yt_res = self.youtube.publish(video_data)
+            ig_res = self.instagram.publish(video_data)
+            fb_res = self.facebook.publish(video_data)
+            tt_res = self.tiktok.publish(video_data)
 
         # 2. 영상 파일과 동일 경로에 [완전체 메타데이터 파일] 자동 저장
         if mp4_path and os.path.exists(mp4_path):

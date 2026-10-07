@@ -115,7 +115,7 @@ class RedditOrganicAI:
 Write your comment now:"""
 
         if self.client:
-            for model_name in ['gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']:
+            for model_name in ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']:
                 try:
                     response = self.client.models.generate_content(
                         model=model_name,

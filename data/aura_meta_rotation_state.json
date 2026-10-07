@@ -1,0 +1,138 @@
+{
+  "current_topic_index": 2,
+  "last_topic_id": 2,
+  "last_run_time": "2026-10-02 11:31:24",
+  "last_run_date_slot": "",
+  "published_count": 5,
+  "history": [
+    {
+      "timestamp": "2026-10-01 21:13:45",
+      "topic_id": 2,
+      "theme_name": "실시간 AI 자막 통화",
+      "facebook": {
+        "status": "error",
+        "message": "{\"error\":{\"message\":\"\\uc2a4\\ud338\\uc73c\\ub85c\\ubd80\\ud130 \\ucee4\\ubba4\\ub2c8\\ud2f0\\ub97c \\ubcf4\\ud638\\ud558\\uae30 \\uc704\\ud574 \\uc77c\\uc815 \\uae30\\uac04 \\ub0b4\\uc5d0 \\uac8c\\uc2dc\\ubb3c\\uc744 \\uc62c\\ub9ac\\uac70\\ub098 \\ub313\\uae00\\uc744 \\ub2ec\\uac70\\ub098 \\uae30\\ud0c0 \\ud65c\\ub3d9\\uc744 \\ud560 \\uc218 \\uc788\\ub294 \\ube48\\ub3c4\\ub97c \\uc81c\\ud55c\\ud558\\uace0 \\uc788\\uc2b5\\ub2c8\\ub2e4. \\ub098\\uc911\\uc5d0 \\ub2e4\\uc2dc \\uc2dc\\ub3c4\\ud574\\ubcf4\\uc138\\uc694. \\ub354 \\uc54c\\uc544\\ubcf4\\uae30\",\"type\":\"OAuthException\",\"code\":368,\"error_data\":{\"sentry_block_data\":\"AesGxdTg3Seq85cAKSNVhmR6t9DtudPZBRe4ithv1wGM0JINUAJBpctAvzIRnwq3DcAGFI5kqDlJvtpxeN4lS3toRrviS8KkcxGNUthiwyxrkglmSJVRR7oGIZ9Vyl-8En0boEF2KRzpbFtn_gog4L1C2o-X1OOxIN5--WUjX1sgWkUN73V9scQyRfg4LHjTaNCjWEKaRCChEtKU4X6R5rxIlepzx48BObqonY5JJtQfjtlAMm4MEBNarhv3T4e8FW1tXzde3tFBpBsi90dmT4_r6y7CYAvBsKqN5k6lQaaO9oohDHvfXQDkCKyHe_4ftHqcHz5S_wDfVY0XNrTvgLY\",\"help_center_id\":0,\"is_silent\":false},\"error_subcode\":1390008,\"error_user_msg\":\"\",\"fbtrace_id\":\"ARvxy5UmKOGLtcWxIktTFsl\"}}",
+        "brand": "aura"
+      },
+      "instagram": {
+        "status": "success",
+        "media_id": "18096206351389064",
+        "platform": "instagram",
+        "brand": "aura"
+      }
+    },
+    {
+      "timestamp": "2026-10-01 21:24:37",
+      "topic_id": 1,
+      "theme_name": "소개팅 긴급 탈출 전화",
+      "cardnews_slides_count": 5,
+      "cardnews_source_dir": "C:\\Users\\zkfnt\\Desktop\\한국 카드뉴스_산출물\\아우라\\아우라_01_소개팅긴급탈출전화_20261001_1249",
+      "shorts_video": "Aura_22초숏폼_주제01_escape_call_20260924_214243.mp4",
+      "results": {
+        "facebook_cardnews": {
+          "status": "error",
+          "message": "{\"error\":{\"message\":\"\\uc2a4\\ud338\\uc73c\\ub85c\\ubd80\\ud130 \\ucee4\\ubba4\\ub2c8\\ud2f0\\ub97c \\ubcf4\\ud638\\ud558\\uae30 \\uc704\\ud574 \\uc77c\\uc815 \\uae30\\uac04 \\ub0b4\\uc5d0 \\uac8c\\uc2dc\\ubb3c\\uc744 \\uc62c\\ub9ac\\uac70\\ub098 \\ub313\\uae00\\uc744 \\ub2ec\\uac70\\ub098 \\uae30\\ud0c0 \\ud65c\\ub3d9\\uc744 \\ud560 \\uc218 \\uc788\\ub294 \\ube48\\ub3c4\\ub97c \\uc81c\\ud55c\\ud558\\uace0 \\uc788\\uc2b5\\ub2c8\\ub2e4. \\ub098\\uc911\\uc5d0 \\ub2e4\\uc2dc \\uc2dc\\ub3c4\\ud574\\ubcf4\\uc138\\uc694. \\ub354 \\uc54c\\uc544\\ubcf4\\uae30\",\"type\":\"OAuthException\",\"code\":368,\"error_data\":{\"sentry_block_data\":\"AesGs3nEAPdGNB1o9nCmYoIXtFn45gC3Tni34aMVAnVB_JPpiTuHcQcjnlF_9caQB8iHKomRnukGbabf1Q6Zmeu7YCwgGLcf0m-_n1HyP6ZojxcQhWO1VSuMZzYCXWeAQZnFZxmO53utdRWAv2Y59mFdFp5ozxlUbQzA9TZDfDtrZBz4uQOKRS5IyLhPEU5PXFpYbiR1Bsw6lzN7bdGJyMwe7MVzi0feJCp7pd5R2UUuO0FC5eqh9iaVen15VKo958NOs4wPv9RH0I9TSuPNtgCy66lKzB-aIPZFsM9jQTiRrHZjicAXZ8IVzpLX5KkRRFKuD4doOmgL_iyEZw1GUac\",\"help_center_id\":0,\"is_silent\":false},\"error_subcode\":1390008,\"error_user_msg\":\"\",\"fbtrace_id\":\"AXjoYSwRhXZTKVGVryM4Asp\"}}",
+          "brand": "aura"
+        },
+        "instagram_feed": {
+          "status": "success",
+          "media_id": "18034659545663924",
+          "platform": "instagram",
+          "brand": "aura"
+        },
+        "facebook_video": {
+          "status": "error",
+          "message": "{\"error\":{\"message\":\"\\uc2a4\\ud338\\uc73c\\ub85c\\ubd80\\ud130 \\ucee4\\ubba4\\ub2c8\\ud2f0\\ub97c \\ubcf4\\ud638\\ud558\\uae30 \\uc704\\ud574 \\uc77c\\uc815 \\uae30\\uac04 \\ub0b4\\uc5d0 \\uac8c\\uc2dc\\ubb3c\\uc744 \\uc62c\\ub9ac\\uac70\\ub098 \\ub313\\uae00\\uc744 \\ub2ec\\uac70\\ub098 \\uae30\\ud0c0 \\ud65c\\ub3d9\\uc744 \\ud560 \\uc218 \\uc788\\ub294 \\ube48\\ub3c4\\ub97c \\uc81c\\ud55c\\ud558\\uace0 \\uc788\\uc2b5\\ub2c8\\ub2e4. \\ub098\\uc911\\uc5d0 \\ub2e4\\uc2dc \\uc2dc\\ub3c4\\ud574\\ubcf4\\uc138\\uc694. \\ub354 \\uc54c\\uc544\\ubcf4\\uae30\",\"type\":\"OAuthException\",\"code\":368,\"error_data\":{\"sentry_block_data\":\"AesSG-zHft62-i7UeZSYjw5BjLZ2HW4WSWGW7i5BZRc_yPS_RUB0VTebOpL8ENbAqIJ2YMjLHucRsWGkZnwrIBrVpDlcAfqrQazfuwTIM-39jWWruQO2R8gj3iEOu9aiCRFRF7ZFmIk9znMAbhebT_idABHhwihNmCh-cK0zTzpEhQGEB8BdOLYilj-Ujdv5fb6pFGgSmPV0WS9vcJB2PAzz5Pm6t1xDLSuIMTKpOVnrTalwjTh8TH4zXGDjco5l8507aZkY2xhDR5W9VY6Ei9rNAmyR8VKgqy8oGIjeGwAuJuUegU6qF9B6FIcjfGBFWtHkS3KsVOgUsrKCOLlL8x0\",\"help_center_id\":0,\"is_silent\":false},\"error_subcode\":1390008,\"error_user_msg\":\"\",\"fbtrace_id\":\"Ak0KeuUFxynQAwaqg3gO-n9\"}}",
+          "brand": "aura"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-01 21:29:31",
+      "topic_id": 2,
+      "theme_name": "실시간 AI 자막 통화",
+      "cardnews_slides_count": 5,
+      "cardnews_source_dir": "C:\\Users\\zkfnt\\Desktop\\한국 카드뉴스_산출물\\아우라\\아우라_02_실시간AI자막통화_20260930_1613",
+      "shorts_video": "Aura_22초숏폼_주제02_live_subtitles_20260924_225258.mp4",
+      "results": {
+        "facebook_cardnews": {
+          "status": "error",
+          "message": "{\"error\":{\"message\":\"\\uc2a4\\ud338\\uc73c\\ub85c\\ubd80\\ud130 \\ucee4\\ubba4\\ub2c8\\ud2f0\\ub97c \\ubcf4\\ud638\\ud558\\uae30 \\uc704\\ud574 \\uc77c\\uc815 \\uae30\\uac04 \\ub0b4\\uc5d0 \\uac8c\\uc2dc\\ubb3c\\uc744 \\uc62c\\ub9ac\\uac70\\ub098 \\ub313\\uae00\\uc744 \\ub2ec\\uac70\\ub098 \\uae30\\ud0c0 \\ud65c\\ub3d9\\uc744 \\ud560 \\uc218 \\uc788\\ub294 \\ube48\\ub3c4\\ub97c \\uc81c\\ud55c\\ud558\\uace0 \\uc788\\uc2b5\\ub2c8\\ub2e4. \\ub098\\uc911\\uc5d0 \\ub2e4\\uc2dc \\uc2dc\\ub3c4\\ud574\\ubcf4\\uc138\\uc694. \\ub354 \\uc54c\\uc544\\ubcf4\\uae30\",\"type\":\"OAuthException\",\"code\":368,\"error_data\":{\"sentry_block_data\":\"Aetq3rpURxDAcd_lekEFh3vb1N1j2YPDqUzhWEBVl5CPe2KP9uM7OHkTncrbSVDUnojGcChSEYRqcz5kiYDFCJjLH1W8vvV0GLdk5RbQMbfgJEOBBliOzU6EVKgy9eNMR_UBwhR_r6k9568QtaX3h6r8wbj_YzT3QaMfU90hUBWggbb1jNDGMTgFlPn2fXrfun3sA2lRXc8fGXSkxTgiT-asohNOs4SF2n7mQBJMsv3f3tCy5Vgu1NTxwCI6ZHuEZP6yNUt6Dof6wU1MeQs0_1uygs6ahFTp59EZMCyc8N26iGdu1FFaKgXdVWTD3FxtbDDTXWPDonwQtd9mbeW1Yg\",\"help_center_id\":0,\"is_silent\":false},\"error_subcode\":1390008,\"error_user_msg\":\"\",\"fbtrace_id\":\"A8-yYX-onFO-Ki9IuR4x6_-\"}}",
+          "brand": "aura"
+        },
+        "instagram_carousel": {
+          "status": "success",
+          "media_id": "17990758101044661",
+          "slides_count": 5,
+          "platform": "instagram_carousel",
+          "brand": "aura"
+        },
+        "facebook_video": {
+          "status": "error",
+          "message": "{\"error\":{\"message\":\"\\uc2a4\\ud338\\uc73c\\ub85c\\ubd80\\ud130 \\ucee4\\ubba4\\ub2c8\\ud2f0\\ub97c \\ubcf4\\ud638\\ud558\\uae30 \\uc704\\ud574 \\uc77c\\uc815 \\uae30\\uac04 \\ub0b4\\uc5d0 \\uac8c\\uc2dc\\ubb3c\\uc744 \\uc62c\\ub9ac\\uac70\\ub098 \\ub313\\uae00\\uc744 \\ub2ec\\uac70\\ub098 \\uae30\\ud0c0 \\ud65c\\ub3d9\\uc744 \\ud560 \\uc218 \\uc788\\ub294 \\ube48\\ub3c4\\ub97c \\uc81c\\ud55c\\ud558\\uace0 \\uc788\\uc2b5\\ub2c8\\ub2e4. \\ub098\\uc911\\uc5d0 \\ub2e4\\uc2dc \\uc2dc\\ub3c4\\ud574\\ubcf4\\uc138\\uc694. \\ub354 \\uc54c\\uc544\\ubcf4\\uae30\",\"type\":\"OAuthException\",\"code\":368,\"error_data\":{\"sentry_block_data\":\"AeuV4NkFFN0SLt90n2oA9jp1SctkYLzut6dtJaDnYSK_is6LIatvbM-7x8kJQ4w0JY2z-jLhCVkdTSyhGW2RLWZZ5dKABJYTR6-EoZ6bx2m3d4zPTRTVChbuNp3NzD3BFdBTzFwTkgVeUde2JgYZ1Q9HcaPIail5rAiRJju1cTIF-X9nwsiI75IXGLEMRQwvOCGJzi-dHIouXCmuUWMDzE8lHwKbhkS3SRqvoNhJFeS9PH2zrgIV4zHlURMtvG2KrMmuF0ak0myPMjxpltbtZMBu3wZOrPPCXiUqaFZCV1MN_jKF9euTxhlor5TUOyDGCHbg2r591w080vYepwRvQ1w\",\"help_center_id\":0,\"is_silent\":false},\"error_subcode\":1390008,\"error_user_msg\":\"\",\"fbtrace_id\":\"A_qX4TAXnybW700iAa5nHx_\"}}",
+          "brand": "aura"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-02 11:29:10",
+      "topic_id": 1,
+      "theme_name": "소개팅 긴급 탈출 전화",
+      "cardnews_slides_count": 5,
+      "cardnews_source_dir": "C:\\Users\\zkfnt\\Desktop\\한국 카드뉴스_산출물\\아우라\\아우라_01_소개팅긴급탈출전화_20261001_1249",
+      "shorts_video": "Aura_22초숏폼_주제01_escape_call_20260924_214243.mp4",
+      "results": {
+        "facebook_cardnews": {
+          "status": "error",
+          "message": "카드뉴스 이미지 업로드 실패",
+          "brand": "aura"
+        },
+        "instagram_carousel": {
+          "status": "error",
+          "message": "HTTP 400: {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 01-Oct-26 06:00:00 PDT. The current time is Thursday, 01-Oct-26 19:29:08 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":463,\"fbtrace_id\":\"AVCHGPWQLx4AzSt1Z8C5F-V\"}}",
+          "brand": "aura"
+        },
+        "facebook_video": {
+          "status": "error",
+          "message": "{\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 01-Oct-26 06:00:00 PDT. The current time is Thursday, 01-Oct-26 19:29:09 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":463,\"fbtrace_id\":\"AE0zuDzzTFByH2XyUWempNA\"}}",
+          "brand": "aura"
+        },
+        "instagram_reels": {
+          "status": "error",
+          "message": "HTTP 400: {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 01-Oct-26 06:00:00 PDT. The current time is Thursday, 01-Oct-26 19:29:11 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":463,\"fbtrace_id\":\"AW9UUTKVR83A_RIV29RRRut\"}}",
+          "brand": "aura"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-02 11:31:24",
+      "topic_id": 2,
+      "theme_name": "실시간 AI 자막 통화",
+      "cardnews_slides_count": 5,
+      "cardnews_source_dir": "C:\\Users\\zkfnt\\Desktop\\한국 카드뉴스_산출물\\아우라\\아우라_02_실시간AI자막통화_20260930_1613",
+      "shorts_video": "Aura_22초숏폼_주제02_live_subtitles_20260924_225258.mp4",
+      "results": {
+        "facebook_cardnews": {
+          "status": "error",
+          "message": "카드뉴스 이미지 업로드 실패",
+          "brand": "aura"
+        },
+        "instagram_carousel": {
+          "status": "error",
+          "message": "HTTP 400: {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 01-Oct-26 06:00:00 PDT. The current time is Thursday, 01-Oct-26 19:31:19 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":463,\"fbtrace_id\":\"AYjuwNrDbMkqPszjUuhMr_E\"}}",
+          "brand": "aura"
+        },
+        "facebook_video": {
+          "status": "error",
+          "message": "{\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 01-Oct-26 06:00:00 PDT. The current time is Thursday, 01-Oct-26 19:31:21 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":463,\"fbtrace_id\":\"AskRN08QreTJsN42v1dRq39\"}}",
+          "brand": "aura"
+        },
+        "instagram_reels": {
+          "status": "error",
+          "message": "HTTP 400: {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 01-Oct-26 06:00:00 PDT. The current time is Thursday, 01-Oct-26 19:31:25 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":463,\"fbtrace_id\":\"A8esWtSYdXz0sxFCfuNpt8n\"}}",
+          "brand": "aura"
+        }
+      }
+    }
+  ]
+}

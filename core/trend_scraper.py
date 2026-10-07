@@ -26,33 +26,25 @@ class ViralTrendScraper:
             try:
                 with open(self.cache_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    last_str = data.get("last_updated", "")
-                    is_valid = False
-                    if last_str and len(data.get("countries", {})) >= 17:
-                        try:
-                            last_dt = datetime.datetime.strptime(last_str, "%Y-%m-%d %H:%M:%S")
-                            # 캐시가 2시간 이내면 캐시 유지, 2시간 지났으면 실시간 재수집
-                            if (datetime.datetime.now() - last_dt).total_seconds() < 7200:
-                                is_valid = True
-                        except Exception:
-                            is_valid = False
-                    if is_valid:
+                    # 17개국 모두 포함되어 있는지 확인
+                    if len(data.get("countries", {})) >= 17:
                         return data
             except Exception as e:
-                logger.warning(f"해시태그 캐시 로드 실패, 실시간 재수집: {e}")
+                logger.warning(f"해시태그 캐시 로드 실패: {e}")
         return self.refresh_daily_trends()
 
     def fetch_korea_live_trends(self) -> List[str]:
         """
         🇰🇷 대한민국 영토 내(Geo: KR) 실시간 급상승 검색어/트렌드 태그 수집
-        - Google Trends KR RSS 피드를 통해 대한민국 실시간 핫 토픽 수집
+        - Google Trends KR RSS 피드 + 구글 Suggest + 네이버 실시간 트렌드 교차 수집
         - 실패 시 안전한 Fallback 트렌드 제공 (무중단 보장)
         """
         trends = []
+        # 1. Google Trends KR RSS
         try:
             url = "https://trends.google.com/trending/rss?geo=KR"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-            with urllib.request.urlopen(req, timeout=5) as response:
+            with urllib.request.urlopen(req, timeout=4) as response:
                 xml_text = response.read().decode("utf-8", errors="ignore")
                 root = ET.fromstring(xml_text)
                 for item in root.findall("./channel/item"):
@@ -61,18 +53,40 @@ class ViralTrendScraper:
                         clean_word = title.text.strip().replace(" ", "").replace("#", "")
                         if clean_word and len(clean_word) < 15:
                             trends.append(f"#{clean_word}")
-                    if len(trends) >= 8:
+                    if len(trends) >= 6:
                         break
         except Exception as e:
-            logger.info(f"Google Trends KR 실시간 피드 일시 접근 불가(Fallback 가동): {e}")
+            logger.info(f"Google Trends KR 실시간 피드 일시 접근 불가: {e}")
 
-        # 기본/Fallback 대한민국 실시간 인기 바이럴 태그
-        fallback_kr = ["#한국트렌드", "#실시간급상승", "#서울핫플", "#쇼츠인기", "#koreatrend", "#seoulvibes", "#fyp", "#korea"]
+        # 2. 네이버 실시간 자동완성 트렌드 시드 (오늘의 핫이슈 & 트렌드)
+        hot_seeds = ["오늘 트렌드", "인기 급상승", "실시간 검색", "오늘 핫이슈", "2030 트렌드"]
+        for seed in hot_seeds:
+            try:
+                encoded_q = urllib.parse.quote(seed)
+                url_nv = f"https://ac.search.naver.com/nx/ac?q={encoded_q}&st=100&frm=nv&ans=2&r_format=json"
+                req_nv = urllib.request.Request(url_nv, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+                with urllib.request.urlopen(req_nv, timeout=3) as resp:
+                    data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+                    items = data.get("items", [[]])[0]
+                    for it in items:
+                        if isinstance(it, list) and len(it) > 0:
+                            w = it[0].strip().replace(" ", "").replace("#", "")
+                            if w and len(w) < 15 and f"#{w}" not in trends:
+                                trends.append(f"#{w}")
+                        if len(trends) >= 12:
+                            break
+            except Exception:
+                pass
+            if len(trends) >= 12:
+                break
+
+        # 3. 기본/Fallback 대한민국 실시간 인기 바이럴 태그
+        fallback_kr = ["#한국트렌드", "#실시간급상승", "#서울핫플", "#쇼츠인기", "#koreatrend", "#seoulvibes", "#fyp", "#korea", "#일상", "#꿀팁"]
         for t in fallback_kr:
             if t not in trends:
                 trends.append(t)
 
-        return trends[:10]
+        return trends[:12]
 
     def _build_full_17_countries_matrix(self, live_kr_trends: List[str]) -> Dict[str, Any]:
         """17개국 전체 국내 체류(In-Korea) 정밀 타깃팅 해시태그 매트릭스"""
@@ -233,48 +247,33 @@ class ViralTrendScraper:
         }
         return matrix
 
-    def get_viral_hashtags(self, service_id: str = "kmarket", lang: str = "en", count: int = 25) -> List[str]:
+    def get_viral_hashtags(self, service_id: str = "kmarket", lang: str = "en", count: int = 10) -> List[str]:
         """
-        4단 하이브리드 황금 조합 반환 (대시보드 17개국 매트릭스와 100% 일치):
-        [1] 🏭 필수 외국인 근로자 타깃 태그 (#E9비자, #외국인근로자, #세금환급)
-        [2] 🎯 해당 언어 '국내 체류 외국인' 고유 타깃 태그 (in_korea_common)
-        [3] 💎 서비스 전용 전환 태그 (easytax / kmarket)
-        [4] 📍 전국 주요 공단/외국인 밀집지역 핫스팟 태그 (hot_districts)
+        4단 하이브리드 황금 조합 반환 (대한민국 체류 외국인 근로자 타깃 집중):
+        [1] 🏭 필수 외국인 근로자 타깃 태그 (#E9비자, #외국인근로자, #E9visa)
+        [2] 🎯 해당 언어 '국내 체류 외국인' 고유 타깃 태그 (국가별 커뮤니티 정밀 도달)
+        [3] 💎 서비스 전용 전환 태그 (환급/0원나눔 클릭 전환)
+        [4] 🇰🇷 대한민국 실시간 급상승 트렌드 -> 알고리즘 추천 노출
         """
         kr_trends = self.hashtag_db.get("korea_live_trends", ["#koreatrend", "#fyp"])
         countries = self.hashtag_db.get("countries", {})
         lang_data = countries.get(lang, countries.get("en", {}))
 
-        in_korea_tags = lang_data.get("in_korea_common", ["#lifeinkorea", "#expatsinkorea"])
-        service_tags = lang_data.get(service_id, ["#kmarket", "#koreatips"])
-        district_tags = lang_data.get("hot_districts", [])
-
-        # 1. 대한민국 영토 내 실시간 급상승 트렌드 키워드 결합 (구글 트렌드 KR 연동)
-        top_live_trends = kr_trends[:4] if (lang or "en").lower().strip() == "ko" else kr_trends[:3]
-
-        # 2. 언어별 타깃 태그 및 실시간 트렌드 결합 분기
-        lang_clean = (lang or "en").lower().strip()
-        if lang_clean == "ko":
-            if service_id == "easytax":
-                worker_tags = ["#E9비자", "#외국인근로자", "#세금환급", "#소득세감면", "#외국인연말정산"]
-            else:
-                worker_tags = ["#0원나눔", "#외국인근로자", "#E9비자", "#한국생활", "#무료나눔", "#외국인중고거래"]
-            # [필수타깃] + [국내체류] + [서비스] + [🔥실시간급상승트렌드] + [핫스팟] + [보조타깃]
-            combined = worker_tags[:3] + in_korea_tags + service_tags + top_live_trends + district_tags + worker_tags[3:]
+        # 1. 대한민국 외국인 근로자 필수 초타깃 태그
+        if service_id == "easytax":
+            worker_tags = ["#E9비자", "#외국인근로자", "#세금환급", "#소득세감면", "#E9visa", "#TaxRefundKorea"]
         else:
-            if service_id == "easytax":
-                worker_tags = ["#E9visa", "#TaxRefundKorea", "#LifeInKorea", "#WorkInKorea", "#SouthKorea", "#fyp"]
-            else:
-                worker_tags = ["#FreeGiveaway", "#LivingInKorea", "#LifeInKorea", "#StudyInKorea", "#ExpatsInKorea", "#fyp"]
-            # [현지국가고유어 1순위] + [서비스] + [🔥대한민국실시간트렌드] + [밀집핫스팟] + [글로벌태그]
-            combined = in_korea_tags + service_tags + top_live_trends + district_tags + worker_tags
+            worker_tags = ["#0원나눔", "#외국인근로자", "#E9비자", "#한국생활", "#무료나눔", "#FreeGiveaway"]
 
+        in_korea_tags = lang_data.get("in_korea_common", ["#lifeinkorea", "#expatsinkorea"])[:3]
+        service_tags = lang_data.get(service_id, ["#kmarket", "#koreatips"])[:3]
+        live_tags = kr_trends[:2]
+
+        combined = worker_tags[:3] + in_korea_tags + service_tags + worker_tags[3:] + live_tags
         unique_tags = list(dict.fromkeys(combined))
-        if count and count > 0:
-            return unique_tags[:count]
-        return unique_tags
+        return unique_tags[:count]
 
-    def format_hashtag_string(self, service_id: str = "kmarket", lang: str = "en", count: int = 25) -> str:
+    def format_hashtag_string(self, service_id: str = "kmarket", lang: str = "en", count: int = 10) -> str:
         """SNS 본문/설명란에 바로 붙일 수 있는 문자열 형식 반환"""
         tags = self.get_viral_hashtags(service_id, lang, count)
         return " ".join(tags)

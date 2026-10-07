@@ -1,0 +1,41 @@
+{
+  "current_topic_index": 0,
+  "last_topic_id": 2,
+  "last_run_time": "2026-10-01 21:13:14",
+  "published_count": 2,
+  "history": [
+    {
+      "timestamp": "2026-10-01 21:11:23",
+      "topic_id": 1,
+      "theme_name": "삼성전자 vs SK하이닉스 HBM 수급 대결",
+      "facebook": {
+        "status": "success",
+        "post_id": "1341778472350233_122102130249492063",
+        "platform": "facebook",
+        "brand": "stock"
+      },
+      "instagram": {
+        "status": "error",
+        "message": "HTTP Error 400: Bad Request",
+        "brand": "stock"
+      }
+    },
+    {
+      "timestamp": "2026-10-01 21:13:14",
+      "topic_id": 2,
+      "theme_name": "미국 배당성장 ETF(SCHD·JEPQ) 월 100만원 배당",
+      "facebook": {
+        "status": "success",
+        "post_id": "1341778472350233_122102131869492063",
+        "platform": "facebook",
+        "brand": "stock"
+      },
+      "instagram": {
+        "status": "success",
+        "media_id": "18121120156911482",
+        "platform": "instagram",
+        "brand": "stock"
+      }
+    }
+  ]
+}

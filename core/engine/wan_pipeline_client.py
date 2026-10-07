@@ -15,7 +15,7 @@ import urllib.request
 import urllib.parse
 import subprocess
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from PIL import Image
 import imageio_ffmpeg
 
@@ -30,8 +30,10 @@ class WanPipelineClient:
         self.ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
         self.comfy_input_dir = r"D:\ComfyUI_Wan_Engine\ComfyUI\input"
         self.comfy_output_dir = r"D:\ComfyUI_Wan_Engine\ComfyUI\output"
+        self.cond_cache_dir = r"D:\ComfyUI_Wan_Engine\ComfyUI\cache\conditioning"
         os.makedirs(self.comfy_input_dir, exist_ok=True)
         os.makedirs(self.comfy_output_dir, exist_ok=True)
+        os.makedirs(self.cond_cache_dir, exist_ok=True)
 
     def check_health(self, auto_start: bool = False) -> bool:
         try:
@@ -68,106 +70,118 @@ class WanPipelineClient:
         prefix: str,
         timeout_sec: int = 1800,
         check_vram_safety: bool = False,
-        abort_scope: Optional[str] = None
+        task_label: Optional[str] = None
     ) -> List[str]:
-        """ComfyUI에 작업을 제출하고 완료될 때까지 대기 후 생성된 이미지 경로 반환"""
+        """ComfyUI에 작업을 제출하고 완료될 때까지 대기 후 생성된 이미지 경로 반환 (GPU 전역 순차 대기열 보호)"""
         from core.engine.vram_safety_guard import VRAMSafetyGuard, VRAMSafetyException
+        from core.engine.gpu_lock import gpu_lock
 
-        self.free_vram()
+        # 직관적인 한글 GPU 작업 라벨 매핑
+        if not task_label:
+            if "aura_cardnews" in prefix or "cardnews" in prefix:
+                task_label = f"🎨 💖 Aura 데이팅 카드뉴스 실사 사진 렌더링 중 ({prefix})"
+            elif "s2v" in prefix or "wan_s2v" in prefix:
+                task_label = f"🎬 💖 Aura 22초 숏폼 아바타 Wan 2.2 립싱크 영상 생성 중 ({prefix})"
+            elif "stock" in prefix:
+                task_label = f"📈 StockMaster AI 퀀트 숏폼 렌더링 중 ({prefix})"
+            elif "insure" in prefix or "insurance" in prefix:
+                task_label = f"🛡️ 보험 리밸런스 숏폼 렌더링 중 ({prefix})"
+            elif "face_inpaint" in prefix:
+                task_label = f"🎭 Wan 2.1 인물 얼굴 보존 인페인팅 렌더링 중 ({prefix})"
+            elif "cond_bake" in prefix:
+                task_label = f"🧁 텍스트 임베딩 고속 사전 베이킹 중 ({prefix})"
+            else:
+                task_label = f"🎮 GPU 그래픽카드 연산 가동 중 ({prefix})"
 
-        # 🛡️ [VRAM 안전 가드레일 1단계: 사전 진입 게이트]
-        if check_vram_safety:
-            VRAMSafetyGuard.assert_vram_headroom(min_free_gb=11.5, host=self.host, auto_free_fn=self.free_vram)
+        with gpu_lock(task_name=task_label, timeout_sec=timeout_sec, host=self.host):
+            self.free_vram()
 
-        # 이전 프레임 정리
-        for f in glob.glob(os.path.join(self.comfy_output_dir, f"{prefix}_*.png")):
-            try:
-                os.remove(f)
-            except Exception:
-                pass
+            # 🛡️ [VRAM 안전 가드레일 1단계: 사전 진입 게이트]
+            if check_vram_safety:
+                VRAMSafetyGuard.assert_vram_headroom(min_free_gb=11.5, host=self.host, auto_free_fn=self.free_vram)
 
-        data = json.dumps({"prompt": prompt_dict}).encode('utf-8')
-        req = urllib.request.Request(f"{self.host}/prompt", data=data, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req) as resp:
-            res = json.loads(resp.read().decode('utf-8'))
-            prompt_id = res.get("prompt_id")
-
-        start_time = time.time()
-        completed_hist = None
-
-        # 런타임 로그 감시 준비
-        log_path = VRAMSafetyGuard.get_latest_comfyui_log_path() if check_vram_safety else None
-        last_log_pos = os.path.getsize(log_path) if log_path and os.path.exists(log_path) else 0
-
-        while time.time() - start_time < timeout_sec:
-            time.sleep(1)
-
-            # 🛑 [비상 정지 킬스위치 감시] 대시보드 정지 신호 감지 시 즉시 루프 탈출 (타 채널 간섭 없는 스코프 격리)
-            from core.engine.generation_abort_guard import GenerationAbortGuard, GenerationAbortedException
-            effective_scope = abort_scope or prefix
-            if GenerationAbortGuard.is_abort_requested(scope=effective_scope):
-                logger.warning(f"🛑 [WAN 대기 감시] 작업 중단 신호 감지 (스코프: {effective_scope})")
-                raise GenerationAbortedException(f"대시보드 정지 요청({effective_scope})으로 WAN 연산이 즉시 중단되었습니다.")
-
-            # 🛡️ [VRAM 안전 가드레일 2단계: 실시간 런타임 킬스위치]
-            if check_vram_safety and log_path and os.path.exists(log_path):
+            # 이전 프레임 정리
+            for f in glob.glob(os.path.join(self.comfy_output_dir, f"{prefix}_*.png")):
                 try:
-                    curr_size = os.path.getsize(log_path)
-                    if curr_size > last_log_pos:
-                        with open(log_path, "r", encoding="utf-8", errors="ignore") as lf:
-                            lf.seek(last_log_pos)
-                            new_lines = lf.readlines()
-                            last_log_pos = curr_size
-                        for line in new_lines:
-                            violation, reason = VRAMSafetyGuard.check_log_line_for_violation(line)
-                            if violation:
-                                VRAMSafetyGuard.trigger_emergency_interrupt(host=self.host)
-                                err_msg = (
-                                    f"🚨 [GPU 과열 방지 안전 차단] {reason}. "
-                                    "텍스트 인코더 잔류 등으로 비디오 모델(12.5GB)이 VRAM에 오르지 못하고 CPU로 튕겨 나갔습니다. "
-                                    "그래픽카드 과열 및 극심한 지연(스텝당 4분, 총 1시간 20분)을 방지하기 위해 "
-                                    "0.1초 만에 연산을 즉각 긴급 중단했습니다."
-                                )
-                                logger.error(err_msg)
-                                raise VRAMSafetyException(err_msg)
-                except VRAMSafetyException:
-                    raise
-                except Exception as e:
-                    logger.debug(f"VRAM 로그 모니터링 예외 (무시): {e}")
+                    os.remove(f)
+                except Exception:
+                    pass
 
-            try:
-                with urllib.request.urlopen(f"{self.host}/history/{prompt_id}", timeout=5) as resp:
-                    hist = json.loads(resp.read().decode('utf-8'))
-                    if prompt_id in hist:
-                        status = hist[prompt_id].get("status", {})
-                        if status.get("completed", False):
-                            completed_hist = hist[prompt_id]
-                            break
-                        if status.get("status_str") == "error":
-                            msgs = str(status.get("messages", ""))
-                            if "execution_interrupted" in msgs or GenerationAbortGuard.is_abort_requested(scope=effective_scope):
-                                raise GenerationAbortedException("ComfyUI 실행이 중단(Interrupted)되었습니다.")
-                            raise RuntimeError(f"ComfyUI Job Error: {status.get('messages')}")
-            except urllib.error.URLError:
-                pass
+            data = json.dumps({"prompt": prompt_dict}).encode('utf-8')
+            req = urllib.request.Request(f"{self.host}/prompt", data=data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req) as resp:
+                res = json.loads(resp.read().decode('utf-8'))
+                prompt_id = res.get("prompt_id")
 
-        # 1차: ComfyUI 히스토리의 outputs에서 실제 생성된 파일 목록 직접 추출
-        frames = []
-        if completed_hist:
-            outputs = completed_hist.get("outputs", {})
-            for node_id, node_out in outputs.items():
-                if isinstance(node_out, dict) and "images" in node_out:
-                    for img_info in node_out["images"]:
-                        fname = img_info.get("filename")
-                        subf = img_info.get("subfolder", "")
-                        fpath = os.path.join(self.comfy_output_dir, subf, fname) if subf else os.path.join(self.comfy_output_dir, fname)
-                        if os.path.exists(fpath):
-                            frames.append(fpath)
+            start_time = time.time()
+            completed_hist = None
 
-        # 2차: outputs가 비어있거나 찾지 못한 경우 glob 폴더 패턴 백업 매칭
-        if not frames:
-            frames = sorted(glob.glob(os.path.join(self.comfy_output_dir, f"{prefix}_*.png")))
-        return frames
+            # 런타임 로그 감시 준비
+            log_path = VRAMSafetyGuard.get_latest_comfyui_log_path() if check_vram_safety else None
+            last_log_pos = os.path.getsize(log_path) if log_path and os.path.exists(log_path) else 0
+
+            while time.time() - start_time < timeout_sec:
+                time.sleep(2)
+
+                # 🛡️ [VRAM 안전 가드레일 2단계: 실시간 런타임 킬스위치]
+                if check_vram_safety and log_path and os.path.exists(log_path):
+                    try:
+                        curr_size = os.path.getsize(log_path)
+                        if curr_size > last_log_pos:
+                            with open(log_path, "r", encoding="utf-8", errors="ignore") as lf:
+                                lf.seek(last_log_pos)
+                                new_lines = lf.readlines()
+                                last_log_pos = curr_size
+                            for line in new_lines:
+                                violation, reason = VRAMSafetyGuard.check_log_line_for_violation(line)
+                                if violation:
+                                    VRAMSafetyGuard.trigger_emergency_interrupt(host=self.host)
+                                    err_msg = (
+                                        f"🚨 [GPU 과열 방지 안전 차단] {reason}. "
+                                        "텍스트 인코더 잔류 등으로 비디오 모델(12.5GB)이 VRAM에 오르지 못하고 CPU로 튕겨 나갔습니다. "
+                                        "그래픽카드 과열 및 극심한 지연(스텝당 4분, 총 1시간 20분)을 방지하기 위해 "
+                                        "0.1초 만에 연산을 즉각 긴급 중단했습니다."
+                                    )
+                                    logger.error(err_msg)
+                                    raise VRAMSafetyException(err_msg)
+                    except VRAMSafetyException:
+                        raise
+                    except Exception as e:
+                        logger.debug(f"VRAM 로그 모니터링 예외 (무시): {e}")
+
+                try:
+                    with urllib.request.urlopen(f"{self.host}/history/{prompt_id}") as resp:
+                        hist = json.loads(resp.read().decode('utf-8'))
+                        if prompt_id in hist:
+                            status = hist[prompt_id].get("status", {})
+                            if status.get("completed", False):
+                                completed_hist = hist[prompt_id]
+                                break
+                            if status.get("status_str") == "error":
+                                raise RuntimeError(f"ComfyUI Job Error: {status.get('messages')}")
+                except urllib.error.URLError:
+                    pass
+
+            # 1차: ComfyUI 히스토리의 outputs에서 실제 생성된 파일 목록 직접 추출
+            frames = []
+            if completed_hist:
+                outputs = completed_hist.get("outputs", {})
+                for node_id, node_out in outputs.items():
+                    if isinstance(node_out, dict) and "images" in node_out:
+                        for img_info in node_out["images"]:
+                            fname = img_info.get("filename")
+                            subf = img_info.get("subfolder", "")
+                            fpath = os.path.join(self.comfy_output_dir, subf, fname) if subf else os.path.join(self.comfy_output_dir, fname)
+                            if os.path.exists(fpath):
+                                frames.append(fpath)
+
+            # 2차: outputs가 비어있거나 찾지 못한 경우 glob 폴더 패턴 백업 매칭
+            if not frames:
+                frames = sorted(glob.glob(os.path.join(self.comfy_output_dir, f"{prefix}_*.png")))
+
+            # 후처리: 다음 대기 작업을 위한 VRAM 캐시 즉시 비우기
+            self.free_vram()
+            return frames
 
     def generate_t2i_master(
         self,
@@ -176,8 +190,7 @@ class WanPipelineClient:
         width: int = 832,
         height: int = 1216,
         seed: Optional[int] = None,
-        prefix: str = "wan_t2i_master",
-        abort_scope: Optional[str] = None
+        prefix: str = "wan_t2i_master"
     ) -> str:
         """Wan 2.1 14B Q4_0 1-Frame Native T2I 고화질 마스터 사진 생성"""
         if seed is None:
@@ -207,7 +220,7 @@ class WanPipelineClient:
                 "class_type": "KSampler",
                 "inputs": {
                     "model": ["2", 0], "positive": ["7", 0], "negative": ["7", 1],
-                    "latent_image": ["7", 2], "seed": seed, "steps": 25, "cfg": 3.2,
+                    "latent_image": ["7", 2], "seed": seed, "steps": 25, "cfg": 4.8,
                     "sampler_name": "uni_pc", "scheduler": "simple", "denoise": 1.0
                 }
             },
@@ -215,9 +228,14 @@ class WanPipelineClient:
             "10": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": prefix}}
         }
 
-        frames = self.submit_and_wait(workflow, prefix=prefix, abort_scope=abort_scope)
+        # ComfyUI 미실행 또는 접속 불가 시 즉시 중단 (빈 캔버스 폴백 100% 영구 차단)
+        if not self.check_health():
+            raise RuntimeError(f"[WanPipelineClient] ComfyUI 엔진 오프라인 상태 ({prefix}) - 렌더링 불가")
+
+        task_kr = f"🎨 Wan 2.1 실사 T2I 마스터 사진 렌더링 ({prefix})"
+        frames = self.submit_and_wait(workflow, prefix=prefix, task_label=task_kr)
         if not frames:
-            raise RuntimeError("Wan 2.1 T2I 마스터 컷 생성에 실패했습니다.")
+            raise RuntimeError(f"Wan 2.1 T2I 마스터 컷 생성 실패 ({prefix})")
         return frames[0]
 
     def generate_t2i_img2img(
@@ -229,8 +247,7 @@ class WanPipelineClient:
         width: int = 832,
         height: int = 1216,
         seed: Optional[int] = None,
-        prefix: str = "wan_img2img",
-        abort_scope: Optional[str] = None
+        prefix: str = "wan_img2img"
     ) -> str:
         """
         WAN img2img - 동일 인물 유지 씬 전환기:
@@ -296,7 +313,7 @@ class WanPipelineClient:
             "10": {"class_type": "SaveImage",  "inputs": {"images": ["9", 0], "filename_prefix": prefix}}
         }
 
-        frames = self.submit_and_wait(workflow, prefix=prefix, abort_scope=abort_scope)
+        frames = self.submit_and_wait(workflow, prefix=prefix, task_label=f"🎭 💖 Aura 카드뉴스 동일인물 씬전환 렌더링 중 ({prefix})")
         if not frames:
             raise RuntimeError("WAN img2img 동일 인물 씬 전환 생성 실패")
         return frames[0]
@@ -309,8 +326,7 @@ class WanPipelineClient:
         width: int = 832,
         height: int = 1216,
         seed: Optional[int] = None,
-        prefix: str = "wan_face_inpaint",
-        abort_scope: Optional[str] = None
+        prefix: str = "wan_face_inpaint"
     ) -> str:
         """
         알리바바 Wan 2.1 공식 논문 기반 얼굴 100% 보존 인페인팅:
@@ -358,10 +374,48 @@ class WanPipelineClient:
         )
 
         # 3. 제출 및 대기
-        frames = self.submit_and_wait(workflow, prefix=prefix, abort_scope=abort_scope)
+        frames = self.submit_and_wait(workflow, prefix=prefix, task_label=f"🎭 💖 Aura 카드뉴스 얼굴 보존 인페인팅 렌더링 중 ({prefix})")
         if not frames:
             raise RuntimeError("WAN 얼굴 보존 인페인팅 생성 실패")
         return frames[0]
+
+    def get_or_bake_conditioning(self, prompt_text: str, neg_text: str) -> Tuple[str, str]:
+        """
+        [1번 방법: 텍스트 모델 100% 영구 분리 & 캐시 사전 베이킹]
+        1. 모션 프롬프트 및 네거티브 프롬프트 해시 기반 캐시 파일 경로 확인
+        2. 캐시 파일이 없으면 CLIPLoader + CLIPTextEncode만 1회 단독 실행(약 1~2초) 후 .pt 저장
+        3. 저장 완료 즉시 self.free_vram() 호출로 6.4GB 텍스트 모델을 RAM/VRAM에서 100% 완전 파기
+        4. 캐시 파일 경로 (pos_path, neg_path) 반환 -> S2V 비디오 워크플로우에는 텍스트 모델 0% 미탑재!
+        """
+        import hashlib
+        pos_hash = hashlib.md5(prompt_text.strip().encode('utf-8')).hexdigest()[:16]
+        neg_hash = hashlib.md5(neg_text.strip().encode('utf-8')).hexdigest()[:16]
+
+        pos_path = os.path.join(self.cond_cache_dir, f"cond_pos_{pos_hash}.pt")
+        neg_path = os.path.join(self.cond_cache_dir, f"cond_neg_{neg_hash}.pt")
+
+        if os.path.exists(pos_path) and os.path.exists(neg_path):
+            logger.info(f"⚡ [WanConditioningCache] 사전 베이킹된 프롬프트 텐서 캐시 즉시 재사용 (텍스트 모델 0MB): {pos_hash}")
+            return pos_path, neg_path
+
+        logger.info(f"🧁 [WanConditioningCache] 텍스트 임베딩 사전 베이킹 1회 실행 (약 1~2초 소요)...")
+        workflow_bake = {
+            "62": {"class_type": "CLIPLoader", "inputs": {"clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors", "type": "wan"}},
+            "6":  {"class_type": "CLIPTextEncode", "inputs": {"clip": ["62", 0], "text": prompt_text}},
+            "7":  {"class_type": "CLIPTextEncode", "inputs": {"clip": ["62", 0], "text": neg_text}},
+            "101": {"class_type": "SaveConditioningToFile", "inputs": {"conditioning": ["6", 0], "file_path": pos_path}},
+            "102": {"class_type": "SaveConditioningToFile", "inputs": {"conditioning": ["7", 0], "file_path": neg_path}}
+        }
+        self.submit_and_wait(workflow_bake, prefix="cond_bake", check_vram_safety=False)
+
+        # 🧹 베이킹 완료 즉시 텍스트 모델을 RAM과 VRAM에서 영구 퇴출!
+        logger.info("🧹 [WanConditioningCache] 베이킹 완료! 6.4GB 텍스트 모델을 RAM/VRAM에서 즉각 완전 파기...")
+        self.free_vram()
+
+        if not os.path.exists(pos_path) or not os.path.exists(neg_path):
+            raise RuntimeError(f"텍스트 임베딩 사전 베이킹 실패: {pos_path} 또는 {neg_path} 미생성")
+
+        return pos_path, neg_path
 
     def generate_s2v_video(
         self,
@@ -374,27 +428,37 @@ class WanPipelineClient:
         width: int = 384,
         height: int = 672,
         frames: int = 49,
-        prefix: str = "s2v_run",
-        abort_scope: Optional[str] = None
+        cfg: float = 4.5,
+        shift: float = 3.0,
+        prefix: str = "s2v_run"
     ) -> str:
-        """Wan 2.2 S2V 립싱크 렌더링 후 MP4 완성 파일 생성 (384x672 @ 16fps, 49프레임 = 3.06초, 14B 16GB GPU 100% VRAM 단독 탑재 규격)"""
-        neg = negative_text or "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景"
+        """Wan 2.2 S2V 립싱크 렌더링 후 MP4 완성 파일 생성 (텍스트 모델 100% 영구 배제 순수 비디오 모드)"""
+        neg = negative_text or (
+            "static mouth, closed mouth while speaking, desynchronized lips, bad lip sync, unnatural mouth movement, "
+            "frozen lips, frozen face, distorted mouth, mumbling, silent face, "
+            "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，"
+            "JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景"
+        )
 
+        # 1. 텍스트 임베딩 사전 베이킹 또는 캐시 로드 (텍스트 모델은 여기서 완전히 퇴출됨)
+        pos_cond_file, neg_cond_file = self.get_or_bake_conditioning(prompt_text, neg)
+
+        # 2. 순수 S2V 비디오 렌더링 워크플로우 (텍스트 모델 0% 완전 배제!)
         workflow = {
             "61": {"class_type": "UnetLoaderGGUF", "inputs": {"unet_name": "Wan2.2-S2V-14B-Q4_0.gguf"}},
-            "54": {"class_type": "ModelSamplingSD3", "inputs": {"model": ["61", 0], "shift": 8.0}},
+            "54": {"class_type": "ModelSamplingSD3", "inputs": {"model": ["61", 0], "shift": shift}},
             "57": {"class_type": "AudioEncoderLoader", "inputs": {"audio_encoder_name": "wav2vec2_large_english_fp16.safetensors"}},
             "58": {"class_type": "LoadAudio", "inputs": {"audio": audio_name}},
             "56": {"class_type": "AudioEncoderEncode", "inputs": {"audio_encoder": ["57", 0], "audio": ["58", 0]}},
-            "62": {"class_type": "CLIPLoader", "inputs": {"clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors", "type": "wan"}},
-            "6": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["62", 0], "text": prompt_text}},
-            "7": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["62", 0], "text": neg}},
+            # 🔥 텍스트 모델(CLIPLoader/CLIPTextEncode) 전면 영구 박멸! 사전 베이킹 텐서 로드!
+            "201": {"class_type": "LoadConditioningFromFile", "inputs": {"file_path": pos_cond_file}},
+            "202": {"class_type": "LoadConditioningFromFile", "inputs": {"file_path": neg_cond_file}},
             "63": {"class_type": "VAELoader", "inputs": {"vae_name": "wan_2.1_vae.safetensors"}},
             "52": {"class_type": "LoadImage", "inputs": {"image": image_name}},
             "55": {
                 "class_type": "WanSoundImageToVideo",
                 "inputs": {
-                    "positive": ["6", 0], "negative": ["7", 0], "vae": ["63", 0],
+                    "positive": ["201", 0], "negative": ["202", 0], "vae": ["63", 0],
                     "width": width, "height": height, "length": frames, "batch_size": 1,
                     "audio_encoder_output": ["56", 0], "ref_image": ["52", 0]
                 }
@@ -403,7 +467,7 @@ class WanPipelineClient:
                 "class_type": "KSampler",
                 "inputs": {
                     "model": ["54", 0], "positive": ["55", 0], "negative": ["55", 1],
-                    "latent_image": ["55", 2], "seed": seed, "steps": 20, "cfg": 6.0,
+                    "latent_image": ["55", 2], "seed": seed, "steps": 20, "cfg": cfg,
                     "sampler_name": "uni_pc", "scheduler": "simple", "denoise": 1.0
                 }
             },
@@ -411,7 +475,9 @@ class WanPipelineClient:
             "9": {"class_type": "SaveImage", "inputs": {"images": ["8", 0], "filename_prefix": prefix}}
         }
 
-        generated_frames = self.submit_and_wait(workflow, prefix=prefix, check_vram_safety=True, abort_scope=abort_scope)
+
+        task_s2v = f"🎬 💖 Aura 22초 숏폼 아바타 Wan 2.2 S2V 립싱크 렌더링 중 ({prefix})"
+        generated_frames = self.submit_and_wait(workflow, prefix=prefix, check_vram_safety=True, task_label=task_s2v)
         if not generated_frames:
             raise RuntimeError("Wan 2.2 S2V 렌더링 프레임이 생성되지 않았습니다.")
 

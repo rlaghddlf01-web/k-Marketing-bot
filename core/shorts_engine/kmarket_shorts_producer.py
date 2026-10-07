@@ -21,7 +21,6 @@ from PIL import Image
 from .base_shorts_producer import BaseShortsProducer
 from brands.kmarket.ui_templates.remittance_template import RemittanceTemplate
 from core.scenario_director_shorts_kmarket import ScenarioDirectorShortsKMarket
-from core.gemini_shorts_copywriter import GeminiShortsCopywriter
 
 logger = logging.getLogger("KMarketShortsProducer")
 
@@ -36,105 +35,106 @@ class KMarketShortsProducer(BaseShortsProducer):
             "gender": "female",
             "char_desc": "a lovely 24-year-old Vietnamese young woman, calm friendly face, sleek dark hair, neat modern casual navy blue top",
             "bg_desc": "cozy modern Seoul studio apartment, soft warm ambient window light, wooden shelves",
+            "badge_primary": "K-MARKET MIỄN PHÍ",
+            "badge_secondary": "Giao dịch trực tiếp 0 won",
+            "cta_text": "TẢI APP K-MARKET >",
             "default_theme": 30, # 에어프라이어
+            "speech": "Tôi vừa nhận được đồ gia dụng miễn phí trên K-Market! Mở app xem ngay nhé!"
         },
         "km": {
             "name": "Cambodia",
             "gender": "male",
             "char_desc": "a handsome 26-year-old Cambodian young man, warm bright eyes, clean-shaven smooth skin, strictly no beard, no mustache, neat modern haircut, casual dark grey shirt",
             "bg_desc": "clean modern Seoul studio room, neat study desk, soft warm room light",
+            "badge_primary": "ចែកជូនឥតគិតថ្លៃ!",
+            "badge_secondary": "ទំនិញល្អតម្លៃ 0 វ៉ុន",
+            "cta_text": "ទាញយក K-MARKET >",
             "default_theme": 30,
+            "speech": "ខ្ញុំទទួលបានរបស់ប្រើប្រាស់ដោយឥតគិតថ្លៃពី K-Market! ចូលមើលឥឡូវនេះ!"
         },
         "id": {
             "name": "Indonesia",
             "gender": "male",
             "char_desc": "a friendly 25-year-old Indonesian young man, neat black hair, clean-shaven, calm composed face, casual charcoal polo shirt",
             "bg_desc": "modern warm living room, wooden shelves, soft warm ambient light",
+            "badge_primary": "GRATIS K-MARKET",
+            "badge_secondary": "Ambil Langsung 0 Won",
+            "cta_text": "CEK APLIKASI K-MARKET >",
             "default_theme": 30,
+            "speech": "Dapat barang gratis di K-Market! Yuk cek aplikasinya sekarang!"
         },
         "kk": {
             "name": "Kazakhstan",
             "gender": "male",
             "char_desc": "a handsome 27-year-old Kazakh young man, Central Asian features, calm confident expression, short black hair, modern dark olive bomber",
             "bg_desc": "modern clean apartment living room, warm indoor lamp light",
+            "badge_primary": "ТЕГІН ЗАТТАР",
+            "badge_secondary": "K-Market арқылы 0 вон",
+            "cta_text": "ҚОСЫМШАНЫ ЖҮКТЕУ >",
             "default_theme": 30,
+            "speech": "K-Market-тен тегін заттар алдым! Қосымшаны қазір көріңіз!"
         },
         "tl": {
             "name": "Philippines",
             "gender": "female",
             "char_desc": "a pleasant 25-year-old Filipina young woman, calm pleasant expression, clean tied hair, casual dark striped t-shirt",
             "bg_desc": "bright cozy apartment interior, soft warm ambient lighting",
+            "badge_primary": "FREE ON K-MARKET",
+            "badge_secondary": "Direct Pickup 0 Won",
+            "cta_text": "DOWNLOAD K-MARKET >",
             "default_theme": 30,
+            "speech": "Got free household items from K-Market! Check the app now!"
         },
         "uz": {
             "name": "Uzbekistan",
             "gender": "male",
             "char_desc": "a handsome 26-year-old Uzbek young man, clean-shaven, calm pleasant face, neat dark hair, casual navy blue knit",
             "bg_desc": "comfortable modern studio apartment, cozy warm lighting",
+            "badge_primary": "K-MARKETDA BEPUL",
+            "badge_secondary": "To'g'ridan-to'g'ri 0 von",
+            "cta_text": "ILOVANI YUKLAB OLING >",
             "default_theme": 30,
+            "speech": "K-Market ilovasida bepul buyumlar oldim! Hoziroq tekshiring!"
         },
         "my": {
             "name": "Myanmar",
             "gender": "male",
             "char_desc": "a polite 25-year-old Myanmar young man, kind composed face, clean-shaven smooth skin, neat hairstyle, casual dark green shirt",
             "bg_desc": "clean bright apartment room, soft warm indoor lighting",
+            "badge_primary": "အခမဲ့ ရယူပါ",
+            "badge_secondary": "K-Market တိုက်ရိုက် 0 ဝမ်",
+            "cta_text": "အက်ပ်ကို ကြည့်ရန် >",
             "default_theme": 30,
+            "speech": "K-Market ကနေ အခမဲ့ ရရှိခဲ့ပါတယ်! အခုပဲ ဝင်ကြည့်လိုက်ပါ!"
         },
         "th": {
             "name": "Thailand",
             "gender": "male",
             "char_desc": "a cheerful 26-year-old Thai young man, calm pleasant expression, clean-shaven, modern short haircut, casual dark grey t-shirt",
             "bg_desc": "modern warm living space, tidy bookshelf, pleasant warm atmosphere",
+            "badge_primary": "แจกฟรี K-MARKET",
+            "badge_secondary": "รับของจริง 0 วอน",
+            "cta_text": "ดูของฟรีในแอป >",
             "default_theme": 30,
-        },
-        "ne": {
-            "name": "Nepal",
-            "gender": "male",
-            "char_desc": "a warm 26-year-old Nepalese young man, friendly calm face, clean-shaven, neat dark hair, casual comfortable navy blue sweater",
-            "bg_desc": "clean sunny apartment living room, neat bookshelf, warm indoor lighting",
-            "default_theme": 30,
-        },
-        "mn": {
-            "name": "Mongolia",
-            "gender": "male",
-            "char_desc": "a strong 27-year-old Mongolian young man, healthy sun-bronzed look, clean-shaven, modern short haircut, casual charcoal hoodie",
-            "bg_desc": "cozy modern Seoul studio apartment, soft warm ambient window light",
-            "default_theme": 30,
-        },
+            "speech": "ได้ของใช้ฟรีจาก K-Market! โหลดแอปมาดูกันเลยครับ!"
+        }
     }
 
     def __init__(self):
         super().__init__(brand_name="케이마켓")
         self.scenario_director = ScenarioDirectorShortsKMarket()
         self.ui_template = RemittanceTemplate()
-        self.copywriter = GeminiShortsCopywriter(service_id="kmarket")
 
-    def get_character_prompt(self, lang: str, gender: Optional[str] = None, **kwargs) -> Dict[str, str]:
-        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (8개국 고유 골격 + iPhone 실사 질감 + 한 손 그립 + 닫힌 입술)"""
-        from core.character_phenotype_definitions import get_character_phenotype, get_negative_phenotype
+    def get_character_prompt(self, lang: str, **kwargs) -> Dict[str, str]:
+        """Wan 2.1 T2I용 고화질 숏폼 인물 프롬프트 구성 (iPhone 실사 질감 + 한 손 그립 + 닫힌 입술)"""
         cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
-        ethnic_desc = get_character_phenotype(lang)
-        ethnic_neg = get_negative_phenotype(lang)
-        
-        # 🎯 [성별 50:50 완벽 랜덤 균등 분배] 기존 인물 정의 100% 보존하면서 성별 전환
-        effective_gender = gender if gender in ("male", "female") else random.choice(["male", "female"])
-        gender_en = "man" if effective_gender == "male" else "woman"
         char_desc = cfg["char_desc"]
-        # 기존 설명에서 성별 키워드만 정밀 매핑 (인물 스타일/나이/분위기 100% 보존)
-        if effective_gender == "female":
-            char_desc = char_desc.replace("young man", "young woman").replace("man", "woman").replace("polo shirt", "comfortable neat top").replace("bomber jacket", "casual jacket")
-        else:
-            char_desc = char_desc.replace("young woman", "young man").replace("woman", "man").replace("blouse", "neat shirt").replace("top", "polo shirt")
-            
         bg_desc = cfg["bg_desc"]
 
         positive = (
-            f"candid authentic vertical iPhone mobile photo taken by a friend, photographed from 3.5 meters away with natural smartphone camera lens, "
-            f"wide environmental distant cowboy shot, waist-up view showing complete upper body from head down past hips and belt, "
-            f"natural 8-head tall realistic adult human body proportions, natural slender neck and shoulders, "
-            f"subject occupies only 35% to 40% of the vertical frame with generous surrounding room space and open interior, {ethnic_desc}, {char_desc}, "
-            f"sitting comfortably in {bg_desc} at 3.5 meters distance, "
-            f"holding a sleek modern smartphone naturally in one hand at hip and waist level, showing the vertical black display screen directly facing forward to camera, "
+            f"candid authentic vertical iPhone mobile photo taken by a friend, {char_desc}, "
+            f"sitting comfortably in {bg_desc}, "
+            f"holding a sleek modern smartphone naturally in one hand at chest level, showing the vertical black display screen directly facing forward to camera, "
             f"relaxed comfortable one-handed grip, the other arm resting naturally and still, "
             f"calm neutral resting face, lips completely closed together, mouth gently shut, strictly no smile, no teeth showing, "
             f"looking directly into the camera lens with sincere trustworthy friendly eye contact, "
@@ -143,8 +143,6 @@ class KMarketShortsProducer(BaseShortsProducer):
         )
 
         negative = (
-            f"{ethnic_neg}, "
-            "close-up, extreme close-up, cropped torso, bust shot, headshot, zoomed-in, person filling frame, subject taking up majority of frame, large face, tight framing, "
             "overexposed, blown out highlights, washed out, harsh white lighting, excessive brightness, pale bleached skin, "
             "beauty filter, airbrushed, porcelain skin, plastic skin, glamour lighting, studio flash, "
             "smiling, laughing, grinning, toothy smile, open mouth, parted lips, visible teeth, teeth, "
@@ -159,56 +157,32 @@ class KMarketShortsProducer(BaseShortsProducer):
         """케이마켓 앱 거래 화면 렌더링"""
         return self.ui_template.render(title=f"K-MARKET {theme_title}", amount=0)
 
-    def get_speech_script(self, lang: str, scenario: Optional[Dict[str, Any]] = None, **kwargs) -> str:
-        """다국어 나레이션 스크립트 (제미나이 100% 실시간 생성)"""
-        script_data = self.copywriter.generate_shorts_script(
-            service_id="kmarket",
-            lang=lang,
-            scenario=scenario or {"theme_name": "K-Market 0 Won Giveaway"}
-        )
-        return script_data.get("hook_0_10s", "K-Market 0 Won Free Giveaway")
-
-    def produce_shorts(self, lang: str = "vi", **kwargs) -> Dict[str, Any]:
-        """GoldenBatchProducer 및 배치 봇 호환용 alias"""
-        return self.produce(lang=lang, **kwargs)
+    def get_speech_script(self, lang: str, **kwargs) -> str:
+        """다국어 나레이션 스크립트"""
+        cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
+        return cfg["speech"]
 
     def produce(
         self,
         lang: str = "vi",
         theme_index: Optional[int] = None,
         custom_hero_image: Optional[Image.Image] = None,
-        seed: Optional[int] = None,
-        gender: Optional[str] = None,
-        abort_scope: Optional[str] = None
+        seed: Optional[int] = None
     ) -> Dict[str, Any]:
         """케이마켓 1080p 상용급 숏폼 동영상 1회 완제 생산"""
         cfg = self.COUNTRY_CONFIG.get(lang, self.COUNTRY_CONFIG["vi"])
         country_name = cfg["name"]
         effective_theme = theme_index if theme_index is not None else cfg["default_theme"]
 
-        # 🎯 [성별 50:50 완벽 랜덤 균등 분배]
-        effective_gender = gender if gender in ("male", "female") else random.choice(["male", "female"])
-
         # 테마 메타데이터 로드
         scenario = self.scenario_director.get_shorts_scenario(lang=lang, theme_index=effective_theme)
         theme_title = scenario.get("theme_name", "Air Fryer 5L")
-
-        # 🤖 제미나이 AI 실시간 22초 숏폼 대본/배지/CTA 창작
-        script_data = self.copywriter.generate_shorts_script(
-            service_id="kmarket",
-            lang=lang,
-            scenario=scenario
-        )
-        speech_text = script_data.get("hook_0_10s") or "K-Market 0 Won Free Giveaway"
-        badge_p = script_data.get("badge_primary") or "0 WON FREE"
-        badge_s = script_data.get("badge_secondary") or "Direct Pickup"
-        cta_t = script_data.get("cta_button_text") or "DOWNLOAD APP >"
 
         dt_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_folder = self.output_base / f"케이마켓_{country_name}_{theme_title}_{dt_str}"
         out_folder.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"🚀 [케이마켓 숏폼] 생산 시작: {country_name} ({lang.upper()}) | 성별: {effective_gender} | 테마: {theme_title}")
+        logger.info(f"🚀 [케이마켓 숏폼] 생산 시작: {country_name} ({lang.upper()}) | 테마: {theme_title}")
 
         # 1. ComfyUI 엔진 확인
         self.ensure_engine_ready()
@@ -219,19 +193,18 @@ class KMarketShortsProducer(BaseShortsProducer):
             logger.info("🌟 [Step 1] 전달받은 마스터 인물 사진 사용")
         else:
             # 🎯 [100% 숏폼 독자 프롬프트] 카드뉴스 의존성 완전 분리: 1인칭 한 손 그립 + 립싱크용 닫힌 입술 적용
-            t2i_prompt = self.get_character_prompt(lang=lang, gender=effective_gender, theme_title=theme_title)
+            t2i_prompt = self.get_character_prompt(lang=lang, theme_title=theme_title)
             pos_prompt = t2i_prompt["positive"]
             neg_prompt = t2i_prompt["negative"]
 
-            logger.info(f"🎨 [Step 1] 자연스러운 숏폼 UGC 씬 사진 생성 (성별={effective_gender}, 한 손 그립, 입술 닫힘, seed={seed})")
+            logger.info(f"🎨 [Step 1] 자연스러운 숏폼 UGC 씬 사진 생성 (한 손 그립, 입술 닫힘, seed={seed})")
             gen_path = self.wan_client.generate_t2i_master(
                 positive_prompt=pos_prompt,
                 negative_prompt=neg_prompt,
                 width=832,
                 height=1216,
                 seed=seed,
-                prefix=f"shorts_kmarket_ugc_{lang}",
-                abort_scope=abort_scope
+                prefix=f"shorts_kmarket_ugc_{lang}"
             )
             master_img = Image.open(gen_path)
             master_save_path = out_folder / f"01_master_t2i_{lang}.png"
@@ -260,10 +233,11 @@ class KMarketShortsProducer(BaseShortsProducer):
 
         # 4. [Step 3] 다국어 TTS 음성 합성 & Wan 2.2 S2V 립싱크 렌더링
         logger.info("🎙️ [Step 3] Edge-TTS 다국어 음성 생성...")
+        speech_text = self.get_speech_script(lang=lang)
         wav_path = self.tts.generate_speech_wav(
             text=speech_text,
             lang=lang,
-            gender=effective_gender,
+            gender=cfg.get("gender", "male"),
             rate="+0%",  # 🎯 차분하고 편안한 보통 대화 속도 (수다쟁이 입 파닥거림 원천 차단)
             filename_prefix=f"kmarket_audio_{lang}"
         )
@@ -282,8 +256,7 @@ class KMarketShortsProducer(BaseShortsProducer):
             audio_name=audio_name,
             prompt_text=f"a cheerful friendly person holding smartphone, talking enthusiastically to camera with natural gentle smile, clear lip sync, stable hands",
             output_mp4_path=raw_video_path,
-            prefix=f"kmarket_s2v_{lang}",
-            abort_scope=abort_scope
+            prefix=f"kmarket_s2v_{lang}"
         )
 
         # 5. [Step 4] 1080x1920 세로 풀HD 업스케일 & 마케팅 오버레이 결합
@@ -294,9 +267,9 @@ class KMarketShortsProducer(BaseShortsProducer):
         self.composer.finalize_1080p_shorts(
             raw_video_path=raw_video_path,
             output_mp4_path=final_mp4_path,
-            badge_text_primary=badge_p,
-            badge_text_secondary=badge_s,
-            cta_text=cta_t,
+            badge_text_primary=cfg["badge_primary"],
+            badge_text_secondary=cfg["badge_secondary"],
+            cta_text=cfg["cta_text"],
             lang=lang
         )
 
@@ -309,8 +282,7 @@ class KMarketShortsProducer(BaseShortsProducer):
             country_name=country_name,
             theme_title=theme_title,
             speech=speech_text,
-            cfg=cfg,
-            scenario=scenario
+            cfg=cfg
         )
         logger.info(f"📝 [SNS 가이드] 숏폼 배포 패키지 가이드 저장 완료: {guide_filename}")
 
@@ -322,14 +294,6 @@ class KMarketShortsProducer(BaseShortsProducer):
                 pass
 
         logger.info(f"🎉 [케이마켓 숏폼 완성] 최종 산출물: {final_mp4_path}")
-        
-        # 🧹 [1개국 K-Market 숏폼 완성 즉각 VRAM 캐시 방출]
-        try:
-            from core.engine.gpu_memory_flusher import GPUMemoryFlusher
-            GPUMemoryFlusher.flush_gpu_vram(unload_models=False)
-        except Exception:
-            pass
-
         return {
             "output_mp4": final_mp4_path,
             "folder_path": str(out_folder),
@@ -347,17 +311,76 @@ class KMarketShortsProducer(BaseShortsProducer):
         country_name: str,
         theme_title: str,
         speech: str,
-        cfg: Dict[str, Any],
-        scenario: Optional[Dict[str, Any]] = None
+        cfg: Dict[str, Any]
     ):
-        """인스타그램 릴스, 틱톡, 유튜브 쇼츠, 페이스북 릴스 전용 다국어 배포 가이드 작성 (제미나이 100% 동적 생성)"""
-        # 🤖 제미나이 AI 4대 숏폼 플랫폼 맞춤 팩 생성
-        scen = scenario or {"theme_name": theme_title, "item": theme_title}
-        sns_pack = self.copywriter.generate_shorts_post_package(
-            service_id="kmarket",
-            lang=lang,
-            scenario=scen
+        """인스타그램 릴스, 틱톡, 유튜브 쇼츠, 페이스북 릴스 전용 다국어 배포 가이드 작성"""
+        badge_p = cfg.get("badge_primary", "K-MARKET MIỄN PHÍ")
+        cta = cfg.get("cta_text", "DOWNLOAD APP >")
+
+        hashtags = (
+            f"#{country_name}InKorea #KMarket #FreeSharing #UsedMarket #LifeInKorea "
+            f"#ForeignersInKorea #E9Visa #E7Visa #중고거래 #무료나눔 #{lang.upper()}"
         )
-        content = self.copywriter.format_guide_text(sns_pack)
+
+        content = f"""================================================================================
+🎬 [K-Market 숏폼 영상 4대 SNS 배포 가이드 & 카피라이트]
+================================================================================
+타깃 국가: {country_name} ({lang.upper()})
+거래 물품 테마: {theme_title} (무료 나눔 / 직거래 0원)
+영상 규격: 1080x1920 (9:16 세로 풀HD 숏폼)
+발화 나레이션: {speech}
+================================================================================
+
+[1] 🎵 틱톡 (TikTok) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [추천 캡션 (복사용 원문)]
+🎁 {badge_p}! ({theme_title}) 
+{speech}
+👇 {cta} (Link in Bio / Profile)
+
+{hashtags} #TikTokShorts #ViralVideo #FreeStuffKorea
+
+📌 [고정 댓글 (Pinned Comment)]
+👉 Download K-Market App for free! (Profile link)
+(외국인 이웃 간 100% 안전 직거래 & 무료 나눔 커뮤니티 앱)
+
+
+[2] 📸 인스타그램 릴스 (Instagram Reels) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [추천 캡션 (복사용 원문)]
+🇰🇷 {country_name} friends in Korea!
+"Got {theme_title} for 0 Won directly on K-Market!"
+
+{speech}
+
+✨ K-Market Highlights:
+1️⃣ 100% Free Sharing & Direct Pickup (직거래 0원)
+2️⃣ Verified foreign neighbor community in Korea!
+3️⃣ Available in your own language!
+
+👉 Click the link in bio to download K-Market right now!
+
+{hashtags} #Reels #KoreaLife #KMarket #FreeLife
+
+
+[3] 🔴 유튜브 쇼츠 (YouTube Shorts) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [쇼츠 제목 (Title)]
+Free {theme_title} in Korea! {badge_p} 🇰🇷 #Shorts
+
+📌 [쇼츠 설명 (Description)]
+{speech}
+👉 Free App Download Link: (프로필/고정댓글 링크 입력)
+{hashtags} #Shorts #KMarket #KoreaUsedGoods
+
+
+[4] 📘 페이스북 릴스 (Facebook Reels) 포스팅 가이드
+--------------------------------------------------------------------------------
+📌 [추천 캡션]
+📢 [케이마켓 무료 나눔] {country_name} 이웃 간 생활 가전/가구 직거래 인증! ({theme_title})
+{speech}
+지금 바로 프로필 링크에서 케이마켓 앱을 다운로드하고 무료 나눔을 받아가세요!
+================================================================================
+"""
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)

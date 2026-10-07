@@ -1,215 +1,169 @@
+# -*- coding: utf-8 -*-
+"""
+KMarketRedditEngine - 🛒 [K-Market 전용 레딧 외국인 생활·중고마켓 무인 마케팅 총괄 엔진]
+====================================================================================
+• 역할:
+  - 핵심 서브레딧 대상 100% 무인 실시간 스캔 & 스텔스 댓글 침투 총괄
+  - 80:20 스텔스 비율 + Zero URL 스텔스 원칙: 직접 링크 0% + 오직 구글 검색어 'KTRS Market' 유도
+  - RedditSafetyOrchestrator 연동: 업보트 + 피드 스크롤 + 비홍보 댓글 + 홍보 댓글 안전 실행
+  - 가시성 검증 (10초 후 댓글 삭제 여부 자동 확인) & 헬스 모니터 연동
+  - 24시간 365일 무인 자율 구동 지원
+"""
+
 import os
 import sys
-import re
-import json
 import time
-import random
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
+WORKSPACE_DIR = Path(__file__).resolve().parent.parent
+if str(WORKSPACE_DIR) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_DIR))
 
-# Add engine root to sys.path
-BASE_DIR = Path(__file__).resolve().parent.parent
-if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
-
-from config import (
-    DATA_DIR,
-    REPLY_DELAY_MIN_SEC, REPLY_DELAY_MAX_SEC,
-    HOURLY_REDDIT_LIMIT, DAILY_REDDIT_PROMO_LIMIT,
-    BASE_URLS
-)
+from config import HOURLY_REDDIT_LIMIT, DAILY_REDDIT_PROMO_LIMIT
 from core.db_manager import DBManager
-from core.gemini_kmarket import KMarketGeminiEngine
-from core.supabase_manager import SupabaseManager
 from core.reddit_browser_driver import RedditBrowserDriver
 from core.reddit_safety_orchestrator import RedditSafetyOrchestrator
 from core.reddit_account_health import AccountHealthMonitor
+from brands.kmarket.kmarket_reddit_scanner import KMarketRedditScanner
+from brands.kmarket.kmarket_reddit_copywriter import KMarketRedditCopywriter
 
-logger = logging.getLogger("KMarketRedditHunter")
+logger = logging.getLogger("KMarketRedditEngine")
 
-class KMarketRedditHunter:
-    """
-    🛒 [K-Market 전용 실시간 무인 Reddit Lead Hunter & Safety Orchestrator]
-    - 200+ 가구/가전/생필품 매트릭스 + Gemini AI 시맨틱 문맥 인텐트 판별
-    - 3단계 간접 홍보 전략 (순수도움 40% / 간접유도 40% / 프로필 20%)
-    - RedditSafetyOrchestrator와 연동: 업보트 + 비홍보 댓글 + 홍보 댓글 안전 실행
-    """
-    def __init__(self, db_mgr: DBManager, supabase_mgr: SupabaseManager):
-        self.db_mgr = db_mgr
+
+class KMarketRedditEngine:
+    """K-Market 전용 레딧 무인 마케팅 총괄 엔진"""
+
+    SERVICE_ID = "kmarket"
+    OFFICIAL_SEARCH_KEYWORD = "KTRS Market"
+    OFFICIAL_KOREAN_KEYWORD = "케이티알에스 마켓"
+    OFFICIAL_LANDING_URL = "https://ktrs-market.vercel.app/"
+
+    def __init__(self, db_mgr: Optional[DBManager] = None, supabase_mgr: Optional[Any] = None, *args, **kwargs):
         self.supabase_mgr = supabase_mgr
-        self.gemini = KMarketGeminiEngine(self.supabase_mgr)
-        self.driver = RedditBrowserDriver(service_id="kmarket")
-        self.health = AccountHealthMonitor(service_id="kmarket")
+        self.db_mgr = db_mgr or DBManager()
+        self.driver = RedditBrowserDriver(service_id=self.SERVICE_ID)
+        self.health = AccountHealthMonitor(service_id=self.SERVICE_ID)
+        self.copywriter = KMarketRedditCopywriter()
+        self.scanner = KMarketRedditScanner(db_mgr=self.db_mgr, driver=self.driver)
+
         self.orchestrator = RedditSafetyOrchestrator(
-            service_id="kmarket",
+            service_id=self.SERVICE_ID,
             db_mgr=self.db_mgr,
-            supabase_mgr=self.supabase_mgr
+            supabase_mgr=None
         )
         self.orchestrator.set_promo_handler(self._execute_single_promo)
-        self.keywords_matrix = self._load_keywords_matrix()
-
-    def _load_keywords_matrix(self) -> Dict[str, List[str]]:
-        path = DATA_DIR / "kmarket_reddit_keywords.json"
-        if path.exists():
-            try:
-                with open(path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.warning(f"키워드 매트릭스 로드 실패: {e}")
-        return {
-            "appliances": ["tv", "fridge", "microwave", "heater", "rice cooker", "vacuum"],
-            "furniture": ["bed", "mattress", "desk", "chair", "sofa", "wardrobe"],
-            "intent_triggers": ["where to buy", "cheap", "used", "moving", "giveaway", "free"],
-            "target_subreddits": ["Living_in_Korea", "korea", "teachinginkorea", "seoul"]
-        }
+        logger.info("🛒 [KMarketRedditEngine] K-Market 레딧 전담 무인 엔진 초기화 완료")
 
     def _execute_single_promo(self, auto_post: bool = True) -> int:
-        """홍보 댓글 1건 안전 실행 (Orchestrator가 호출)"""
         return self.scan_and_reply(limit_per_sub=10, max_promo=1, auto_post=auto_post)
 
     def run_safe_cycle(self) -> Dict[str, Any]:
         """업보트 + 피드 스크롤 + 비홍보 댓글 + 홍보 댓글 1회 안전 종합 사이클 실행"""
+        logger.info("🔄 [K-Market Reddit] 안전 종합 사이클 가동...")
         return self.orchestrator.run_safe_cycle()
 
-    def scan_and_reply(self, limit_per_sub: int = 15, max_promo: int = 1, auto_post: bool = True, **kwargs) -> int:
-        """
-        타깃 서브레딧들의 실시간 글을 무인 스캔하고,
-        품목 + AI 문맥 검증을 통과한 글에 100% 맞춤 생활 팩트 + 구글 검색 유도 댓글 게시
-        """
+    def scan_and_reply(
+        self,
+        subreddits: Optional[List[str]] = None,
+        limit_per_sub: int = 15,
+        max_promo: int = 1,
+        auto_post: bool = True
+    ) -> int:
         if not self.health.can_post_promo(DAILY_REDDIT_PROMO_LIMIT):
-            logger.info("🛡️ [K-Market] 일일 안전 한도 초과 또는 쿨다운 상태로 스킵")
+            logger.info("🛡️ [K-Market Reddit] 일일 안전 한도 도달 또는 쿨다운 상태로 스킵")
             return 0
 
-        subreddits = self.keywords_matrix.get("target_subreddits", [
-            "Living_in_Korea", "korea", "teachinginkorea", "seoul",
-            "StudyInKorea", "movingtokorea", "EPIK", "Yonsei",
-            "KoreaUniversity", "SNU", "Busan", "Daegu"
-        ])
-        logger.info(f"🛒 [K-Market Reddit Hunter] {len(subreddits)}개 커뮤니티 실시간 스캔 가동...")
-
-        live_posts = self.driver.fetch_live_posts(subreddits, limit_per_sub=limit_per_sub)
-        if not live_posts:
-            logger.info("실시간 스캔된 글이 없어 대기합니다.")
+        leads = self.scanner.scan_target_subreddits(subreddits=subreddits, limit_per_sub=limit_per_sub, max_final_leads=max_promo)
+        if not leads:
+            logger.info("처리 가능한 신규 K-Market 타겟 글이 없습니다.")
             return 0
 
         processed_count = 0
-        all_flattened_keywords = []
-        for cat in ["appliances", "furniture", "household_kitchen", "korean_shopping_platforms", "moving_housing_services", "korean_language_institutes_kli", "foreigner_support_centers", "intent_triggers"]:
-            all_flattened_keywords.extend(self.keywords_matrix.get(cat, []))
-
-        for post in live_posts:
+        for lead in leads:
             if processed_count >= max_promo:
                 break
 
-            post_id = post["id"]
-            title = post["title"]
-            body = post.get("body", "")
-            subreddit = post["subreddit"]
-            post_url = post["url"]
+            post_id = lead["post_id"]
+            title = lead["title"]
+            body = lead["body"]
+            subreddit = lead["subreddit"]
+            post_url = lead["post_url"]
+            intent = lead.get("intent", {})
 
-            # DB 중복 체크
-            if self.db_mgr.is_already_processed(post_id):
-                continue
-
-            # 채널별 시간당/일일 한도 체크
             channel_key = f"reddit_kmarket:{subreddit}"
             if not self.db_mgr.can_post_to_channel(channel_key, HOURLY_REDDIT_LIMIT, DAILY_REDDIT_PROMO_LIMIT):
                 logger.info(f"[{subreddit}] 채널 안전 한도 초과로 스킵")
                 continue
 
-            # 1단계: 품목/행위 키워드 1차 매칭 검사 (단어 경계 \b 및 네거티브 필터링 적용)
-            combined_text = f"{title} {body}".lower()
-
-            # 네거티브 패턴 검사 (한국어 문법 struggle, 기호품, 렌터카 등 오인 방지)
-            has_negative = any(re.search(pat, combined_text, re.IGNORECASE) for pat in [
-                r"\b(struggle|struggling|grammar|sentence|korean\s*learners?|topik|conjugation|pronunciation|vocab)\b",
-                r"\b(nicotine|zyn|velo|pablo|vape|car\s*lease|car\s*rental)\b"
-            ])
-            has_strong_kmarket = any(w in combined_text for w in [
-                "moving out", "leaving korea", "moving sale", "secondhand", "free giveaway", "give away", "0 krw", "당근", "중고"
-            ])
-            if has_negative and not has_strong_kmarket:
-                continue
-
-            has_keyword_match = False
-            for kw in all_flattened_keywords:
-                kw_str = kw.strip().lower()
-                if not kw_str:
-                    continue
-                if re.match(r'^[a-zA-Z0-9\s\-]+$', kw_str):
-                    if re.search(r'\b' + re.escape(kw_str) + r'\b', combined_text, re.IGNORECASE):
-                        has_keyword_match = True
-                        break
-                else:
-                    if kw_str in combined_text:
-                        has_keyword_match = True
-                        break
-
-            if not has_keyword_match:
-                continue
-
-            # 2단계: Gemini AI 정밀 시맨틱 인텐트 판별
-            intent_res = self.gemini.reddit_engine.classify_kmarket_reddit_intent(title, body)
-            if not intent_res.get("is_relevant", False):
-                logger.info(f"⏭️ [AI 필터링] KTRS 마켓 무관 글 스킵: '{title}' ({intent_res.get('reason', '')})")
-                continue
-
-            logger.info(f"🎯 [K-Market 타깃 질문 포착!] '{title}' (카테고리: {intent_res.get('category')})")
-
-            # 3단계: 다국어 랜딩 URL
-            target_lang = "en"
-            base_domain = BASE_URLS.get("kmarket", "https://ktrs-market.vercel.app").rstrip("/")
-            landing_url = f"{base_domain}/{target_lang}"
-
-            # 4단계: 3단계 간접 홍보 답변 생성
-            reply_content = self.gemini.reddit_engine.generate_reddit_response(
+            scenario_id = intent.get("scenario_id", 1)
+            reply_content = self.copywriter.generate_reddit_response(
                 post_title=title,
                 post_body=body,
-                target_lang=target_lang,
-                landing_url=landing_url
+                subreddit=subreddit,
+                target_lang="en",
+                scenario_id=scenario_id
             )
 
-            # 5단계: 영구 프로필 브라우저 드라이버를 통한 무인 댓글 작성
             post_success = False
             if auto_post:
-                logger.info(f"✍️ [K-Market 무인 댓글 게시 시도] '{title}'...")
+                logger.info(f"✍️ [K-Market Reddit 스텔스 댓글 게시 시도] r/{subreddit}: '{title[:35]}'...")
                 comment_res = self.driver.post_comment_humanlike(post_url=post_url, comment_text=reply_content)
-                post_success = comment_res.get("success", False)
+                post_success = comment_res.get("verified", False)
                 if not post_success:
-                    logger.warning(f"댓글 게시 실패: {comment_res.get('error')}")
+                    err_msg = comment_res.get('error', 'unknown_error')
+                    logger.warning(f"댓글 게시 실패: {err_msg}")
+                    self.db_mgr.record_history(
+                        content_type="reddit_skipped",
+                        service_id=self.SERVICE_ID,
+                        target_lang="en",
+                        title=f"[SKIPPED:{err_msg}] {title}",
+                        content_text=str(err_msg),
+                        target_url=post_url,
+                        external_id=post_id
+                    )
                     continue
 
-                # 6단계: 가시성 검증 (삭제/숨김 여부 체크)
+                # 10초 후 가시성 검증 (삭제/섀도우밴 여부 확인)
                 time.sleep(10)
                 visible = self.driver.check_comment_visible(post_url, reply_content[:50])
                 if not visible:
                     self.health.report_deletion(post_url, reply_content[:100])
                     logger.warning("⚠️ K-Market 홍보 댓글 삭제 감지! 헬스 모니터에 기록")
             else:
+                logger.info(f"🧪 [시뮬레이션 모드 댓글 생성]\n{reply_content}")
                 post_success = True
 
-            # 7단계: SQLite DB 및 헬스 모니터 기록
             self.db_mgr.record_history(
                 content_type="reddit_reply",
-                service_id="kmarket",
-                target_lang=target_lang,
-                title=f"[{intent_res.get('category')}] {title}",
+                service_id=self.SERVICE_ID,
+                target_lang="en",
+                title=f"[{intent.get('category', 'kmarket')}] {title}",
                 content_text=reply_content,
-                target_url=landing_url,
+                target_url=self.OFFICIAL_LANDING_URL,
                 external_id=post_id
             )
             self.health.record_promo_comment()
             processed_count += 1
-            logger.info(f"✅ [K-Market Reddit] 성공 처리 완료 (총 {processed_count}건)")
+            logger.info(f"✅ [K-Market Reddit] 성공 처리 완료 (누적 {processed_count}건)")
 
         return processed_count
 
+
+# 하위 호환성 별칭
+KMarketRedditPipeline = KMarketRedditEngine
+KMarketRedditHunter = KMarketRedditEngine
+
 if __name__ == "__main__":
-    db = DBManager()
-    supa = SupabaseManager(db)
-    hunter = KMarketRedditHunter(db, supa)
-    print("Testing K-Market Reddit Hunter live scan...")
-    count = hunter.scan_and_reply(limit_per_sub=3, max_promo=1, auto_post=False)
-    print(f"Scan finished. Processed: {count} posts.")
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    engine = KMarketRedditEngine()
+    print("\n" + "=" * 80)
+    print("🛒 [K-Market 전용 Reddit 무인 마케팅 엔진 테스트]")
+    print("=" * 80)
+    res_count = engine.scan_and_reply(limit_per_sub=3, max_promo=1, auto_post=False)
+    print(f"\n🎉 테스트 완료: {res_count}건 처리됨")

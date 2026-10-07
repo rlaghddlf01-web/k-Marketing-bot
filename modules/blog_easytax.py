@@ -120,14 +120,7 @@ class EasyTaxBlogPublisher:
             # 언어별 랜딩 URL 및 해시태그 치환 (ko URL을 각 언어 URL로)
             content_md = translated_raw.get("content_md", "")
             content_md = content_md.replace(ko_landing_url, landing_url)
-
-            # 🚀 [파이썬 전담] 제미나이 호출 없이 파이썬이 해당 언어 타깃 + 실시간 트렌드 해시태그를 본문 끝에 직접 결합
-            sep = chr(10) + "---" + chr(10)
-            if sep in content_md:
-                parts = content_md.rsplit(sep, 1)
-                if "#" in parts[1] and len(parts[1].strip().split()) <= 40:
-                    content_md = parts[0].strip()
-            content_md = f"{content_md.strip()}{chr(10)}{chr(10)}---{chr(10)}{hashtags}{chr(10)}"
+            content_md = content_md.replace(ko_hashtags, hashtags)
             translated_raw = {**translated_raw, "content_md": content_md}
 
             content_html = markdown.markdown(content_md, extensions=['extra', 'tables', 'nl2br'])

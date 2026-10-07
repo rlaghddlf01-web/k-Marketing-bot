@@ -48,8 +48,8 @@ class ScenarioDirectorCardnewsKMarket:
         cat = theme.get("cat", "")
         theme_id = theme.get("id", "")
 
-        # 🎯 [성별 50:50 완벽 랜덤 균등 분배]
-        target_gender = random.choices(["female", "male"], weights=[50, 50], k=1)[0]
+        # 🎯 [대표님 절대 지침] 남성 4 : 여성 6 황금 성비 가중치 선택
+        target_gender = random.choices(["female", "male"], weights=[60, 40], k=1)[0]
 
         # 1. 대학가 캠퍼스 타깃 (연세대, 고려대, 성균관대 등)
         if cat == "campus" or "univ" in theme_id or "대학" in target:
@@ -109,7 +109,7 @@ class ScenarioDirectorCardnewsKMarket:
                 image_prompt = build_kmarket_cardnews_scene_prompt(
                     slide_idx=1,
                     char=char_anchor,
-                    scene_action=f"meeting outdoors on a clean city sidewalk near {target} to receive a free {item}",
+                    scene_action=f"meeting outdoors on a clean Korean sidewalk near {target} to receive a free {item}",
                     item_name=item
                 )
             elif idx == 2:
@@ -137,7 +137,7 @@ class ScenarioDirectorCardnewsKMarket:
                     item_name=item
                 )
             else:
-                # 🎬 5번 슬라이드: 시청자에게 케이마켓 나눔 추천 따뜻한 클로징 CTA
+                # 🎬 5번 슬라이드: 시청자에게 케이마켓 나눔 추천 및 엄지척 CTA
                 image_prompt = build_kmarket_cardnews_scene_prompt(
                     slide_idx=5,
                     char=char_anchor,
@@ -162,7 +162,6 @@ class ScenarioDirectorCardnewsKMarket:
                 "title": copy_item.get("title", f"Step {idx} Title"),
                 "subtitle": copy_item.get("subtitle", ""),
                 "bullets": copy_item.get("bullets", []),
-                "cta_button": copy_item.get("cta_button", ""),
                 "image_prompt": image_prompt,
                 "negative_prompt": negative_prompt
             })

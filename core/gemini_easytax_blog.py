@@ -56,6 +56,7 @@ class EasyTaxGeminiBlog:
 
 [본문 대표 사진 태그]: `![{topic_title}]({img_url})`
 [랜딩 링크]: {landing_url}
+[바이럴 해시태그]: {hashtags}
 
 다음 구조를 완벽하게 갖춘 마크다운 전문을 작성해 주십시오:
 1. 매력적이고 신뢰감 있는 대제목 (# 제목)
@@ -67,7 +68,7 @@ class EasyTaxGeminiBlog:
 7. 자주 묻는 질문 (FAQ 2가지)
 8. 안심 보장 (선입금 0원, 국세청 세법 기준 100% 안전 접수 지원)
 9. 하단 CTA 버튼: `👉 [지금 바로 내 숨은 환급금 무료 조회하기 ({landing_url})]({landing_url})`
-(주의: 해시태그는 파이썬 엔진에서 실시간 트렌드로 자동 결합되므로 본문 작성에만 집중하십시오)
+10. 최하단 실시간 바이럴 해시태그
 
 [비주얼 프롬프트 지침]:
 - visual_prompt 필드에는 본문 속 스토리/상황(예: 공단 야외 현장, 카페 알바, 인천공항 출국장, 안락한 거실 가족통화, 세무서 앞 등)을 가장 생동감 있게 묘사하는 Imagen 3 전용 영문 프롬프트 1문장을 작성하십시오. (반드시 realistic Asian features, photorealistic, 16:9 포함)
@@ -83,7 +84,7 @@ class EasyTaxGeminiBlog:
         if self.client:
             try:
                 result = self.client.models.generate_content(
-                    model='gemini-flash-lite-latest',
+                    model='gemini-3.1-flash-lite',
                     contents=prompt
                 )
                 text = result.text.strip()

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aura Live Video Chat & Subtitles</title>
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: '#E5A934',
+              hover: '#d49826',
+              foreground: '#121212',
+            },
+          },
+          animation: {
+            'subtle-pulse': 'subtlePulse 4s ease-in-out infinite',
+            'radar-ping': 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+            'float-subtle': 'floatSubtle 6s ease-in-out infinite',
+          },
+          keyframes: {
+            subtlePulse: {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.02)' },
+            },
+            floatSubtle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-4px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #09090b;
+      color: #f4f4f5;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .glass-card {
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .glass-pill {
+      background: rgba(10, 10, 10, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .glow-gold {
+      box-shadow: 0 0 25px rgba(229, 169, 52, 0.45);
+    }
+    .glow-red {
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+    }
+    /* Typing Cursor */
+    .typing-cursor::after {
+      content: '|';
+      animation: blink 0.9s infinite;
+      color: #E5A934;
+      font-weight: 300;
+      margin-left: 2px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body class="h-screen w-full relative flex flex-col items-center justify-between select-none">
+
+  <!-- 1. Remote Video Stream (Nanami, Tokyo, 24) -->
+  <div class="absolute inset-0 w-full h-full overflow-hidden bg-zinc-950">
+    <!-- Nanami Live Stream Feed -->
+    <img 
+      id="remoteVideoFeed"
+      src="/nanami_portrait.jpg" 
+      alt="Nanami Live Video"
+      class="w-full h-full object-cover object-center animate-subtle-pulse filter brightness-95 contrast-105"
+    />
+    <!-- Subtle Cinematic Gradient Overlays -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-black/40 pointer-events-none"></div>
+  </div>
+
+  <!-- 2. Top Header Bar: AI 실시간 통역 뱃지 & Nanami 프로필 태그 -->
+  <header class="relative z-30 w-full px-5 pt-6 flex items-center justify-between pointer-events-none">
+    <!-- Live AI Interpretation Badge (Native Aura Component) -->
+    <div class="flex items-center gap-2.5 glass-pill px-4 py-2 rounded-full shadow-2xl pointer-events-auto transition-transform hover:scale-105">
+      <span class="relative flex h-2.5 w-2.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-80"></span>
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-sm shadow-emerald-400"></span>
+      </span>
+      <span class="text-xs font-bold tracking-wide text-white">AI 실시간 통역</span>
+      <span class="text-[11px] text-zinc-300 font-medium tracking-tight">(한국어 ⇄ 日本語)</span>
+    </div>
+
+    <!-- Caller Info Pill -->
+    <div class="flex items-center gap-2 glass-pill px-3 py-1.5 rounded-full text-[11px] text-zinc-300 pointer-events-auto">
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span class="font-semibold text-white">나나미 (도쿄, 24)</span>
+      <span class="text-[10px] text-zinc-400">00:14</span>
+    </div>
+  </header>
+
+  <!-- 3. Local Video Stream (Picture-in-Picture) -->
+  <div 
+    id="pipContainer"
+    class="absolute top-20 right-5 w-28 h-40 md:w-32 md:h-44 rounded-2xl overflow-hidden border-2 border-white/25 shadow-[0_10px_30px_rgba(0,0,0,0.7)] z-30 bg-zinc-900 transition-all duration-300 hover:scale-105"
+  >
+    <img 
+      src="/sample_avatar_male.jpg" 
+      alt="Local User Selfie"
+      class="w-full h-full object-cover scale-x-[-1]"
+    />
+    <div class="absolute bottom-1.5 left-2 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-zinc-200 font-medium">
+      나 (서울)
+    </div>
+  </div>
+
+  <!-- 4. Live Voice Subtitle Overlay (Netflix Glassmorphism Style) -->
+  <div class="relative z-30 w-full px-5 pb-36 flex flex-col items-center justify-center pointer-events-none space-y-2.5">
+    
+    <!-- Real-time Voice Wave Indicator -->
+    <div class="flex items-center gap-1.5 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[11px] text-zinc-300 shadow-lg animate-float-subtle">
+      <span class="flex items-center gap-0.5 h-3">
+        <span class="w-1 bg-[#E5A934] h-2 animate-pulse rounded-full"></span>
+        <span class="w-1 bg-[#E5A934] h-3 animate-pulse rounded-full" style="animation-delay: 150ms"></span>
+        <span class="w-1 bg-[#E5A934] h-2.5 animate-pulse rounded-full" style="animation-delay: 300ms"></span>
+        <span class="w-1 bg-[#E5A934] h-1.5 animate-pulse rounded-full" style="animation-delay: 450ms"></span>
+      </span>
+      <span class="text-white font-medium">나나미 음성 인식 중...</span>
+    </div>
+
+    <!-- Netflix Style Glassmorphism Subtitle Card -->
+    <div 
+      id="subtitleCard" 
+      class="glass-card px-6 py-4 rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] max-w-sm w-full text-center space-y-1.5 transition-all duration-300 border border-white/20"
+    >
+      <!-- Korean Translated Live Subtitle (Main) -->
+      <p id="koreanSubtitle" class="text-base md:text-lg font-bold text-white tracking-wide leading-snug drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+        한국 놀러 가고 싶어! 🍜
+      </p>
+      
+      <!-- Japanese Original Speech (Sub) -->
+      <p id="japaneseSubtitle" class="text-xs md:text-[13px] text-zinc-300 font-medium italic drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)] line-clamp-1">
+        Nanami: 韓国に遊びに行きたい！
+      </p>
+    </div>
+  </div>
+
+  <!-- 5. Bottom Floating Control Bar (Native Aura video-chat.tsx Controls) -->
+  <footer class="absolute bottom-7 left-0 right-0 z-40 flex items-center justify-center gap-5 px-6">
+    <!-- Mic Toggle Button -->
+    <button 
+      id="btnMic" 
+      onclick="toggleMic()"
+      title="마이크 켜기/끄기"
+      class="w-13 h-13 md:w-14 md:h-14 p-3.5 rounded-full border-none bg-white/10 hover:bg-white/20 text-white backdrop-blur-xl transition-all shadow-lg active:scale-95 flex items-center justify-center"
+    >
+      <svg id="iconMic" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" x2="12" y1="19" y2="22"/>
+      </svg>
+    </button>
+
+    <!-- Live Subtitle (CC / Languages) Active Toggle -->
+    <button 
+      id="btnSubtitles" 
+      onclick="toggleSubtitles()"
+      title="AI 실시간 통역 자막"
+      class="w-13 h-13 md:w-14 md:h-14 p-3.5 rounded-full border-none text-white backdrop-blur-xl transition-all shadow-lg bg-[#E5A934] hover:bg-[#d49826] glow-gold ring-2 ring-[#E5A934]/60 active:scale-95 flex items-center justify-center"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m5 8 6 6"/>
+        <path d="m4 14 6-6 2-3"/>
+        <path d="M2 5h12"/>
+        <path d="M7 2h1"/>
+        <path d="m22 22-5-10-5 10"/>
+        <path d="M14 18h6"/>
+      </svg>
+    </button>
+
+    <!-- End Call (PhoneOff) Button -->
+    <button 
+      id="btnEndCall" 
+      onclick="endCall()"
+      title="통화 종료"
+      class="w-15 h-15 md:w-16 md:h-16 p-4 rounded-full shadow-2xl bg-red-600 hover:bg-red-700 glow-red hover:scale-105 active:scale-95 transition-all flex items-center justify-center text-white"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/>
+      </svg>
+    </button>
+
+    <!-- Camera Toggle Button -->
+    <button 
+      id="btnCamera" 
+      onclick="toggleCamera()"
+      title="카메라 켜기/끄기"
+      class="w-13 h-13 md:w-14 md:h-14 p-3.5 rounded-full border-none bg-white/10 hover:bg-white/20 text-white backdrop-blur-xl transition-all shadow-lg active:scale-95 flex items-center justify-center"
+    >
+      <svg id="iconCamera" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m22 8-6 4 6 4V8Z"/>
+        <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+      </svg>
+    </button>
+  </footer>
+
+  <!-- Interactivity & Script Simulation -->
+  <script>
+    let isMicOn = true;
+    let isSubtitlesOn = true;
+    let isCameraOn = true;
+
+    // Subtitle toggle
+    function toggleSubtitles() {
+      isSubtitlesOn = !isSubtitlesOn;
+      const card = document.getElementById('subtitleCard');
+      const btn = document.getElementById('btnSubtitles');
+      if (isSubtitlesOn) {
+        card.style.opacity = '1';
+        card.style.transform = 'scale(1)';
+        btn.className = "w-13 h-13 md:w-14 md:h-14 p-3.5 rounded-full border-none text-white backdrop-blur-xl transition-all shadow-lg bg-[#E5A934] hover:bg-[#d49826] glow-gold ring-2 ring-[#E5A934]/60 active:scale-95 flex items-center justify-center";
+      } else {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.95)';
+        btn.className = "w-13 h-13 md:w-14 md:h-14 p-3.5 rounded-full border-none text-zinc-400 backdrop-blur-xl transition-all shadow-lg bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center";
+      }
+    }
+
+    // Mic toggle
+    function toggleMic() {
+      isMicOn = !isMicOn;
+      const btn = document.getElementById('btnMic');
+      if (isMicOn) {
+        btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+        btn.classList.add('bg-white/10', 'hover:bg-white/20');
+      } else {
+        btn.classList.remove('bg-white/10', 'hover:bg-white/20');
+        btn.classList.add('bg-red-500', 'hover:bg-red-600');
+      }
+    }
+
+    // Camera toggle
+    function toggleCamera() {
+      isCameraOn = !isCameraOn;
+      const btn = document.getElementById('btnCamera');
+      const pip = document.getElementById('pipContainer');
+      if (isCameraOn) {
+        btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+        btn.classList.add('bg-white/10', 'hover:bg-white/20');
+        pip.style.opacity = '1';
+      } else {
+        btn.classList.remove('bg-white/10', 'hover:bg-white/20');
+        btn.classList.add('bg-red-500', 'hover:bg-red-600');
+        pip.style.opacity = '0.3';
+      }
+    }
+
+    function endCall() {
+      alert("Aura 영상 통화가 종료되었습니다.");
+    }
+
+    // Real-time Dynamic Dialogue Progression Simulation
+    const dialogueSequence = [
+      {
+        ko: "한국 놀러 가고 싶어! 🍜",
+        ja: "Nanami: 韓国に遊びに行きたい！"
+      },
+      {
+        ko: "홍대 매운 라멘 같이 먹으러 가자!",
+        ja: "Nanami: 弘大の辛いラーメン一緒に食べに行こう！"
+      },
+      {
+        ko: "실시간 자막 번역 진짜 신기하다 ✨",
+        ja: "Nanami: リアルタイム字幕翻訳、本当にすごい！"
+      }
+    ];
+
+    let dialogueIdx = 0;
+    setInterval(() => {
+      if (!isSubtitlesOn) return;
+      dialogueIdx = (dialogueIdx + 1) % dialogueSequence.length;
+      const koEl = document.getElementById('koreanSubtitle');
+      const jaEl = document.getElementById('japaneseSubtitle');
+      const card = document.getElementById('subtitleCard');
+
+      card.style.transform = 'scale(0.97)';
+      card.style.opacity = '0.7';
+
+      setTimeout(() => {
+        koEl.innerText = dialogueSequence[dialogueIdx].ko;
+        jaEl.innerText = dialogueSequence[dialogueIdx].ja;
+        card.style.transform = 'scale(1)';
+        card.style.opacity = '1';
+      }, 200);
+    }, 4500);
+  </script>
+</body>
+</html>

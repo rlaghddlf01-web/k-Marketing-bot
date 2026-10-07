@@ -1,0 +1,39 @@
+{
+  "current_topic_index": 0,
+  "last_topic_id": 8,
+  "last_run_time": "2026-10-05 09:24:50",
+  "published_count": 2,
+  "history": [
+    {
+      "timestamp": "2026-10-01 21:12:39",
+      "topic_id": 1,
+      "theme_name": "4세대 실손 전환 손익 계산기",
+      "facebook": {
+        "status": "success",
+        "post_id": "1358924267302888_122097566697499579",
+        "platform": "facebook",
+        "brand": "insurance"
+      },
+      "instagram": {
+        "status": "success",
+        "media_id": "17947538457296848",
+        "platform": "instagram",
+        "brand": "insurance"
+      }
+    },
+    {
+      "timestamp": "2026-10-05 09:24:50",
+      "topic_id": 8,
+      "theme_name": "AI 보험료 역추정 비교 & 가성비 리모델링",
+      "shorts_video": "Insurance_22초숏폼_주제08_coverage_score_gap_diagnosis_20260929_151644.mp4",
+      "results": {
+        "mbs_cardnews_reels": {
+          "status": "success",
+          "message": "Meta Business Suite를 통한 보험 릴스 동시 발행 성공",
+          "platform": "meta_business_suite",
+          "video": "insurance_topic8_cardnews_reels.mp4"
+        }
+      }
+    }
+  ]
+}

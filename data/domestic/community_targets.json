@@ -1,0 +1,27 @@
+{
+  "ppomppu": {
+    "insurance": "money",
+    "stock": "stock",
+    "aura": "freeboard"
+  },
+  "dcinside": {
+    "insurance": "insurance",
+    "stock": "neostock",
+    "aura": "love"
+  },
+  "bobaedream": {
+    "insurance": "accident",
+    "stock": "freeb",
+    "aura": "freeb"
+  },
+  "natepann": {
+    "insurance": "pann_talk",
+    "stock": "pann_talk",
+    "aura": "love_talk"
+  },
+  "fmkorea": {
+    "insurance": "humor",
+    "stock": "stock",
+    "aura": "love"
+  }
+}
