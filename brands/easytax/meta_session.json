@@ -1,0 +1,94 @@
+{
+  "cookies": [
+    {
+      "name": "_GRECAPTCHA",
+      "value": "09AKhCRwjHOphTfnWwWpzC0vPuzqF6u8dLd5mf818gHKkwrPPhvpsKSfODgB14rk6PZDG_qNgNvmnebsiWNDoGOMU",
+      "domain": "www.google.com",
+      "path": "/recaptcha",
+      "expires": 1807015338.601443,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "datr",
+      "value": "mI_HatpXRas0LFUWMey8-UQr",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826023320.018047,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "ig_did",
+      "value": "933344C6-3069-427E-A1F0-30E18C13A6B0",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1822999320.018083,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "mid",
+      "value": "asePmAALAAEKl3Dl8EezXitoKEoL",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826023320.018114,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "wd",
+      "value": "929x925",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1792068156,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "csrftoken",
+      "value": "81H9h6FyDoTUNLTalOXPq8gbJyHgDcKR",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826023351.149709,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ds_user_id",
+      "value": "40012713571",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1799239351.149892,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "sessionid",
+      "value": "40012713571%3AYKoUGSqhqrCtP4%3A13%3AAYl6OA-sa2BpV-EafCmgHWiy6U6iFspFK8NXarZEJA",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1822999345.349038,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "test_cookie",
+      "value": "CheckForPermission",
+      "domain": ".doubleclick.net",
+      "path": "/",
+      "expires": 1791464249.489227,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    }
+  ]
+}

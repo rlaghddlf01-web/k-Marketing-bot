@@ -1,0 +1,9 @@
+[
+  {
+    "status": "login_required",
+    "timestamp": "2026-10-08 20:23:56",
+    "brand": "kmarket",
+    "error": "유튜브 구글 계정 로그인이 필수입니다. 바탕화면의 1회 연동 도구를 실행해 주세요.",
+    "trust_score": "LOCKED (0%)"
+  }
+]

@@ -40,3 +40,20 @@ class EasyTaxShortsPipeline:
             custom_hero_image=custom_master_image
         )
         return res.get("output_mp4", "")
+
+    def publish(self, video_path: str, nationality_code: str = "vi", **kwargs) -> dict:
+        """생산된 숏폼을 유튜브 스튜디오 브라우저 봇으로 즉시 사람처럼 무인 직접 업로드"""
+        from .easytax_youtube_bot_publisher import EasyTaxYouTubeBotPublisher
+        bot = EasyTaxYouTubeBotPublisher(headless=True)
+        return bot.publish_short(
+            video_path=video_path,
+            nationality_code=nationality_code,
+            **kwargs
+        )
+
+    def produce_and_publish(self, nationality_code: str = "vi", amount: int = 3100000, **kwargs) -> dict:
+        """숏폼 제작 즉시 유튜브 공식 채널 무인 업로드 통합 파이프라인"""
+        video_path = self.produce(nationality_code=nationality_code, amount=amount, **kwargs)
+        upload_res = self.publish(video_path, nationality_code=nationality_code)
+        return {"video_path": video_path, "upload": upload_res}
+

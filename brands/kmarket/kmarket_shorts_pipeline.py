@@ -92,3 +92,19 @@ class KMarketShortsPipeline:
         )
 
         return str(output_desktop)
+
+    def publish(self, video_path: str, nationality_code: str = "vi", **kwargs) -> dict:
+        """생산된 숏폼을 유튜브 스튜디오 브라우저 봇으로 즉시 사람처럼 무인 업로드"""
+        from .kmarket_youtube_bot_publisher import KMarketYouTubeBotPublisher
+        bot = KMarketYouTubeBotPublisher(headless=True)
+        return bot.publish_short(
+            video_path=video_path,
+            nationality_code=nationality_code,
+            **kwargs
+        )
+
+    def produce_and_publish(self, nationality_code: str = "vi", **kwargs) -> dict:
+        """숏폼 제작 즉시 유튜브 공식 채널 무인 업로드 통합 파이프라인"""
+        video_path = self.produce(nationality_code=nationality_code, **kwargs)
+        upload_res = self.publish(video_path, nationality_code=nationality_code)
+        return {"video_path": video_path, "upload": upload_res}

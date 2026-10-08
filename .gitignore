@@ -46,4 +46,8 @@ gfpgan/
 # Local browser profiles & outputs
 data/reddit_profiles/
 outputs/
-*.bat
+
+# Local browser profile directories
+*_chrome_profile/
+*/profiles/
+profiles/

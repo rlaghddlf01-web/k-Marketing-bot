@@ -1,0 +1,61 @@
+[
+  {
+    "timestamp": "2026-10-08 20:24:02",
+    "slot_id": "morning",
+    "slot_name": "🌅 아침 출근길 숏폼 (7분)",
+    "target_min": 7,
+    "target_likes": 3,
+    "actual_sec": 0,
+    "likes_given": 0,
+    "shorts_watched": 0,
+    "comments_inspected": 0,
+    "status": "login_required",
+    "gemini_calls": 0,
+    "brand": "easytax",
+    "error": "유튜브 구글 계정 로그인이 필수입니다. 바탕화면의 [1회연동] 도구를 먼저 실행해 주세요."
+  },
+  {
+    "timestamp": "2026-10-08 20:26:04",
+    "slot_id": "quick_youtube",
+    "slot_name": "⚡ 대시보드 1초 즉시 유튜브 세션",
+    "target_min": 0.5,
+    "target_likes": 3,
+    "actual_sec": 0,
+    "likes_given": 0,
+    "shorts_watched": 0,
+    "comments_inspected": 0,
+    "status": "login_required",
+    "gemini_calls": 0,
+    "brand": "easytax",
+    "error": "유튜브 구글 계정 로그인이 필수입니다. 바탕화면의 [1회연동] 도구를 먼저 실행해 주세요."
+  },
+  {
+    "timestamp": "2026-10-08 20:45:56",
+    "slot_id": "quick_youtube",
+    "slot_name": "⚡ 대시보드 1초 즉시 유튜브 세션",
+    "target_min": 0.5833333333333334,
+    "target_likes": 2,
+    "actual_sec": 56,
+    "likes_given": 1,
+    "shorts_watched": 1,
+    "comments_inspected": 0,
+    "status": "success",
+    "gemini_calls": 0,
+    "brand": "easytax"
+  },
+  {
+    "timestamp": "2026-10-08 20:51:30",
+    "slot_id": "quick_youtube",
+    "slot_name": "⚡ 대시보드 1초 즉시 유튜브 세션",
+    "target_min": 0.5,
+    "target_likes": 2,
+    "actual_sec": 64,
+    "likes_given": 1,
+    "shorts_watched": 1,
+    "comments_inspected": 0,
+    "status": "success",
+    "gemini_calls": 0,
+    "brand": "easytax",
+    "active_channel": "KTRS Vietnam - Hoàn thuế E-9 Hàn Quốc"
+  }
+]

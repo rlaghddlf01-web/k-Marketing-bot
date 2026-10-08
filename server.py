@@ -476,6 +476,12 @@ def _brand_daemon_loop(brand: str):
                 elif brand == "stock":
                     from brands.stock.stock_youtube_behavior_bot import StockYouTubeBehaviorScheduler
                     StockYouTubeBehaviorScheduler().start()
+                elif brand == "kmarket":
+                    from brands.kmarket.kmarket_youtube_behavior_bot import KMarketYouTubeBehaviorScheduler
+                    KMarketYouTubeBehaviorScheduler().start()
+                elif brand == "easytax":
+                    from brands.easytax.easytax_youtube_behavior_bot import EasyTaxYouTubeBehaviorScheduler
+                    EasyTaxYouTubeBehaviorScheduler().start()
             except Exception as ye:
                 log_event(f"⚠️ [{brand_kr} 유튜브 스텔스 봇 데몬 예외] {ye}", "warning")
             time.sleep(60)
@@ -832,6 +838,7 @@ for _name in [
     "RedditBrowserDriver", "RedditSafetyOrchestrator", "RedditOrganicEngine", "AccountHealthMonitor",
     "ChannelScheduler",
     "AuraYouTubeScheduler", "AuraYouTubeAPIPublisher", "AuraYouTubeBotPublisher", "AuraYouTubeHybridPilot",
+    "KMarketYouTubeBotPublisher", "EasyTaxYouTubeBotPublisher", "KMarketYouTubeBehaviorBot", "EasyTaxYouTubeBehaviorBot", "KMarketYouTubeStealthIncubator", "EasyTaxYouTubeStealthIncubator",
     "AuraMetaScheduler", "AuraMetaPublisher",
     "InsuranceYouTubeScheduler", "InsuranceYouTubeAPIPublisher", "InsuranceYouTubeBotPublisher", "InsuranceYouTubeHybridPilot",
     "InsuranceMetaScheduler", "InsuranceMetaPublisher",
@@ -840,6 +847,7 @@ for _name in [
     "AuraKinScanner", "InsuranceKinScanner", "StockKinScanner",
     "AuraHumanBehaviorBot", "InsuranceHumanBehaviorBot", "StockHumanBehaviorBot",
     "AuraMetaStealthIncubator", "InsuranceMetaStealthIncubator", "StockMetaStealthIncubator",
+    "KMarketMetaStealthIncubator", "EasyTaxMetaStealthIncubator",
     "AuraYouTubeBehaviorBot", "InsuranceYouTubeBehaviorBot", "StockYouTubeBehaviorBot",
     "AuraYouTubeBehaviorScheduler", "InsuranceYouTubeBehaviorScheduler", "StockYouTubeBehaviorScheduler",
     "AuraYouTubeIncubator", "InsuranceYouTubeIncubator", "StockYouTubeIncubator",
@@ -1051,6 +1059,76 @@ def execute_single_channel_task(module_name: str) -> str:
         else:
             res = omni.execute_campaign(s_target)
             return f"🎬 [{s_target.upper()}] 5대 플랫폼 360도 옴니채널 패키징 완료!"
+
+    # 🛒 [KTRS Market 유튜브 스텔스 & 워밍업]
+    elif module_name in ["kmarket_youtube_bot", "kmarket_youtube_stealth"]:
+        from brands.kmarket.kmarket_youtube_behavior_bot import KMarketYouTubeBehaviorBot
+        log_event("▶ [KMarket 유튜브 스텔스] 사람처럼 쇼츠 추천 피드 시청 및 좋아요 시작...", "info")
+        res = KMarketYouTubeBehaviorBot(headless=True).execute_single_session()
+        log_event(f"🎉 [KMarket 유튜브 스텔스 완료] 체류 {res.get('duration_sec', 0)}초, 쇼츠 {res.get('shorts_watched', 0)}편 완시청, 좋아요 {res.get('likes_given', 0)}회", "success")
+        return f"🛒 [KMarket 유튜브 스텔스 완료] 체류 {res.get('duration_sec', 0)}초, 쇼츠 {res.get('shorts_watched', 0)}편, 좋아요 {res.get('likes_given', 0)}회"
+    elif module_name in ["kmarket_youtube_warmup", "kmarket_youtube_incubator"]:
+        from brands.kmarket.kmarket_youtube_stealth_incubator import KMarketYouTubeStealthIncubator
+        log_event("🚀 [KMarket 유튜브 워밍업] 숏폼 노출 신뢰도 100% 충전 워밍업 시작...", "info")
+        res = KMarketYouTubeStealthIncubator(headless=True).run_warmup_session(watch_count=3)
+        return f"🛒 [KMarket 워밍업 완료] 쇼츠 {res.get('watched_count', 0)}편 완시청, 좋아요 {res.get('likes_given', 0)}회, 신뢰도: {res.get('trust_score')}"
+    elif module_name in ["kmarket_youtube_upload", "kmarket_youtube_publish"]:
+        from brands.kmarket.kmarket_youtube_bot_publisher import KMarketYouTubeBotPublisher
+        target_lang = get_next_golden_eight_language("kmarket_shorts")
+        log_event(f"🚀 [KMarket 유튜브 쇼츠 업로드] 8개국 채널 중 ({target_lang}) 채널 전환 및 쇼츠 사람처럼 업로드 시작...", "info")
+        bot = KMarketYouTubeBotPublisher(headless=True)
+        res = bot.publish_short(nationality_code=target_lang)
+        if res.get("status") == "success":
+            return f"🛒 [KMarket 유튜브 업로드 성공] 채널: {res.get('channel_name')} | 영상: {res.get('title')[:25]}... | 고정댓글: {res.get('pinned_comment')}"
+        else:
+            return f"⚠️ [KMarket 유튜브 업로드] {res.get('message', res.get('error', '업로드 중 알 수 없는 상태'))}"
+    elif module_name in ["kmarket_meta_stealth", "kmarket_instagram_stealth", "kmarket_meta_incubator"]:
+        from brands.kmarket.kmarket_meta_stealth_incubator import KMarketMetaStealthIncubator
+        log_event("📸 [KMarket 인스타 스텔스] 탐색 피드 체류 및 사람처럼 좋아요 시작...", "info")
+        res = KMarketMetaStealthIncubator(headless=True).run_warmup_session()
+        log_event(f"🎉 [KMarket 인스타 스텔스 완료] 체류 {res.get('duration', 0)}초, 게시물 {res.get('posts_viewed', 0)}편 탐색, 좋아요 {res.get('likes_given', 0)}회", "success")
+        return f"🛒 [KMarket 인스타 스텔스 완료] 체류 {res.get('duration', 0)}초, 게시물 {res.get('posts_viewed', 0)}개, 좋아요 {res.get('likes_given', 0)}회"
+
+    # 💰 [KTRS 세금 환급 유튜브 스텔스 & 워밍업]
+    elif module_name in ["easytax_youtube_bot", "easytax_youtube_stealth"]:
+        from brands.easytax.easytax_youtube_behavior_bot import EasyTaxYouTubeBehaviorBot
+        log_event("▶ [EasyTax 유튜브 스텔스] 사람처럼 쇼츠 추천 피드 시청 및 좋아요 시작...", "info")
+        res = EasyTaxYouTubeBehaviorBot(headless=True).execute_single_session()
+        log_event(f"🎉 [EasyTax 유튜브 스텔스 완료] 체류 {res.get('duration_sec', 0)}초, 쇼츠 {res.get('shorts_watched', 0)}편 완시청, 좋아요 {res.get('likes_given', 0)}회", "success")
+        return f"💰 [EasyTax 유튜브 스텔스 완료] 체류 {res.get('duration_sec', 0)}초, 쇼츠 {res.get('shorts_watched', 0)}편, 좋아요 {res.get('likes_given', 0)}회"
+    elif module_name in ["easytax_youtube_warmup", "easytax_youtube_incubator"]:
+        from brands.easytax.easytax_youtube_stealth_incubator import EasyTaxYouTubeStealthIncubator
+        log_event("🚀 [EasyTax 유튜브 워밍업] 숏폼 노출 신뢰도 100% 충전 워밍업 시작...", "info")
+        res = EasyTaxYouTubeStealthIncubator(headless=True).run_warmup_session(watch_count=3)
+        return f"💰 [EasyTax 워밍업 완료] 쇼츠 {res.get('watched_count', 0)}편 완시청, 좋아요 {res.get('likes_given', 0)}회, 신뢰도: {res.get('trust_score')}"
+    elif module_name in ["easytax_youtube_upload", "easytax_youtube_publish"]:
+        from brands.easytax.easytax_youtube_bot_publisher import EasyTaxYouTubeBotPublisher
+        target_lang = get_next_golden_eight_language("easytax_shorts")
+        log_event(f"🚀 [EasyTax 유튜브 쇼츠 업로드] 8개국 채널 중 ({target_lang}) 채널 전환 및 쇼츠 사람처럼 업로드 시작...", "info")
+        bot = EasyTaxYouTubeBotPublisher(headless=True)
+        res = bot.publish_short(nationality_code=target_lang)
+        if res.get("status") == "success":
+            return f"💰 [EasyTax 유튜브 업로드 성공] 채널: {res.get('channel_name')} | 영상: {res.get('title')[:25]}... | 고정댓글: {res.get('pinned_comment')}"
+        else:
+            return f"⚠️ [EasyTax 유튜브 업로드] {res.get('message', res.get('error', '업로드 중 알 수 없는 상태'))}"
+    elif module_name in ["easytax_meta_stealth", "easytax_instagram_stealth", "easytax_meta_incubator"]:
+        from brands.easytax.easytax_meta_stealth_incubator import EasyTaxMetaStealthIncubator
+        log_event("📸 [EasyTax 인스타 스텔스] 탐색 피드 체류 및 사람처럼 좋아요 시작...", "info")
+        res = EasyTaxMetaStealthIncubator(headless=True).run_warmup_session()
+        log_event(f"🎉 [EasyTax 인스타 스텔스 완료] 체류 {res.get('duration', 0)}초, 게시물 {res.get('posts_viewed', 0)}편 탐색, 좋아요 {res.get('likes_given', 0)}회", "success")
+        return f"💰 [EasyTax 인스타 스텔스 완료] 체류 {res.get('duration', 0)}초, 게시물 {res.get('posts_viewed', 0)}개, 좋아요 {res.get('likes_given', 0)}회"
+    elif module_name in ["meta_stealth_dual", "instagram_stealth_dual", "meta_stealth_all", "instagram_stealth_all"]:
+        from core.meta_dual_app_orchestrator import MetaDualAppOrchestrator
+        log_event("📸 [인스타그램 2개 앱 8개국 교대 스텔스] EasyTax와 K-Market 번갈아가며 독립 프로필 워밍업 시작...", "info")
+        orchestrator = MetaDualAppOrchestrator(headless=True)
+        res = orchestrator.run_alternating_cycle(duration_per_session=45)
+        et = res.get("easytax", {})
+        km = res.get("kmarket", {})
+        msg = f"🎉 [인스타 2개 앱 교대 완료] EasyTax: {et.get('country_label', '완료')}(좋아요 {et.get('likes_given', 0)}회) | K-Market: {km.get('country_label', '완료')}(좋아요 {km.get('likes_given', 0)}회)"
+        log_event(msg, "success")
+        return msg
+
+
 
     # 💖 [Aura 데이팅 전용 채널 실행기]
     elif module_name.startswith("aura_"):
@@ -4086,12 +4164,29 @@ def run_server(port: int = 8080):
     port = int(os.environ.get("PORT", port))
     ThreadingHTTPServer.allow_reuse_address = True
     server_address = ("", port)
-    try:
-        httpd = ThreadingHTTPServer(server_address, DashboardHandler)
-    except OSError as e:
-        print(f"\n❌ [오류] 포트 {port}를 이미 다른 프로그램이 사용 중입니다: {e}")
-        print(f"기존에 실행 중인 창이나 프로세스를 확인해주세요.\n")
-        return
+    httpd = None
+    for attempt in range(1, 4):
+        try:
+            httpd = ThreadingHTTPServer(server_address, DashboardHandler)
+            break
+        except OSError as e:
+            if attempt < 3:
+                print(f"⚠️ [포트 {port} 대기 ({attempt}/3)] 기존 연결 정리 대기 중... ({e})")
+                try:
+                    import subprocess
+                    subprocess.run(
+                        ["powershell", "-NoProfile", "-Command", f"Get-NetTCPConnection -LocalPort {port} -ErrorAction SilentlyContinue | ForEach-Object {{ Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }}"],
+                        capture_output=True,
+                        timeout=3
+                    )
+                except Exception:
+                    pass
+                time.sleep(1.0)
+            else:
+                print(f"\n❌ [오류] 포트 {port}를 이미 다른 프로그램이 사용 중입니다: {e}")
+                print(f"기존에 실행 중인 창이나 프로세스를 확인해주세요.\n")
+                return
+
     print("\n========================================================")
     print("🛸 [Universal Expat Growth Engine] Local Web Control Center Started!")
     print(f"🌐 Browser URL: http://localhost:{port}")
@@ -4105,6 +4200,8 @@ def run_server(port: int = 8080):
 
     # 🌐 서버 준비 완료 직후 브라우저 자동 오픈 (에러 없는 1초 컷 즉시 실행)
     def _open_browser():
+        if os.environ.get("NO_AUTO_BROWSER") == "1":
+            return
         time.sleep(0.3)
         try:
             webbrowser.open(f"http://localhost:{port}")

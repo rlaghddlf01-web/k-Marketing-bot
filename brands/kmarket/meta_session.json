@@ -1,0 +1,164 @@
+{
+  "cookies": [
+    {
+      "name": "_GRECAPTCHA",
+      "value": "09AKhCRwj75hoxkc8fiHA6XG25DyFpy_LFkMlY5km0b9atwSUddyxuC26Cfls5SrYoZ0vkMxFX099UmNZECBGqcfg",
+      "domain": "www.google.com",
+      "path": "/recaptcha",
+      "expires": 1807014942.095601,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "datr",
+      "value": "s43HarODfCpWRRJ47K2Ocv_A",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826022835.127945,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "ig_did",
+      "value": "635D51F1-7ECF-4667-89A6-0423F05D618B",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1822998835.127986,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "mid",
+      "value": "aseNswALAAH5f6C8v6REaNC6kL-b",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826022835.128017,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "wd",
+      "value": "929x925",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1792067765,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ps_l",
+      "value": "1",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826022918.893943,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ps_n",
+      "value": "1",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826022918.894117,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "__Secure-STRP",
+      "value": "ABNhA6jVOH1u4HU6bmsGH8XIm1n9a1aTssQhgnr1ABMXiyqPITFil09TdcOlgJ3CH2MZYn6NpEi-D26OIw0jeqyw7bN1ZsUCODBG",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": 1791463219.192412,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "SEARCH_SAMESITE",
+      "value": "CgQI_qEB",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": 1807014919.192509,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "__Host-GAPS",
+      "value": "1:6UBzwan8xZfRkv2hjSvwu3dErkzPTg:o4uCHJVD0PKWG6Bi",
+      "domain": "accounts.google.com",
+      "path": "/",
+      "expires": 1826022938.074435,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "NID",
+      "value": "Cu4BCAESoAEBOxGDSN3zFDz4vZMfvpNtwMCGO9erv5w71ZdBXd2TYJphNsqANDMENb3o4ctgoA_ZKjDnFhTAo2NWNgEWE6CQRWY91pYR4IQPo4gSYzfyTGPjOjOd-Mdoq4SMe1dEHtuUty0IyQbX6c0_q8je79Be-rCgHtm1UP7KGpwshR57qZjpS7XiVnkzIeRRaYNg4gi0Qr0tmtuD35FxEbUVU79zKAEyRQHSrAfPqxB3qjeinxiW-G-VShkO54WTnwztlpOAtHT8yxh-ZQ2svt7gFah3OvvwhkgDxNo5UYgx_i4Y0nWnSx2xfq0XCg",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": 1807274119.074556,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "OTZ",
+      "value": "8819316_20_20__20_",
+      "domain": "accounts.google.com",
+      "path": "/",
+      "expires": 1794054940,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "csrftoken",
+      "value": "bckwIczKixo8rkj9dIyTCfBzOXPZttMm",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1826022962.862324,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ds_user_id",
+      "value": "57846247592",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1799238962.862643,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "sessionid",
+      "value": "57846247592%3AoMo93GDgH14d8U%3A16%3AAYm7zMT6HjwTYNYzwuMhrOANHe6wJmiNr9foFu67Qw",
+      "domain": ".instagram.com",
+      "path": "/",
+      "expires": 1822998957.088371,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "test_cookie",
+      "value": "CheckForPermission",
+      "domain": ".doubleclick.net",
+      "path": "/",
+      "expires": 1791463860.311576,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    }
+  ]
+}
